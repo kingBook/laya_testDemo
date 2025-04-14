@@ -1,0 +1,40 @@
+{
+  "_$ver": 1,
+  "_$id": "bfzypuei",
+  "_$type": "Panel",
+  "name": "PanelStart",
+  "width": 640,
+  "height": 1136,
+  "left": 0,
+  "right": 0,
+  "top": 0,
+  "bottom": 0,
+  "_$comp": [
+    {
+      "_$type": "2efb4d4d-261c-4732-b512-43136587bd55",
+      "scriptPath": "../src/kingBook/ui/PanelStart.ts",
+      "_buttonStartGame": {
+        "_$ref": "euxh2r5e"
+      }
+    }
+  ],
+  "_$child": [
+    {
+      "_$id": "euxh2r5e",
+      "_$var": true,
+      "_$type": "Button",
+      "name": "buttonStartGame",
+      "x": 260,
+      "y": 548,
+      "width": 120,
+      "height": 40,
+      "centerX": 0,
+      "centerY": 0,
+      "skin": "res://d4cfd6a8-0d0a-475b-ac93-d85eaa646936",
+      "label": "开始游戏",
+      "labelSize": 20,
+      "labelAlign": "center",
+      "labelVAlign": "middle"
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "_$ver": 1,
+  "_$id": "n1ob9h3e",
+  "_$type": "Box",
+  "name": "PanelGameing",
+  "width": 640,
+  "height": 1136,
+  "left": 0,
+  "right": 0,
+  "top": 0,
+  "bottom": 0,
+  "_$child": [
+    {
+      "_$id": "ou7flsmu",
+      "_$type": "Box",
+      "name": "CollapsibleBar",
+      "width": 82,
+      "height": 704,
+      "left": 0,
+      "top": 0,
+      "_$comp": [
+        {
+          "_$type": "a1f123a3-2b4f-4502-99f6-c2d4594c5e52",
+          "scriptPath": "../src/kingBook/ui/CollapsibleBar.ts",
+          "_bottomImage": {
+            "_$ref": "9a8skz1b"
+          },
+          "_list": {
+            "_$ref": "ayso4u80"
+          },
+          "_collapseBtn": {
+            "_$ref": "y8ax29f9"
+          }
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "9a8skz1b",
+          "_$type": "Image",
+          "name": "bottomImage",
+          "x": 40,
+          "width": 80,
+          "height": 695,
+          "anchorX": 0.5,
+          "left": 0,
+          "top": 0,
+          "skin": "res://cac6cda2-3ddc-4874-828e-dfa09284cc4c",
+          "color": "#ffffff"
+        },
+        {
+          "_$id": "ayso4u80",
+          "_$type": "List",
+          "name": "List",
+          "x": 40,
+          "width": 80,
+          "height": 624,
+          "anchorX": 0.5,
+          "left": 0,
+          "top": 0,
+          "itemTemplate": {
+            "_$ref": "484y65tf",
+            "_$tmpl": "itemRender"
+          },
+          "repeatX": 1,
+          "repeatY": 6,
+          "_$child": [
+            {
+              "_$id": "484y65tf",
+              "_$type": "Box",
+              "name": "Box",
+              "width": 70,
+              "height": 105,
+              "_$child": [
+                {
+                  "_$id": "1lj0kl6l",
+                  "_$type": "Button",
+                  "name": "Button",
+                  "width": 80,
+                  "height": 80,
+                  "skin": "res://0a9fa50d-b564-4e92-a847-84de452c7184",
+                  "label": "",
+                  "labelSize": 20,
+                  "labelBold": true,
+                  "labelColors": "#ffffff,#ffffff,#ffffff",
+                  "labelAlign": "center",
+                  "labelVAlign": "bottom",
+                  "labelStrokeColor": "#32556b"
+                },
+                {
+                  "_$id": "6gq3plbg",
+                  "_$type": "Image",
+                  "name": "roundRect",
+                  "x": 40,
+                  "y": 87,
+                  "width": 64,
+                  "height": 28,
+                  "anchorX": 0.5,
+                  "anchorY": 0.5,
+                  "skin": "res://58a5696a-3f16-43a3-b2a8-65dd84210240",
+                  "color": "#222228",
+                  "_$child": [
+                    {
+                      "_$id": "q2qnqzic",
+                      "_$type": "Label",
+                      "name": "Label_1",
+                      "y": 1,
+                      "width": 64,
+                      "height": 28,
+                      "left": 0,
+                      "right": 0,
+                      "top": 1,
+                      "bottom": -1,
+                      "text": "20天",
+                      "fontSize": 20,
+                      "color": "#ffffff",
+                      "bold": true,
+                      "align": "center",
+                      "valign": "middle"
+                    }
+                  ]
+                },
+                {
+                  "_$id": "5w6qpgji",
+                  "_$type": "Label",
+                  "name": "Label",
+                  "y": 53,
+                  "width": 80,
+                  "height": 28,
+                  "_filters": [
+                    {
+                      "_$type": "GlowFilter",
+                      "offX": 0,
+                      "offY": 0,
+                      "blur": 1.056,
+                      "color": "#000"
+                    }
+                  ],
+                  "text": "贸易港",
+                  "fontSize": 20,
+                  "color": "#ffffff",
+                  "bold": true,
+                  "align": "center",
+                  "valign": "middle"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "y8ax29f9",
+          "_$type": "Button",
+          "name": "collapseBtn",
+          "x": 40,
+          "y": 644,
+          "width": 58,
+          "height": 37,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "rotation": 180,
+          "_mouseState": 2,
+          "skin": "res://84e4311c-4ea7-436a-bcad-234fad5c364e",
+          "label": "",
+          "labelSize": 20,
+          "labelColors": "#ffffff,#ffffff,#ffffff",
+          "labelAlign": "center",
+          "labelVAlign": "middle"
+        }
+      ]
+    }
+  ]
+}

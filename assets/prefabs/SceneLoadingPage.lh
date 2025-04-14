@@ -1,0 +1,57 @@
+{
+  "_$ver": 1,
+  "_$id": "fyalojjx",
+  "_$type": "Box",
+  "name": "SceneLoadingPage",
+  "width": 640,
+  "height": 1136,
+  "left": 0,
+  "right": 0,
+  "top": 0,
+  "bottom": 0,
+  "bgColor": "#482525",
+  "_$comp": [
+    {
+      "_$type": "19186a80-27ec-48b1-ab46-32ec282c7dec",
+      "scriptPath": "../src/kingBook/ui/SceneLonadingPage.ts",
+      "_progressBar": {
+        "_$ref": "9fl5hsa2"
+      },
+      "_progressLabel": {
+        "_$ref": "ydf77t39"
+      }
+    }
+  ],
+  "_$child": [
+    {
+      "_$id": "9fl5hsa2",
+      "_$type": "ProgressBar",
+      "name": "ProgressBar",
+      "x": 161,
+      "y": 553,
+      "width": 319,
+      "height": 30,
+      "centerX": 0,
+      "centerY": 0,
+      "skin": "res://ae3de75e-ee9f-478d-9f8b-ede75a4fc296",
+      "value": 0.066,
+      "_$child": [
+        {
+          "_$id": "ydf77t39",
+          "_$type": "Label",
+          "name": "Label",
+          "x": 100,
+          "y": 1,
+          "width": 120,
+          "height": 28,
+          "centerX": 0,
+          "centerY": 0,
+          "text": "100%",
+          "fontSize": 20,
+          "align": "center",
+          "valign": "middle"
+        }
+      ]
+    }
+  ]
+}
