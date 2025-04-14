@@ -31,6 +31,10 @@
           "panelStartPrefab": {
             "_$uuid": "382b9e22-207d-4130-bbe4-1fc940700e0f",
             "_$type": "Prefab"
+          },
+          "panelGameing": {
+            "_$uuid": "dcf144a6-587a-4f47-8356-dc1486d0fcf4",
+            "_$type": "Prefab"
           }
         }
       ]

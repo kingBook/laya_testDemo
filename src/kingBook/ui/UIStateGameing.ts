@@ -8,6 +8,7 @@ export class UIStateGameing extends State {
 
     public onStateEnter(fsm: Fsm): void {
         console.log("UIStateGameing");
+
         
     }
 

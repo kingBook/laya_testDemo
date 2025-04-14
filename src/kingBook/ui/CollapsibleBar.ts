@@ -9,7 +9,7 @@ export class CollapsibleBar extends Laya.Script {
     private _bottomImage: Laya.Image
 
     @property({ type: Laya.List, private: false })
-    public _list: Laya.List;
+    private _list: Laya.List;
 
     @property({ type: Laya.Button, private: false, tips: "折叠按钮" })
     private _collapseBtn: Laya.Button

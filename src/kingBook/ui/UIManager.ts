@@ -15,6 +15,8 @@ export class UIManager extends Laya.Script {
     private _sceneLoadingPagePrefab: Laya.Prefab;
     @property({ type: Laya.Prefab, private: false })
     public panelStartPrefab: Laya.Prefab;
+    @property({ type: Laya.Prefab, private: false })
+    public panelGameing: Laya.Prefab;
 
     /** UI 管理器的实例 */
     public static get instance(): UIManager {
