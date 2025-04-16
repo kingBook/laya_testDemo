@@ -21,6 +21,23 @@
       "skin": "res://328253e0-e522-4beb-ab2f-864b457dfe14",
       "useSourceSize": true,
       "color": "#ffffff"
+    },
+    {
+      "_$id": "sduyy5mj",
+      "_$type": "Sprite",
+      "name": "HeroManager",
+      "width": 100,
+      "height": 100,
+      "_$comp": [
+        {
+          "_$type": "6c4b4fc7-1f96-41a6-bdb7-fbd2cb8f40b5",
+          "scriptPath": "../src/kingBook/roles/HeroManager.ts",
+          "_heroPrefab": {
+            "_$uuid": "1369d904-1d22-4b86-b8aa-3e73fd681e29",
+            "_$type": "Prefab"
+          }
+        }
+      ]
     }
   ]
 }

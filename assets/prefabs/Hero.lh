@@ -1,0 +1,29 @@
+{
+  "_$ver": 1,
+  "_$id": "309b7efk",
+  "_$type": "Sprite",
+  "name": "Hero",
+  "x": 335,
+  "y": 861,
+  "width": 100,
+  "height": 232,
+  "anchorX": 0.5,
+  "anchorY": 1,
+  "scaleX": 0.4,
+  "scaleY": 0.4,
+  "_$comp": [
+    {
+      "_$type": "Spine2DRenderNode",
+      "layer": 0,
+      "useFastRender": false,
+      "source": "res://df103dab-afee-4685-8074-53409cea95e5",
+      "animationName": "idle",
+      "preview": true,
+      "physicsUpdate": 2
+    },
+    {
+      "_$type": "191976dd-720e-4c28-b92e-771b5c5761cd",
+      "scriptPath": "../src/kingBook/roles/Hero.ts"
+    }
+  ]
+}

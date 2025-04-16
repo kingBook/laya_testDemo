@@ -1,0 +1,93 @@
+{
+  "_$ver": 1,
+  "_$id": "4rs62yva",
+  "_$type": "Box",
+  "name": "Box",
+  "y": 533,
+  "width": 70,
+  "height": 70,
+  "centerY": 0,
+  "_$comp": [
+    {
+      "_$type": "bcbcc642-b40b-49e9-b630-f99831e422ce",
+      "scriptPath": "../src/kingBook/ui/BottomBarItem.ts"
+    }
+  ],
+  "_$child": [
+    {
+      "_$id": "rvzms9zp",
+      "_$type": "Sprite",
+      "name": "Glow",
+      "y": 2,
+      "width": 68,
+      "height": 68,
+      "_gcmds": [
+        {
+          "_$type": "DrawRoundRectCmd",
+          "lt": 8,
+          "rt": 8,
+          "lb": 8,
+          "rb": 8,
+          "fillColor": "rgba(95,41,41,0.803921568627451)"
+        }
+      ],
+      "_filters": [
+        {
+          "_$type": "GlowFilter",
+          "offX": 0,
+          "offY": 0,
+          "color": "#7b5050"
+        },
+        {
+          "_$type": "BlurFilter",
+          "strength": 4.907
+        }
+      ]
+    },
+    {
+      "_$id": "7h854aeq",
+      "_$type": "Button",
+      "name": "Button",
+      "width": 70,
+      "height": 70,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0,
+      "skin": "res://0a9fa50d-b564-4e92-a847-84de452c7184",
+      "label": "",
+      "labelSize": 20,
+      "labelBold": true,
+      "labelColors": "#ffffff,#ffffff,#ffffff",
+      "labelAlign": "center",
+      "labelVAlign": "bottom",
+      "labelStrokeColor": "#32556b"
+    },
+    {
+      "_$id": "0uyyhbix",
+      "_$type": "Label",
+      "name": "Label",
+      "x": 36,
+      "y": 58,
+      "width": 61,
+      "height": 21,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "_filters": [
+        {
+          "_$type": "GlowFilter",
+          "offX": 0,
+          "offY": 0,
+          "blur": 1.056,
+          "color": "#000"
+        }
+      ],
+      "text": "贸易港",
+      "fontSize": 15,
+      "color": "#ffffff",
+      "bold": true,
+      "align": "center",
+      "valign": "middle"
+    }
+  ]
+}

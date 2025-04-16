@@ -12,27 +12,36 @@ export class CollapsibleBar extends Laya.Script {
     private _list: Laya.List;
 
     @property({ type: Laya.Button, private: false, tips: "折叠按钮" })
-    private _collapseBtn: Laya.Button
+    private _collapseBtn: Laya.Button;
+
+    public get list(): Laya.List { return this._list; }
 
     onAwake(): void {
-        
+        this._collapseBtn.clickHandler = new Laya.Handler(this, this.onClickCollapse);
     }
 
     onUpdate(): void {
-        console.log(this._list.numChildren);
-        //this.updateHeight();
+        this.updateHeight();
+        this.updateCollapseBtnStatus();
     }
 
 
-    public updateHeight():void{
-        this._list.height = this._list.itemRender.data.height*this._list.numChildren;
+    private updateHeight(): void {
+        this._list.height = this._list.itemRender.data.height * this._list.getChildAt(0).numChildren;
 
-
-        let height = this._list.height + 71;
+        let height = this._list.height + 65;
         this.owner.height = height;
         this._bottomImage.height = height;
     }
 
+    private updateCollapseBtnStatus(): void {
+        let itemNum = this._list.getChildAt(0).numChildren;
+        this._collapseBtn.rotation = itemNum > 1 ? 0 : 180;
+    }
 
+    private onClickCollapse(): void {
+        this._list.repeatY = this._list.getChildAt(0).numChildren > 1 ? 1 : this.list.array.length;
+
+    }
 
 }

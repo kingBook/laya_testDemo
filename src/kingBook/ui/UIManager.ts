@@ -11,12 +11,12 @@ export class UIManager extends Laya.Script {
     private static s_instance: UIManager;
     private _fsm: UIManagerFsm;
 
-    @property({ type: Laya.Prefab, private: false })
-    private _sceneLoadingPagePrefab: Laya.Prefab;
-    @property({ type: Laya.Prefab, private: false })
+    @property({ type: Laya.Prefab})
+    public sceneLoadingPagePrefab: Laya.Prefab;
+    @property({ type: Laya.Prefab })
     public panelStartPrefab: Laya.Prefab;
-    @property({ type: Laya.Prefab, private: false })
-    public panelGameing: Laya.Prefab;
+    @property({ type: Laya.Prefab })
+    public panelGameMapPrefab: Laya.Prefab;
 
     /** UI 管理器的实例 */
     public static get instance(): UIManager {
@@ -35,13 +35,6 @@ export class UIManager extends Laya.Script {
         
     }
 
-    public showLoadingPage(delay: number = 500): SceneLonadingPage {
-        let loadingPage=this._sceneLoadingPagePrefab.create() as Laya.Sprite;
-        // 设置场景加载页
-        Laya.Scene.setLoadingPage(loadingPage);
-        Laya.Scene.showLoadingPage(loadingPage, delay);
-        return loadingPage.getComponent(SceneLonadingPage);
-    }
 
 
 }

@@ -1,7 +1,8 @@
 import { StateDefault } from "../fsm/StateDefault";
 import { SceneLonadingPage } from "./SceneLonadingPage";
+import { SceneManager } from "./SceneManager";
 import { UIManager } from "./UIManager";
-import { UIStateGameing } from "./UIStateGameing";
+import { UIStateGameMap } from "./UIStateGameMap";
 
 const { regClass, property } = Laya;
 
@@ -15,21 +16,27 @@ export class PanelStart extends Laya.Script {
         this._buttonStartGame.on(Laya.Event.CLICK, this, () => {
             UIManager.instance.fsm.changeStateTo(StateDefault); // 加载不显示非 loading 页以外的 UI
 
-            let loadingPage:SceneLonadingPage = UIManager.instance.showLoadingPage(0);
+            let loadingPage:Laya.Sprite = UIManager.instance.sceneLoadingPagePrefab.create() as Laya.Sprite;
+            SceneManager.instance.setLoadingPage(loadingPage);
+            SceneManager.instance.showLoadingPage(null,0);
+
+            let sceneLoadingPage:SceneLonadingPage = loadingPage.getComponent(SceneLonadingPage);
+            sceneLoadingPage.setProgress(0);
+
             // 为了能查看加载进条页，延迟执行
-            Laya.timer.once(1000, this, ()=>{
+            Laya.timer.once(500, this, ()=>{
                 let onComplete = new Laya.Handler(this, (scene: Laya.Scene) => {
-                    console.log("load complete: scenes/gameing.ls");
-                    // 显示 gameing UI
-                    UIManager.instance.fsm.changeStateTo(UIStateGameing);
+                    console.log("load complete: scenes/gameMap.ls");
+                    // 显示 gameMap UI
+                    UIManager.instance.fsm.changeStateTo(UIStateGameMap);
                 });
         
                 let onProgress = new Laya.Handler(this, (value: number) => {
                     console.log("loading:" + value);
-                    loadingPage.setProgress(value);
+                    sceneLoadingPage.setProgress(value);
                 });
         
-                Laya.Scene.open("scenes/gameing.ls", false, null, onComplete, onProgress);
+                SceneManager.instance.open("scenes/gameMap.ls", false, null, onComplete, onProgress);
             });
         });
     }

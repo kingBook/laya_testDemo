@@ -1,0 +1,536 @@
+{
+  "_$ver": 1,
+  "_$id": "n1ob9h3e",
+  "_$type": "Box",
+  "name": "PanelGameMap",
+  "width": 640,
+  "height": 1136,
+  "left": 0,
+  "right": 0,
+  "top": 0,
+  "bottom": 0,
+  "_$comp": [
+    {
+      "_$type": "18aaf87c-8bb3-4a7d-89c2-89636eaeb1a4",
+      "scriptPath": "../src/kingBook/ui/PanelGameMap.ts"
+    }
+  ],
+  "_$child": [
+    {
+      "_$id": "ou7flsmu",
+      "_$type": "Box",
+      "name": "CollapsibleBarLeft",
+      "width": 82,
+      "height": 704,
+      "left": 0,
+      "top": 0,
+      "_$comp": [
+        {
+          "_$type": "a1f123a3-2b4f-4502-99f6-c2d4594c5e52",
+          "scriptPath": "../src/kingBook/ui/CollapsibleBar.ts",
+          "_bottomImage": {
+            "_$ref": "9a8skz1b"
+          },
+          "_list": {
+            "_$ref": "ayso4u80"
+          },
+          "_collapseBtn": {
+            "_$ref": "y8ax29f9"
+          }
+        },
+        {
+          "_$type": "d94a4e45-bea2-48fa-a59c-b352ff555a63",
+          "scriptPath": "../src/kingBook/ui/CollapsibleBarLeft.ts",
+          "_icons": [
+            {
+              "_$uuid": "0a9fa50d-b564-4e92-a847-84de452c7184",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "02b63a4e-35da-497c-9dc8-6cdad5cf77c7",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "6bf7d315-c375-47b3-8b3d-512b6daba195",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "ecce2afd-63ed-48d8-813c-b23bf6f3584f",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "0c72f8e4-f9e8-49ba-a61b-56e79022ef74",
+              "_$type": "Texture2D"
+            }
+          ]
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "9a8skz1b",
+          "_$type": "Image",
+          "name": "bottomImage",
+          "x": 40,
+          "width": 80,
+          "height": 695,
+          "anchorX": 0.5,
+          "left": 0,
+          "top": 0,
+          "skin": "res://cac6cda2-3ddc-4874-828e-dfa09284cc4c",
+          "color": "#ffffff"
+        },
+        {
+          "_$id": "ayso4u80",
+          "_$type": "List",
+          "name": "List",
+          "x": 40,
+          "width": 80,
+          "height": 624,
+          "anchorX": 0.5,
+          "left": 0,
+          "top": 0,
+          "itemTemplate": {
+            "_$ref": "484y65tf",
+            "_$tmpl": "itemRender"
+          },
+          "repeatX": 1,
+          "repeatY": 6,
+          "_$child": [
+            {
+              "_$id": "484y65tf",
+              "_$type": "Box",
+              "name": "Box",
+              "width": 70,
+              "height": 105,
+              "_$comp": [
+                {
+                  "_$type": "fede8b92-c62f-4933-8897-662b2bbc54c2",
+                  "scriptPath": "../src/kingBook/ui/ListItem.ts"
+                }
+              ],
+              "_$child": [
+                {
+                  "_$id": "6gq3plbg",
+                  "_$type": "Image",
+                  "name": "roundRect",
+                  "x": 40,
+                  "y": 85,
+                  "width": 64,
+                  "height": 28,
+                  "anchorX": 0.5,
+                  "anchorY": 0.5,
+                  "skin": "res://58a5696a-3f16-43a3-b2a8-65dd84210240",
+                  "color": "#222228",
+                  "_$child": [
+                    {
+                      "_$id": "q2qnqzic",
+                      "_$type": "Label",
+                      "name": "Label_1",
+                      "width": 64,
+                      "height": 28,
+                      "left": 0,
+                      "right": 0,
+                      "top": 0,
+                      "bottom": 0,
+                      "text": "20天",
+                      "fontSize": 20,
+                      "color": "#ffffff",
+                      "bold": true,
+                      "align": "center",
+                      "valign": "middle"
+                    }
+                  ]
+                },
+                {
+                  "_$id": "1lj0kl6l",
+                  "_$type": "Button",
+                  "name": "Button",
+                  "width": 80,
+                  "height": 80,
+                  "skin": "res://0a9fa50d-b564-4e92-a847-84de452c7184",
+                  "label": "",
+                  "labelSize": 20,
+                  "labelBold": true,
+                  "labelColors": "#ffffff,#ffffff,#ffffff",
+                  "labelAlign": "center",
+                  "labelVAlign": "bottom",
+                  "labelStrokeColor": "#32556b"
+                },
+                {
+                  "_$id": "5w6qpgji",
+                  "_$type": "Label",
+                  "name": "Label",
+                  "x": 40,
+                  "y": 65,
+                  "width": 61,
+                  "height": 21,
+                  "anchorX": 0.5,
+                  "anchorY": 0.5,
+                  "_filters": [
+                    {
+                      "_$type": "GlowFilter",
+                      "offX": 0,
+                      "offY": 0,
+                      "blur": 1.056,
+                      "color": "#000"
+                    }
+                  ],
+                  "text": "贸易港",
+                  "fontSize": 15,
+                  "color": "#ffffff",
+                  "bold": true,
+                  "align": "center",
+                  "valign": "middle"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "y8ax29f9",
+          "_$type": "Button",
+          "name": "collapseBtn",
+          "x": 43,
+          "y": 651,
+          "width": 58,
+          "height": 37,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "_mouseState": 2,
+          "bottom": 35,
+          "centerX": 2,
+          "skin": "res://84e4311c-4ea7-436a-bcad-234fad5c364e",
+          "label": "",
+          "labelSize": 20,
+          "labelColors": "#ffffff,#ffffff,#ffffff",
+          "labelAlign": "center",
+          "labelVAlign": "middle"
+        }
+      ]
+    },
+    {
+      "_$id": "2dvd3spw",
+      "_$type": "Box",
+      "name": "CollapsibleBarRight",
+      "x": 558,
+      "width": 82,
+      "height": 704,
+      "right": 0,
+      "top": 0,
+      "_$comp": [
+        {
+          "_$type": "a1f123a3-2b4f-4502-99f6-c2d4594c5e52",
+          "scriptPath": "../src/kingBook/ui/CollapsibleBar.ts",
+          "_bottomImage": {
+            "_$ref": "uft2tj6h"
+          },
+          "_list": {
+            "_$ref": "f925804y"
+          },
+          "_collapseBtn": {
+            "_$ref": "ori3h8s0"
+          }
+        },
+        {
+          "_$type": "37b50391-3a92-4d92-babf-a3ef231161d9",
+          "scriptPath": "../src/kingBook/ui/CollapsibleBarRight.ts",
+          "_icons": [
+            {
+              "_$uuid": "02b63a4e-35da-497c-9dc8-6cdad5cf77c7",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "ecce2afd-63ed-48d8-813c-b23bf6f3584f",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "ecce2afd-63ed-48d8-813c-b23bf6f3584f",
+              "_$type": "Texture2D"
+            }
+          ]
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "uft2tj6h",
+          "_$type": "Image",
+          "name": "bottomImage",
+          "x": 40,
+          "width": 80,
+          "height": 695,
+          "anchorX": 0.5,
+          "left": 0,
+          "top": 0,
+          "skin": "res://cac6cda2-3ddc-4874-828e-dfa09284cc4c",
+          "color": "#ffffff"
+        },
+        {
+          "_$id": "f925804y",
+          "_$type": "List",
+          "name": "List",
+          "x": 40,
+          "width": 80,
+          "height": 624,
+          "anchorX": 0.5,
+          "left": 0,
+          "top": 0,
+          "itemTemplate": {
+            "_$ref": "b6njw04k",
+            "_$tmpl": "itemRender"
+          },
+          "repeatX": 1,
+          "repeatY": 6,
+          "_$child": [
+            {
+              "_$id": "b6njw04k",
+              "_$type": "Box",
+              "name": "Box",
+              "width": 70,
+              "height": 105,
+              "_$comp": [
+                {
+                  "_$type": "fede8b92-c62f-4933-8897-662b2bbc54c2",
+                  "scriptPath": "../src/kingBook/ui/ListItem.ts"
+                }
+              ],
+              "_$child": [
+                {
+                  "_$id": "hoguq7kr",
+                  "_$type": "Image",
+                  "name": "roundRect",
+                  "x": 40,
+                  "y": 85,
+                  "width": 64,
+                  "height": 28,
+                  "anchorX": 0.5,
+                  "anchorY": 0.5,
+                  "skin": "res://58a5696a-3f16-43a3-b2a8-65dd84210240",
+                  "color": "#222228",
+                  "_$child": [
+                    {
+                      "_$id": "5qe6zz4j",
+                      "_$type": "Label",
+                      "name": "Label_1",
+                      "width": 64,
+                      "height": 28,
+                      "left": 0,
+                      "right": 0,
+                      "top": 0,
+                      "bottom": 0,
+                      "text": "20天",
+                      "fontSize": 20,
+                      "color": "#ffffff",
+                      "bold": true,
+                      "align": "center",
+                      "valign": "middle"
+                    }
+                  ]
+                },
+                {
+                  "_$id": "ucvzseyd",
+                  "_$type": "Button",
+                  "name": "Button",
+                  "width": 80,
+                  "height": 80,
+                  "skin": "res://0a9fa50d-b564-4e92-a847-84de452c7184",
+                  "label": "",
+                  "labelSize": 20,
+                  "labelBold": true,
+                  "labelColors": "#ffffff,#ffffff,#ffffff",
+                  "labelAlign": "center",
+                  "labelVAlign": "bottom",
+                  "labelStrokeColor": "#32556b"
+                },
+                {
+                  "_$id": "my85kqjv",
+                  "_$type": "Label",
+                  "name": "Label",
+                  "x": 40,
+                  "y": 64,
+                  "width": 61,
+                  "height": 21,
+                  "anchorX": 0.5,
+                  "anchorY": 0.5,
+                  "_filters": [
+                    {
+                      "_$type": "GlowFilter",
+                      "offX": 0,
+                      "offY": 0,
+                      "blur": 1.056,
+                      "color": "#000"
+                    }
+                  ],
+                  "text": "贸易港",
+                  "fontSize": 15,
+                  "color": "#ffffff",
+                  "bold": true,
+                  "align": "center",
+                  "valign": "middle"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "ori3h8s0",
+          "_$type": "Button",
+          "name": "collapseBtn",
+          "x": 43,
+          "y": 651,
+          "width": 58,
+          "height": 37,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "_mouseState": 2,
+          "bottom": 35,
+          "centerX": 2,
+          "skin": "res://84e4311c-4ea7-436a-bcad-234fad5c364e",
+          "label": "",
+          "labelSize": 20,
+          "labelColors": "#ffffff,#ffffff,#ffffff",
+          "labelAlign": "center",
+          "labelVAlign": "middle"
+        }
+      ]
+    },
+    {
+      "_$id": "bo0hzdow",
+      "_$type": "Box",
+      "name": "BottomBar",
+      "y": 1056,
+      "width": 640,
+      "height": 80,
+      "left": 0,
+      "right": 0,
+      "bottom": 0,
+      "_$comp": [
+        {
+          "_$type": "d7f0aa87-f5a7-4470-8c00-46a9e0d34ba1",
+          "scriptPath": "../src/kingBook/ui/BottomBar.ts",
+          "_icons": [
+            {
+              "_$uuid": "0a9fa50d-b564-4e92-a847-84de452c7184",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "02b63a4e-35da-497c-9dc8-6cdad5cf77c7",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "6bf7d315-c375-47b3-8b3d-512b6daba195",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "ecce2afd-63ed-48d8-813c-b23bf6f3584f",
+              "_$type": "Texture2D"
+            },
+            {
+              "_$uuid": "0c72f8e4-f9e8-49ba-a61b-56e79022ef74",
+              "_$type": "Texture2D"
+            }
+          ],
+          "_btnRole": {
+            "_$ref": "nburwxzu"
+          }
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "dvduqvzy",
+          "_$type": "Image",
+          "name": "Image",
+          "width": 640,
+          "height": 80,
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "skin": "res://92d5e006-11ce-4df4-813a-3c4080fc5ac9",
+          "sizeGrid": "11,10,10,11,0",
+          "color": "#ffffff"
+        },
+        {
+          "_$id": "cuugb03x",
+          "_$type": "HBox",
+          "name": "HBox",
+          "x": 321,
+          "y": 39,
+          "width": 541,
+          "height": 66,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "space": 46,
+          "align": "middle",
+          "_$child": [
+            {
+              "_$id": "krsfhm1s",
+              "_$prefab": "535eae95-587d-45fa-9370-11ccff6826ff",
+              "name": "Box",
+              "active": true,
+              "x": 0,
+              "y": -2,
+              "visible": true,
+              "centerY": 0
+            },
+            {
+              "_$id": "54xkyvbo",
+              "_$prefab": "535eae95-587d-45fa-9370-11ccff6826ff",
+              "name": "Box_1",
+              "active": true,
+              "x": 116,
+              "y": -2,
+              "visible": true,
+              "centerY": 0
+            },
+            {
+              "_$id": "apui2t1r",
+              "_$prefab": "535eae95-587d-45fa-9370-11ccff6826ff",
+              "name": "Box_1_1",
+              "active": true,
+              "x": 232,
+              "y": -2,
+              "visible": true,
+              "centerY": 0
+            },
+            {
+              "_$id": "pql3dk3h",
+              "_$prefab": "535eae95-587d-45fa-9370-11ccff6826ff",
+              "name": "Box_1_1_1",
+              "active": true,
+              "x": 348,
+              "y": -2,
+              "visible": true,
+              "centerY": 0
+            },
+            {
+              "_$id": "2cv1ebgv",
+              "_$prefab": "535eae95-587d-45fa-9370-11ccff6826ff",
+              "name": "Box_1_1_1_1",
+              "active": true,
+              "x": 464,
+              "y": -2,
+              "visible": true,
+              "centerY": 0
+            }
+          ]
+        },
+        {
+          "_$id": "nburwxzu",
+          "_$type": "Button",
+          "name": "ButtonRole",
+          "x": 239,
+          "y": -71,
+          "width": 163,
+          "height": 40,
+          "bottom": 111,
+          "centerX": 0,
+          "skin": "res://fb303fdb-a5e4-4dd8-9bd9-8935cf323f95",
+          "label": "角色",
+          "labelSize": 20,
+          "labelAlign": "center",
+          "labelVAlign": "middle"
+        }
+      ]
+    }
+  ]
+}
