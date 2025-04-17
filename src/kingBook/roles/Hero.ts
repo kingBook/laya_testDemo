@@ -21,7 +21,16 @@ export class Hero extends Laya.Script {
 
     onAwake(): void {
         this._heroManger = this.owner.parent.getComponent(HeroManager);
+        
+        
         this._spineRender = this.owner.getComponent(Laya.Spine2DRenderNode);
+        this._spineRender.owner.on(Laya.Event.LABEL, (e: Laya.EventData) => {
+            console.log("骨骼动画事件：", e.name);
+        });
+        this._spineRender.owner.on(Laya.Event.PLAYED, ()=>{
+            console.log("动画开始播放");
+            
+        });
     }
 
     onEnable(): void {
@@ -31,6 +40,10 @@ export class Hero extends Laya.Script {
 
     private setToTarget(): void {
         this._spineRender.play(Random.sign > 0 ? "run" : "walk", true);
+        //console.log("this._spineRender.templet:",this._spineRender.templet);
+        /*this._spineRender.templet.on(Laya.Event.LABEL, (e:any)=>{
+            console.log("骨骼事件：",e);
+        });*/
         let p0 = Hero.getRandomPos();
 
         this.owner.scaleX = MathUtil.sign(p0.x - this.owner.x) * Math.abs(this.owner.scaleX);

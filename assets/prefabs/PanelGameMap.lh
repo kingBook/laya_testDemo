@@ -5,6 +5,7 @@
   "name": "PanelGameMap",
   "width": 640,
   "height": 1136,
+  "drawCallOptimize": true,
   "left": 0,
   "right": 0,
   "top": 0,
@@ -87,6 +88,9 @@
           "width": 80,
           "height": 624,
           "anchorX": 0.5,
+          "mask": {
+            "_$ref": "aylilz6m"
+          },
           "left": 0,
           "top": 0,
           "itemTemplate": {
@@ -96,6 +100,16 @@
           "repeatX": 1,
           "repeatY": 6,
           "_$child": [
+            {
+              "_$id": "aylilz6m",
+              "_$type": "Box",
+              "name": "mask",
+              "width": 80,
+              "height": 361,
+              "left": 0,
+              "right": 0,
+              "bgColor": "#ffffff"
+            },
             {
               "_$id": "484y65tf",
               "_$type": "Box",
@@ -205,6 +219,14 @@
           "labelColors": "#ffffff,#ffffff,#ffffff",
           "labelAlign": "center",
           "labelVAlign": "middle"
+        },
+        {
+          "_$id": "hhybalop",
+          "_$type": "Box",
+          "name": "Box",
+          "width": 82,
+          "height": 704,
+          "left": 0
         }
       ]
     },
@@ -272,6 +294,9 @@
           "width": 80,
           "height": 624,
           "anchorX": 0.5,
+          "mask": {
+            "_$ref": "hkj1w6h4"
+          },
           "left": 0,
           "top": 0,
           "itemTemplate": {
@@ -368,6 +393,16 @@
                   "valign": "middle"
                 }
               ]
+            },
+            {
+              "_$id": "hkj1w6h4",
+              "_$type": "Box",
+              "name": "mask",
+              "width": 80,
+              "height": 361,
+              "left": 0,
+              "right": 0,
+              "bgColor": "#ffffff"
             }
           ]
         },
@@ -407,6 +442,10 @@
         {
           "_$type": "d7f0aa87-f5a7-4470-8c00-46a9e0d34ba1",
           "scriptPath": "../src/kingBook/ui/BottomBar.ts",
+          "_dialogRolePrefab": {
+            "_$uuid": "987afc41-175b-4768-88d9-4e3236f13c48",
+            "_$type": "Prefab"
+          },
           "_icons": [
             {
               "_$uuid": "0a9fa50d-b564-4e92-a847-84de452c7184",

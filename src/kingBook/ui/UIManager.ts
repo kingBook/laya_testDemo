@@ -11,7 +11,7 @@ export class UIManager extends Laya.Script {
     private static s_instance: UIManager;
     private _fsm: UIManagerFsm;
 
-    @property({ type: Laya.Prefab})
+    @property({ type: Laya.Prefab })
     public sceneLoadingPagePrefab: Laya.Prefab;
     @property({ type: Laya.Prefab })
     public panelStartPrefab: Laya.Prefab;
@@ -32,7 +32,6 @@ export class UIManager extends Laya.Script {
         UIManager.s_instance = this;
         this._fsm = this.owner.addComponent(UIManagerFsm);
 
-        
     }
 
 

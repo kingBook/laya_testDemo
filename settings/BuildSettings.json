@@ -2,8 +2,7 @@
   "name": "LayaProject1",
   "startupScene": "res://9b931ecf-fde9-44dd-acf3-15f8dc807965",
   "includedScenes": [
-    "res://6506aa03-ae79-481a-9348-2bfa073a99e6",
-    "res://3a3ca351-2282-4786-9d04-57339db72df5"
+    "res://6506aa03-ae79-481a-9348-2bfa073a99e6"
   ],
   "android": {
     "targetArchitectures": {
