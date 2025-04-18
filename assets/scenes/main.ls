@@ -11,21 +11,6 @@
   "height": 1136,
   "_$child": [
     {
-      "_$id": "4s9d2t4q",
-      "_$type": "Sprite",
-      "name": "SceneManager",
-      "x": 130,
-      "y": 480,
-      "width": 100,
-      "height": 100,
-      "_$comp": [
-        {
-          "_$type": "0e827b22-010e-475b-afb8-9bf11f6a0882",
-          "scriptPath": "../src/kingBook/ui/SceneManager.ts"
-        }
-      ]
-    },
-    {
       "_$id": "3jeyjwg2",
       "_$type": "Sprite",
       "name": "UIManager",

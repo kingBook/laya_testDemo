@@ -1,6 +1,5 @@
 import { BottomBarItem } from "./BottomBarItem";
 import { DialogRole } from "./DialogRole";
-import { SceneManager } from "./SceneManager";
 
 const { regClass, property } = Laya;
 

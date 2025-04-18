@@ -41,7 +41,6 @@ export class CollapsibleBar extends Laya.Script {
         let listHeight = this._list.itemRender.data.height * this._displayItemCount;
         let bgHeight = listHeight + 65;
 
-
         if (isTween) {
             Laya.Tween.to(this._list, { height: listHeight }, this.delay);
             Laya.Tween.to(this._listMask, { height: listHeight }, this.delay);
@@ -64,7 +63,6 @@ export class CollapsibleBar extends Laya.Script {
         this.setDisplayItemCount(this._displayItemCount > 1 ? 1 : this.list.array.length);
         Laya.timer.callLater(this, this.updateHeight, [true]);
         Laya.timer.callLater(this, this.updateCollapseBtnStatus);
-
     }
 
     public setDisplayItemCount(value: number): void {

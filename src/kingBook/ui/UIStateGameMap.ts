@@ -9,13 +9,13 @@ const { regClass, property } = Laya;
 @regClass()
 export class UIStateGameMap extends State {
 
-    private _panelGameMap:PanelGameMap;
+    private _panelGameMap: PanelGameMap;
 
     public onStateEnter(fsm: Fsm): void {
         console.log("UIStateGameMap::onStateEnter");
         this._panelGameMap = UIManager.instance.panelGameMapPrefab.create().getComponent(PanelGameMap);
-        SceneManager.instance.currentScene.addChild(this._panelGameMap.owner);
-        
+        UIManager.getCurrentScene().addChild(this._panelGameMap.owner);
+
     }
 
     public onStateExit(fsm: Fsm): void {

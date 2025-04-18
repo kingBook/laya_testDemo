@@ -15,9 +15,6 @@ export class CollapsibleBarLeft extends Laya.Script {
     onAwake(): void {
         this._collapBar = this.owner.getComponent(CollapsibleBar);
 
-        //this._collapBar.list.repeatX = 1;
-        //this._collapBar.list.repeatY = this._icons.length;
-
         let datas: Array<any> = [];
         for (let i = 0; i < this._icons.length; i++) {
             datas[i] = {

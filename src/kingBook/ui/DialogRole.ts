@@ -10,6 +10,7 @@ export class DialogRole extends Laya.Script {
     onEnable(): void {
         this._closeBtn = this.owner.getChild("closeBtn") as Laya.Button;
         this._closeBtn.on(Laya.Event.CLICK, this, this.onClose);
+        
         //Laya.Dialog.manager.on(Laya.Event.CLOSE, this, this.onClose);
         //Laya.Dialog.manager.on(Laya.Event.OPEN, this, this.onOpen);
     }

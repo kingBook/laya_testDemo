@@ -38,6 +38,19 @@
           }
         }
       ]
+    },
+    {
+      "_$id": "tcwuecit",
+      "_$prefab": "dcf144a6-587a-4f47-8356-dc1486d0fcf4",
+      "name": "PanelGameMap",
+      "active": true,
+      "x": 0,
+      "y": 0,
+      "visible": true,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0
     }
   ]
 }

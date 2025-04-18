@@ -570,6 +570,24 @@
           "labelVAlign": "middle"
         }
       ]
+    },
+    {
+      "_$id": "a3xv3vom",
+      "_$type": "Button",
+      "name": "ButtonDownDragList",
+      "x": 377,
+      "y": 59,
+      "width": 163,
+      "height": 40,
+      "right": 100,
+      "top": 59,
+      "skin": "res://fb303fdb-a5e4-4dd8-9bd9-8935cf323f95",
+      "label": "下拉刷新列表",
+      "labelSize": 24,
+      "labelBold": true,
+      "labelColors": "#0e203e,#32cc6b,#ff0000",
+      "labelAlign": "center",
+      "labelVAlign": "middle"
     }
   ]
 }
