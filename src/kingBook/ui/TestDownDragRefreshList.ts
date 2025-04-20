@@ -17,7 +17,7 @@ export class TestDownDragRefreshList extends Laya.Script {
 
     private initDatas(): void {
         var datas: any[] = [];
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 8; i++) {
             datas[i] = {
                 Label: "Item:" + i
             };

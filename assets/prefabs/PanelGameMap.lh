@@ -1,6 +1,7 @@
 {
   "_$ver": 1,
   "_$id": "n1ob9h3e",
+  "_$runtime": "res://cf63ff62-fbb8-4f59-bbe9-1d8bce45d2ef",
   "_$type": "Box",
   "name": "PanelGameMap",
   "width": 640,
@@ -13,7 +14,15 @@
   "_$comp": [
     {
       "_$type": "18aaf87c-8bb3-4a7d-89c2-89636eaeb1a4",
-      "scriptPath": "../src/kingBook/ui/PanelGameMap.ts"
+      "scriptPath": "../src/kingBook/ui/PanelGameMap.ts",
+      "_dialogTestListPrefab": {
+        "_$uuid": "e189d11c-4b3f-4644-8507-0231eb21e69b",
+        "_$type": "Prefab"
+      },
+      "_panelRolePrefab": {
+        "_$uuid": "987afc41-175b-4768-88d9-4e3236f13c48",
+        "_$type": "Prefab"
+      }
     }
   ],
   "_$child": [
@@ -442,10 +451,6 @@
         {
           "_$type": "d7f0aa87-f5a7-4470-8c00-46a9e0d34ba1",
           "scriptPath": "../src/kingBook/ui/BottomBar.ts",
-          "_dialogRolePrefab": {
-            "_$uuid": "987afc41-175b-4768-88d9-4e3236f13c48",
-            "_$type": "Prefab"
-          },
           "_icons": [
             {
               "_$uuid": "0a9fa50d-b564-4e92-a847-84de452c7184",
@@ -467,10 +472,7 @@
               "_$uuid": "0c72f8e4-f9e8-49ba-a61b-56e79022ef74",
               "_$type": "Texture2D"
             }
-          ],
-          "_btnRole": {
-            "_$ref": "nburwxzu"
-          }
+          ]
         }
       ],
       "_$child": [
@@ -552,40 +554,44 @@
               "centerY": 0
             }
           ]
-        },
-        {
-          "_$id": "nburwxzu",
-          "_$type": "Button",
-          "name": "ButtonRole",
-          "x": 239,
-          "y": -71,
-          "width": 163,
-          "height": 40,
-          "bottom": 111,
-          "centerX": 0,
-          "skin": "res://fb303fdb-a5e4-4dd8-9bd9-8935cf323f95",
-          "label": "角色",
-          "labelSize": 20,
-          "labelAlign": "center",
-          "labelVAlign": "middle"
         }
       ]
     },
     {
       "_$id": "a3xv3vom",
+      "_$var": true,
       "_$type": "Button",
-      "name": "ButtonDownDragList",
-      "x": 377,
-      "y": 59,
+      "name": "buttonTestList",
+      "x": 239,
+      "y": 921,
       "width": 163,
       "height": 40,
-      "right": 100,
-      "top": 59,
+      "bottom": 175,
+      "centerX": 0,
       "skin": "res://fb303fdb-a5e4-4dd8-9bd9-8935cf323f95",
       "label": "下拉刷新列表",
-      "labelSize": 24,
+      "labelSize": 22,
       "labelBold": true,
       "labelColors": "#0e203e,#32cc6b,#ff0000",
+      "labelAlign": "center",
+      "labelVAlign": "middle"
+    },
+    {
+      "_$id": "nburwxzu",
+      "_$var": true,
+      "_$type": "Button",
+      "name": "buttonRole",
+      "x": 239,
+      "y": 980,
+      "width": 163,
+      "height": 40,
+      "bottom": 116,
+      "centerX": 0,
+      "skin": "res://fb303fdb-a5e4-4dd8-9bd9-8935cf323f95",
+      "label": "角色面板",
+      "labelSize": 24,
+      "labelBold": true,
+      "labelColors": "#123348,#32cc6b,#ff0000",
       "labelAlign": "center",
       "labelVAlign": "middle"
     }

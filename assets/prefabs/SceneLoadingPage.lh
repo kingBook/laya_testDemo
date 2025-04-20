@@ -9,7 +9,7 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "bgColor": "#482525",
+  "bgColor": "#414f62",
   "_$comp": [
     {
       "_$type": "19186a80-27ec-48b1-ab46-32ec282c7dec",
@@ -33,8 +33,8 @@
       "height": 30,
       "centerX": 0,
       "centerY": 0,
-      "skin": "res://ae3de75e-ee9f-478d-9f8b-ede75a4fc296",
-      "value": 0.066,
+      "skin": "res://fb1937cc-6a31-4274-a924-dc58e28d3abd",
+      "value": 0.399,
       "_$child": [
         {
           "_$id": "ydf77t39",
@@ -48,6 +48,8 @@
           "centerY": 0,
           "text": "100%",
           "fontSize": 20,
+          "color": "#ffffff",
+          "bold": true,
           "align": "center",
           "valign": "middle"
         }

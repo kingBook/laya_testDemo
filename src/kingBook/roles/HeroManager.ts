@@ -20,6 +20,8 @@ export class HeroManager extends Laya.Script {
             if (i >= 5) clearInterval(this._intervalId);
         }, i * 2000);
 
+        // 背景音乐
+        Laya.SoundManager.playMusic("resources/audios/植物大战僵尸背景.mp3");
     }
 
     public createHero(): Laya.Sprite {

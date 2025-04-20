@@ -62,7 +62,7 @@ export class DownDragRefreshList extends Laya.Script {
         } else {
             this.upDragRefreshHandler?.run();
             // 滚动到最后一项
-            this.owner.scrollTo(this.owner.array.length - 1);
+            this.owner.scrollTo(this.owner.array.length-this.owner.repeatY);
         }
     }
 

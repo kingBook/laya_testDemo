@@ -1,50 +1,53 @@
 {
   "_$ver": 1,
-  "_$id": "4zel8up2",
-  "_$type": "Dialog",
-  "name": "DialogRole",
+  "_$id": "ltjp0pmg",
+  "_$type": "Box",
+  "name": "PanelRole",
+  "x": 320,
+  "y": 568,
   "width": 640,
   "height": 1136,
   "anchorX": 0.5,
   "anchorY": 0.5,
-  "isShowEffect": false,
+  "bgColor": "#1d2432",
   "_$comp": [
     {
       "_$type": "a24f6669-7f54-4683-bda5-ad2523c46724",
-      "scriptPath": "../src/kingBook/ui/DialogRole.ts"
+      "scriptPath": "../src/kingBook/ui/PanelRole.ts"
     }
   ],
   "_$child": [
     {
-      "_$id": "cc299j7k",
+      "_$id": "lo54kkv4",
       "_$type": "Box",
-      "name": "bg",
-      "width": 640,
-      "height": 1136,
-      "left": 0,
-      "right": 0,
-      "top": 0,
-      "bottom": 0,
-      "bgColor": "#1d2432"
-    },
-    {
-      "_$id": "he574e4s",
-      "_$type": "Sprite",
-      "name": "role",
-      "x": 314,
-      "y": 703,
-      "width": 100,
-      "height": 242,
-      "anchorX": 0.5,
-      "anchorY": 1,
-      "_$comp": [
+      "name": "Box_role",
+      "x": 220,
+      "y": 474,
+      "width": 200,
+      "height": 188,
+      "centerX": 0,
+      "centerY": 0,
+      "_$child": [
         {
-          "_$type": "Spine2DRenderNode",
-          "layer": 0,
-          "useFastRender": false,
-          "source": "res://df103dab-afee-4685-8074-53409cea95e5",
-          "animationName": "idle",
-          "physicsUpdate": 2
+          "_$id": "he574e4s",
+          "_$type": "Sprite",
+          "name": "role",
+          "x": 94,
+          "y": 235,
+          "width": 100,
+          "height": 242,
+          "anchorX": 0.5,
+          "anchorY": 1,
+          "_$comp": [
+            {
+              "_$type": "Spine2DRenderNode",
+              "layer": 0,
+              "useFastRender": false,
+              "source": "res://df103dab-afee-4685-8074-53409cea95e5",
+              "animationName": "idle",
+              "physicsUpdate": 2
+            }
+          ]
         }
       ]
     },
@@ -52,10 +55,13 @@
       "_$id": "92k711rk",
       "_$type": "Box",
       "name": "Box",
-      "x": 29,
+      "x": 26,
       "y": 358,
       "width": 129,
       "height": 421,
+      "left": 26,
+      "top": 358,
+      "bottom": 357,
       "centerY": 0,
       "_$child": [
         {
@@ -102,10 +108,13 @@
       "_$id": "yaay9elk",
       "_$type": "Box",
       "name": "Box_1",
-      "x": 479,
+      "x": 485,
       "y": 358,
       "width": 129,
       "height": 421,
+      "right": 26,
+      "top": 358,
+      "bottom": 357,
       "centerY": 0,
       "_$child": [
         {

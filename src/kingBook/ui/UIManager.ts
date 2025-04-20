@@ -1,7 +1,4 @@
 import { SceneLonadingPage } from "./SceneLonadingPage";
-import { UIManagerFsm } from "./UIManagerFsm";
-import { UIStateGameMap } from "./UIStateGameMap";
-import { UIStateStart } from "./UIStateStart";
 
 const { regClass, property } = Laya;
 
@@ -11,8 +8,6 @@ export class UIManager extends Laya.Script {
 
     /** UI 管理器的实例 */
     private static s_instance: UIManager;
-    /** 管理 UI 切换的状态机 */
-    private _fsm: UIManagerFsm;
 
     @property({ type: Laya.Prefab })
     public sceneLoadingPagePrefab: Laya.Prefab;
@@ -38,23 +33,20 @@ export class UIManager extends Laya.Script {
         return scene;
     }
 
-    /** 管理 UI 切换的状态机 */
-    public get fsm(): UIManagerFsm {
-        return this._fsm;
-    }
-
     onAwake(): void {
         UIManager.s_instance = this;
-        this._fsm = this.owner.addComponent(UIManagerFsm);
+
+        Laya.SoundManager.autoStopMusic = false;
     }
 
     onStart(): void {
-        this._fsm.addState(UIStateStart);
-        this._fsm.addState(UIStateGameMap);
-        this._fsm.init();
+        // 创建 ‘开始’ UI
+        this.createPanelStart();
+    }
 
-        // 切换到 ‘开始’ UI
-        this._fsm.changeStateTo(UIStateStart);
+    private createPanelStart(): void {
+        let panelStart = UIManager.instance.panelStartPrefab.create();
+        UIManager.getCurrentScene().addChild(panelStart);
     }
 
 

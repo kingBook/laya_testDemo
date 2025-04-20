@@ -24,10 +24,10 @@ export class Hero extends Laya.Script {
         this._spineRender = this.owner.getComponent(Laya.Spine2DRenderNode);
         
         this._spineRender.owner.on(Laya.Event.LABEL, (e: Laya.EventData) => {
-            console.log("骨骼动画事件：", e.name);
+            //console.log("骨骼动画事件：", e.name);
         });
         this._spineRender.owner.on(Laya.Event.PLAYED, ()=>{
-            console.log("动画开始播放");
+            //console.log("动画开始播放");
             
         });
     }

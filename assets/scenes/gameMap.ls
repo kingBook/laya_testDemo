@@ -40,7 +40,7 @@
       ]
     },
     {
-      "_$id": "tcwuecit",
+      "_$id": "cmqky084",
       "_$prefab": "dcf144a6-587a-4f47-8356-dc1486d0fcf4",
       "name": "PanelGameMap",
       "active": true,

@@ -25,9 +25,6 @@ export class BottomBarItem extends Laya.Script {
 
                 let glow = item.getChild("Glow") as Laya.Sprite;
                 glow.visible = item == this.owner;
-                if(glow.visible){
-                    this._bottomBar.setButtonRoleVisible(i === 2);
-                }
             }
 
         });
