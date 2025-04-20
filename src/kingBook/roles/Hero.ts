@@ -61,7 +61,7 @@ export class Hero extends Laya.Script {
         // 从舞台移除
         this.owner.removeSelf();
 
-        console.log("移除 hero 并加入对象池");
+        //console.log("移除 hero 并加入对象池");
     }
 
     onDisable(): void {

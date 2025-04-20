@@ -1,6 +1,7 @@
 {
   "_$ver": 1,
   "_$id": "ltjp0pmg",
+  "_$runtime": "res://46716743-98c9-4f32-b8f3-9370bfe164ba",
   "_$type": "Box",
   "name": "PanelRole",
   "x": 320,
@@ -13,7 +14,11 @@
   "_$comp": [
     {
       "_$type": "a24f6669-7f54-4683-bda5-ad2523c46724",
-      "scriptPath": "../src/kingBook/ui/PanelRole.ts"
+      "scriptPath": "../src/kingBook/ui/PanelRole.ts",
+      "_spineRender": {
+        "_$ref": "he574e4s",
+        "_$type": "Spine2DRenderNode"
+      }
     }
   ],
   "_$child": [
@@ -45,7 +50,9 @@
               "useFastRender": false,
               "source": "res://df103dab-afee-4685-8074-53409cea95e5",
               "animationName": "idle",
-              "physicsUpdate": 2
+              "preview": true,
+              "physicsUpdate": 2,
+              "externalSkins": []
             }
           ]
         }
@@ -57,7 +64,7 @@
       "name": "Box",
       "x": 26,
       "y": 358,
-      "width": 129,
+      "width": 128,
       "height": 421,
       "left": 26,
       "top": 358,
@@ -66,39 +73,48 @@
       "_$child": [
         {
           "_$id": "lea3gdyh",
+          "_$var": true,
           "_$type": "Button",
-          "name": "Button",
-          "width": 120,
-          "height": 124,
-          "skin": "res://6bf7d315-c375-47b3-8b3d-512b6daba195",
-          "label": "",
-          "labelSize": 20,
-          "labelAlign": "center",
-          "labelVAlign": "middle"
-        },
-        {
-          "_$id": "yqnn1xy1",
-          "_$type": "Button",
-          "name": "Button_1",
-          "y": 288,
-          "width": 120,
-          "height": 124,
-          "skin": "res://6bf7d315-c375-47b3-8b3d-512b6daba195",
-          "label": "",
-          "labelSize": 20,
+          "name": "buttonCrouch",
+          "width": 128,
+          "height": 128,
+          "skin": "res://63cd312f-28a8-4df7-ba71-56b9e9beaf57",
+          "label": "蹲",
+          "labelSize": 70,
+          "labelBold": true,
+          "labelColors": "#ffffff,#32cc6b,#ff0000",
           "labelAlign": "center",
           "labelVAlign": "middle"
         },
         {
           "_$id": "yv81r6w1",
+          "_$var": true,
           "_$type": "Button",
-          "name": "Button_1_1",
+          "name": "buttonAttack",
           "y": 144,
-          "width": 120,
-          "height": 124,
-          "skin": "res://6bf7d315-c375-47b3-8b3d-512b6daba195",
-          "label": "",
-          "labelSize": 20,
+          "width": 128,
+          "height": 128,
+          "skin": "res://63cd312f-28a8-4df7-ba71-56b9e9beaf57",
+          "label": "攻击",
+          "labelSize": 55,
+          "labelBold": true,
+          "labelColors": "#ffffff,#32cc6b,#ff0000",
+          "labelAlign": "center",
+          "labelVAlign": "middle"
+        },
+        {
+          "_$id": "yqnn1xy1",
+          "_$var": true,
+          "_$type": "Button",
+          "name": "buttonHeadTurn",
+          "y": 288,
+          "width": 128,
+          "height": 128,
+          "skin": "res://63cd312f-28a8-4df7-ba71-56b9e9beaf57",
+          "label": "回头",
+          "labelSize": 55,
+          "labelBold": true,
+          "labelColors": "#ffffff,#32cc6b,#ff0000",
           "labelAlign": "center",
           "labelVAlign": "middle"
         }
@@ -108,9 +124,9 @@
       "_$id": "yaay9elk",
       "_$type": "Box",
       "name": "Box_1",
-      "x": 485,
+      "x": 486,
       "y": 358,
-      "width": 129,
+      "width": 128,
       "height": 421,
       "right": 26,
       "top": 358,
@@ -119,39 +135,46 @@
       "_$child": [
         {
           "_$id": "lhp6jlgi",
+          "_$var": true,
           "_$type": "Button",
-          "name": "Button",
-          "width": 120,
-          "height": 124,
-          "skin": "res://6bf7d315-c375-47b3-8b3d-512b6daba195",
-          "label": "",
-          "labelSize": 20,
-          "labelAlign": "center",
-          "labelVAlign": "middle"
-        },
-        {
-          "_$id": "4hcc9yu6",
-          "_$type": "Button",
-          "name": "Button_1",
-          "y": 288,
-          "width": 120,
-          "height": 124,
-          "skin": "res://6bf7d315-c375-47b3-8b3d-512b6daba195",
-          "label": "",
-          "labelSize": 20,
+          "name": "buttonWalk",
+          "width": 128,
+          "height": 128,
+          "skin": "res://63cd312f-28a8-4df7-ba71-56b9e9beaf57",
+          "label": "走",
+          "labelSize": 70,
+          "labelBold": true,
+          "labelColors": "#ffffff,#32cc6b,#ff0000",
           "labelAlign": "center",
           "labelVAlign": "middle"
         },
         {
           "_$id": "lkkbdcm5",
+          "_$var": true,
           "_$type": "Button",
-          "name": "Button_1_1",
+          "name": "buttonRun",
           "y": 144,
-          "width": 120,
-          "height": 124,
-          "skin": "res://6bf7d315-c375-47b3-8b3d-512b6daba195",
-          "label": "",
-          "labelSize": 20,
+          "width": 128,
+          "height": 128,
+          "skin": "res://63cd312f-28a8-4df7-ba71-56b9e9beaf57",
+          "label": "跑",
+          "labelSize": 70,
+          "labelColors": "#ffffff,#32cc6b,#ff0000",
+          "labelAlign": "center",
+          "labelVAlign": "middle"
+        },
+        {
+          "_$id": "4hcc9yu6",
+          "_$var": true,
+          "_$type": "Button",
+          "name": "buttonIdle",
+          "y": 288,
+          "width": 128,
+          "height": 128,
+          "skin": "res://63cd312f-28a8-4df7-ba71-56b9e9beaf57",
+          "label": "站",
+          "labelSize": 70,
+          "labelColors": "#ffffff,#32cc6b,#ff0000",
           "labelAlign": "center",
           "labelVAlign": "middle"
         }

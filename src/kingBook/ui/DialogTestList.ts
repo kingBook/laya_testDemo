@@ -3,13 +3,16 @@ import { DownDragRefreshList } from "./DownDragRefreshList";
 const { regClass, property } = Laya;
 
 @regClass()
-export class TestDownDragRefreshList extends Laya.Script {
-    declare owner: Laya.List;
-
+export class DialogTestList extends Laya.Script {
+    
+    @property({type:Laya.List, private:false})
+    private _list:Laya.List;
+    @property({type:DownDragRefreshList, private:false})
     private _downDragRefreshList: DownDragRefreshList;
 
     onAwake(): void {
-        this._downDragRefreshList = this.owner.getComponent(DownDragRefreshList);
+        //Laya.Dialog.manager.on(Laya.Event.CLOSE, this, this.onClose);
+        //Laya.Dialog.manager.on(Laya.Event.OPEN, this, this.onOpen);
         this._downDragRefreshList.upDragRefreshHandler = new Laya.Handler(this, this.upDragRefreshHandler);
         this._downDragRefreshList.downDragRefreshHandler = new Laya.Handler(this, this.downDragRefreshHandler);
         this.initDatas();
@@ -22,20 +25,20 @@ export class TestDownDragRefreshList extends Laya.Script {
                 Label: "Item:" + i
             };
         }
-        this.owner.array = datas;
+        this._list.array = datas;
     }
 
     private upDragRefreshHandler(): void {
         console.log("加载更多项");
         for (let i = 0; i < 3; i++) {
-            this.owner.addItem({ Label: "new:" + i });
+            this._list.addItem({ Label: "new:" + i });
         }
     }
 
     private downDragRefreshHandler(): void {
         console.log("刷新列表");
-        for (let i = 0, len = this.owner.array.length; i < len; i++) {
-            this.owner.changeItem(i, { Label: "已刷新:" + i });
+        for (let i = 0, len = this._list.array.length; i < len; i++) {
+            this._list.changeItem(i, { Label: "已刷新:" + i });
         }
     }
 }

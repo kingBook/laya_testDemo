@@ -39,7 +39,7 @@ export class HeroManager extends Laya.Script {
             let pos = Hero.getRandomPos();
             hero.pos(pos.x, pos.y);
             this.owner.addChild(hero);
-            console.log("delayCreateHeroByPool");
+            //console.log("delayCreateHeroByPool");
         }, delay);
     }
 

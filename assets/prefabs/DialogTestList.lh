@@ -8,6 +8,19 @@
   "width": 394,
   "height": 530,
   "isModal": true,
+  "_$comp": [
+    {
+      "_$type": "08bbaed4-027f-4071-8934-dbc403a16249",
+      "scriptPath": "../src/kingBook/ui/DialogTestList.ts",
+      "_list": {
+        "_$ref": "vhi1rs2k"
+      },
+      "_downDragRefreshList": {
+        "_$ref": "vhi1rs2k",
+        "_$type": "3e0bd175-412f-4531-93f8-dfcb238969e6"
+      }
+    }
+  ],
   "_$child": [
     {
       "_$id": "qta5gbyj",
@@ -48,10 +61,6 @@
           "_iconDownDrag": {
             "_$ref": "r9wvvvuo"
           }
-        },
-        {
-          "_$type": "08bbaed4-027f-4071-8934-dbc403a16249",
-          "scriptPath": "../src/kingBook/ui/TestDownDragRefreshList.ts"
         }
       ],
       "_$child": [

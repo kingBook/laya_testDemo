@@ -1,22 +1,56 @@
+import { PanelRoleRuntimeScript } from "./PanelRoleRuntimeScript";
+
 const { regClass, property } = Laya;
 
 @regClass()
 export class PanelRole extends Laya.Script {
-    declare owner: Laya.Box;
-
+    
+    declare owner: PanelRoleRuntimeScript;
+    @property({type:Laya.Spine2DRenderNode, private:false})
+    private _spineRender: Laya.Spine2DRenderNode;
     private _closeBtn: Laya.Button;
     private _tweenInPoint: Laya.Point;
 
     onEnable(): void {
         this._closeBtn = this.owner.getChild("closeBtn") as Laya.Button;
         this._closeBtn.on(Laya.Event.CLICK, this, this.onClose);
-
-        //Laya.Dialog.manager.on(Laya.Event.CLOSE, this, this.onClose);
-        //Laya.Dialog.manager.on(Laya.Event.OPEN, this, this.onOpen);
+        
+        this.owner.buttonCrouch.on(Laya.Event.CLICK, ()=>{
+            this._spineRender.play("crouch",true);
+        });
+        this.owner.buttonAttack.on(Laya.Event.CLICK, ()=>{
+            this._spineRender.play("attack",true);
+        });
+        this.owner.buttonHeadTurn.on(Laya.Event.CLICK, ()=>{
+            this._spineRender.play("head-turn",true);
+        });
+        
+        this.owner.buttonWalk.on(Laya.Event.CLICK, ()=>{
+            this._spineRender.play("walk",true);
+        });
+        this.owner.buttonRun.on(Laya.Event.CLICK, ()=>{
+            this._spineRender.play("run",true);
+        });
+        this.owner.buttonIdle.on(Laya.Event.CLICK, ()=>{
+            this._spineRender.play("idle",true);
+        });
+        
+        this._spineRender.owner.on(Laya.Event.LABEL, (e: Laya.EventData) => {
+            console.log("骨骼动画事件：", e.name);
+        });
+        this._spineRender.owner.on(Laya.Event.PLAYED, ()=>{
+            //console.log("动画开始播放");
+            
+        });
+        //this._spineRender.getSlotByName("weapon")
+        // https://blog.csdn.net/u014528558/article/details/82697910
+        //https://ask.layabox.com/question/49524#!answer_form
+        //https://ask.layabox.com/question/3577
+        
     }
 
     /**
-     * 开始缓动进入动画
+     * 开始缓动进入
      * @param origin 缓动的起始位置
      */
     public startTweenIn(origin: Laya.Sprite): void {
@@ -32,6 +66,9 @@ export class PanelRole extends Laya.Script {
         });
     }
 
+    /**
+     * 开始缓动飞出
+     */
     private startTweenOut(): void {
         // 取消适配
         this.owner.left = this.owner.right = this.owner.top = this.owner.bottom = null;
