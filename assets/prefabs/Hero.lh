@@ -16,7 +16,7 @@
       "_$type": "Spine2DRenderNode",
       "layer": 0,
       "useFastRender": false,
-      "source": "res://df103dab-afee-4685-8074-53409cea95e5",
+      "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
       "animationName": "idle",
       "preview": true,
       "physicsUpdate": 2

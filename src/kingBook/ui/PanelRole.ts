@@ -4,9 +4,9 @@ const { regClass, property } = Laya;
 
 @regClass()
 export class PanelRole extends Laya.Script {
-    
+
     declare owner: PanelRoleRuntimeScript;
-    @property({type:Laya.Spine2DRenderNode, private:false})
+    @property({ type: Laya.Spine2DRenderNode, private: false })
     private _spineRender: Laya.Spine2DRenderNode;
     private _closeBtn: Laya.Button;
     private _tweenInPoint: Laya.Point;
@@ -14,39 +14,47 @@ export class PanelRole extends Laya.Script {
     onEnable(): void {
         this._closeBtn = this.owner.getChild("closeBtn") as Laya.Button;
         this._closeBtn.on(Laya.Event.CLICK, this, this.onClose);
-        
-        this.owner.buttonCrouch.on(Laya.Event.CLICK, ()=>{
-            this._spineRender.play("crouch",true);
+
+        this.owner.buttonCrouch.on(Laya.Event.CLICK, () => {
+            this._spineRender.play("crouch", true);
         });
-        this.owner.buttonAttack.on(Laya.Event.CLICK, ()=>{
-            this._spineRender.play("attack",true);
+        this.owner.buttonAttack.on(Laya.Event.CLICK, () => {
+            this._spineRender.play("attack", true);
         });
-        this.owner.buttonHeadTurn.on(Laya.Event.CLICK, ()=>{
-            this._spineRender.play("head-turn",true);
+        this.owner.buttonHeadTurn.on(Laya.Event.CLICK, () => {
+            this._spineRender.play("head-turn", true);
         });
-        
-        this.owner.buttonWalk.on(Laya.Event.CLICK, ()=>{
-            this._spineRender.play("walk",true);
+
+        this.owner.buttonWalk.on(Laya.Event.CLICK, () => {
+            this._spineRender.play("walk", true);
         });
-        this.owner.buttonRun.on(Laya.Event.CLICK, ()=>{
-            this._spineRender.play("run",true);
+        this.owner.buttonRun.on(Laya.Event.CLICK, () => {
+            this._spineRender.play("run", true);
         });
-        this.owner.buttonIdle.on(Laya.Event.CLICK, ()=>{
-            this._spineRender.play("idle",true);
+        this.owner.buttonIdle.on(Laya.Event.CLICK, () => {
+            this._spineRender.play("idle", true);
         });
-        
+
+        this.owner.buttonChangeWeapon.on(Laya.Event.CLICK, () => {
+            // 切换武器
+            let slot: spine.Slot = this._spineRender.getSlotByName("weapon");
+            let targetAttachmentName = slot.getAttachment().name === "sword" ? "weapon" : "sword";
+            this._spineRender.setSlotAttachment("weapon", targetAttachmentName);
+        });
+
         this._spineRender.owner.on(Laya.Event.LABEL, (e: Laya.EventData) => {
             console.log("骨骼动画事件：", e.name);
         });
-        this._spineRender.owner.on(Laya.Event.PLAYED, ()=>{
+        this._spineRender.owner.on(Laya.Event.PLAYED, () => {
             //console.log("动画开始播放");
-            
         });
-        //this._spineRender.getSlotByName("weapon")
-        // https://blog.csdn.net/u014528558/article/details/82697910
-        //https://ask.layabox.com/question/49524#!answer_form
-        //https://ask.layabox.com/question/3577
-        
+        this._spineRender.owner.on(Laya.Event.PAUSED, () => {
+            //console.log("动画暂停播放");
+        });
+        this._spineRender.owner.on(Laya.Event.STOPPED, () => {
+            //console.log("动画停止播放");
+        });
+
     }
 
     /**

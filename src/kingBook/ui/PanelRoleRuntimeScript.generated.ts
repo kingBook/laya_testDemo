@@ -11,5 +11,6 @@ export class PanelRoleRuntimeScriptBase extends Laya.Box {
     public buttonWalk!: Laya.Button;
     public buttonRun!: Laya.Button;
     public buttonIdle!: Laya.Button;
+    public buttonChangeWeapon!: Laya.Button;
 }
 
