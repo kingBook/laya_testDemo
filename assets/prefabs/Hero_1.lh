@@ -1,0 +1,25 @@
+{
+  "_$ver": 1,
+  "_$id": "309b7efk",
+  "_$type": "Sprite",
+  "name": "Hero",
+  "x": 335,
+  "y": 861,
+  "width": 100,
+  "height": 232,
+  "anchorX": 0.5,
+  "anchorY": 1,
+  "scaleX": 0.4,
+  "scaleY": 0.4,
+  "_$comp": [
+    {
+      "_$type": "Spine2DRenderNode",
+      "layer": 0,
+      "useFastRender": false,
+      "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
+      "animationName": "idle",
+      "preview": true,
+      "physicsUpdate": 2
+    }
+  ]
+}

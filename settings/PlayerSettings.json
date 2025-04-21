@@ -25,7 +25,9 @@
   "modules": {
     "laya.ui": true,
     "laya.d3": true,
-    "laya.spine": true
+    "laya.spine": true,
+    "laya.physics2D": true,
+    "laya.navMesh2D": true
   },
   "splash": {
     "fit": "center"

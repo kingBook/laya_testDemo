@@ -1,26 +1,28 @@
 const { regClass, property } = Laya;
 
-/** 可折叠的条 */
+/** 可折叠条 */
 @regClass()
 export class CollapsibleBar extends Laya.Script {
 
     declare owner: Laya.Box;
 
-    @property({ type: Laya.Image, private: false })
+    @property({ type: Laya.Image, private: false, tips:"折叠条底部的图片" })
     private _bottomImage: Laya.Image
 
-    @property({ type: Laya.List, private: false })
+    @property({ type: Laya.List, private: false, tips:"折叠条中使用的列表" })
     private _list: Laya.List;
 
     @property({ type: Laya.Button, private: false, tips: "折叠按钮" })
     private _collapseBtn: Laya.Button;
 
+    /** 折叠条中使用的列表的遮罩 */
     private _listMask: Laya.Box;
-
+    /** 展开/折叠缓动的时间<毫秒> */
     private readonly delay: number = 300;
-
+    /** 显示的图标个数 */
     private _displayItemCount: number;
 
+    /** 可折叠条中的列表 */
     public get list(): Laya.List { return this._list; }
 
     onAwake(): void {

@@ -2,19 +2,29 @@ import { CollapsibleBar } from "./CollapsibleBar";
 
 const { regClass, property } = Laya;
 
+/**  游戏地图场景中，右侧的可折叠的条 */
 @regClass()
 export class CollapsibleBarRight extends Laya.Script {
 
+    /** 图标名称数组 */
     private _iconNames: Array<string> = ["任务", "背包", "邮件"];
 
-    @property({ type: [Laya.Texture2D], private: false })
+    @property({ type: [Laya.Texture2D], private: false, tips: "图标纹理列表" })
     private _icons: Array<Laya.Texture2D>;
 
+    /** 可折叠的条 */
     private _collapBar: CollapsibleBar;
 
     onAwake(): void {
         this._collapBar = this.owner.getComponent(CollapsibleBar);
+        // 初始化折叠条中的列表
+        this.initCollapsibleBarList();
+        // 设置显示的图标个数
+        this._collapBar.setDisplayItemCount(1);
+    }
 
+    /** 初始化可折叠条中的列表 */
+    private initCollapsibleBarList(): void {
         let datas: Array<any> = [];
         for (let i = 0; i < this._icons.length; i++) {
             datas[i] = {
@@ -24,8 +34,5 @@ export class CollapsibleBarRight extends Laya.Script {
             };
         }
         this._collapBar.list.array = datas;
-
-        this._collapBar.setDisplayItemCount(1);
-
     }
 }

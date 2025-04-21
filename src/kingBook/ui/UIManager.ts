@@ -9,11 +9,11 @@ export class UIManager extends Laya.Script {
     /** UI 管理器的实例 */
     private static s_instance: UIManager;
 
-    @property({ type: Laya.Prefab })
+    @property({ type: Laya.Prefab, tips: "加载场景时的进度页面预制件" })
     public sceneLoadingPagePrefab: Laya.Prefab;
-    @property({ type: Laya.Prefab })
+    @property({ type: Laya.Prefab, tips: "开始UI预制件" })
     public panelStartPrefab: Laya.Prefab;
-    @property({ type: Laya.Prefab })
+    @property({ type: Laya.Prefab, tips: "游戏地图场景中的UI预制件" })
     public panelGameMapPrefab: Laya.Prefab;
 
     /** UI 管理器的实例 */
@@ -36,14 +36,14 @@ export class UIManager extends Laya.Script {
     onAwake(): void {
         UIManager.s_instance = this;
 
-        Laya.SoundManager.autoStopMusic = false;
+        //Laya.SoundManager.autoStopMusic = false;
     }
 
     onStart(): void {
         // 创建 ‘开始’ UI
         this.createPanelStart();
     }
-
+    
     private createPanelStart(): void {
         let panelStart = UIManager.instance.panelStartPrefab.create();
         UIManager.getCurrentScene().addChild(panelStart);
