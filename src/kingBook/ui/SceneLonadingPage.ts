@@ -1,5 +1,6 @@
 const { regClass, property } = Laya;
 
+/** 加载场景时的进度页面 */
 @regClass()
 export class SceneLonadingPage extends Laya.Script {
 

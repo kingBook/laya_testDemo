@@ -6,17 +6,12 @@ export class CollapsibleBar extends Laya.Script {
 
     declare owner: Laya.Box;
 
-    @property({ type: Laya.Image, private: false, tips:"折叠条底部的图片" })
-    private _bottomImage: Laya.Image
-
     @property({ type: Laya.List, private: false, tips:"折叠条中使用的列表" })
     private _list: Laya.List;
 
-    @property({ type: Laya.Button, private: false, tips: "折叠按钮" })
+    @property({ type: Laya.Button, private: false, tips: "折叠/展开按钮" })
     private _collapseBtn: Laya.Button;
 
-    /** 折叠条中使用的列表的遮罩 */
-    private _listMask: Laya.Box;
     /** 展开/折叠缓动的时间<毫秒> */
     private readonly delay: number = 300;
     /** 显示的图标个数 */
@@ -26,8 +21,7 @@ export class CollapsibleBar extends Laya.Script {
     public get list(): Laya.List { return this._list; }
 
     onAwake(): void {
-        this._collapseBtn.clickHandler = new Laya.Handler(this, this.onClickCollapse);
-        this._listMask = this._list.getChild("mask") as Laya.Box;
+        this._collapseBtn.on(Laya.Event.CLICK, this, this.onClickButtonCollapse);
     }
 
     onStart(): void {
@@ -39,21 +33,14 @@ export class CollapsibleBar extends Laya.Script {
         Laya.timer.callLater(this, this.updateCollapseBtnStatus);
     }
 
-    private updateHeight(isTween: boolean, itemCount: number): void {
+    private updateHeight(isTween: boolean): void {
         let listHeight = this._list.itemRender.data.height * this._displayItemCount;
-        let bgHeight = listHeight + 65;
+        let bgHeight = listHeight + 70;
 
         if (isTween) {
-            Laya.Tween.to(this._list, { height: listHeight }, this.delay);
-            Laya.Tween.to(this._listMask, { height: listHeight }, this.delay);
             Laya.Tween.to(this.owner, { height: bgHeight }, this.delay);
-            Laya.Tween.to(this._bottomImage, { height: bgHeight }, this.delay);
         } else {
-            this._list.height = listHeight;
-            this._listMask.height = listHeight;
-
             this.owner.height = bgHeight;
-            this._bottomImage.height = bgHeight;
         }
     }
 
@@ -61,7 +48,7 @@ export class CollapsibleBar extends Laya.Script {
         this._collapseBtn.rotation = this._displayItemCount > 1 ? 0 : 180;
     }
 
-    private onClickCollapse(): void {
+    private onClickButtonCollapse(): void {
         this.setDisplayItemCount(this._displayItemCount > 1 ? 1 : this.list.array.length);
         Laya.timer.callLater(this, this.updateHeight, [true]);
         Laya.timer.callLater(this, this.updateCollapseBtnStatus);
@@ -72,12 +59,13 @@ export class CollapsibleBar extends Laya.Script {
     }
 
     onDisable(): void {
-        Laya.Tween.killAll(this._list);
         Laya.Tween.killAll(this.owner);
-        Laya.Tween.killAll(this._bottomImage);
-        Laya.Tween.killAll(this._listMask);
         Laya.timer.clearCallLater(this, this.updateHeight);
         Laya.timer.clearCallLater(this, this.updateCollapseBtnStatus);
+    }
+
+    onDestroy(): void {
+        this._collapseBtn.off(Laya.Event.CLICK, this, this.onClickButtonCollapse);
     }
 
 }

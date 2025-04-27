@@ -70,16 +70,13 @@
           "_$type": "Box",
           "name": "CollapsibleBarLeft",
           "width": 82,
-          "height": 704,
+          "height": 608,
           "left": 0,
           "top": 0,
           "_$comp": [
             {
               "_$type": "a1f123a3-2b4f-4502-99f6-c2d4594c5e52",
               "scriptPath": "../src/kingBook/ui/CollapsibleBar.ts",
-              "_bottomImage": {
-                "_$ref": "ivduviby"
-              },
               "_list": {
                 "_$ref": "ayeygbbb"
               },
@@ -119,12 +116,13 @@
               "_$id": "ivduviby",
               "_$type": "Image",
               "name": "bottomImage",
-              "x": 40,
+              "x": 41,
               "width": 80,
-              "height": 695,
+              "height": 608,
               "anchorX": 0.5,
-              "left": 0,
               "top": 0,
+              "bottom": 0,
+              "centerX": 0,
               "skin": "res://cac6cda2-3ddc-4874-828e-dfa09284cc4c",
               "color": "#ffffff"
             },
@@ -132,31 +130,33 @@
               "_$id": "ayeygbbb",
               "_$type": "List",
               "name": "List",
-              "x": 40,
+              "x": 41,
               "width": 80,
-              "height": 624,
+              "height": 538,
               "anchorX": 0.5,
               "mask": {
                 "_$ref": "phv3sfk1"
               },
-              "left": 0,
               "top": 0,
+              "bottom": 70,
+              "centerX": 0,
               "itemTemplate": {
                 "_$ref": "6ctp74ho",
                 "_$tmpl": "itemRender"
               },
               "repeatX": 1,
-              "repeatY": 6,
-              "spaceY": 15,
+              "repeatY": 5,
               "_$child": [
                 {
                   "_$id": "phv3sfk1",
                   "_$type": "Box",
                   "name": "mask",
                   "width": 80,
-                  "height": 361,
+                  "height": 538,
                   "left": 0,
                   "right": 0,
+                  "top": 0,
+                  "bottom": 0,
                   "bgColor": "#ffffff"
                 },
                 {
@@ -254,7 +254,7 @@
               "_$type": "Button",
               "name": "collapseBtn",
               "x": 43,
-              "y": 651,
+              "y": 555,
               "width": 58,
               "height": 37,
               "anchorX": 0.5,
@@ -298,16 +298,13 @@
           "name": "CollapsibleBarRight",
           "x": 558,
           "width": 82,
-          "height": 704,
+          "height": 176,
           "right": 0,
           "top": 0,
           "_$comp": [
             {
               "_$type": "a1f123a3-2b4f-4502-99f6-c2d4594c5e52",
               "scriptPath": "../src/kingBook/ui/CollapsibleBar.ts",
-              "_bottomImage": {
-                "_$ref": "ulrpeni7"
-              },
               "_list": {
                 "_$ref": "3sl951ni"
               },
@@ -339,12 +336,13 @@
               "_$id": "ulrpeni7",
               "_$type": "Image",
               "name": "bottomImage",
-              "x": 40,
+              "x": 41,
               "width": 80,
-              "height": 695,
+              "height": 176,
               "anchorX": 0.5,
-              "left": 0,
               "top": 0,
+              "bottom": 0,
+              "centerX": 0,
               "skin": "res://cac6cda2-3ddc-4874-828e-dfa09284cc4c",
               "color": "#ffffff"
             },
@@ -352,15 +350,16 @@
               "_$id": "3sl951ni",
               "_$type": "List",
               "name": "List",
-              "x": 40,
-              "width": 80,
-              "height": 624,
+              "x": 41,
+              "width": 82,
+              "height": 106,
               "anchorX": 0.5,
               "mask": {
                 "_$ref": "uzbz2bzf"
               },
-              "left": 0,
               "top": 0,
+              "bottom": 70,
+              "centerX": 0,
               "itemTemplate": {
                 "_$ref": "l3p19pu2",
                 "_$tmpl": "itemRender"
@@ -460,10 +459,12 @@
                   "_$id": "uzbz2bzf",
                   "_$type": "Box",
                   "name": "mask",
-                  "width": 80,
-                  "height": 361,
+                  "width": 82,
+                  "height": 106,
                   "left": 0,
                   "right": 0,
+                  "top": 0,
+                  "bottom": 0,
                   "bgColor": "#ffffff"
                 }
               ]
@@ -473,7 +474,7 @@
               "_$type": "Button",
               "name": "collapseBtn",
               "x": 43,
-              "y": 651,
+              "y": 123,
               "width": 58,
               "height": 37,
               "anchorX": 0.5,
