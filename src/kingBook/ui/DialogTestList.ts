@@ -1,20 +1,21 @@
 import { DownDragRefreshList } from "./DownDragRefreshList";
+import { DragTopBottomRefreshList } from "./DragTopBottomRefreshList";
 
 const { regClass, property } = Laya;
 
 @regClass()
 export class DialogTestList extends Laya.Script {
-    
-    @property({type:Laya.List, private:false})
-    private _list:Laya.List;
-    @property({type:DownDragRefreshList, private:false})
-    private _downDragRefreshList: DownDragRefreshList;
+
+    @property({ type: Laya.List, private: false })
+    private _list: Laya.List;
+    @property({ type: DragTopBottomRefreshList, private: false })
+    private _dragTopBottomRefreshList: DragTopBottomRefreshList;
 
     onAwake(): void {
         //Laya.Dialog.manager.on(Laya.Event.CLOSE, this, this.onClose);
         //Laya.Dialog.manager.on(Laya.Event.OPEN, this, this.onOpen);
-        this._downDragRefreshList.upDragRefreshHandler = new Laya.Handler(this, this.upDragRefreshHandler);
-        this._downDragRefreshList.downDragRefreshHandler = new Laya.Handler(this, this.downDragRefreshHandler);
+        this._dragTopBottomRefreshList.onDragBottomRefreshHandler = new Laya.Handler(this, this.onDragBottomRefreshHandler);
+        this._dragTopBottomRefreshList.onDragTopRefreshHandler = new Laya.Handler(this, this.onDragTopRefreshHandler);
         this.initDatas();
     }
 
@@ -28,17 +29,33 @@ export class DialogTestList extends Laya.Script {
         this._list.array = datas;
     }
 
-    private upDragRefreshHandler(): void {
+    private onDragBottomRefreshHandler(): void {
         console.log("加载更多项");
+        Laya.timer.once(1000, this, this.onDragBottomRefreshComplete);
+    }
+
+    private onDragBottomRefreshComplete(): void {
         for (let i = 0; i < 3; i++) {
             this._list.addItem({ Label: "new:" + i });
         }
+        
+        this._dragTopBottomRefreshList.endRefresh();
     }
 
-    private downDragRefreshHandler(): void {
+    private onDragTopRefreshHandler(): void {
         console.log("刷新列表");
         for (let i = 0, len = this._list.array.length; i < len; i++) {
             this._list.changeItem(i, { Label: "已刷新:" + i });
         }
+        Laya.timer.once(1000, this, this.onDragTopRefreshComplete);
+    }
+
+    private onDragTopRefreshComplete(): void {
+        this._dragTopBottomRefreshList.endRefresh();
+    }
+
+    onDisable(): void {
+        Laya.timer.clear(this, this.onDragBottomRefreshComplete);
+        Laya.timer.clear(this, this.onDragTopRefreshComplete);
     }
 }

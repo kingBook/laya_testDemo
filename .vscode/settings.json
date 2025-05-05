@@ -5,5 +5,8 @@
         "library/": true,
         "temp/": true,
         "local/": true
-    }
+    },
+    "editor.renderLineHighlightOnlyWhenFocus": false,
+    "markdown.occurrencesHighlight.enabled": false
+    
 }

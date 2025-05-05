@@ -15,9 +15,9 @@
       "_list": {
         "_$ref": "vhi1rs2k"
       },
-      "_downDragRefreshList": {
+      "_dragTopBottomRefreshList": {
         "_$ref": "vhi1rs2k",
-        "_$type": "3e0bd175-412f-4531-93f8-dfcb238969e6"
+        "_$type": "15a5f121-e7a1-4f83-b323-afe69cbd3464"
       }
     }
   ],
@@ -37,7 +37,7 @@
     {
       "_$id": "vhi1rs2k",
       "_$type": "List",
-      "name": "DownDragRefreshList",
+      "name": "DragTopBottomRefreshList",
       "x": 43,
       "y": 64,
       "width": 310,
@@ -51,15 +51,32 @@
       "repeatY": 8,
       "elasticEnabled": true,
       "scrollType": 2,
+      "vScrollBarSkin": "res://fc3bb457-8d97-4456-b6b6-304c6b064689",
       "_$comp": [
         {
-          "_$type": "3e0bd175-412f-4531-93f8-dfcb238969e6",
-          "scriptPath": "../src/kingBook/ui/DownDragRefreshList.ts",
-          "_iconUpDrag": {
-            "_$ref": "rhyf8r2o"
+          "_$type": "15a5f121-e7a1-4f83-b323-afe69cbd3464",
+          "scriptPath": "../src/kingBook/ui/DragTopBottomRefreshList.ts",
+          "mode": 17,
+          "iconScale": 0.5,
+          "iconPadding": 10,
+          "refreshInterval": 500,
+          "tint": {
+            "_$type": "Color",
+            "r": 0,
+            "g": 0,
+            "b": 0
           },
-          "_iconDownDrag": {
-            "_$ref": "r9wvvvuo"
+          "upIcon": {
+            "_$uuid": "888c5c49-8018-49b0-b95b-d82ddd03f064",
+            "_$type": "Texture"
+          },
+          "downIcon": {
+            "_$uuid": "539a6dd6-e96b-49d1-853e-8e6b17b32ff9",
+            "_$type": "Texture"
+          },
+          "updateIcon": {
+            "_$uuid": "b4cd2ef9-82a4-42fe-9bca-f3384ecc40ac",
+            "_$type": "Texture"
           }
         }
       ],
@@ -100,148 +117,6 @@
               "color": "#ffffff",
               "align": "center",
               "valign": "middle"
-            }
-          ]
-        },
-        {
-          "_$id": "r9wvvvuo",
-          "_$type": "Box",
-          "name": "IconDownDrag",
-          "x": 130,
-          "width": 50,
-          "height": 50,
-          "top": 0,
-          "centerX": 0,
-          "_$child": [
-            {
-              "_$id": "8p73c150",
-              "_$type": "Image",
-              "name": "Arrow",
-              "x": 10,
-              "y": 10,
-              "width": 30,
-              "height": 30,
-              "centerX": 0,
-              "centerY": 0,
-              "skin": "res://637c973f-9f5d-4650-805b-9c721f636c95",
-              "color": "#ffffff"
-            },
-            {
-              "_$id": "rbcjfdpe",
-              "_$type": "Image",
-              "name": "Refresh",
-              "x": 25,
-              "y": 25,
-              "width": 30,
-              "height": 30,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "visible": false,
-              "_mouseState": 2,
-              "centerX": 0,
-              "centerY": 0,
-              "skin": "res://cf2dd71a-80dc-43bc-a04c-756bcb0c936b",
-              "color": "#ffffff",
-              "_$comp": [
-                {
-                  "_$type": "Animator2D",
-                  "controller": {
-                    "_$uuid": "8d5dff06-0aed-408b-a946-8814958e5f2a",
-                    "_$type": "AnimationController2D"
-                  },
-                  "controllerLayers": [
-                    {
-                      "_$type": "AnimatorControllerLayer2D",
-                      "name": "Base Layer",
-                      "states": [
-                        {
-                          "_$type": "AnimatorState2D",
-                          "name": "rotate",
-                          "clipStart": 0,
-                          "clip": {
-                            "_$uuid": "365b0155-d46e-45e2-a4a5-bd8fb8b613d1",
-                            "_$type": "AnimationClip2D"
-                          },
-                          "soloTransitions": []
-                        }
-                      ],
-                      "defaultStateName": "rotate"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "_$id": "rhyf8r2o",
-          "_$type": "Box",
-          "name": "IconUpDrag",
-          "x": 130,
-          "y": 350,
-          "width": 50,
-          "height": 50,
-          "bottom": 0,
-          "centerX": 0,
-          "_$child": [
-            {
-              "_$id": "vpt33w94",
-              "_$type": "Image",
-              "name": "Arrow",
-              "x": 10,
-              "y": 40,
-              "width": 30,
-              "height": 30,
-              "scaleY": -1,
-              "centerX": 0,
-              "centerY": 0,
-              "skin": "res://637c973f-9f5d-4650-805b-9c721f636c95",
-              "color": "#ffffff"
-            },
-            {
-              "_$id": "men09pga",
-              "_$type": "Image",
-              "name": "Refresh",
-              "x": 25,
-              "y": 25,
-              "width": 30,
-              "height": 30,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "rotation": 360,
-              "visible": false,
-              "centerX": 0,
-              "centerY": 0,
-              "skin": "res://cf2dd71a-80dc-43bc-a04c-756bcb0c936b",
-              "color": "#ffffff",
-              "_$comp": [
-                {
-                  "_$type": "Animator2D",
-                  "controller": {
-                    "_$uuid": "8d5dff06-0aed-408b-a946-8814958e5f2a",
-                    "_$type": "AnimationController2D"
-                  },
-                  "controllerLayers": [
-                    {
-                      "_$type": "AnimatorControllerLayer2D",
-                      "name": "Base Layer",
-                      "states": [
-                        {
-                          "_$type": "AnimatorState2D",
-                          "name": "rotate",
-                          "clipStart": 0,
-                          "clip": {
-                            "_$uuid": "365b0155-d46e-45e2-a4a5-bd8fb8b613d1",
-                            "_$type": "AnimationClip2D"
-                          },
-                          "soloTransitions": []
-                        }
-                      ],
-                      "defaultStateName": "rotate"
-                    }
-                  ]
-                }
-              ]
             }
           ]
         }
