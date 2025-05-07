@@ -50,8 +50,8 @@
       "repeatX": 1,
       "repeatY": 8,
       "elasticEnabled": true,
+      "spaceY": 10,
       "scrollType": 2,
-      "vScrollBarSkin": "res://fc3bb457-8d97-4456-b6b6-304c6b064689",
       "_$comp": [
         {
           "_$type": "15a5f121-e7a1-4f83-b323-afe69cbd3464",
@@ -59,7 +59,7 @@
           "mode": 17,
           "iconScale": 0.5,
           "iconPadding": 10,
-          "refreshInterval": 500,
+          "refreshInterval": 2000,
           "tint": {
             "_$type": "Color",
             "r": 0,

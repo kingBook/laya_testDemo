@@ -68,13 +68,12 @@ export class DragTopBottomRefreshList extends Laya.Script {
     /** 底顶部时的刷新处理函数，函数格式为: (): void */
     public onDragBottomRefreshHandler: Laya.Handler;
 
-    public onAwake(): void {
+
+    public onStart(): void {
         this.owner.elasticEnabled = true; // 必须开启
         this.owner.scrollBar.on("dragTopLimit", this, this.onDragTopLimit);
         this.owner.scrollBar.on("dragBottomLimit", this, this.onDragBottomLimit);
-    }
 
-    public onStart(): void {
         // 初始化 顶部图标
         this._iconTop = new Laya.Image();
         this._iconTop.skin = this.downIcon.url;
@@ -105,7 +104,6 @@ export class DragTopBottomRefreshList extends Laya.Script {
         // 
         this._oldScrollRectY = this.owner.content.scrollRect.y;
     }
-
 
     public onUpdate(): void {
         if (this.mode !== Mode.None) {
@@ -158,9 +156,10 @@ export class DragTopBottomRefreshList extends Laya.Script {
         icon.rotation = rotation;
     }
 
+    /** 滚动条的 dragTopLimit 事件回调 */
     private onDragTopLimit(): void {
         if ((this.mode & Mode.DragTop) > 0) {
-            // 限制刷新频率
+            // 限制刷新频率，并赋值 stopMoveLimit 处理函数，限制滚动条移动并停止在顶部 topMoveLimit 指定的位置
             if (Laya.timer.currTimer - this._lastStopTopMoveTime > this.refreshInterval) {
                 this.owner.scrollBar.stopMoveLimit = this.onTopStopMoveLimit.bind(this);
                 this._lastStopTopMoveTime = Laya.timer.currTimer;
@@ -168,9 +167,10 @@ export class DragTopBottomRefreshList extends Laya.Script {
         }
     }
 
+    /** 滚动条的 dragBottomLimit 事件回调 */
     private onDragBottomLimit(): void {
         if ((this.mode & Mode.DragBottom) > 0) {
-            // 限制刷新频率
+            // 限制刷新频率，并赋值 stopMoveLimit 处理函数，限制滚动条移动并停止在底部 bottomMoveLimit 指定的位置
             if (Laya.timer.currTimer - this._lastStopBottomMoveTime > this.refreshInterval) {
                 this.owner.scrollBar.stopMoveLimit = this.onBottomStopMoveLimit.bind(this);
                 this._lastStopBottomMoveTime = Laya.timer.currTimer;
@@ -185,7 +185,7 @@ export class DragTopBottomRefreshList extends Laya.Script {
         this._currentDisplayIcon = this._iconTop;
         // 执行处理函数
         this.onDragTopRefreshHandler?.run();
-        return true; // 返回 true, 不滚回原位，卡在 topMoveLimit 定义的距离
+        return true; // 返回 true, 不滚回原位，停在 topMoveLimit 指定的位置
     }
 
     /** 在底部限制移动时 */
@@ -193,39 +193,42 @@ export class DragTopBottomRefreshList extends Laya.Script {
         this.owner.scrollBar.stopMoveLimit = this.emptyStopMoveLimit;
         this._isRefreshing = true;
         this._currentDisplayIcon = this._iconBottom;
-        console.log("a", this.owner.scrollBar.value, this.owner.scrollBar.max);
-        this._dyScrollBarMax = this.owner.scrollBar.max - this.owner.scrollBar.value;
+        //console.log("a", this.owner.scrollBar.value, this.owner.scrollBar.max);
+        //this._dyScrollBarMax = this.owner.scrollBar.max - this.owner.scrollBar.value;
         // 执行处理函数
         Laya.timer.callLater(this, this.callLaterDragBottomRefresh);
-        return true; // 返回 true, 不滚回原位，卡在 bottomMoveLimit 定义的距离
+        return true; // 返回 true, 不滚回原位，停在 bottomMoveLimit 指定的位置
     }
 
     private callLaterDragBottomRefresh(): void {
-        //this.owner.scrollBar.stopScroll();
-        //Laya.Tween.killAll(this.owner.scrollBar);
-        this.onDragBottomRefreshHandler?.run();
-        this.owner.scrollBar.value = this.owner.scrollBar.max - this._dyScrollBarMax;
+        Laya.Tween.killAll(this.owner.scrollBar);
         Laya.Tween.to(this.owner.scrollBar, { value: this.owner.scrollBar.max + this.owner.scrollBar.bottomMoveLimit }, this.owner.scrollBar.elasticBackTime, Laya.ScrollBar.easeFunction, Laya.Handler.create(this.owner.scrollBar, this.owner.scrollBar["elasticOver"]));
+
+        this.onDragBottomRefreshHandler?.run();
     }
 
-    /** 
+    /**
      * 结束刷新
      * 
      * 在 onDragTopRefreshHandler, onDragBottomRefreshHandler 执行刷新处理完成时，需要调用此函数结束刷新，让列表回滚到正确位置
+     * @param topBottomSign 0: 表示拽顶部， 1：表示拽底部
      */
-    public endRefresh(): void {
-        Laya.Tween.killAll(this.owner.scrollBar);
-        if (!isNaN(this._dyScrollBarMax)) {
-            this.owner.scrollBar.value = this.owner.scrollBar.max - this._dyScrollBarMax;
+    public endRefresh(topBottomSign: number): void {
+        if(topBottomSign===0){
+            this.owner.scrollBar.stopMoveLimit = null;
+            Laya.Tween.killAll(this.owner.scrollBar);
+            this._isRefreshing = false;
+            this._currentDisplayIcon = null;
+            this.owner.scrollBar["_isElastic"] = true;
+            this.owner.scrollBar.backToNormal();
+        }else if (topBottomSign === 1) {
+            this.owner.scrollBar.stopMoveLimit = null;
+            this.owner.scrollBar.value = this.owner.scrollBar.max + this.owner.scrollBar.bottomMoveLimit;
+            Laya.Tween.killAll(this.owner.scrollBar);
+            this._isRefreshing = false;
+            this._currentDisplayIcon = null;
         }
-        // this.owner.scrollBar.stopMoveLimit = null;
-        this._isRefreshing = false;
-        this._currentDisplayIcon = null;
-        this.owner.scrollBar["_isElastic"] = true;
-        console.log("b", this.owner.scrollBar.value, this.owner.scrollBar.max);
-        this.owner.scrollBar.backToNormal();
     }
-
     private emptyStopMoveLimit(): boolean {
         return true;
     }

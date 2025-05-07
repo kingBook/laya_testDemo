@@ -38,8 +38,7 @@ export class DialogTestList extends Laya.Script {
         for (let i = 0; i < 3; i++) {
             this._list.addItem({ Label: "new:" + i });
         }
-        
-        this._dragTopBottomRefreshList.endRefresh();
+        this._dragTopBottomRefreshList.endRefresh(1);
     }
 
     private onDragTopRefreshHandler(): void {
@@ -51,7 +50,7 @@ export class DialogTestList extends Laya.Script {
     }
 
     private onDragTopRefreshComplete(): void {
-        this._dragTopBottomRefreshList.endRefresh();
+        this._dragTopBottomRefreshList.endRefresh(0);
     }
 
     onDisable(): void {
