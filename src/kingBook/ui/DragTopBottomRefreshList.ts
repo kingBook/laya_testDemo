@@ -227,6 +227,7 @@ export class DragTopBottomRefreshList extends Laya.Script {
             Laya.Tween.killAll(this.owner.scrollBar);
             this._isRefreshing = false;
             this._currentDisplayIcon = null;
+			this.owner.scrollBar.backToNormal();
         }
     }
     private emptyStopMoveLimit(): boolean {
