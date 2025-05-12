@@ -62,9 +62,9 @@ export class DragTopBottomRefreshList extends Laya.Script {
     @property({ type: Laya.Texture, hidden: "data.mode==0", tips: "'刷新' 图标" })
     public texUpdate: Laya.Texture;
 
-    /** 拽顶部时的刷新处理函数，函数格式为: (): void */
+    /** 拽顶部时的刷新处理函数，函数格式为: (refreshList:DragTopBottomRefreshList): void */
     public onDragTopRefreshHandler: Laya.Handler;
-    /** 底顶部时的刷新处理函数，函数格式为: (): void */
+    /** 底顶部时的刷新处理函数，函数格式为: (refreshList:DragTopBottomRefreshList): void */
     public onDragBottomRefreshHandler: Laya.Handler;
 
 
@@ -201,9 +201,9 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
     private runRefreshHandler(dragMode: DragMode.DragTop | DragMode.DragBottom): void {
         if (dragMode === DragMode.DragTop) {
-            this.onDragTopRefreshHandler?.run();
+            this.onDragTopRefreshHandler?.runWith(this);
         } else if (dragMode === DragMode.DragBottom) {
-            this.onDragBottomRefreshHandler?.run();
+            this.onDragBottomRefreshHandler?.runWith(this);
         }
     }
 

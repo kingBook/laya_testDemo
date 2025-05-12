@@ -29,7 +29,7 @@ export class DialogTestList extends Laya.Script {
         this._list.array = datas;
     }
 
-    private onDragTopRefreshHandler(): void {
+    private onDragTopRefreshHandler(refreshList: DragTopBottomRefreshList): void {
         Laya.timer.once(100, this, this.onDragTopRefreshComplete);
     }
 
@@ -50,7 +50,7 @@ export class DialogTestList extends Laya.Script {
         this._dragTopBottomRefreshList.endRefresh(DragMode.DragTop);
     }
 
-    private onDragBottomRefreshHandler(): void {
+    private onDragBottomRefreshHandler(refreshList: DragTopBottomRefreshList): void {
         Laya.timer.once(1000, this, this.onDragBottomRefreshComplete);
     }
 
