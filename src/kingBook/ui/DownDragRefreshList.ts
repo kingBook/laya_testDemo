@@ -75,8 +75,9 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
         // 初始化 顶部图标
         this._iconTop = new Laya.Image();
-        this._iconTop.skin = this.texDown.url;
-        this._iconTop.size(this.texDown.width, this.texDown.height);
+        
+        this._iconTop.skin = this.texUp.url;
+        this._iconTop.size(this.texUp.width, this.texUp.height);
         this._iconTop.anchor(0.5, 0.5);
         this._iconTop.scale(this.iconScale, this.iconScale);
         this._iconTop.color = this.tint.toString();
