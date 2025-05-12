@@ -66,15 +66,15 @@
             "g": 0,
             "b": 0
           },
-          "upIcon": {
+          "texUp": {
             "_$uuid": "888c5c49-8018-49b0-b95b-d82ddd03f064",
             "_$type": "Texture"
           },
-          "downIcon": {
+          "texDown": {
             "_$uuid": "539a6dd6-e96b-49d1-853e-8e6b17b32ff9",
             "_$type": "Texture"
           },
-          "updateIcon": {
+          "texUpdate": {
             "_$uuid": "b4cd2ef9-82a4-42fe-9bca-f3384ecc40ac",
             "_$type": "Texture"
           }

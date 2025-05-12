@@ -1,5 +1,5 @@
 import { DownDragRefreshList } from "./DownDragRefreshList";
-import { DragTopBottomRefreshList } from "./DragTopBottomRefreshList";
+import { DragMode, DragTopBottomRefreshList } from "./DragTopBottomRefreshList";
 
 const { regClass, property } = Laya;
 
@@ -47,11 +47,11 @@ export class DialogTestList extends Laya.Script {
 
         //console.log("value2:",  this._list.scrollBar.value, "min:",  this._list.scrollBar.min);
 
-        this._dragTopBottomRefreshList.endRefresh(0);
+        this._dragTopBottomRefreshList.endRefresh(DragMode.DragTop);
     }
 
     private onDragBottomRefreshHandler(): void {
-        Laya.timer.once(100, this, this.onDragBottomRefreshComplete);
+        Laya.timer.once(1000, this, this.onDragBottomRefreshComplete);
     }
 
     private onDragBottomRefreshComplete(): void {
@@ -60,7 +60,7 @@ export class DialogTestList extends Laya.Script {
             this._list.addItem({ Label: "new:" + i });
         }
 
-        this._dragTopBottomRefreshList.endRefresh(1);
+        this._dragTopBottomRefreshList.endRefresh(DragMode.DragBottom);
     }
     
     onDisable(): void {

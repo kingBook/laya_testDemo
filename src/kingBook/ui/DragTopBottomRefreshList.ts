@@ -1,7 +1,7 @@
 const { regClass, property } = Laya;
 
-/** 定义刷新的模式 */
-enum Mode {
+/** 拽的模式 */
+export enum DragMode {
     /** 无（相当于该脚本不起作用） */
     None = 0x0000,
     /** 只在顶部下拽刷新 */
@@ -22,9 +22,6 @@ enum Mode {
 @regClass()
 export class DragTopBottomRefreshList extends Laya.Script {
 
-    /** 刷新过程的最小时长限制<毫秒> */
-    private readonly _minRefreshTimeLong: number = 500;
-
     declare owner: Laya.List;
     /** 顶部的图标 */
     private _iconTop: Laya.Image;
@@ -37,13 +34,12 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
     private _lastStopTopMoveTime: number;
     private _lastStopBottomMoveTime: number;
-    private _timeOnRefreshStart: number;
 
     private _oldScrollRectY: number;
 
-    /** 刷新的模式 */
-    @property({ type: Mode, tips: "刷新的模式" })
-    public mode: Mode = Mode.DragTopAndBottom;
+    /** 拽的模式 */
+    @property({ type: DragMode, tips: "刷新的模式" })
+    public dragMode: DragMode = DragMode.DragTopAndBottom;
     /** 上/下箭头或刷新图标的缩放值 */
     @property({ type: 'number', min: 0, tips: "上/下箭头或刷新图标的缩放值" })
     public iconScale: number = 1;
@@ -58,13 +54,13 @@ export class DragTopBottomRefreshList extends Laya.Script {
     public tint: Laya.Color = Laya.Color.WHITE;
     /** '向上箭头' 图标 */
     @property({ type: Laya.Texture, hidden: "data.mode==0", tips: "'向上箭头' 图标" })
-    public upIcon: Laya.Texture;
+    public texUp: Laya.Texture;
     /** '向下箭头' 图标 */
     @property({ type: Laya.Texture, hidden: "data.mode==0", tips: "'向下箭头' 图标" })
-    public downIcon: Laya.Texture;
+    public texDown: Laya.Texture;
     /** '刷新' 图标 */
     @property({ type: Laya.Texture, hidden: "data.mode==0", tips: "'刷新' 图标" })
-    public updateIcon: Laya.Texture;
+    public texUpdate: Laya.Texture;
 
     /** 拽顶部时的刷新处理函数，函数格式为: (): void */
     public onDragTopRefreshHandler: Laya.Handler;
@@ -79,16 +75,16 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
         // 初始化 顶部图标
         this._iconTop = new Laya.Image();
-        this._iconTop.skin = this.downIcon.url;
-        this._iconTop.size(this.downIcon.width, this.downIcon.height);
+        this._iconTop.skin = this.texDown.url;
+        this._iconTop.size(this.texDown.width, this.texDown.height);
         this._iconTop.anchor(0.5, 0.5);
         this._iconTop.scale(this.iconScale, this.iconScale);
         this.owner.content.addChild(this._iconTop);
 
         // 初始化 底部图标
         this._iconBottom = new Laya.Image();
-        this._iconBottom.skin = this.downIcon.url;
-        this._iconBottom.size(this.downIcon.width, this.downIcon.height);
+        this._iconBottom.skin = this.texDown.url;
+        this._iconBottom.size(this.texDown.width, this.texDown.height);
         this._iconBottom.anchor(0.5, 0.5);
         this._iconBottom.scale(this.iconScale, this.iconScale);
         this.owner.content.addChild(this._iconBottom);
@@ -101,8 +97,8 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
 
         // 不支持的模式，则隐藏图标
-        this._iconTop.visible = (this.mode & Mode.DragTop) > 0;
-        this._iconBottom.visible = (this.mode & Mode.DragBottom) > 0;
+        this._iconTop.visible = (this.dragMode & DragMode.DragTop) > 0;
+        this._iconBottom.visible = (this.dragMode & DragMode.DragBottom) > 0;
 
         // 
         this._oldScrollRectY = this.owner.content.scrollRect.y;
@@ -111,7 +107,7 @@ export class DragTopBottomRefreshList extends Laya.Script {
     }
 
     public onUpdate(): void {
-        if (this.mode !== Mode.None) {
+        if (this.dragMode !== DragMode.None) {
             this.updateIconsPosition();
             this.updateIconStatus();
         }
@@ -126,9 +122,9 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
         if (this._isRefreshing && this._currentDisplayIcon) {
             if (Laya.timer.currTimer - this._lastStopTopMoveTime > this.refreshInterval || Laya.timer.currTimer - this._lastStopBottomMoveTime > this.refreshInterval) {
-                this.setIconSkinAndRotation(this._currentDisplayIcon, this.updateIcon.url, (this._currentDisplayIcon.rotation + 8) % 360);
+                this.setIconSkinAndRotation(this._currentDisplayIcon, this.texUpdate.url, (this._currentDisplayIcon.rotation + 8) % 360);
             } else {
-                let skinUrl = sign > 0 ? this.downIcon.url : this.upIcon.url;
+                let skinUrl = sign > 0 ? this.texDown.url : this.texUp.url;
                 this.setIconSkinAndRotation(this._currentDisplayIcon, skinUrl, 0);
             }
         } else {
@@ -136,10 +132,10 @@ export class DragTopBottomRefreshList extends Laya.Script {
             let ymax: number = this.owner.scrollBar.max;
 
             if (scrollRectY < ymin) {
-                let skinUrl = sign > 0 ? this.downIcon.url : sign < 0 ? this.upIcon.url : this._iconTop.source.url;
+                let skinUrl = sign > 0 ? this.texDown.url : sign < 0 ? this.texUp.url : this._iconTop.source.url;
                 this.setIconSkinAndRotation(this._iconTop, skinUrl, 0);
             } else if (scrollRectY > ymax) {
-                let skinUrl = sign > 0 ? this.downIcon.url : sign < 0 ? this.upIcon.url : this._iconBottom.source.url;
+                let skinUrl = sign > 0 ? this.texDown.url : sign < 0 ? this.texUp.url : this._iconBottom.source.url;
                 this.setIconSkinAndRotation(this._iconBottom, skinUrl, 0);
             }
         }
@@ -163,7 +159,7 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
     /** 滚动条的 dragTopLimit 事件回调 */
     private onDragTopLimit(): void {
-        if ((this.mode & Mode.DragTop) === 0) return;
+        if ((this.dragMode & DragMode.DragTop) === 0) return;
         // 限制刷新频率，并赋值 stopMoveLimit 处理函数，滚动条停止在 topMoveLimit 指定的位置
         if (Laya.timer.currTimer - this._lastStopTopMoveTime > this.refreshInterval) {
             this._lastStopTopMoveTime = Laya.timer.currTimer;
@@ -172,9 +168,9 @@ export class DragTopBottomRefreshList extends Laya.Script {
                 this.owner.scrollBar.stopMoveLimit = this.emptyStopMoveLimit.bind(this);
                 this._isRefreshing = true;
                 this._currentDisplayIcon = this._iconTop;
-                this._timeOnRefreshStart = Laya.timer.currTimer;
-                // 执行处理函数
-                this.onDragTopRefreshHandler?.run();
+                // 执行处理函数, 延时 500 避免滚动条未回弹就开始
+                Laya.timer.clear(this, this.runRefreshHandler);
+                Laya.timer.once(500, this, this.runRefreshHandler, [DragMode.DragTop]);
             }
         } else {
             this.owner.scrollBar.stopMoveLimit = null;
@@ -183,7 +179,7 @@ export class DragTopBottomRefreshList extends Laya.Script {
 
     /** 滚动条的 dragBottomLimit 事件回调 */
     private onDragBottomLimit(): void {
-        if ((this.mode & Mode.DragBottom) === 0) return;
+        if ((this.dragMode & DragMode.DragBottom) === 0) return;
         // 限制刷新频率，并赋值 stopMoveLimit 处理函数，滚动条停止在 bottomMoveLimit 指定的位置
         if (Laya.timer.currTimer - this._lastStopBottomMoveTime > this.refreshInterval) {
             this._lastStopBottomMoveTime = Laya.timer.currTimer;
@@ -192,12 +188,20 @@ export class DragTopBottomRefreshList extends Laya.Script {
                 this.owner.scrollBar.stopMoveLimit = this.emptyStopMoveLimit.bind(this);
                 this._isRefreshing = true;
                 this._currentDisplayIcon = this._iconBottom;
-                this._timeOnRefreshStart = Laya.timer.currTimer;
-                // 执行处理函数
-                this.onDragBottomRefreshHandler?.run();
+                // 执行处理函数, 延时 500 避免滚动条未回弹就开始
+                Laya.timer.clear(this, this.runRefreshHandler);
+                Laya.timer.once(500, this, this.runRefreshHandler, [DragMode.DragBottom]);
             }
         } else {
             this.owner.scrollBar.stopMoveLimit = null;
+        }
+    }
+
+    private runRefreshHandler(dragMode: DragMode.DragTop | DragMode.DragBottom): void {
+        if (dragMode === DragMode.DragTop) {
+            this.onDragTopRefreshHandler?.run();
+        } else if (dragMode === DragMode.DragBottom) {
+            this.onDragBottomRefreshHandler?.run();
         }
     }
 
@@ -205,43 +209,32 @@ export class DragTopBottomRefreshList extends Laya.Script {
      * 结束刷新
      * 
      * 在 onDragTopRefreshHandler, onDragBottomRefreshHandler 执行刷新处理完成时，需要调用此函数结束刷新，让列表回滚到正确位置
-     * @param topBottomSign 0: 表示拽顶部， 1：表示拽底部
+     * @param dragMode type:DragMode.DragTop | DragMode.DragBottom
      */
-    public endRefresh(topBottomSign: number): void {
+    /**
+     * 
+     * @param dragMode DragMode.DragTop | DragMode.DragBottom
+     * @returns 
+     */
+    public endRefresh(dragMode: DragMode.DragTop | DragMode.DragBottom): void {
         if (!this._isRefreshing) return;
 
-        this.owner.scrollBar["_isElastic"] = true; // 当设置 scrollBar.value 不在 [min, max] 范围时，必须 _isElastic 为 true 时才可以
-        if (topBottomSign === 0) {
+        if (dragMode === DragMode.DragTop) {
+            this.owner.scrollBar.stopMoveLimit = null;
+            this.owner.scrollBar["_isElastic"] = true; // 当设置 scrollBar.value 不在 [min, max] 范围时，必须 _isElastic 为 true 时才可以
             this.owner.scrollBar.value = this.owner.scrollBar.min - this.owner.scrollBar.topMoveLimit;
-        } else if (topBottomSign === 1) {
+            this._isRefreshing = false;
+            this._currentDisplayIcon = null;
+            this.owner.scrollBar.backToNormal();
+        } else if (dragMode === DragMode.DragBottom) {
+            this.owner.scrollBar.stopMoveLimit = null;
+            this.owner.scrollBar["_isElastic"] = true; // 当设置 scrollBar.value 不在 [min, max] 范围时，必须 _isElastic 为 true 时才可以
             this.owner.scrollBar.value = this.owner.scrollBar.max + this.owner.scrollBar.bottomMoveLimit;
-        }
-
-        let delay = this._minRefreshTimeLong - (Laya.timer.currTimer - this._timeOnRefreshStart);
-        if (delay > 0) {
-            // 刷新过程太快时，补时结束
-            Laya.timer.once(delay, this, this.onRefreshEnd, [topBottomSign]);
-        } else {
-            this.onRefreshEnd(topBottomSign);
-        }
-    }
-
-    private onRefreshEnd(topBottomSign: number): void {
-        if (topBottomSign === 0) {
-            this.owner.scrollBar.stopMoveLimit = null;
-            //this.owner.scrollBar["_isElastic"] = true; // 当设置 scrollBar.value 不在 [min, max] 范围时，必须 _isElastic 为 true 时才可以
-            //this.owner.scrollBar.value = this.owner.scrollBar.min - this.owner.scrollBar.topMoveLimit;
-            this._isRefreshing = false;
-            this._currentDisplayIcon = null;
-            this.owner.scrollBar.backToNormal();
-        } else if (topBottomSign === 1) {
-            this.owner.scrollBar.stopMoveLimit = null;
-            //this.owner.scrollBar["_isElastic"] = true; // 当设置 scrollBar.value 不在 [min, max] 范围时，必须 _isElastic 为 true 时才可以
-            //this.owner.scrollBar.value = this.owner.scrollBar.max + this.owner.scrollBar.bottomMoveLimit;
             this._isRefreshing = false;
             this._currentDisplayIcon = null;
             this.owner.scrollBar.backToNormal();
         }
+
     }
 
     private emptyStopMoveLimit(): boolean {
@@ -250,7 +243,7 @@ export class DragTopBottomRefreshList extends Laya.Script {
     }
 
     public onDisable(): void {
-        Laya.timer.clear(this, this.onRefreshEnd);
+        Laya.timer.clear(this, this.runRefreshHandler);
     }
 
     public onDestroy(): void {
