@@ -9,34 +9,84 @@
   "name": "Scene2D",
   "width": 640,
   "height": 1136,
+  "componentElementDatasMap": {
+    "_$type": "Record",
+    "navMesh2D": {
+      "_$type": "any",
+      "value": {
+        "agents": [
+          {
+            "agentName": "humanoid",
+            "cellSize": 1,
+            "cellHeight": 0,
+            "agentMaxSlope": 0,
+            "agentHeight": 0,
+            "agentRadius": 10,
+            "agentMaxClimb": 10,
+            "tileSize": 256
+          }
+        ],
+        "areas": [
+          {
+            "name": "unwalk",
+            "index": 0,
+            "cost": 1
+          },
+          {
+            "name": "walk",
+            "index": 1,
+            "cost": 1
+          },
+          {
+            "name": "jump",
+            "index": 2,
+            "cost": 1
+          }
+        ]
+      }
+    }
+  },
   "_$child": [
     {
       "_$id": "8hpksg8n",
       "_$type": "Sprite",
       "name": "surface",
-      "x": 252,
-      "y": 524,
-      "width": 100,
-      "height": 100,
+      "width": 640,
+      "height": 1136,
       "_$comp": [
         {
           "_$id": "ev2q",
           "_$type": "NavMesh2DSurface",
           "agentType": "humanoid",
+          "areaFlag": "walk",
           "asyn": false,
+          "datas": {
+            "_$uuid": "7a85e292-5dd7-4d39-b636-da9904ac5706",
+            "_$type": "TextResource"
+          },
           "_editorConfig": {
             "_$type": "Record",
             "rootIds": {
               "_$type": "any",
               "value": [
-                "165"
+                "104"
               ]
             },
             "config": {
               "_$type": "any",
               "value": {
-                "165": {
+                "104": {
                   "active": true,
+                  "hoix": false,
+                  "renderMode": 3
+                },
+                "105": {
+                  "active": true,
+                  "hoix": false,
+                  "renderMode": 2
+                },
+                "107": {
+                  "active": false,
                   "hoix": false,
                   "renderMode": 2
                 }
@@ -44,7 +94,55 @@
             }
           },
           "areas": [],
-          "obstacles": [],
+          "obstacles": [
+            {
+              "_$type": "NavMesh2DObstacles",
+              "position": {
+                "_$type": "Vector2",
+                "x": 377,
+                "y": 713
+              },
+              "areaFlag": "unwalk",
+              "size": {
+                "_$type": "Vector2",
+                "x": 100,
+                "y": 123
+              }
+            },
+            {
+              "_$type": "NavMesh2DObstacles",
+              "position": {
+                "_$type": "Vector2",
+                "x": 40.87,
+                "y": 58.7
+              },
+              "areaFlag": "unwalk",
+              "meshType": 2,
+              "datas": {
+                "_$uuid": "ce0e92de-e7c2-474a-a46b-40259243db6a",
+                "_$type": "TextResource"
+              },
+              "_editorConfig": {
+                "_$type": "Record",
+                "rootIds": {
+                  "_$type": "any",
+                  "value": [
+                    "107"
+                  ]
+                },
+                "config": {
+                  "_$type": "any",
+                  "value": {
+                    "107": {
+                      "active": true,
+                      "hoix": false,
+                      "renderMode": 2
+                    }
+                  }
+                }
+              }
+            }
+          ],
           "navMeshLink": []
         }
       ],
@@ -53,6 +151,8 @@
           "_$id": "ikh7r2d6",
           "_$type": "Sprite",
           "name": "Sprite",
+          "x": 259,
+          "y": 546,
           "width": 100,
           "height": 100,
           "_gcmds": [
@@ -109,6 +209,53 @@
               "fillColor": "#ffffff"
             }
           ]
+        },
+        {
+          "_$id": "0p0u8y5z",
+          "_$type": "Sprite",
+          "name": "obstacle",
+          "x": 120,
+          "y": 812,
+          "width": 100,
+          "height": 100,
+          "visible": false,
+          "_gcmds": [
+            {
+              "_$type": "DrawPolyCmd",
+              "x": 0,
+              "y": 0,
+              "points": [
+                0,
+                0,
+                211,
+                37,
+                142.02054939867958,
+                167.34457529802458,
+                0,
+                100
+              ],
+              "lineWidth": 1,
+              "lineColor": "#000000",
+              "fillColor": "#ffffff"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_$id": "ny7uiw9x",
+      "_$type": "Sprite",
+      "name": "player",
+      "x": 252,
+      "y": 524,
+      "width": 100,
+      "height": 100,
+      "_$comp": [
+        {
+          "_$type": "Nav2DAgent",
+          "agentType": "humanoid",
+          "maxAcceleration": 10,
+          "areaMask": 1
         }
       ]
     }
