@@ -1,0 +1,67 @@
+{
+  "_$ver": 1,
+  "_$id": "zrp6hlp7",
+  "_$type": "Dialog",
+  "name": "Dialog",
+  "width": 640,
+  "height": 1136,
+  "hitArea": {
+    "_$type": "HitArea"
+  },
+  "_$child": [
+    {
+      "_$id": "nhu3oywi",
+      "_$type": "Box",
+      "name": "Box",
+      "width": 640,
+      "height": 972,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bgColor": "#2d4d5b"
+    },
+    {
+      "_$id": "f4qjhq28",
+      "_$type": "Image",
+      "name": "Image",
+      "x": 64,
+      "y": 412,
+      "width": 512,
+      "height": 313,
+      "centerX": 0,
+      "centerY": 0,
+      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
+      "useSourceSize": true,
+      "color": "#ffffff"
+    },
+    {
+      "_$id": "xl1v6lak",
+      "_$type": "Button",
+      "name": "close",
+      "x": 343,
+      "y": 383,
+      "width": 262,
+      "height": 87,
+      "centerX": 154,
+      "centerY": -142,
+      "skin": "res://d4cfd6a8-0d0a-475b-ac93-d85eaa646936",
+      "label": "Title",
+      "labelSize": 20,
+      "labelAlign": "center",
+      "labelVAlign": "middle"
+    },
+    {
+      "_$id": "kjlp9n7a",
+      "_$type": "Label",
+      "name": "Label",
+      "x": 51,
+      "y": 882,
+      "width": 550,
+      "height": 194,
+      "text": "以窗口方式弹出对话框时，\n在对话框的大小范围内点空白不会关闭对话框，\n即使是透明的\n\n当创建了 Hit Area 实例，即使未设置任何形状，\n点击任何地方都会关闭对话框\n",
+      "fontSize": 25,
+      "color": "#ffffff",
+      "fitContent": "yes"
+    }
+  ]
+}
