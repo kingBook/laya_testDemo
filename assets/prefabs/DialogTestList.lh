@@ -56,10 +56,10 @@
         {
           "_$type": "15a5f121-e7a1-4f83-b323-afe69cbd3464",
           "scriptPath": "../src/kingBook/ui/DragTopBottomRefreshList.ts",
-          "mode": 17,
+          "dragMode": 17,
           "iconScale": 0.5,
           "iconPadding": 10,
-          "refreshInterval": 2000,
+          "refreshInterval": 500,
           "tint": {
             "_$type": "Color",
             "r": 0,

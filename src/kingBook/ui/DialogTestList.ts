@@ -1,4 +1,3 @@
-import { DownDragRefreshList } from "./DownDragRefreshList";
 import { DragMode, DragTopBottomRefreshList } from "./DragTopBottomRefreshList";
 
 const { regClass, property } = Laya;
@@ -30,7 +29,7 @@ export class DialogTestList extends Laya.Script {
     }
 
     private onDragTopRefreshHandler(refreshList: DragTopBottomRefreshList): void {
-        Laya.timer.once(100, this, this.onDragTopRefreshComplete);
+        Laya.timer.once(500, this, this.onDragTopRefreshComplete);
     }
 
     private onDragTopRefreshComplete(): void {
