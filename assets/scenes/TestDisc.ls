@@ -1,0 +1,133 @@
+{
+  "_$ver": 1,
+  "_$id": "5myind7y",
+  "_$type": "Scene",
+  "left": 0,
+  "right": 0,
+  "top": 0,
+  "bottom": 0,
+  "name": "Scene2D",
+  "width": 750,
+  "height": 1600,
+  "_$child": [
+    {
+      "_$id": "8kko1mee",
+      "_$type": "Box",
+      "name": "Disc",
+      "x": 375,
+      "y": 800,
+      "width": 750,
+      "height": 750,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "centerX": 0,
+      "centerY": 0,
+      "_$comp": [
+        {
+          "_$type": "cfdb6eef-804e-4425-b2f0-4d1c38a9753d",
+          "scriptPath": "../src/kingBook/components/Disc.ts",
+          "_mode": 0,
+          "_pointer": {
+            "_$ref": "wgqhu2s7"
+          },
+          "_bgOutside": {
+            "_$ref": "ss2k2c3z"
+          },
+          "_bgInner": null,
+          "_pointerAngleOffset": 90,
+          "_initRotateSpeed": 1,
+          "_splitOutsideAngles": [
+            0,
+            90,
+            180,
+            270
+          ],
+          "_splitInnerAngles": [
+            0,
+            180
+          ]
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "8u8g4fnt",
+          "_$type": "Sprite",
+          "name": "bgOutside",
+          "x": 375,
+          "y": 800,
+          "width": 100,
+          "height": 100,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "visible": false,
+          "_gcmds": [
+            {
+              "_$type": "DrawPieCmd",
+              "x": 50,
+              "y": 50,
+              "radius": 320,
+              "startAngle": 0,
+              "endAngle": 360,
+              "fillColor": "rgba(124,39,39,0.5019607843137255)",
+              "lineColor": "#00ff0f",
+              "lineWidth": 3
+            }
+          ]
+        },
+        {
+          "_$id": "r99hso73",
+          "_$type": "Sprite",
+          "name": "bgInner",
+          "x": 375,
+          "y": 800,
+          "width": 100,
+          "height": 100,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "visible": false,
+          "_gcmds": [
+            {
+              "_$type": "DrawPieCmd",
+              "x": 50,
+              "y": 50,
+              "radius": 150,
+              "startAngle": 0,
+              "endAngle": 360,
+              "fillColor": "rgba(37,128,127,0.5019607843137255)",
+              "lineColor": "#00ff4e",
+              "lineWidth": 3
+            }
+          ]
+        },
+        {
+          "_$id": "ss2k2c3z",
+          "_$type": "Image",
+          "name": "bg",
+          "x": 375,
+          "y": 375,
+          "width": 818,
+          "height": 818,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "skin": "res://2c19290e-052d-4deb-8a19-700dc985f6d1",
+          "useSourceSize": true,
+          "color": "#ffffff"
+        },
+        {
+          "_$id": "wgqhu2s7",
+          "_$type": "Image",
+          "name": "pointer",
+          "x": 375,
+          "y": 88,
+          "width": 70,
+          "height": 76,
+          "anchorX": 0.5,
+          "anchorY": 1,
+          "skin": "res://118daf0b-b355-4bea-8b76-b24bbed69583",
+          "useSourceSize": true,
+          "color": "#ffffff"
+        }
+      ]
+    }
+  ]
+}

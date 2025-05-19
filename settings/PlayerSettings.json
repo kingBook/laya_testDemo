@@ -1,7 +1,7 @@
 {
   "resolution": {
-    "designWidth": 640,
-    "designHeight": 1136,
+    "designWidth": 750,
+    "designHeight": 1600,
     "scaleMode": "fixedwidth"
   },
   "physics2D": {
