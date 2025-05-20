@@ -13,7 +13,7 @@
     {
       "_$id": "8kko1mee",
       "_$type": "Box",
-      "name": "Disc",
+      "name": "LuckWheel",
       "x": 375,
       "y": 800,
       "width": 750,
@@ -24,25 +24,23 @@
       "centerY": 0,
       "_$comp": [
         {
-          "_$type": "cfdb6eef-804e-4425-b2f0-4d1c38a9753d",
-          "scriptPath": "../src/kingBook/components/Disc.ts",
-          "_mode": 0,
+          "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
+          "scriptPath": "../src/kingBook/components/luckWheel/LuckWheel.ts",
+          "_mode": 1,
           "_pointer": {
             "_$ref": "wgqhu2s7"
           },
-          "_bgOutside": {
-            "_$ref": "ss2k2c3z"
-          },
-          "_bgInner": null,
+          "_outsideDisc": null,
+          "_innerDisc": null,
           "_pointerAngleOffset": 90,
-          "_initRotateSpeed": 1,
-          "_splitOutsideAngles": [
+          "_initPointerRpm": -14,
+          "_initOutsideDiscRpm": 14,
+          "_initInnerDiscRpm": 14,
+          "_splitOutsideDiscAngles": [
             0,
-            90,
-            180,
-            270
+            180
           ],
-          "_splitInnerAngles": [
+          "_splitInnerDiscAngles": [
             0,
             180
           ]
