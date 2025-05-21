@@ -26,21 +26,29 @@
         {
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "../src/kingBook/components/luckWheel/LuckWheel.ts",
+          "gizmoVisible": true,
+          "gizmoOutsideRadius": 100,
+          "gizmoInnerRadius": 5,
           "_mode": 1,
           "_pointer": {
             "_$ref": "wgqhu2s7"
           },
-          "_outsideDisc": null,
-          "_innerDisc": null,
+          "_outsideDisc": {
+            "_$ref": "8u8g4fnt"
+          },
+          "_innerDisc": {
+            "_$ref": "r99hso73"
+          },
           "_pointerAngleOffset": 90,
-          "_initPointerRpm": -14,
-          "_initOutsideDiscRpm": 14,
-          "_initInnerDiscRpm": 14,
-          "_splitOutsideDiscAngles": [
+          "_pointerRpm": 14,
+          "_outsideDiscRpm": 14,
+          "_innerDiscRpm": 14,
+          "_outsideDiscSplitAngles": [
             0,
-            180
+            45,
+            90
           ],
-          "_splitInnerDiscAngles": [
+          "_innerDiscSplitAngles": [
             0,
             180
           ]
@@ -48,16 +56,29 @@
       ],
       "_$child": [
         {
+          "_$id": "ss2k2c3z",
+          "_$type": "Image",
+          "name": "bg",
+          "active": false,
+          "x": 375,
+          "y": 375,
+          "width": 750,
+          "height": 750,
+          "anchorX": 0.5,
+          "anchorY": 0.5,
+          "visible": false,
+          "color": "#ffffff"
+        },
+        {
           "_$id": "8u8g4fnt",
           "_$type": "Sprite",
-          "name": "bgOutside",
+          "name": "discOutside",
           "x": 375,
-          "y": 800,
+          "y": 375,
           "width": 100,
           "height": 100,
           "anchorX": 0.5,
           "anchorY": 0.5,
-          "visible": false,
           "_gcmds": [
             {
               "_$type": "DrawPieCmd",
@@ -67,7 +88,7 @@
               "startAngle": 0,
               "endAngle": 360,
               "fillColor": "rgba(124,39,39,0.5019607843137255)",
-              "lineColor": "#00ff0f",
+              "lineColor": "#ff0000",
               "lineWidth": 3
             }
           ]
@@ -75,14 +96,13 @@
         {
           "_$id": "r99hso73",
           "_$type": "Sprite",
-          "name": "bgInner",
+          "name": "discInner",
           "x": 375,
-          "y": 800,
+          "y": 375,
           "width": 100,
           "height": 100,
           "anchorX": 0.5,
           "anchorY": 0.5,
-          "visible": false,
           "_gcmds": [
             {
               "_$type": "DrawPieCmd",
@@ -92,24 +112,10 @@
               "startAngle": 0,
               "endAngle": 360,
               "fillColor": "rgba(37,128,127,0.5019607843137255)",
-              "lineColor": "#00ff4e",
+              "lineColor": "#00fff6",
               "lineWidth": 3
             }
           ]
-        },
-        {
-          "_$id": "ss2k2c3z",
-          "_$type": "Image",
-          "name": "bg",
-          "x": 375,
-          "y": 375,
-          "width": 818,
-          "height": 818,
-          "anchorX": 0.5,
-          "anchorY": 0.5,
-          "skin": "res://2c19290e-052d-4deb-8a19-700dc985f6d1",
-          "useSourceSize": true,
-          "color": "#ffffff"
         },
         {
           "_$id": "wgqhu2s7",
