@@ -28,9 +28,9 @@ export class LuckWheel extends Laya.Script {
     // ===================== Editor start =====================
     @property({ type: Boolean, catalog: "Gizmo" })
     public gizmoVisible: boolean = true;
-    @property({ type: Number, catalog: "Gizmo" })
+    @property({ type: Number, catalog: "Gizmo", step: 1, fractionDigits: 0 })
     public gizmoOutsideRadius: number = 750;
-    @property({ type: Number, catalog: "Gizmo" })
+    @property({ type: Number, catalog: "Gizmo", step: 1, fractionDigits: 0 })
     public gizmoInnerRadius: number = 5;
     // =====================  Editor end  =====================
 
@@ -44,19 +44,19 @@ export class LuckWheel extends Laya.Script {
     @property({ type: Laya.Sprite, private: false, catalog: "InnerDisc", tips: "内部的转盘" })
     private _innerDisc: Laya.Sprite;
 
-    @property({ type: Number, private: false, catalog: "Pointer", range: [-180, 180], tips: "指针素材的角度修正" })
+    @property({ type: Number, private: false, catalog: "Pointer", step: 0.1, fractionDigits: 1, range: [-180, 180], tips: "指针素材的角度修正" })
     private _pointerAngleOffset: number = 90;
 
-    @property({ type: Number, private: false, catalog: "Pointer", range: [-90, 90], tips: "初始的指针旋转速度<度>，可以是负数" })
+    @property({ type: Number, private: false, catalog: "Pointer", step: 0.1, fractionDigits: 1, range: [-90, 90], tips: "初始的指针旋转速度<度>，可以是负数" })
     private _pointerRpm: number = 14;
-    @property({ type: Number, private: false, catalog: "OutsideDisc", range: [-90, 90], tips: "初始的外部转盘的旋转速度<度>，可以是负数" })
+    @property({ type: Number, private: false, catalog: "OutsideDisc", step: 0.1, fractionDigits: 1, range: [-90, 90], tips: "初始的外部转盘的旋转速度<度>，可以是负数" })
     private _outsideDiscRpm: number = 14;
-    @property({ type: Number, private: false, catalog: "InnerDisc", range: [-90, 90], tips: "初始的内部转盘的旋转速度<度>，可以是负数" })
+    @property({ type: Number, private: false, catalog: "InnerDisc", step: 0.1, fractionDigits: 1, range: [-90, 90], tips: "初始的内部转盘的旋转速度<度>，可以是负数" })
     private _innerDiscRpm: number = 14;
 
-    @property({ type: [Number], private: false, catalog: "OutsideDisc", elementProps: { range: [0, 360] }, tips: "分割外部转盘的分割线角度列表，角度区间为：[0, 360]" })
+    @property({ type: [Number], private: false, catalog: "OutsideDisc", elementProps: { step: 0.1, fractionDigits: 1, range: [0, 360] }, tips: "分割外部转盘的分割线角度列表，角度区间为：[0, 360]" })
     private _outsideDiscSplitAngles: number[] = [0, 90, 180, 270];
-    @property({ type: [Number], private: false, catalog: "InnerDisc", elementProps: { range: [0, 360] }, tips: "分割内部转盘的分割线角度列表，角度区间为：[0, 360]" })
+    @property({ type: [Number], private: false, catalog: "InnerDisc", elementProps: { step: 0.1, fractionDigits: 1, range: [0, 360] }, tips: "分割内部转盘的分割线角度列表，角度区间为：[0, 360]" })
     private _innerDiscSplitAngles: number[] = [0, 180];
 
     /** 旋转摩擦系数 */

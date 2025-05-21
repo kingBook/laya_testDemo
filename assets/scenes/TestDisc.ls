@@ -27,8 +27,8 @@
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "../src/kingBook/components/luckWheel/LuckWheel.ts",
           "gizmoVisible": true,
-          "gizmoOutsideRadius": 100,
-          "gizmoInnerRadius": 5,
+          "gizmoOutsideRadius": 348,
+          "gizmoInnerRadius": 116,
           "_mode": 1,
           "_pointer": {
             "_$ref": "wgqhu2s7"
@@ -39,18 +39,23 @@
           "_innerDisc": {
             "_$ref": "r99hso73"
           },
-          "_pointerAngleOffset": 90,
+          "_pointerAngleOffset": 95.5,
           "_pointerRpm": 14,
-          "_outsideDiscRpm": 14,
-          "_innerDiscRpm": 14,
+          "_outsideDiscRpm": 18.2,
+          "_innerDiscRpm": 13.267,
           "_outsideDiscSplitAngles": [
             0,
-            45,
-            90
+            60.3,
+            146,
+            190,
+            266
           ],
           "_innerDiscSplitAngles": [
             0,
-            180
+            45.7,
+            84.8,
+            149.2,
+            234.1
           ]
         }
       ],
@@ -79,6 +84,7 @@
           "height": 100,
           "anchorX": 0.5,
           "anchorY": 0.5,
+          "visible": false,
           "_gcmds": [
             {
               "_$type": "DrawPieCmd",
@@ -103,6 +109,7 @@
           "height": 100,
           "anchorX": 0.5,
           "anchorY": 0.5,
+          "visible": false,
           "_gcmds": [
             {
               "_$type": "DrawPieCmd",
