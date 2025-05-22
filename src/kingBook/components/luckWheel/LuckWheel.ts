@@ -52,10 +52,10 @@ export class LuckWheel extends Laya.Script {
     public innerDiscRpm: number = 14;
 
     /** 外转盘的分割线角度列表，角度区间为：[0, 359] */
-    @property({ type: [Number], catalog: "Outside", elementProps: { step: 0.1, fractionDigits: 1, range: [0, 359] }, tips: "外转盘的分割线角度列表，角度区间为：[0, 360]" })
+    @property({ type: [Number], catalog: "Outside", minArrayLength: 2, elementProps: { step: 0.1, fractionDigits: 1, range: [0, 359] }, tips: "外转盘的分割线角度列表，角度区间为：[0, 359]" })
     public outsideSplitAngles: number[] = [0, 90, 180, 270];
     /** 内转盘的分割线角度列表，角度区间为：[0, 359] */
-    @property({ type: [Number], catalog: "Inner", elementProps: { step: 0.1, fractionDigits: 1, range: [0, 359] }, tips: "内转盘的分割线角度列表，角度区间为：[0, 360]" })
+    @property({ type: [Number], catalog: "Inner", minArrayLength: 2, elementProps: { step: 0.1, fractionDigits: 1, range: [0, 359] }, tips: "内转盘的分割线角度列表，角度区间为：[0, 359]" })
     public innerSplitAngles: number[] = [0, 45, 135, 225];
 
     /** 旋转摩擦系数 */
@@ -131,22 +131,24 @@ export class LuckWheel extends Laya.Script {
         if (this._flags & Flag.Rotating) return;
         this._flags |= Flag.Rotating;
 
+        let tempPointerAngle = Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x));
+
         // 根据模式初始化
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
-                this.setPointerAngle(Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x)));
+                this.setPointerAngle(tempPointerAngle);
 
                 this._pointerRotationalObj.setRewardAngle(NaN);
                 this._pointerRotationalObj.init(this._pointerAngle, this.pointerRpm, this._rotateFriction);
                 break;
             case LuckWheelMode.SingleFixedPointer:
-                this.setPointerAngle(Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x)));
+                this.setPointerAngle(tempPointerAngle);
 
                 this._outsideRotationalObj.setRewardAngle(NaN);
                 this._outsideRotationalObj.init(this.outsideDisc.rotation, this.outsideDiscRpm, this._rotateFriction);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
-                this.setPointerAngle(Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x)));
+                this.setPointerAngle(tempPointerAngle);
 
                 this._outsideRotationalObj.setRewardAngle(NaN);
                 this._outsideRotationalObj.init(this.outsideDisc.rotation, this.outsideDiscRpm, this._rotateFriction);
@@ -174,17 +176,6 @@ export class LuckWheel extends Laya.Script {
                     console.log("onRotateEnd", Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x)));
                 }
                 break;
-        }
-    }
-
-    /** 舞台可见性发生变化时调度（比如浏览器或者当前标签被切换到后台后调度） */
-    private onStageVisibilityChange(): void {
-        if (!Laya.stage.isVisibility) {
-            // 切换到在后台时
-
-        } else {
-            // 从后台切回来时
-
         }
     }
 
@@ -230,18 +221,18 @@ export class LuckWheel extends Laya.Script {
         let rewardAngle: number;
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
-                rewardAngle = this.getAngleByRewardIndex(this._outsideRewardIndex, this.outsideSplitAngles);
+                rewardAngle = this.getRewardAngleByIndex(this._outsideRewardIndex, this.outsideSplitAngles);
                 this._pointerRotationalObj.setRewardAngle(rewardAngle);
                 break;
             case LuckWheelMode.SingleFixedPointer:
-                rewardAngle = this.getAngleByRewardIndex(this._outsideRewardIndex, this.outsideSplitAngles);
+                rewardAngle = this.getRewardAngleByIndex(this._outsideRewardIndex, this.outsideSplitAngles);
                 this._outsideRotationalObj.setRewardAngle(rewardAngle);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
-                rewardAngle = this.getAngleByRewardIndex(this._outsideRewardIndex, this.outsideSplitAngles);
+                rewardAngle = this.getRewardAngleByIndex(this._outsideRewardIndex, this.outsideSplitAngles);
                 this._outsideRotationalObj.setRewardAngle(rewardAngle);
 
-                let rewardAngle2 = this.getAngleByRewardIndex(this._innerRewardIndex, this.innerSplitAngles);
+                let rewardAngle2 = this.getRewardAngleByIndex(this._innerRewardIndex, this.innerSplitAngles);
                 this._innerRotationalObj.setRewardAngle(rewardAngle2);
                 break;
         }
@@ -262,12 +253,12 @@ export class LuckWheel extends Laya.Script {
      * @param splitAngles 转盘分割线角度数组
      * @returns 返回角度 [0,360]
      */
-    private getAngleByRewardIndex(rewardIndex: number, splitAngles: number[]): number {
-        let a = splitAngles[rewardIndex]; // 区块的下限角
-        let b = rewardIndex + 1 >= splitAngles.length ? 360 : splitAngles[rewardIndex + 1]; // 区块的上限角，到达分割线数组最大索引时取 360
+    private getRewardAngleByIndex(rewardIndex: number, splitAngles: number[]): number {
+        let min = splitAngles[rewardIndex]; // 区块的下限角
+        let max = rewardIndex + 1 >= splitAngles.length ? 360 : splitAngles[rewardIndex + 1]; // 区块的上限角，到达分割线数组最大索引时取 360
 
         const t = 0.5;
-        let rewardAngle = Laya.MathUtil.lerp(a, b, t);
+        let rewardAngle = Laya.MathUtil.lerp(min, max, t);
 
         // 固定指针时，计算指针角度差异
         if ((this.mode & LuckWheelMode.SingleFixedPointer) || (this.mode & LuckWheelMode.DoubleFixedPointer)) {
@@ -291,6 +282,17 @@ export class LuckWheel extends Laya.Script {
             this._center.y + Math.sin(pointerRadian) * this._pointerRadius
         );
         this.pointer.rotation = this._pointerAngle + this.pointerAngleOffset;
+    }
+
+    /** 舞台可见性发生变化时调度（比如浏览器或者当前标签被切换到后台后调度） */
+    private onStageVisibilityChange(): void {
+        if (!Laya.stage.isVisibility) {
+            // 切换到在后台时
+
+        } else {
+            // 从后台切回来时
+
+        }
     }
 
     public onDestroy(): void {
@@ -320,15 +322,15 @@ class RotationalObject extends Laya.EventDispatcher {
     private _rotateFriction: number;
 
     /** 是否处于缓中... */
-    private _isTweening: boolean;
+    private _isEasing: boolean;
     /** 是否旋转结束 */
     private _isRotateEnd: boolean;
 
     /** 开始缓动角速度的阈值 */
-    private readonly tweenThreshold = 5;
+    private readonly easeThreshold = 5;
     /** 缓动的角长（用于计算什么距离多少度开始缓动，以及缓动的进度插值） */
-    private readonly tweenAngleLen = 260;
-    /**  */
+    private readonly easeAngleLen = 260;
+    /** 当到达奖励角时，再多转的圈数角 */
     private readonly extraAngle: number = 360;
 
     /** 当前所在的角 [0,360] */
@@ -338,7 +340,7 @@ class RotationalObject extends Laya.EventDispatcher {
     /** 奖励角度[0,360]  */
     public get rewardAngle(): number { return this._rewardAngle; }
     /** 是否处于缓中... */
-    public get isTweening(): boolean { return this._isTweening; }
+    public get isEasing(): boolean { return this._isEasing; }
     /** 是否旋转结束 */
     public get isRotateEnd(): boolean { return this._isRotateEnd; }
 
@@ -355,7 +357,7 @@ class RotationalObject extends Laya.EventDispatcher {
         this._rotateFriction = rotateFriction;
 
         this.setRewardAngle(NaN);
-        this._isTweening = false;
+        this._isEasing = false;
         this._isRotateEnd = false;
     }
 
@@ -377,8 +379,8 @@ class RotationalObject extends Laya.EventDispatcher {
 
             //console.log("deltaAngle:", deltaAngle, this._rewardAngle, (360 - this._angle));
 
-            if (this._isTweening) {
-                let t = 1 - Laya.MathUtil.clamp01(deltaAngle / this.tweenAngleLen);
+            if (this._isEasing) {
+                let t = 1 - Laya.MathUtil.clamp01(deltaAngle / this.easeAngleLen);
                 t = t >= 0.999 ? 1 : t;
                 if (t >= 1) {
                     let minRmp = 0.1;
@@ -387,7 +389,7 @@ class RotationalObject extends Laya.EventDispatcher {
                         this._rpm = Math.sign(this._rpm) * minRmp;
                         this.setAngle(this._angle + this._rpm);
                     } else {
-                        this._isTweening = false; // 结束缓动
+                        this._isEasing = false; // 结束缓动
                         this._rpm = 0;
                         this.setAngle(this._rewardAngle); // 设置角为奖励角避免误差
                         this._isRotateEnd = true;
@@ -395,15 +397,15 @@ class RotationalObject extends Laya.EventDispatcher {
                         this.event(RotationalObject.ROTATE_END, this);
                     }
                 } else {
-                    this._rpm = Math.sign(this._rpm) * Math.ceil(Laya.MathUtil.lerp(this.tweenThreshold, 0, t) * 10) / 10;
+                    this._rpm = Math.sign(this._rpm) * Math.ceil(Laya.MathUtil.lerp(this.easeThreshold, 0, t) * 10) / 10;
                     console.log("缓动中:", "t:" + t, "rpm:" + this._rpm);
                     this.setAngle(this._angle + this._rpm);
                 }
-            } else if (Math.abs(this._rpm) <= this.tweenThreshold) {
-                this._rpm = Math.sign(this._rpm) * this.tweenThreshold; // 限制旋转速度在缓动角度的阈值
-                if (Math.abs(deltaAngle) >= this.tweenAngleLen) { // 距离太小，继续走，到达大角度才缓动
+            } else if (Math.abs(this._rpm) <= this.easeThreshold) {
+                this._rpm = Math.sign(this._rpm) * this.easeThreshold; // 限制旋转速度在缓动角度的阈值
+                if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续走，到达大角度才缓动
                     // 开始缓动
-                    this._isTweening = true;
+                    this._isEasing = true;
                     console.log("开始缓动", this._rewardAngle);
                 }
                 this.setAngle(this._angle + this._rpm);
