@@ -26,35 +26,35 @@
         {
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "../src/kingBook/components/luckWheel/LuckWheel.ts",
-          "gizmoVisible": true,
-          "gizmoOutsideRadius": 320,
-          "gizmoInnerRadius": 151,
           "mode": 4,
+          "gizmoVisible": true,
+          "gizmoOutsideRadius": 314,
+          "gizmoInnerRadius": 152,
           "pointer": {
             "_$ref": "jrcr0gae"
           },
+          "pointerAngleOffset": 90,
+          "pointerRpm": 14,
           "outsideDisc": {
             "_$ref": "8u8g4fnt"
           },
+          "outsideDiscRpm": 13.4,
+          "outsideSplitAngles": [
+            10.1,
+            57.5,
+            142.8,
+            210.9,
+            275.6
+          ],
           "innerDisc": {
             "_$ref": "r99hso73"
           },
-          "pointerAngleOffset": 90,
-          "pointerRpm": 14,
-          "outsideDiscRpm": -19.7,
           "innerDiscRpm": 12.7,
-          "outsideSplitAngles": [
-            0,
-            67.5,
-            150.6,
-            200.8,
-            281.4
-          ],
           "innerSplitAngles": [
             0,
-            45,
-            135,
-            211.2
+            67.1,
+            134.2,
+            224.3
           ]
         }
       ],
@@ -76,7 +76,7 @@
         {
           "_$id": "8u8g4fnt",
           "_$type": "Sprite",
-          "name": "discOutside",
+          "name": "outsideDisc",
           "x": 375,
           "y": 375,
           "width": 100,
@@ -187,7 +187,7 @@
         {
           "_$id": "r99hso73",
           "_$type": "Sprite",
-          "name": "discInner",
+          "name": "innerDisc",
           "x": 375,
           "y": 375,
           "width": 100,

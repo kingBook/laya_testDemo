@@ -7,8 +7,8 @@
   "top": 0,
   "bottom": 0,
   "name": "Scene2D",
-  "width": 640,
-  "height": 1136,
+  "width": 750,
+  "height": 1600,
   "_$child": [
     {
       "_$id": "4bu73a7s",
@@ -112,7 +112,11 @@
             "max": null,
             "color": null
           },
-          "idx": -4.619
+          "indices": [
+            0.905,
+            2.897,
+            0
+          ]
         }
       ]
     }

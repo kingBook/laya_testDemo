@@ -1,0 +1,44 @@
+{
+  "_$ver": 1,
+  "_$id": "9y8kckif",
+  "_$type": "Widget",
+  "name": "Root",
+  "width": 400,
+  "height": 400,
+  "_$child": [
+    {
+      "_$id": "a62nvvak",
+      "_$prefab": "54434fc8-4ab8-0418-d865-e4adb03033c0",
+      "name": "ArrayField",
+      "active": true,
+      "x": 0,
+      "y": 0,
+      "visible": true,
+      "touchable": true,
+      "_$child": [
+        {
+          "_$id": "8khfg804",
+          "_$prefab": "889a3232-df74-c494-e827-ce1f557f8e85",
+          "name": "Button",
+          "active": true,
+          "x": 192,
+          "y": 5,
+          "visible": true,
+          "touchable": true,
+          "relations": [
+            {
+              "_$type": "Relation",
+              "target": {
+                "_$ref": "a62nvvak"
+              },
+              "data": [
+                9,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

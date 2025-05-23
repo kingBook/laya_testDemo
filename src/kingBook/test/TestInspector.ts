@@ -135,11 +135,11 @@ export class TestInspector extends Laya.Script {
     @property({ type: Pie })
     pie: Pie;
 
-    @property({ type: Number, inspector: "MyTestField" })
-    public idx: number;
+    @property({ type: [Number], inspector: "MyTestField" })
+    public indices: number[];
     
     onAwake(): void {
-        console.log("idx",this.idx);
+        console.log("indices.length",this.indices.length);
         
     }
 }
