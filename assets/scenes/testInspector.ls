@@ -18,6 +18,24 @@
       "y": 524,
       "width": 100,
       "height": 100,
+      "_gcmds": [
+        {
+          "_$type": "DrawPolyCmd",
+          "x": 0,
+          "y": 0,
+          "points": [
+            0,
+            0,
+            100,
+            50,
+            0,
+            100
+          ],
+          "lineWidth": 1,
+          "lineColor": "#000000",
+          "fillColor": "#ffffff"
+        }
+      ],
       "_$comp": [
         {
           "_$type": "6a55a63a-c698-4293-96e8-f47acaeb5902",
@@ -53,7 +71,8 @@
             [
               "a",
               "b",
-              "c"
+              "c",
+              ""
             ],
             [
               "e",
@@ -106,16 +125,10 @@
           "test4": null,
           "enumItems": null,
           "v3": null,
-          "pie": {
-            "_$type": "3df4b5b3-c8e8-4436-b10c-36537123e833",
-            "min": null,
-            "max": null,
-            "color": null
-          },
+          "pie": null,
           "indices": [
-            0.905,
-            2.897,
-            0
+            0.26,
+            0.87
           ]
         }
       ]
