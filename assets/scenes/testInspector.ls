@@ -127,8 +127,64 @@
           "v3": null,
           "pie": null,
           "indices": [
-            0.26,
-            0.87
+            1,
+            2
+          ]
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "uyaw8r8l",
+          "_$type": "Sprite",
+          "name": "Sprite",
+          "x": 37,
+          "y": 441,
+          "width": 100,
+          "height": 100,
+          "_gcmds": [
+            {
+              "_$type": "DrawPolyCmd",
+              "x": 0,
+              "y": 0,
+              "points": [
+                0,
+                0,
+                100,
+                50,
+                0,
+                100
+              ],
+              "lineWidth": 1,
+              "lineColor": "#000000",
+              "fillColor": "#ffffff"
+            }
+          ]
+        },
+        {
+          "_$id": "9vknz5q4",
+          "_$type": "Sprite",
+          "name": "Sprite",
+          "x": -426,
+          "y": 1234,
+          "width": 100,
+          "height": 100,
+          "_gcmds": [
+            {
+              "_$type": "DrawPolyCmd",
+              "x": 0,
+              "y": 0,
+              "points": [
+                0,
+                0,
+                100,
+                50,
+                0,
+                100
+              ],
+              "lineWidth": 1,
+              "lineColor": "#000000",
+              "fillColor": "#ffffff"
+            }
           ]
         }
       ]

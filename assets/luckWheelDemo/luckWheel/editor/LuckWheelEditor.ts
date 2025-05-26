@@ -1,18 +1,15 @@
 import { LuckWheel, LuckWheelMode } from "../LuckWheel";
+import { LuckWheelGizmoConfig } from "./LuckWheelGizmoConfig";
 
 const { regClass, property } = Laya;
 
-
+/**
+ * 自定义 {@link LuckWheel} 组件的场景视图
+ */
 @IEditorEnv.customEditor(LuckWheel)
 export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
 
     declare owner: Laya.Sprite;
-
-    private readonly outsideStrokeColor: string = "#ff0000";
-    private readonly outsideFillColor: string = "#7c272770";
-
-    private readonly innerStrokeColor: string = "#00fff6";
-    private readonly innerFillColor: string = "#25807f70";
 
     private _manager: IEditorEnv.IGizmosManager;
     private _luckWheel: LuckWheel;
@@ -49,44 +46,48 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._innerNumberTexts.length = 0;
         }
 
-
+        // gizmoVisible 为 true 时才在场景视图中显示绘图
         if ((this._luckWheel as any).gizmoVisible) {
             // 外转盘
-            this.drawOutsideSplitLines();
-            this.drawOutsideNumberTexts();
+            this.drawOutsideSplitPolygon(); // 绘制多边形
+            this.drawOutsideNumberTexts(); // 绘制索引编号
 
-            // 内转盘
             if (this._luckWheel.mode & LuckWheelMode.DoubleFixedPointer) {
-                this.drawInnerSplitLines();
-                this.drawInnerNumberTexts();
+                // 内转盘
+                this.drawInnerSplitPolygon(); // 绘制多边形
+                this.drawInnerNumberTexts(); // 绘制索引编号
             }
         }
     }
 
-    private drawOutsideSplitLines(): void {
+
+    /** 绘制外部的多边形 */
+    private drawOutsideSplitPolygon(): void {
         // 创建外多边形
         if (!this._outsidePolygon) {
             this._outsidePolygon = this._manager.createPolygon();
-            this._outsidePolygon.stroke({ color: this.outsideStrokeColor, width: 2 });
-            this._outsidePolygon.fill(this.outsideFillColor);
-            this._outsidePolygon.touchable = false;
+            this._outsidePolygon.stroke({ color: LuckWheelGizmoConfig.outsideLineColor, width: LuckWheelGizmoConfig.lineWidth });
+            this._outsidePolygon.fill(LuckWheelGizmoConfig.outsideFillColor);
+            this._outsidePolygon.touchable = false; // 不可交互
         }
         // 画外分割线
         this.drawSplitLines(this._outsidePolygon, this._luckWheel.outsideSplitAngles, (this._luckWheel as any).gizmoOutsideRadius);
     }
 
-    private drawInnerSplitLines(): void {
+    /** 绘制内部的多边形 */
+    private drawInnerSplitPolygon(): void {
         // 创建内多边形
         if (!this._innerPolygon) {
             this._innerPolygon = this._manager.createPolygon();
-            this._innerPolygon.stroke({ color: this.innerStrokeColor, width: 2 });
-            this._innerPolygon.fill(this.innerFillColor);
-            this._innerPolygon.touchable = false;
+            this._innerPolygon.stroke({ color: LuckWheelGizmoConfig.innerLineColor, width: LuckWheelGizmoConfig.lineWidth });
+            this._innerPolygon.fill(LuckWheelGizmoConfig.innerFillColor);
+            this._innerPolygon.touchable = false; // 不可交互
         }
         // 画内分割线
         this.drawSplitLines(this._innerPolygon, this._luckWheel.innerSplitAngles, (this._luckWheel as any).gizmoInnerRadius);
     }
 
+    /** 绘制区块分割线 */
     private drawSplitLines(polygon: IEditorEnv.IGizmoPolygon, splitAngles: number[], radius: number): void {
         polygon.points.length = 0; // 清空
 
@@ -114,18 +115,21 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
         polygon.setLocalPos(this.owner.pivotX, this.owner.pivotY);
     }
 
+    /** 绘制外多边形的索引编号 */
     private drawOutsideNumberTexts(): void {
         let radius = (this._luckWheel as any).gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
-        let splitPositions: number[] = this._luckWheel.getOutsideSplitPositions(radius, false);
-        this.drawNumberTexts(splitPositions, radius, this.outsideStrokeColor, this._outsideNumberTexts);
+        let splitPositions: number[] = this._luckWheel.getOutsideSplitPositions(radius, false); // 外转盘各分块的中线点列表
+        this.drawNumberTexts(splitPositions, radius, LuckWheelGizmoConfig.outsideLineColor, this._outsideNumberTexts);
     }
 
+    /** 绘制内多边形的索引编号 */
     private drawInnerNumberTexts(): void {
         let radius = (this._luckWheel as any).gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
-        let splitPositions: number[] = this._luckWheel.getInnerSplitPositions(radius, false);
-        this.drawNumberTexts(splitPositions, radius, this.innerStrokeColor, this._innerNumberTexts);
+        let splitPositions: number[] = this._luckWheel.getInnerSplitPositions(radius, false); // 内转盘各分块的中线点列表
+        this.drawNumberTexts(splitPositions, radius, LuckWheelGizmoConfig.innerLineColor, this._innerNumberTexts);
     }
 
+    /** 绘制索引编号 */
     private drawNumberTexts(splitPositions: number[], radius: number, textColor: string, outTexts: IEditorEnv.IGizmoText[]): void {
         for (let i = 0, len = splitPositions.length; i < len; i += 2) {
             let x = splitPositions[i] + this.owner.pivotX;
