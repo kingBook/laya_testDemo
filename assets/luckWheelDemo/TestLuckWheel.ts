@@ -21,7 +21,7 @@ export class TestLuckWheel extends Laya.Script {
             // 随机取一个外转盘的开奖结果
             let outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.outsideSplitAngles.length);
             // 随机取一个内转盘的开奖结果
-            let innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.outsideSplitAngles.length);
+            let innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.innerSplitAngles.length);
             switch (this._luckWheel.mode) {
                 case LuckWheelMode.SingleRotatePointer:
                 case LuckWheelMode.SingleFixedPointer:
