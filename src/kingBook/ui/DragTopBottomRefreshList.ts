@@ -3,13 +3,13 @@ const { regClass, property } = Laya;
 /** 拽的模式 */
 export enum DragMode {
     /** 无（相当于该脚本不起作用） */
-    None = 0x0000,
+    None = 0,
     /** 只在顶部下拽刷新 */
-    DragTop = 0x0001,
+    DragTop = 1,
     /** 只在底部上拽刷新 */
-    DragBottom = 0x0010,
+    DragBottom = 2,
     /** 在顶/底部上/下拽都刷新 */
-    DragTopAndBottom = 0x0011
+    DragTopAndBottom = 4
 }
 
 
