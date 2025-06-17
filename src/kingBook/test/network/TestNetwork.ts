@@ -80,10 +80,7 @@ export class TestNetwork extends Laya.Script {
 
     private onConnect(_data: any): void {
         console.log("已发送获取幸运值请求")
-        const pro = GameNetwork.getInstance().post(4000, 10002);
-        pro.then(res => {
-            //console.log("获得数据 res:", res);
-        });
+        GameNetwork.getInstance().post(4000, 10002);
     }
 
 }
