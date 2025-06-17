@@ -10,6 +10,8 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
     "paths": {
       "~/packages/*": [
         "./library/packages/*"
@@ -34,6 +36,7 @@
   "include": [
     "./assets",
     "./src",
-    "./engine"
+    "./engine",
+    "typings.d.ts"
   ]
 }
