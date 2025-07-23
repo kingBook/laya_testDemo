@@ -19,8 +19,10 @@ export class TestFilter extends Laya.Script {
 
             this.owner.children.forEach(child => {
                 const childImg = child as Laya.Image;
+                
                 const filters = childImg.filters;
                 childImg.filters = null;
+
                 filters.forEach(filter => {
                     filter["texture"] && filter["texture"].destroy(); // 所有滤镜都有 texture 属性
                     filter["textureExtend"] && filter["textureExtend"].destroy(); // textureExtend 是 GlowFilter 才有的属性
