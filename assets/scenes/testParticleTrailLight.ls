@@ -184,6 +184,33 @@
               ]
             }
           ]
+        },
+        {
+          "_$id": "bncnfkdz",
+          "_$type": "Camera",
+          "name": "Camera",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": -0.6417852568202888,
+              "y": 2.9459824687285376,
+              "z": 3.942949000594911
+            },
+            "localRotation": {
+              "_$type": "Quaternion",
+              "x": -0.3888924101699816,
+              "w": 0.9212831775910069
+            }
+          },
+          "fieldOfView": 84,
+          "nearPlane": 0.3,
+          "farPlane": 1000,
+          "clearColor": {
+            "_$type": "Color",
+            "r": 0.39215686274509803,
+            "g": 0.5843137254901961,
+            "b": 0.9294117647058824
+          }
         }
       ]
     },
@@ -191,6 +218,7 @@
       "_$id": "t2kig7nx",
       "_$type": "Sprite",
       "name": "Particle",
+      "active": false,
       "x": 431,
       "y": 842,
       "width": 100,
@@ -468,6 +496,7 @@
       "_$id": "3gtu5fa1",
       "_$type": "Sprite",
       "name": "Trail",
+      "active": false,
       "x": 430,
       "y": 793,
       "width": 100,
