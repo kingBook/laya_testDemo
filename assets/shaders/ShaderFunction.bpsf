@@ -1,0 +1,16 @@
+{
+    "arr": [
+    ],
+    "x": 0,
+    "y": 0,
+    "scale": 1,
+    "bluePrintNum": 5,
+    "material": {
+        "twoSided": false,
+        "blendModes": 0,
+        "materialType": 0
+    },
+    "enableBPID": [
+        "zringPrevFun"
+    ]
+}
