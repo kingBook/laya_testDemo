@@ -1,16 +1,1 @@
-{
-    "arr": [
-    ],
-    "x": 0,
-    "y": 0,
-    "scale": 1,
-    "bluePrintNum": 5,
-    "material": {
-        "twoSided": false,
-        "blendModes": 0,
-        "materialType": 0
-    },
-    "enableBPID": [
-        "zringPrevFun"
-    ]
-}
+{"arr":[{"x":549.4666259765626,"y":178.40001525878907,"constDataID":"Default Output Result","id":6,"inputList":[{"type":"vec3","info":{"id":7}}],"outputList":[],"select":false,"defVal":{}},{"x":121.99996948242188,"y":157.33334350585938,"constDataID":"inputdata/geometry/positionWS","id":7,"inputList":[],"outputList":[{"type":"vec3","infoList":[{"id":6}]},{"type":"float","name":"x"},{"type":"float","name":"y"},{"type":"float","name":"z"}],"select":true}],"x":0,"y":0,"scale":1,"bluePrintNum":7,"material":{"twoSided":false,"blendModes":0,"materialType":0,"scene fog":false,"alpha test":false,"supportReflectionProbe":true,"enableInstancing":true},"enableBPID":["basic/Vector3","inputdata/vertex/positionOS","math/basic/multiply","math/basic/divide","math/basic/add","math/trigonometry/sin","inputdata/scene/Time"],"uniformData":{"uniformArr":[]},"shaderID":"1754293651603_424","version":1754293859139}

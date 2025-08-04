@@ -7,6 +7,7 @@
   "top": 0,
   "bottom": 0,
   "name": "Scene2D",
+  "active": false,
   "width": 750,
   "height": 1600,
   "_$child": [
@@ -126,7 +127,7 @@
         {
           "_$id": "wid81i2u",
           "_$type": "Sprite3D",
-          "name": "Cube_gray",
+          "name": "Cube_BlinnPhongMat",
           "_$comp": [
             {
               "_$type": "MeshFilter",
@@ -144,7 +145,7 @@
               },
               "sharedMaterials": [
                 {
-                  "_$uuid": "6f90bbb0-bcb2-4311-8a9d-3d8277522098",
+                  "_$uuid": "d3c3f7f3-a3c4-46ea-93cd-4f10aa17ce76",
                   "_$type": "Material"
                 }
               ]
@@ -186,6 +187,45 @@
           ]
         },
         {
+          "_$id": "vah2wy1c",
+          "_$type": "Sprite3D",
+          "name": "Plane_mask",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": -1.0824195414321807,
+              "y": 2.6473722285732415,
+              "z": 4.437829342701769
+            },
+            "localRotation": {
+              "_$type": "Quaternion",
+              "x": 0.2179388791360838,
+              "w": 0.9759624198507377
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "MeshFilter",
+              "sharedMesh": {
+                "_$uuid": "4a4afb22-ef83-40a2-a6a8-212a2d20c52f",
+                "_$type": "Mesh"
+              }
+            },
+            {
+              "_$type": "MeshRenderer",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "sharedMaterials": [
+                {
+                  "_$uuid": "9b2a0ead-9f74-4261-8f7b-c2983e5e112b",
+                  "_$type": "Material"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "_$id": "bncnfkdz",
           "_$type": "Camera",
           "name": "Camera",
@@ -218,7 +258,6 @@
       "_$id": "t2kig7nx",
       "_$type": "Sprite",
       "name": "Particle",
-      "active": false,
       "x": 431,
       "y": 842,
       "width": 100,
@@ -496,7 +535,6 @@
       "_$id": "3gtu5fa1",
       "_$type": "Sprite",
       "name": "Trail",
-      "active": false,
       "x": 430,
       "y": 793,
       "width": 100,

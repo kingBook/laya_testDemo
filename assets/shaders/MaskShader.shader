@@ -1,15 +1,16 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:FirstShader,
+    name:MaskShader,
     enableInstancing:true,
-    supportReflectionProbe:false,
+    supportReflectionProbe:true,
     uniformMap:{
         u_AlphaTestValue: { type: Float, default: 0.5 },
         u_TilingOffset: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
 
         u_AlbedoColor: { type: Color, default: [1, 1, 1, 1], block: unlit },
         u_AlbedoTexture: { type: Texture2D, options: { define: "ALBEDOTEXTURE" } },
+        u_MaskTexture: { type: Texture2D, options: { define: "MASKTEXTURE" } },
     },
     defines: {
         ENABLEVERTEXCOLOR: { type: bool, default: false }
@@ -27,7 +28,7 @@ Shader3D End
 GLSL Start
 #defineGLSL unlitVS
 
-    #define SHADER_NAME FirstShader
+    #define SHADER_NAME MaskShader
 
     #include "Math.glsl";
 
@@ -63,7 +64,7 @@ GLSL Start
         mat4 worldMat = getWorldMatrix();
         vec4 pos = (worldMat * vec4(vertex.positionOS, 1.0));
         vec3 positionWS = pos.xyz / pos.w;
-        positionWS=vec3(positionWS.x, positionWS.y+1.0, positionWS.z);
+
         gl_Position = getPositionCS(positionWS);
 
         gl_Position = remapPositionZ(gl_Position);
@@ -76,7 +77,7 @@ GLSL Start
 
 #defineGLSL unlitPS
 
-    #define SHADER_NAME FirstShader
+    #define SHADER_NAME MaskShader
 
     #include "Color.glsl";
 
@@ -121,11 +122,17 @@ GLSL Start
         color = scenUnlitFog(color);
     #endif // FOG
 
+    #ifdef MASKTEXTURE
+        vec4 maskSampler = texture2D(u_MaskTexture, uv);
+        if(maskSampler.r > 0.1) {
+            //discard;
+            alpha = 0.0;
+        }
+    #endif
+
         gl_FragColor = vec4(color, alpha);
 
         gl_FragColor = outputTransform(gl_FragColor);
-
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
     }
 #endGLSL
 GLSL End
