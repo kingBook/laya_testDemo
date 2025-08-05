@@ -17,7 +17,7 @@
         "agents": [
           {
             "agentName": "humanoid",
-            "cellSize": 5,
+            "cellSize": 10,
             "cellHeight": 0,
             "agentMaxSlope": 0,
             "agentHeight": 0,
@@ -54,7 +54,7 @@
         "_$ref": "8hpksg8n",
         "_$type": "NavMesh2DSurface"
       },
-      "hit": {
+      "mouseHit": {
         "_$ref": "pmpxar7d"
       }
     }
@@ -117,7 +117,7 @@
         {
           "_$id": "ikh7r2d6",
           "_$type": "Sprite",
-          "name": "Ground",
+          "name": "ground",
           "x": 326,
           "y": 530,
           "width": 89,
@@ -232,6 +232,22 @@
               "lineWidth": 1,
               "lineColor": "#000000",
               "fillColor": "#ffffff"
+            },
+            {
+              "_$type": "DrawPolyCmd",
+              "x": 0,
+              "y": 0,
+              "points": [
+                0,
+                -50,
+                20,
+                -38,
+                -1,
+                -1
+              ],
+              "lineWidth": 1,
+              "lineColor": "#ff0000",
+              "fillColor": "rgba(254,255,72,0.5019607843137255)"
             }
           ],
           "_$comp": [
@@ -248,7 +264,7 @@
         {
           "_$id": "pmpxar7d",
           "_$type": "Sprite",
-          "name": "Hit",
+          "name": "mouseHit",
           "x": 331,
           "y": 908,
           "width": 100,

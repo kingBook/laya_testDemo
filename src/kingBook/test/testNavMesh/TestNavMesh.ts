@@ -12,7 +12,7 @@ export class TestNavMesh extends Laya.Script {
 
     // 用于显示鼠标点击的位置
     @property({ type: Laya.Sprite })
-    public hit: Sprite;
+    public mouseHit: Sprite;
 
     private _temp: Sprite;
     private _allAgent: Nav2DAgent[] = [];
@@ -38,42 +38,47 @@ export class TestNavMesh extends Laya.Script {
         this.findCompents(this._allAgent, sprite.scene, Nav2DAgent);
     }
 
-
     onMouseClick(evt: Laya.Event): void {
         let clickGlobalPoint = new Laya.Vector2(evt.stageX, evt.stageY);
-        console.log("click", clickGlobalPoint.x, clickGlobalPoint.y);
+        
         this._temp.graphics.clear();
+
         this._allAgent.forEach((agent) => {
             agent.destination = clickGlobalPoint;
             let paths = agent.getCurrentPath();
             console.log("paths.length:", paths.length);
 
 
-            // 测试手动查找路径(未成功)
+            // 测试手动查找路径
             const outPaths: Laya.NavigationPathData[] = [];
-            const startPos = new Laya.Vector3(agent.owner.globalTrans.x, agent.owner.globalTrans.y);
-            const endPos = new Laya.Vector3(clickGlobalPoint.x, clickGlobalPoint.y);
-            const filter = null;
+            // 开始位置，注意x, z为水平面
+            const startPos = new Laya.Vector3(agent.owner.globalTrans.x, 0, agent.owner.globalTrans.y);
+            // 结束位置，注意x, z为水平面
+            const endPos = new Laya.Vector3(clickGlobalPoint.x, 0, clickGlobalPoint.y);
+            const filter = agent["_filter"];
+
+            console.time("elapsedTime");
             const isFound = this.navMesh2DSurface.findFllowPath(outPaths, startPos, endPos, agent.speed, filter);
             console.log("isFound:", isFound, "outPaths.length: ", outPaths.length);
+            console.timeEnd("elapsedTime"); 
 
-            //this.navMesh2DSurface.findNearestPoly();
+            
+            //paths = outPaths;
 
-
-
-
+            // 画路径
             if (paths.length >= 2) {
-                let points: any = []
-                paths.forEach((point) => {
+                let points: any = [];
+                paths.forEach((point: Laya.NavigationPathData) => {
                     points.push(point.pos.x, point.pos.z);
                 });
                 this._temp.graphics.drawLines(0, 0, points, "#00000030", 5);
             }
 
+        });
 
-        })
-        const lpt = this.hit.parent.globalTrans.globalToLocal(clickGlobalPoint.x, clickGlobalPoint.y);
-        this.hit.pos(lpt.x, lpt.y);
+        // 鼠标点击位置
+        const lpt = this.mouseHit.parent.globalTrans.globalToLocal(clickGlobalPoint.x, clickGlobalPoint.y);
+        this.mouseHit.pos(lpt.x, lpt.y);
     }
 
 }
