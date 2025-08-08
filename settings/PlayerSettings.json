@@ -5,8 +5,9 @@
     "scaleMode": "fixedwidth"
   },
   "physics2D": {
+    "debugDraw": true,
     "defaultConfig": {
-      "allowSleeping": false,
+      "allowSleeping": true,
       "gravity": {
         "x": 0,
         "y": 9.8

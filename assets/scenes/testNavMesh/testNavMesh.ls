@@ -257,7 +257,7 @@
               "speed": 200,
               "maxAcceleration": 1000,
               "quality": 4,
-              "areaMask": 7
+              "areaMask": 1
             }
           ]
         },
