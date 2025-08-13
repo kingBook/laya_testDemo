@@ -1,4 +1,3 @@
-import { Convexdecomposition } from "./Convexdecomposition";
 import { Separator, V2 } from "./Separator";
 
 const { regClass, property } = Laya;
@@ -28,7 +27,9 @@ export class TestConvexdecomposition extends Laya.Script {
         } else if (evt.key === 'v') {
             console.log("凸分解检验：", Separator.validate(this._points).msg);
         } else if (evt.key === 'b') {
-            this._polygonPoints = Convexdecomposition.separate(this._points);
+            console.time("separate");
+            this._polygonPoints = Separator.separate(this._points);
+            console.timeEnd("separate");
             console.log("凸分解-----------------", "凸多形数量:", this._polygonPoints.length);
         }
     }
@@ -70,7 +71,7 @@ export class TestConvexdecomposition extends Laya.Script {
         if (!this._polygonPoints || this._polygonPoints.length <= 0) return;
 
         this._polygonPoints.forEach(pts => {
-            console.log(pts);
+           // console.log(pts);
 
             this.drawPoints(this._polygonPointsSprite, pts, false, true, "#00FF00", 2);
         });
