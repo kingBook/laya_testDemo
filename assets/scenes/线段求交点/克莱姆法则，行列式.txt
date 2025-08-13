@@ -1,0 +1,13 @@
+// 克莱姆法则，行列式
+
+|o12x -d2x|
+|o12y -d2y|
+---------- = t1 = (o12x*-d2y+d2x*o12y)/(d1x*-d2y+d2x*d1y)
+|d1x -d2x|
+|d1y -d2y|
+
+|d1x o12x|
+|d1y o12y|
+---------- = t2 = (d1x*o12y-o12x*d1y)/(d1x*-d2y+d2x*d1y)
+|d1x -d2x|
+|d1y -d2y|
