@@ -69,7 +69,7 @@ export class TestBezier extends Laya.Script {
 
         if (!this._bezierPoints || this._bezierPoints.length <= 0) return;
 
-        this.drawPoints(this._bezierPointsSprite, this._bezierPoints, false, true, "#00FF00", 2);
+        this.drawPoints(this._bezierPointsSprite, this._bezierPoints, false, false, "#00FF00", 2);
 
     }
 

@@ -5,88 +5,86 @@ export interface V2 {
 
 export class Curve {
 
-    public static createCurve(originPoint: V2[], curveRatio: number = 0.1, isCap: boolean = false): V2[] {
+    public static createCurve(vertices: V2[], curveRatio: number = 0.1, isClosed: boolean = false): V2[] {
+        let n: number = vertices.length, n2: number = 2 * n;
+        let i0: number, i: number, i1: number;
+        let ePts: V2[] = [], curvePts: V2[], ctrlPts: V2[];
+        let mid: V2, tempV: V2;
+        let ox: number, oy: number, ei: number, ei1: number, dx: number, dy: number;
+        let u: number, px: number, py: number;
+
         // 控制点收缩系数 ，经调试0.6较好
         const scale: number = 0.6;
-        let originCount: number = originPoint.length;
-        let i: number, nexti: number;
+
         // 生成中点
-        let midpoints: V2[] = [];
-        for (i = 0; i < originCount; i++) {
-            nexti = (i + 1) % originCount;
-            midpoints[i] = {
-                x: (originPoint[i].x + originPoint[nexti].x) * 0.5,
-                y: (originPoint[i].y + originPoint[nexti].y) * 0.5
+        let mids: V2[] = [];
+        for (i = 0; i < n; i++) {
+            i1 = (i + 1) % n;
+            mids[i] = {
+                x: (vertices[i].x + vertices[i1].x) * 0.5,
+                y: (vertices[i].y + vertices[i1].y) * 0.5
             };
         }
         // 平移中点 
-        let n: number = 2 * originCount, previ: number;
-        let extrapoints: V2[] = [];
-        let midinmid: V2;
-        let offsetx: number, offsety: number, extraindex: number, addx: number, addy: number, extranexti: number;
-        let curvePoints: V2[], controlPoints: V2[];
-        let u: number, px: number, py: number;
-        let tempP: V2;
+        for (i = 0; i < n2; i++) ePts[i] = { x: 0, y: 0 };
 
-        for (i = 0; i < n; i++) extrapoints[i] = { x: 0, y: 0 };
+        for (i = 0; i < n; i++) {
+            i0 = (i + n - 1) % n;
+            i1 = (i + 1) % n;
 
-        for (i = 0; i < originCount; i++) {
-            nexti = (i + 1) % originCount;
-            previ = (i + originCount - 1) % originCount;
-
-            midinmid = {
-                x: (midpoints[i].x + midpoints[previ].x) * 0.5,
-                y: (midpoints[i].y + midpoints[previ].y) * 0.5
+            mid = {
+                x: (mids[i].x + mids[i0].x) * 0.5,
+                y: (mids[i].y + mids[i0].y) * 0.5
             };
 
-            offsetx = (originPoint[i].x - midinmid.x) | 0;
-            offsety = (originPoint[i].y - midinmid.y) | 0;
+            ox = (vertices[i].x - mid.x) | 0;
+            oy = (vertices[i].y - mid.y) | 0;
 
-            extraindex = 2 * i;
-            extrapoints[extraindex].x = midpoints[previ].x + offsetx;
-            extrapoints[extraindex].y = midpoints[previ].y + offsety;
+            ei = 2 * i;
+            ePts[ei].x = mids[i0].x + ox;
+            ePts[ei].y = mids[i0].y + oy;
 
-            // 朝 originPoint[i]方向收缩
-            addx = ((extrapoints[extraindex].x - originPoint[i].x) * scale) | 0;
-            addy = ((extrapoints[extraindex].y - originPoint[i].y) * scale) | 0;
-            extrapoints[extraindex].x = originPoint[i].x + addx;
-            extrapoints[extraindex].y = originPoint[i].y + addy;
+            // 朝 vertices[i]方向收缩
+            dx = ((ePts[ei].x - vertices[i].x) * scale) | 0;
+            dy = ((ePts[ei].y - vertices[i].y) * scale) | 0;
+            ePts[ei].x = vertices[i].x + dx;
+            ePts[ei].y = vertices[i].y + dy;
 
-            extranexti = (extraindex + 1) % (2 * originCount);
-            extrapoints[extranexti].x = midpoints[i].x + offsetx;
-            extrapoints[extranexti].y = midpoints[i].y + offsety;
+            ei1 = (ei + 1) % (2 * n);
+            ePts[ei1].x = mids[i].x + ox;
+            ePts[ei1].y = mids[i].y + oy;
 
-            // 朝 originPoint[i]方向收缩
-            addx = ((extrapoints[extranexti].x - originPoint[i].x) * scale) | 0;
-            addy = ((extrapoints[extranexti].y - originPoint[i].y) * scale) | 0;
-            extrapoints[extranexti].x = originPoint[i].x + addx;
-            extrapoints[extranexti].y = originPoint[i].y + addy;
+            // 朝 vertices[i]方向收缩
+            dx = ((ePts[ei1].x - vertices[i].x) * scale) | 0;
+            dy = ((ePts[ei1].y - vertices[i].y) * scale) | 0;
+            ePts[ei1].x = vertices[i].x + dx;
+            ePts[ei1].y = vertices[i].y + dy;
 
         }
-        curvePoints = [];
-        controlPoints = [];
+        curvePts = [];
+        ctrlPts = [];
         //  生成4控制点，产生贝塞尔曲线
-        for (i = 0; i < originCount; i++) {
-            if (i >= originCount - 1 && !isCap) break;
-            controlPoints[0] = originPoint[i];
-            extraindex = 2 * i;
-            controlPoints[1] = extrapoints[extraindex + 1];
-            extranexti = (extraindex + 2) % (2 * originCount);
-            controlPoints[2] = extrapoints[extranexti];
-            nexti = (i + 1) % originCount;
-            controlPoints[3] = originPoint[nexti];
+        for (i = 0; i < n; i++) {
+            if (!isClosed && i >= n - 1) break;
+            ctrlPts[0] = vertices[i];
+            ei = 2 * i;
+            ctrlPts[1] = ePts[ei + 1];
+            ei1 = (ei + 2) % (2 * n);
+            ctrlPts[2] = ePts[ei1];
+            i1 = (i + 1) % n;
+            ctrlPts[3] = vertices[i1];
             u = 1.0;
             while (u >= 0) {
-                px = (this.bezier3funcX(u, controlPoints)) | 0;
-                py = (this.bezier3funcY(u, controlPoints)) | 0;
+                px = (this.bezier3funcX(u, ctrlPts)) | 0;
+                py = (this.bezier3funcY(u, ctrlPts)) | 0;
                 // u的步长决定曲线的疏密  
                 u -= curveRatio;
-                tempP = { x: px, y: py };
+                tempV = { x: px, y: py };
                 // 存入曲线点
-                curvePoints.push(tempP);
+                curvePts.push(tempV);
             }
         }
-        return curvePoints;
+        return curvePts;
     }
 
     /** 三次贝塞尔x */
