@@ -1,0 +1,62 @@
+{
+  "version": "LAYAMATERIAL:04",
+  "props": {
+    "textures": [
+      {
+        "path": "res://22072518-6c4e-47b9-815b-72cb86d1f516",
+        "constructParams": [
+          512,
+          512,
+          1,
+          false,
+          false,
+          true
+        ],
+        "propertyParams": {
+          "filterMode": 1,
+          "wrapModeU": 1,
+          "wrapModeV": 1,
+          "anisoLevel": 1
+        },
+        "name": "u_FoamTexture"
+      }
+    ],
+    "type": "Water",
+    "renderQueue": 2000,
+    "materialRenderMode": 0,
+    "s_Cull": 2,
+    "s_Blend": 0,
+    "s_BlendSrc": 0,
+    "s_BlendDst": 0,
+    "s_BlendSrcRGB": 0,
+    "s_BlendDstRGB": 0,
+    "s_BlendSrcAlpha": 0,
+    "s_BlendDstAlpha": 0,
+    "s_BlendEquation": 0,
+    "s_BlendEquationRGB": 0,
+    "s_BlendEquationAlpha": 0,
+    "s_DepthTest": 1,
+    "s_DepthWrite": true,
+    "u_TilingOffset": [
+      1,
+      1,
+      0,
+      0
+    ],
+    "u_ShalowColor": [
+      0.37097629842602875,
+      0.5636578938689106,
+      0.719638233036958,
+      1
+    ],
+    "u_DeepColor": [
+      0.027762754642148925,
+      0.19063241253549082,
+      0.32558139534883723,
+      1
+    ],
+    "defines": [
+      "ALBEDOTEXTURE"
+    ]
+  }
+}
