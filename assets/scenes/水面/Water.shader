@@ -106,6 +106,21 @@ GLSL Start
         return vec4(r1,g1,b1,a2);
     }
 
+    vec3 blendNormals(vec3 n1, vec3 n2) {
+        return normalize(vec3(n1.xy+n2.xy, n1.z+n2.z));
+    }
+
+    vec3 UnpackNormal(vec4 packednormal) {
+        //#if defined(SHADER_API_GLES)  defined(SHADER_API_MOBILE)
+        //    return packednormal.xyz * 2 - 1;
+        //#else
+            vec3 normal;
+            normal.xy = packednormal.wy * 2 - 1;
+            normal.z = sqrt(1 - normal.x*normal.x - normal.y * normal.y);
+            return normal;
+        //#endif
+    }
+
     void main()
     {
         vec2 uv = v_Texcoord0;

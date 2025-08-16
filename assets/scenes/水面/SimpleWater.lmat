@@ -19,11 +19,30 @@
           "anisoLevel": 1
         },
         "name": "u_FoamTexture"
+      },
+      {
+        "path": "res://44d7ff1c-6f5b-4564-9273-bc8c77fd6df6",
+        "constructParams": [
+          512,
+          512,
+          1,
+          false,
+          false,
+          true
+        ],
+        "propertyParams": {
+          "filterMode": 1,
+          "wrapModeU": 1,
+          "wrapModeV": 1,
+          "anisoLevel": 1
+        },
+        "name": "u_WaterNormalTexture"
       }
     ],
-    "type": "Water",
+    "type": "SimpleWater",
     "renderQueue": 2000,
     "materialRenderMode": 0,
+    "u_AlphaTestValue": 0.5,
     "s_Cull": 2,
     "s_Blend": 0,
     "s_BlendSrc": 0,
@@ -43,20 +62,39 @@
       0,
       0
     ],
+    "u_NormalScale": 1,
+    "u_DiffuseColor": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "u_AlbedoIntensity": 1,
+    "u_Shininess": 0.078,
     "u_ShalowColor": [
-      0.37097629842602875,
-      0.5636578938689106,
-      0.719638233036958,
+      0.5542635658914727,
+      0.8005915952672381,
+      1,
       1
     ],
     "u_DeepColor": [
-      0.027762754642148925,
-      0.19063241253549082,
-      0.32558139534883723,
+      0,
+      0.33914747164230996,
+      0.6201550387596899,
       1
     ],
-    "defines": [
-      "ALBEDOTEXTURE"
-    ]
+    "u_WaveParams": [
+      1,
+      1,
+      0,
+      0
+    ],
+    "u_SpecularColor": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "defines": []
   }
 }
