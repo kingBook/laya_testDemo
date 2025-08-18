@@ -14,18 +14,25 @@ export class Separator {
      * * 没有三个相邻的点位于同一线段上
      * * 不得有重叠部分和“洞”
      * @param verticesVec 非凸多边形的顶点，按顺时针顺序
+     * @param holes 孔洞数组，默认 null
      * @param scale [可选] 原用于在Box2D中绘制形状的比例。越大，精度越好。默认值为30。
      * @return 返回凸分解多边形顶点
      * */
-    public static separate(vertices: V2[], holes: V2[][] = null, scale: number = 30): V2[][] {
-        let i: number, n: number = vertices.length, j: number = 0, m: number = 0;
+    public static separate(verticesVec: V2[], holes: V2[][] = null, scale: number = 30): V2[][] {
+        let i: number, n: number = verticesVec.length, j: number = 0, m: number = 0;
         let vec: V2[] = [], figs: V2[][];
 
-        for (i = 0; i < n; i++) vec.push({ x: vertices[i].x * scale, y: vertices[i].y * scale });
+        // 缩放多边形顶点，使用新的数组储存
+        for (i = 0; i < n; i++) vec.push({ x: verticesVec[i].x * scale, y: verticesVec[i].y * scale });
 
+        // 合并孔洞
+        this.mergeHoles(vec, holes, scale);
+
+        // 凸分解
         figs = this.calcShapes(vec);
-        n = figs.length;
 
+        // 新数组储存分解结果
+        n = figs.length;
         for (i = 0; i < n; i++) {
             vec = figs[i];
             m = vec.length;
@@ -39,6 +46,16 @@ export class Separator {
             }
         }
         return figs;
+    }
+
+    /**
+     * 合并孔洞
+     * @param verticesVec 合并孔洞的多边形顶点数组引用
+     * @param holes 孔洞
+     * @param holeScale 孔洞顶点的缩放，默认：1（不缩放）
+     */
+    public static mergeHoles(verticesVec: V2[], holes: V2[][], holeScale: number = 1): void {
+
     }
 
     /**
