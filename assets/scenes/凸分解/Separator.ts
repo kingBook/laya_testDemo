@@ -14,29 +14,39 @@ export class Separator {
      * * 没有三个相邻的点位于同一线段上
      * * 不得有重叠部分和“洞”
      * @param verticesVec 非凸多边形的顶点，按顺时针顺序
-     * @param holes 孔洞数组，默认 null
+     * @param holeVecs 孔洞数组，默认 null
      * @param scale [可选] 原用于在Box2D中绘制形状的比例。越大，精度越好。默认值为30。
      * @return 返回凸分解多边形顶点
      * */
-    public static separate(verticesVec: V2[], holes: V2[][] = null, scale: number = 30): V2[][] {
-        let i: number, n: number = verticesVec.length, j: number = 0, m: number = 0;
-        let vec: V2[] = [], figs: V2[][];
+    public static separate(verticesVec: V2[], holeVecs: V2[][] = null, scale: number = 30): V2[][] {
+        let i: number, n: number, j: number = 0, m: number = 0;
+        let vec: V2[] = [], vec2: V2[], holeVecs2: V2[][] = [], figs: V2[][];
 
         // 缩放多边形顶点，使用新的数组储存
-        for (i = 0; i < n; i++) vec.push({ x: verticesVec[i].x * scale, y: verticesVec[i].y * scale });
+        n = verticesVec.length;
+        for (i = 0; i < n; i++) vec[i] = { x: verticesVec[i].x * scale, y: verticesVec[i].y * scale };
+
+        // 缩放孔洞顶点，使用新的数组储存
+        n = holeVecs.length;
+        for (i = 0; i < n; i++) {
+            vec = holeVecs[i];
+            m = vec.length;
+            vec2 = [];
+            for (j = 0; j < m; j++)  vec2[j] = { x: vec[i].x * scale, y: vec[i].y * scale };
+            holeVecs2[i] = vec2;
+        }
 
         // 合并孔洞
-        this.mergeHoles(vec, holes, scale);
+        this.mergeHoles(vec, holeVecs2);
 
         // 凸分解
         figs = this.calcShapes(vec);
 
-        // 新数组储存分解结果
+        // 新数组储存凸分解后的多边形
         n = figs.length;
         for (i = 0; i < n; i++) {
             vec = figs[i];
             m = vec.length;
-
             for (j = 0; j < m; j++) {
                 // 此代码会出错
                 //vec[j].x /= scale;
@@ -51,11 +61,73 @@ export class Separator {
     /**
      * 合并孔洞
      * @param verticesVec 合并孔洞的多边形顶点数组引用
-     * @param holes 孔洞
-     * @param holeScale 孔洞顶点的缩放，默认：1（不缩放）
+     * @param holeVecs 孔洞
      */
-    public static mergeHoles(verticesVec: V2[], holes: V2[][], holeScale: number = 1): void {
+    public static mergeHoles(verticesVec: V2[], holeVecs: V2[][]): void {
+        let i: number, j: number, k: number, h: number, n: number, m: number, u: number;
+        let j1: number, j2: number, j3: number, k1: number, k2: number, k3: number;
+        let h1: number, h2: number;
+        let vec: V2[], v: V2, v1: V2, v2: V2, v3: V2, p: V2, p1: V2, p2: V2, p3: V2;
+        let isIntersect: boolean;
 
+        n = holeVecs.length;
+        for (i = 0; i < n; i++) {
+            vec = holeVecs[i];
+            m = vec.length;
+
+            // 孔洞顶点遍历
+            for (j = 0; j < m; j++) {
+                v = vec[j];
+
+                // 多边形顶点遍历
+                u = verticesVec.length;
+                for (k = 0; k < u; k++) {
+                    p = verticesVec[k];
+
+                    // 与孔洞相交检测
+                    isIntersect = false;
+                    for (h = 0; h < m; h++) {
+                        h1 = h;
+                        h2 = (h < m - 1 ? h + 1 : h + 1 - m);
+                        v1 = vec[h1];
+                        v2 = vec[h2];
+                        // 与当前孔洞顶点相邻的边，不检测
+                        if (h1 == j || h2 == j) continue;
+                        // 与孔洞相交
+                        if (this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y)) {
+                            isIntersect = true;
+                            break;
+                        }
+                    }
+
+                    // 与孔洞相交，当前多边形顶点与孔洞顶点不适合
+                    if (isIntersect) continue;
+
+                    // 与多边形相交检测
+                    for (h = 0; h < u; h++) {
+                        h1 = h;
+                        h2 = (h < u - 1 ? h + 1 : h + 1 - u);
+                        v1 = vec[h1];
+                        v2 = vec[h2];
+                        // 与当前多边形顶点相邻的边，不检测
+                        if (h1 == k || h2 == k) continue;
+                        // 与多边形相交
+                        if (this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y)) {
+                            isIntersect = true;
+                            break;
+                        }
+                    }
+
+                    // 与多边形相交，当前多边形顶点与孔洞顶点不适合
+                    if (isIntersect) continue;
+
+
+                    if (!isIntersect) {
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -263,7 +335,9 @@ export class Separator {
 
         a = (t5 * t2 - t6 * t1) / t7;
         let px: number = x1 + a * t3, py: number = y1 + a * t4;
+        // 交点在线段p1,p2上
         let b1: boolean = this.isOnSegment(px, py, x1, y1, x2, y2);
+        // 交点在线段p3,p4上
         let b2: boolean = this.isOnSegment(px, py, x3, y3, x4, y4);
 
         if (b1 && b2) return { x: px, y: py };
@@ -271,11 +345,11 @@ export class Separator {
         return null;
     }
 
-    /** 点p是否与线段任意一个端点重合，误差为0.1 */
+    /** 点p是否在线段上，端点误差为0.1 */
     private static isOnSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number): boolean {
-        // 与端点1重合
+        // px 在线段的x范围内
         let b1: boolean = ((x1 + 0.1 >= px && px >= x2 - 0.1) || (x1 - 0.1 <= px && px <= x2 + 0.1));
-        // 与端点2重合
+        // py 在线段的y范围内
         let b2: boolean = ((y1 + 0.1 >= py && py >= y2 - 0.1) || (y1 - 0.1 <= py && py <= y2 + 0.1));
         return (b1 && b2 && this.isOnLine(px, py, x1, y1, x2, y2));
     }
@@ -288,7 +362,7 @@ export class Separator {
         return (dx < 0.1 && dy < 0.1);
     }
 
-    /** 点p是否在线段上 */
+    /** 点p是否在直线上 */
     private static isOnLine(px: number, py: number, x1: number, y1: number, x2: number, y2: number): boolean {
         // 线段长度大于0.1时
         if (x2 - x1 > 0.1 || x1 - x2 > 0.1) {
