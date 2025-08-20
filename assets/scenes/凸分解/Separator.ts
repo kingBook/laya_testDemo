@@ -20,24 +20,28 @@ export class Separator {
      * */
     public static separate(verticesVec: V2[], holeVecs: V2[][] = null, scale: number = 30): V2[][] {
         let i: number, n: number, j: number = 0, m: number = 0;
-        let vec: V2[] = [], vec2: V2[], holeVecs2: V2[][] = [], figs: V2[][];
+        let vec: V2[] = [], vec1: V2[], vec2: V2[], holeVecs2: V2[][] = [], figs: V2[][];
 
         // 缩放多边形顶点，使用新的数组储存
         n = verticesVec.length;
         for (i = 0; i < n; i++) vec[i] = { x: verticesVec[i].x * scale, y: verticesVec[i].y * scale };
 
-        // 缩放孔洞顶点，使用新的数组储存
-        n = holeVecs.length;
-        for (i = 0; i < n; i++) {
-            vec = holeVecs[i];
-            m = vec.length;
-            vec2 = [];
-            for (j = 0; j < m; j++)  vec2[j] = { x: vec[i].x * scale, y: vec[i].y * scale };
-            holeVecs2[i] = vec2;
-        }
+        if (holeVecs) {
+            // 缩放孔洞顶点，使用新的数组储存
+            n = holeVecs.length;
+            for (i = 0; i < n; i++) {
+                vec1 = holeVecs[i];
+                m = vec1.length;
+                vec2 = [];
+                for (j = 0; j < m; j++)  vec2[j] = { x: vec1[j].x * scale, y: vec1[j].y * scale };
+                holeVecs2[i] = vec2;
+            }
 
-        // 合并孔洞
-        this.mergeHoles(vec, holeVecs2);
+            console.time("mergeHoles");
+            // 合并孔洞
+            vec = this.mergeHoles(vec, holeVecs2);
+            console.timeEnd("mergeHoles");
+        }
 
         // 凸分解
         figs = this.calcShapes(vec);
@@ -62,37 +66,51 @@ export class Separator {
      * 合并孔洞
      * @param verticesVec 合并孔洞的多边形顶点数组引用
      * @param holeVecs 孔洞
+     * @param output 【可选】输出合并孔洞后的多边形顶点
      */
-    public static mergeHoles(verticesVec: V2[], holeVecs: V2[][]): void {
+    public static mergeHoles(verticesVec: V2[], holeVecs: V2[][], output?: V2[]): V2[] {
         let i: number, j: number, k: number, h: number, n: number, m: number, u: number;
-        let j1: number, j2: number, j3: number, k1: number, k2: number, k3: number;
+        let j1: number, k1: number;
         let h1: number, h2: number;
-        let vec: V2[], v: V2, v1: V2, v2: V2, v3: V2, p: V2, p1: V2, p2: V2, p3: V2;
+        let vec: V2[], v: V2, p: V2, v1: V2, v2: V2;
         let isIntersect: boolean;
+
+        output ||= [];
+        output.length = 0;
+        u = verticesVec.length;
+        for (k = 0; k < u; k++) output[k] = { x: verticesVec[k].x, y: verticesVec[k].y };
 
         n = holeVecs.length;
         for (i = 0; i < n; i++) {
             vec = holeVecs[i];
+
             m = vec.length;
+
+            // j1,k1 孔洞与多边形分割线顶点索引
+            j1 = k1 = -1;
 
             // 孔洞顶点遍历
             for (j = 0; j < m; j++) {
                 v = vec[j];
 
                 // 多边形顶点遍历
-                u = verticesVec.length;
+                u = output.length;
                 for (k = 0; k < u; k++) {
-                    p = verticesVec[k];
+                    p = output[k];
 
                     // 与孔洞相交检测
                     isIntersect = false;
                     for (h = 0; h < m; h++) {
                         h1 = h;
                         h2 = (h < m - 1 ? h + 1 : h + 1 - m);
-                        v1 = vec[h1];
-                        v2 = vec[h2];
+
                         // 与当前孔洞顶点相邻的边，不检测
                         if (h1 == j || h2 == j) continue;
+
+                        v1 = vec[h1];
+                        v2 = vec[h2];
+
+                        console.log("与孔洞相交", "h:", h, "j:", j, "k:", k, "hitSegment:", this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y));
                         // 与孔洞相交
                         if (this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y)) {
                             isIntersect = true;
@@ -107,10 +125,14 @@ export class Separator {
                     for (h = 0; h < u; h++) {
                         h1 = h;
                         h2 = (h < u - 1 ? h + 1 : h + 1 - u);
-                        v1 = vec[h1];
-                        v2 = vec[h2];
+
                         // 与当前多边形顶点相邻的边，不检测
                         if (h1 == k || h2 == k) continue;
+
+                        v1 = output[h1];
+                        v2 = output[h2];
+
+                        console.log("与多边形相交检测：", "h:", h, "j:", j, "k:", k, "hitSegment:", this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y));
                         // 与多边形相交
                         if (this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y)) {
                             isIntersect = true;
@@ -121,13 +143,43 @@ export class Separator {
                     // 与多边形相交，当前多边形顶点与孔洞顶点不适合
                     if (isIntersect) continue;
 
-
                     if (!isIntersect) {
+                        // j1,k1 孔洞与多边形分割线顶点索引
+                        j1 = j; // 孔洞索引
+                        k1 = k; // 多边形索引
                         break;
                     }
                 }
+                // 找到合适的分割线，打断孔洞遍历循环
+                if (j1 > -1 && k1 > -1) break;
             }
+            console.log("i:", i);
+            console.log("k1:", k1, "j1:", j1,);
+            output.forEach((item, id) => { console.log(`output1 id:${id}, x:${item.x}, y:${item.y}`) });
+            console.log("m:", m);
+
+            // 找到合适的分割线，合并孔洞
+            if (j1 > -1 && k1 > -1) {
+                j = j1;
+                k = 0;
+                while (true) {
+                    k++;
+                    console.log(`j:${j}, x:${vec[j].x}, y:${vec[j].y}`);
+
+                    output.splice(k1 + k, 0, { x: vec[j].x, y: vec[j].y });
+                    if (k > m) {
+                        output.splice(k1 + k + 1, 0, { x: output[k1].x, y: output[k1].y });
+                        break;
+                    }
+                    if (j - 1 < 0) j = m - 1;
+                    else j--;
+                }
+            } else {
+                console.error("合并孔洞时，未能找到合适的分割线");
+            }
+            output.forEach((item, id) => { console.log(`output2 id:${id}, x:${item.x}, y:${item.y}`) });
         }
+        return output;
     }
 
     /**
