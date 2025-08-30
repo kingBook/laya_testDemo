@@ -17,7 +17,7 @@ export class Separator {
      * @param scale [可选] 原用于在Box2D中绘制形状的比例。越大，精度越好。默认值为30。
      * @return 返回凸分解多边形顶点
      * */
-    public static separate(vertices: V2[], holes: V2[][] = null, scale: number = 30): V2[][] {
+    public static separate(vertices: V2[], scale: number = 30): V2[][] {
         let i: number, n: number = vertices.length, j: number = 0, m: number = 0;
         let vec: V2[] = [], figs: V2[][];
 

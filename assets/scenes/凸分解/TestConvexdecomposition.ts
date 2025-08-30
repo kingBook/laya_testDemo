@@ -37,6 +37,7 @@ export class TestConvexdecomposition extends Laya.Script {
         // 用于显示孔洞
         this._holePointsSpirte = new Laya.Sprite();
         this.owner.addChild(this._holePointsSpirte);
+
     }
 
     onKeyDown(evt: Laya.Event): void {
@@ -60,7 +61,15 @@ export class TestConvexdecomposition extends Laya.Script {
             console.log("凸分解检验：", Separator.validate(this._polOriginPoints).msg);
         } else if (evt.key === 'b') {
             console.time("separate");
-            this._polygonPoints = Separator.separate(this._polOriginPoints, this._holePoints);
+            const merged: V2[] = [];
+            try{
+                this._polygonPoints = Separator.separate(this._polOriginPoints, this._holePoints, 30, merged);
+            }catch(err){
+                this._polygonPoints||=[];
+                this._polygonPoints.push(merged);
+                console.log("this._polygonPoints:",this._polygonPoints);
+                console.error(err);
+            }
             console.timeEnd("separate");
             console.log("凸分解-----------------", "凸多形数量:", this._polygonPoints.length);
         }

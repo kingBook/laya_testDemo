@@ -18,7 +18,7 @@ export class Separator {
      * @param scale [可选] 原用于在Box2D中绘制形状的比例。越大，精度越好。默认值为30。
      * @return 返回凸分解多边形顶点
      * */
-    public static separate(verticesVec: V2[], holeVecs: V2[][] = null, scale: number = 30): V2[][] {
+    public static separate(verticesVec: V2[], holeVecs: V2[][] = null, scale: number = 30, mergeHoleVertices: V2[] = null): V2[][] {
         let i: number, n: number, j: number = 0, m: number = 0;
         let vec: V2[] = [], vec1: V2[], vec2: V2[], holeVecs2: V2[][] = [], figs: V2[][];
 
@@ -39,8 +39,9 @@ export class Separator {
 
             console.time("mergeHoles");
             // 合并孔洞
-            vec = this.mergeHoles(vec, holeVecs2);
             console.timeEnd("mergeHoles");
+            vec = this.mergeHoles(vec, holeVecs2).map(v => { return { x: v.x / scale, y: v.y / scale } });
+            mergeHoleVertices.push(...vec);
         }
 
         // 凸分解
@@ -302,6 +303,8 @@ export class Separator {
                                     minLen = t;
                                 }
                             }
+                            console.log("i:",i,"inetse:",!v);
+                            
                         }
                     }
 
@@ -381,7 +384,7 @@ export class Separator {
     }
 
     /** 两线段的交点 */
-    private static hitSegment(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): V2 {
+    public static hitSegment(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): V2 {
         let t1: number = x3 - x1, t2: number = y3 - y1, t3: number = x2 - x1, t4: number = y2 - y1,
             t5: number = x4 - x3, t6: number = y4 - y3, t7: number = t4 * t5 - t3 * t6, a: number;
 
