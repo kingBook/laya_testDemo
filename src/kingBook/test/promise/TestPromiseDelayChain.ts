@@ -7,8 +7,8 @@ export class TestPromiseDelayChain extends Laya.Script {
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'h') {
             console.log("开始延时");
-            this.delay(2000).then(_ => {
-                console.log("延时完成");
+            this.delay(2000).then(value => {
+                console.log("延时完成 value", value);
 
             });
         } else if (evt.key === 'j') {
@@ -17,17 +17,12 @@ export class TestPromiseDelayChain extends Laya.Script {
         }
     }
 
-    private async delay(ms: number) {
-        new Promise((resolve: (value: TestPromiseDelayChain) => void) => {
+    private async delay(ms: number): Promise<TestPromiseDelayChain> {
+        return new Promise((resolve: (value: TestPromiseDelayChain) => void) => {
             Laya.timer.once(ms, this, () => {
                 resolve(this);
             });
         });
-    }
-
-    private sayHello(): void {
-        console.log("Hello");
-
     }
 
 }
