@@ -128,6 +128,12 @@
           "_$id": "wid81i2u",
           "_$type": "Sprite3D",
           "name": "Cube_BlinnPhongMat",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": 1.991179704931243
+            }
+          },
           "_$comp": [
             {
               "_$type": "MeshFilter",
@@ -238,8 +244,8 @@
             },
             "localRotation": {
               "_$type": "Quaternion",
-              "x": -0.3888924101699816,
-              "w": 0.9212831775910069
+              "x": -0.3888924101699817,
+              "w": 0.9212831775910071
             }
           },
           "fieldOfView": 84,
