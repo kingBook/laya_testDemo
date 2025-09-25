@@ -1,14 +1,10 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:FrameAnim,
+    name:ScrollingBg,
     enableInstancing:true,
     supportReflectionProbe:true,
     uniformMap:{
-        u_HorizontalAmount: {type:Float, default: 8},
-        u_VerticalAmount: {type:Float, default: 8},
-        u_Speed: {type:Float, range:[1, 100], default:30},
-
         u_AlphaTestValue: { type: Float, default: 0.5 },
         u_TilingOffset: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
 
@@ -31,7 +27,7 @@ Shader3D End
 GLSL Start
 #defineGLSL unlitVS
 
-    #define SHADER_NAME FrameAnim
+    #define SHADER_NAME ScrollingBg
 
     #include "Math.glsl";
 
@@ -80,7 +76,7 @@ GLSL Start
 
 #defineGLSL unlitPS
 
-    #define SHADER_NAME FrameAnim
+    #define SHADER_NAME ScrollingBg
 
     #include "Color.glsl";
 
@@ -95,20 +91,7 @@ GLSL Start
 
     void main()
     {
-        // Frame Animation
-        float time = floor(u_Time * u_Speed);
-
-        float frameIdx = mod(time, u_HorizontalAmount * u_VerticalAmount);
-
-        float ix = mod(frameIdx, u_HorizontalAmount);
-        float iy= floor(frameIdx / u_HorizontalAmount);
-
         vec2 uv = v_Texcoord0;
-        uv.x /= u_HorizontalAmount;
-        uv.y /= u_VerticalAmount;
-        uv.x += ix / u_HorizontalAmount;
-        uv.y += iy / u_VerticalAmount;
-        // Frame Animation End
 
         vec3 color = u_AlbedoColor.rgb;
         float alpha = u_AlbedoColor.a;
