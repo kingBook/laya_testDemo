@@ -5,6 +5,7 @@ Shader3D Start
     enableInstancing:true,
     supportReflectionProbe:true,
     uniformMap:{
+        u_scrollX: {type:Float, default:1.0},
         u_AlphaTestValue: { type: Float, default: 0.5 },
         u_TilingOffset: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
 
@@ -92,6 +93,8 @@ GLSL Start
     void main()
     {
         vec2 uv = v_Texcoord0;
+        uv.x+= u_scrollX * u_Time;
+        uv.x = mod(uv.x,1.0);
 
         vec3 color = u_AlbedoColor.rgb;
         float alpha = u_AlbedoColor.a;

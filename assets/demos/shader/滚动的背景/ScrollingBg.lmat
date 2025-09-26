@@ -1,15 +1,34 @@
 {
   "version": "LAYAMATERIAL:04",
   "props": {
-    "textures": [],
+    "textures": [
+      {
+        "path": "res://854bd339-866e-438f-b687-91f9184359a4",
+        "constructParams": [
+          5120,
+          2880,
+          1,
+          false,
+          false,
+          true
+        ],
+        "propertyParams": {
+          "filterMode": 1,
+          "wrapModeU": 1,
+          "wrapModeV": 1,
+          "anisoLevel": 1
+        },
+        "name": "u_AlbedoTexture"
+      }
+    ],
     "type": "ScrollingBg",
     "renderQueue": 2000,
     "materialRenderMode": 0,
     "u_AlphaTestValue": 0.5,
     "s_Cull": 2,
     "s_Blend": 0,
-    "s_BlendSrc": 0,
-    "s_BlendDst": 0,
+    "s_BlendSrc": 6,
+    "s_BlendDst": 7,
     "s_BlendSrcRGB": 0,
     "s_BlendDstRGB": 0,
     "s_BlendSrcAlpha": 0,
@@ -19,12 +38,21 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
+    "u_AlbedoColor": [
+      1,
+      1,
+      1,
+      1
+    ],
     "u_TilingOffset": [
       1,
       1,
       0,
       0
     ],
-    "defines": []
+    "u_scrollX": 0.1,
+    "defines": [
+      "ALBEDOTEXTURE"
+    ]
   }
 }
