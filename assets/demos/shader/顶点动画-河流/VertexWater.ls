@@ -1,6 +1,6 @@
 {
   "_$ver": 1,
-  "_$id": "mx4ovsea",
+  "_$id": "wcqng82b",
   "_$type": "Scene",
   "left": 0,
   "right": 0,
@@ -89,17 +89,13 @@
           ]
         },
         {
-          "_$id": "2wc4h3pj",
+          "_$id": "n3v5jtwq",
           "_$type": "Sprite3D",
           "name": "Plane",
           "transform": {
-            "localPosition": {
-              "_$type": "Vector3",
-              "y": 0.2799977
-            },
             "localScale": {
               "_$type": "Vector3",
-              "x": 1.6599995,
+              "x": 3.0099948,
               "y": 1,
               "z": 1
             }
@@ -119,7 +115,7 @@
               },
               "sharedMaterials": [
                 {
-                  "_$uuid": "6f7e7f97-8ed2-49f3-94e2-7fd3414495fb",
+                  "_$uuid": "0150900c-1f31-457f-b0f0-cb868dd375f5",
                   "_$type": "Material"
                 }
               ]
