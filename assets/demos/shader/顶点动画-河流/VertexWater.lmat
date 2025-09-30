@@ -38,13 +38,19 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
+    "u_AlbedoColor": [
+      1,
+      1,
+      1,
+      1
+    ],
     "u_TilingOffset": [
       1,
       1,
       0,
       0
     ],
-    "u_Magnitude": 0.1,
+    "u_Magnitude": 0.112,
     "u_Frequency": 1,
     "u_InvWaveLength": 30,
     "defines": [

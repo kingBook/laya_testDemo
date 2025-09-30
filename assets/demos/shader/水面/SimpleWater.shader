@@ -18,17 +18,15 @@ Shader3D Start
 
         u_NormalTexture: { type: Texture2D, options: { define: "NORMALMAP" } },
         u_NormalScale: { type: Float, default: 1.0, range: [0.0, 2.0] },
-
-        // 浅水色
-        u_ShalowColor: { type: Color, default:[1,1,1,1]},
-        // 深水色
-        u_DeepColor: { type: Color, default:[1,1,1,1]},
-        // 泡沫贴图（R: 深浅程度; G: 泡沫; B: 细节）
-        u_FoamTexture: { type: Texture2D, default: "white"},
-        // xy: 水流速1; zw: 水流速2
-        u_WaveParams: { type: Vector4, default: [1, 1, 0, 0]},
-        // 
-        u_WaterNormalTexture: { type: Texture2D, default: "white"},
+        
+        // =============================================
+        u_WaveParams: { type: Vector4, default: [1, 1, 0, 0],tips:"xy: 水流速1; zw: 水流速2"},
+        u_ShalowColor: { type: Color, default:[1,1,1,1], tips:"浅水颜色"},
+        u_DeepColor: { type: Color, default:[1,1,1,1], tips:"深水颜色"},
+        u_FoamTexture: { type: Texture2D, default: "white", tips:"泡沫贴图 (R: 深浅程度; G: 泡沫; B: 细节）"},
+        u_WaterNormalTexture: { type: Texture2D, default: "white", tips:"水面法线贴图" },
+        u_WaterNormalScale: { type: Float, default: 1.0, range: [0.0, 2.0] },
+        // =============================================
     },
     defines: {
         ENABLEVERTEXCOLOR: { type: bool, default: false }
@@ -146,14 +144,6 @@ GLSL Start
     #endif // SPECULARMAP
     }
 
-    vec4 lerp(vec4 a, vec4 b, float t) {
-        float r1 = a.r+(b.r-a.r)*t;
-        float g1 = a.g+(b.g-a.g)*t;
-        float b1 = a.b+(b.b-a.b)*t;
-        float a2 = a.a+(b.a-a.a)*t;
-        return vec4(r1,g1,b1,a2);
-    }
-
     vec3 blendNormals(vec3 n1, vec3 n2) {
         return normalize(vec3(n1.xy+n2.xy, n1.z+n2.z));
     }
@@ -180,13 +170,18 @@ GLSL Start
 
         // =============================================
         vec2 uv = v_Texcoord0;
-        // 深浅程度
-        float degree = texture2D(u_FoamTexture, uv).r;
-        // 使用插值计算出颜色
-        surface.diffuseColor *= lerp(u_ShalowColor, u_DeepColor, degree).xyz;
 
+        // 深浅颜色
+        float t = texture2D(u_FoamTexture, uv).r; // R: 深浅程度
+        surface.diffuseColor *= mix(u_ShalowColor, u_DeepColor, t).xyz; // 使用插值计算出深浅颜色
 
+        // 水面波纹
+        vec2 waveOffset1 = u_WaveParams.xy * u_Time + uv; // 水流速1
+        vec2 waveOffset2 = u_WaveParams.zw * u_Time + uv; // 水流速2
         
+        vec3 worldNormal = blendNormals(unpackNormal(texture2D(u_WaterNormalTexture, waveOffset1)), 
+                                        unpackNormal(texture2D(u_WaterNormalTexture, waveOffset2)));
+        worldNormal = mix(vec3(0.0, 0.0, 1.0), worldNormal, u_WaterNormalScale);
         // =============================================
 
     #ifdef ALPHATEST
