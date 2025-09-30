@@ -89,14 +89,22 @@
           ]
         },
         {
-          "_$id": "3jy3iex7",
+          "_$id": "p2fm0tvq",
           "_$type": "Sprite3D",
-          "name": "Capsule",
+          "name": "Cylinder",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": -0.03245633098943728,
+              "y": -0.01406109222657471,
+              "z": -0.03314172343524283
+            }
+          },
           "_$comp": [
             {
               "_$type": "MeshFilter",
               "sharedMesh": {
-                "_$uuid": "81a027ba-bf6c-4112-8e81-2a9b06c53290",
+                "_$uuid": "7b10e9ed-7954-4485-a8f8-7774b2bc79ac",
                 "_$type": "Mesh"
               }
             },
@@ -107,7 +115,7 @@
               },
               "sharedMaterials": [
                 {
-                  "_$uuid": "6f90bbb0-bcb2-4311-8a9d-3d8277522098",
+                  "_$uuid": "0d48200b-c8f5-49be-8b7b-4c740057e510",
                   "_$type": "Material"
                 }
               ]
