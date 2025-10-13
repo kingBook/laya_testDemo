@@ -19,6 +19,24 @@
           "anisoLevel": 1
         },
         "name": "u_AlbedoTexture"
+      },
+      {
+        "path": "res://f5cabcf2-4fa0-4263-a119-3f8944491444",
+        "constructParams": [
+          1024,
+          1024,
+          1,
+          false,
+          false,
+          true
+        ],
+        "propertyParams": {
+          "filterMode": 1,
+          "wrapModeU": 1,
+          "wrapModeV": 1,
+          "anisoLevel": 1
+        },
+        "name": "u_NormalTexture"
       }
     ],
     "type": "Brick_UnlitShader",
@@ -50,6 +68,7 @@
       0,
       0
     ],
+    "u_NormalScale": 1,
     "defines": [
       "ALBEDOTEXTURE"
     ]
