@@ -13,6 +13,7 @@ Shader3D Start
 
         // =============================================
         u_NormalTexture: { type: Texture2D },
+        u_TilingOffsetNormal: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
         u_NormalScale: { type: Float, default: 1.0, range: [0.0, 2.0] },
         // =============================================
     },
@@ -52,6 +53,21 @@ GLSL Start
     varying vec4 v_VertexColor;
     #endif // COLOR
 
+    // 法线在切线空间下计算，相关：
+    varying vec4 uv;
+    varying vec3 lightDir;
+    //
+
+   // 如果场景里没有暴露世界光向量，需在外部传入一个世界空间方向光向量
+   uniform vec3 u_DirectionalLightDir; // world-space light direction (外部设置)
+
+    // 返回 object-space 的光方向（将 world-space light 转到模型空间）
+    vec3 ObjSpaceLightDir(vec3 posOS) {
+        mat3 worldMat3 = mat3(getWorldMatrix()); // world matrix 的上 3x3
+        mat3 worldToObj = inverse(worldMat3);
+        return normalize(worldToObj * normalize(u_DirectionalLightDir));
+  }
+
     void main()
     {
         Vertex vertex;
@@ -76,6 +92,23 @@ GLSL Start
     #ifdef FOG
         FogHandle(gl_Position.z);
     #endif
+
+        // * 法线在切线空间下计算，相关：
+        // 使用了两张纹理
+        // xy 存储主纹理的纹理坐标
+        uv.xy = vertex.texCoord0.xy * u_TilingOffset.xy + u_TilingOffset.zw; // transformUV(vertex.texCoord0, u_TilingOffset);
+        //  zw 存储法线纹理的纹理坐标
+        uv.zw = vertex.texCoord0.xy * u_TilingOffsetNormal.xy + u_TilingOffsetNormal.zw;
+        
+        // 副法线
+        vec3 binormal = cross(normalize(vertex.normalOS), normalize(vertex.tangentOS.xyz)) * vertex.tangentOS.w;
+        
+        // 模型空间到切线空间的变换矩阵（模型空间切线方向、副法线、模型空间法线，按行排列）
+        mat3 rotation = mat3(vertex.tangentOS.xyz, binormal, vertex.normalOS);
+
+        
+        lightDir = (rotation * ObjSpaceLightDir(vertex.positionOS)).xyz;
+        //
     }
 #endGLSL
 
