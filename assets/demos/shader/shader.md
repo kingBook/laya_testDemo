@@ -342,6 +342,8 @@ int getLightIndex(in int offset, in int index)
 
 DirectionLight getDirectionLight(in int index, in vec3 positionWS)
 
+ivec4 getClusterInfo(mat4 viewMatrix, vec4 viewport, vec3 positionWS, vec4 fragCoord, vec4 projectParams)
+
 PointLight getPointLight(in int index, in ivec4 clusterInfo, in vec3 positionWS)
 
 SpotLight getSpotLight(in int index, in ivec4 clusterInfo, in vec3 positionWS)
