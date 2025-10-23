@@ -161,7 +161,7 @@ vec2 transformUV(in vec2 texcoord, in vec4 tilingOffset)
 mat4 getWorldMatrix()
 ```
 
-ShadingCommon.glsl
+#ShadingCommon.glsl
 ```
 #if !defined(ShadingCommon_lib)
     #define ShadingCommon_lib
@@ -215,7 +215,7 @@ struct PixelParams {
 #endif // ShadingCommon_lib
 ```
 
-SkyCommon.glsl
+#SkyCommon.glsl
 ```
 uniform vec3 u_SunLight_direction;
 uniform vec4 u_SunLight_color;
@@ -236,7 +236,7 @@ varying float v_fogFactor;
 void FogHandle(in float fact)
 ```
 
-SceneFog.glsl
+#SceneFog.glsl
 ```
 float getFogFactor()
 vec3 scenUnlitFog(in vec3 color)
@@ -244,7 +244,7 @@ vec3 sceneLitFog(in vec3 color)
 
 ```
 
-Lighting.glsl
+#Lighting.glsl
 ```
 struct Light {
     vec3 color;
@@ -350,7 +350,7 @@ SpotLight getSpotLight(in int index, in ivec4 clusterInfo, in vec3 positionWS)
 
 ```
 
-ShadowCommon.glsl
+#ShadowCommon.glsl
 ```
 uniform vec3 u_ShadowLightDirection;
 uniform vec4 u_ShadowBias;

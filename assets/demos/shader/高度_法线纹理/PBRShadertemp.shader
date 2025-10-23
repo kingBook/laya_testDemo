@@ -118,7 +118,7 @@ GLSL Start
 
         inputs.normalTS = vec3(0.0, 0.0, 1.0);
     #ifdef NORMALTEXTURE
-         vec3 normalSampler = texture2D(u_NormalTexture, uv).rgb;
+        vec3 normalSampler = texture2D(u_NormalTexture, uv).rgb;
         normalSampler = normalize(normalSampler * 2.0 - 1.0);
         normalSampler.y *= -1.0;
         inputs.normalTS = normalScale(normalSampler, u_NormalScale);

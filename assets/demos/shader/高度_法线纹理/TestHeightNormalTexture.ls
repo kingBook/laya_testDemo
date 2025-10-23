@@ -64,9 +64,9 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": 5,
-              "y": 5,
-              "z": 5
+              "x": 0.3417769958039789,
+              "y": 0.6688317483658249,
+              "z": 0.5919751040282897
             },
             "localRotation": {
               "_$type": "Quaternion",
@@ -89,22 +89,14 @@
           ]
         },
         {
-          "_$id": "p2fm0tvq",
+          "_$id": "se5xs76r",
           "_$type": "Sprite3D",
-          "name": "Cylinder",
-          "transform": {
-            "localPosition": {
-              "_$type": "Vector3",
-              "x": -0.03245633098943728,
-              "y": -0.01406109222657471,
-              "z": -0.03314172343524283
-            }
-          },
+          "name": "Cone",
           "_$comp": [
             {
               "_$type": "MeshFilter",
               "sharedMesh": {
-                "_$uuid": "7b10e9ed-7954-4485-a8f8-7774b2bc79ac",
+                "_$uuid": "51cd3a71-c75c-42b4-ae4e-dd493b26290b",
                 "_$type": "Mesh"
               }
             },
@@ -116,6 +108,38 @@
               "sharedMaterials": [
                 {
                   "_$uuid": "0d48200b-c8f5-49be-8b7b-4c740057e510",
+                  "_$type": "Material"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "ufk3hu4o",
+          "_$type": "Sprite3D",
+          "name": "Cone_PBR",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": -1.1507828548342527
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "MeshFilter",
+              "sharedMesh": {
+                "_$uuid": "51cd3a71-c75c-42b4-ae4e-dd493b26290b",
+                "_$type": "Mesh"
+              }
+            },
+            {
+              "_$type": "MeshRenderer",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "sharedMaterials": [
+                {
+                  "_$uuid": "2412a3a6-86f2-4b57-8f6e-01750f1cf756",
                   "_$type": "Material"
                 }
               ]

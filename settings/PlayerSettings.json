@@ -28,7 +28,8 @@
     "laya.d3": true,
     "laya.spine": true,
     "laya.physics2D": true,
-    "laya.navMesh2D": true
+    "laya.navMesh2D": true,
+    "laya.tilemap": true
   },
   "splash": {
     "fit": "center"

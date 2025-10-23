@@ -39,13 +39,13 @@
         "name": "u_NormalTexture"
       }
     ],
-    "type": "Brick_UnlitShader",
+    "type": "PBRShadertemp",
     "renderQueue": 2000,
     "materialRenderMode": 0,
     "u_AlphaTestValue": 0.5,
     "s_Cull": 2,
     "s_Blend": 0,
-    "s_BlendSrc": 1,
+    "s_BlendSrc": 0,
     "s_BlendDst": 0,
     "s_BlendSrcRGB": 0,
     "s_BlendDstRGB": 0,
@@ -69,14 +69,19 @@
       0
     ],
     "u_NormalScale": 1,
-    "u_TilingOffsetNormal": [
+    "u_Metallic": 0,
+    "u_Smoothness": 0.495,
+    "u_OcclusionStrength": 1,
+    "u_EmissionColor": [
       1,
       1,
-      0,
-      0
+      1,
+      1
     ],
+    "u_EmissionIntensity": 1,
     "defines": [
-      "ALBEDOTEXTURE"
+      "ALBEDOTEXTURE",
+      "NORMALTEXTURE"
     ]
   }
 }
