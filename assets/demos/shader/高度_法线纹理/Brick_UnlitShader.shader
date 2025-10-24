@@ -6,10 +6,11 @@ Shader3D Start
     supportReflectionProbe:true,
     uniformMap:{
         u_AlphaTestValue: { type: Float, default: 0.5 },
-        u_TilingOffset: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
-
+        
         u_AlbedoColor: { type: Color, default: [1, 1, 1, 1], block: unlit },
         u_AlbedoTexture: { type: Texture2D, options: { define: "ALBEDOTEXTURE" } },
+        u_TilingOffset: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
+
 
         // =============================================
         u_NormalTexture: { type: Texture2D },
