@@ -62,7 +62,8 @@ GLSL Start
 
         DirectionLight directionLight = getDirectionLight(0, positionWS);
 
-        return normalize(worldToObj * normalize(-directionLight.direction));
+        return normalize(-directionLight.direction);
+        //return normalize(worldToObj * normalize(-directionLight.direction));
     }
 
     vec3 ObjSpaceViewDir(in vec3 positionWS) {
@@ -104,7 +105,7 @@ GLSL Start
         uv.zw = vertex.texCoord0.xy * u_TilingOffsetNormal.xy + u_TilingOffsetNormal.zw; // transformUV(vertex.texCoord0, u_TilingOffsetNormal);
         
         // 副法线
-        vec3 binormal = cross(normalize(vertex.normalOS), normalize(vertex.tangentOS.xyz)) * vertex.tangentOS.w;
+        vec3 binormal = cross(normalize(vertex.normalOS), normalize(vertex.tangentOS.xyz)); vertex.tangentOS.w;
         
         // 模型空间到切线空间的变换矩阵（模型空间切线方向、副法线、模型空间法线，按行排列）
         mat3 rotation = mat3(vertex.tangentOS.xyz, binormal, vertex.normalOS);
@@ -172,7 +173,7 @@ GLSL Start
         //normalSampler.y *= -1.0;
 
         vec3 normalTS = normalScale(normalSampler, u_NormalScale);
-        //normalTS.z = sqrt(1.0 - saturate(dot(normalSampler.xy, normalSampler.xy)));
+        normalTS.z = sqrt(1.0 - saturate(dot(normalSampler.xy, normalSampler.xy)));
 
         color *= max(0.0, dot(normalTS, lightDirOS));
         // =========================================

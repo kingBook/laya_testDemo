@@ -799,7 +799,20 @@
                   -1,
                   -1,
                   -1
-                ]
+                ],
+                "physicsDatas": {
+                  "1": {
+                    "_$type": "TileSetCellPhysicsInfo"
+                  },
+                  "_$type": "Record"
+                },
+                "lightOccluderDatas": {
+                  "_$type": "Record"
+                },
+                "customDatas": {
+                  "_$type": "any",
+                  "value": {}
+                }
               },
               "_$type": "Record"
             }
@@ -1121,7 +1134,20 @@
                   -1,
                   -1,
                   -1
-                ]
+                ],
+                "physicsDatas": {
+                  "1": {
+                    "_$type": "TileSetCellPhysicsInfo"
+                  },
+                  "_$type": "Record"
+                },
+                "lightOccluderDatas": {
+                  "_$type": "Record"
+                },
+                "customDatas": {
+                  "_$type": "any",
+                  "value": {}
+                }
               },
               "_$type": "Record"
             }
