@@ -3,6 +3,8 @@
 @IEditorEnv.customEditor(Laya.MeshFilter)
 export class ShowNormalsEditor extends IEditorEnv.CustomEditor {
 
+    private readonly disable: boolean = true;
+
     declare owner: Laya.Sprite3D;
 
     //private _manager: IEditorEnv.IGizmosManager;
@@ -18,6 +20,8 @@ export class ShowNormalsEditor extends IEditorEnv.CustomEditor {
 
     public override onSceneGUI(): void {
         // IEditorEnv.Handles.drawHemiSphere(this.owner.transform.position, 2);
+
+        if (this.disable) return;
 
         if (this._meshFilter && this._meshFilter.sharedMesh) {
             const mesh = this._meshFilter.sharedMesh;

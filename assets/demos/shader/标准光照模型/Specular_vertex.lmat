@@ -2,10 +2,9 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "标准光照模型/Blinnphong",
+    "type": "标准光照模型/Specular_vertex",
     "renderQueue": 2000,
     "materialRenderMode": 0,
-    "u_AlphaTestValue": 0.5,
     "s_Cull": 2,
     "s_Blend": 0,
     "s_BlendSrc": 0,
@@ -19,27 +18,19 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
-    "u_TilingOffset": [
-      1,
-      1,
-      0,
-      0
-    ],
-    "u_NormalScale": 1,
-    "u_DiffuseColor": [
+    "u_AlbedoColor": [
       1,
       1,
       1,
       1
     ],
-    "u_AlbedoIntensity": 1,
-    "u_Shininess": 0.078125,
     "u_SpecularColor": [
       1,
       1,
       1,
       1
     ],
+    "u_Gloss": 3,
     "defines": []
   }
 }

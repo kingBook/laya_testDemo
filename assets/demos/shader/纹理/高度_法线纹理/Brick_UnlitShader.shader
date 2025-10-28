@@ -61,9 +61,8 @@ GLSL Start
         mat3 worldToObj = inverse(worldMat3);
 
         DirectionLight directionLight = getDirectionLight(0, positionWS);
-
-        return normalize(-directionLight.direction);
-        //return normalize(worldToObj * normalize(-directionLight.direction));
+        //return normalize(-directionLight.direction);
+        return normalize(worldToObj * normalize(-directionLight.direction));
     }
 
     vec3 ObjSpaceViewDir(in vec3 positionWS) {
@@ -105,7 +104,7 @@ GLSL Start
         uv.zw = vertex.texCoord0.xy * u_TilingOffsetNormal.xy + u_TilingOffsetNormal.zw; // transformUV(vertex.texCoord0, u_TilingOffsetNormal);
         
         // 副法线
-        vec3 binormal = cross(normalize(vertex.normalOS), normalize(vertex.tangentOS.xyz)); vertex.tangentOS.w;
+        vec3 binormal = cross(normalize(vertex.normalOS), normalize(vertex.tangentOS.xyz)); //vertex.tangentOS.w;
         
         // 模型空间到切线空间的变换矩阵（模型空间切线方向、副法线、模型空间法线，按行排列）
         mat3 rotation = mat3(vertex.tangentOS.xyz, binormal, vertex.normalOS);
@@ -159,14 +158,6 @@ GLSL Start
         #endif // ENABLEVERTEXCOLOR
     #endif // COLOR
 
-    #ifdef ALPHATEST
-        if (alpha < u_AlphaTestValue)
-            discard;
-    #endif // ALPHATEST
-
-    #ifdef FOG
-        color = scenUnlitFog(color);
-    #endif // FOG
         // =========================================
         vec3 normalSampler = texture2D(u_NormalTexture, uv.zw).rgb;
         normalSampler = normalize(normalSampler * 2.0 - 1.0);
@@ -178,6 +169,14 @@ GLSL Start
         color *= max(0.0, dot(normalTS, lightDirOS));
         // =========================================
 
+    #ifdef ALPHATEST
+        if (alpha < u_AlphaTestValue)
+            discard;
+    #endif // ALPHATEST
+
+    #ifdef FOG
+        color = scenUnlitFog(color);
+    #endif // FOG
         gl_FragColor = vec4(color, alpha);
 
         gl_FragColor = outputTransform(gl_FragColor);

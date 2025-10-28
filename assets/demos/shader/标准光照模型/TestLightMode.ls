@@ -1,6 +1,6 @@
 {
   "_$ver": 1,
-  "_$id": "3ynmo338",
+  "_$id": "lvq4r990",
   "_$type": "Scene",
   "left": 0,
   "right": 0,
@@ -64,9 +64,9 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": 0.3417769958039789,
-              "y": 0.6688317483658249,
-              "z": 0.5919751040282897
+              "x": 0.24308252606486885,
+              "y": 0.699100510197468,
+              "z": 0.4210312491974967
             },
             "localRotation": {
               "_$type": "Quaternion",
@@ -89,14 +89,14 @@
           ]
         },
         {
-          "_$id": "se5xs76r",
+          "_$id": "blv7fxu2",
           "_$type": "Sprite3D",
-          "name": "Cone",
+          "name": "Capsule_diffuse_vertex",
           "_$comp": [
             {
               "_$type": "MeshFilter",
               "sharedMesh": {
-                "_$uuid": "51cd3a71-c75c-42b4-ae4e-dd493b26290b",
+                "_$uuid": "81a027ba-bf6c-4112-8e81-2a9b06c53290",
                 "_$type": "Mesh"
               }
             },
@@ -107,7 +107,7 @@
               },
               "sharedMaterials": [
                 {
-                  "_$uuid": "0d48200b-c8f5-49be-8b7b-4c740057e510",
+                  "_$uuid": "cec1769b-76b9-4637-b91c-86f9bba2b9ca",
                   "_$type": "Material"
                 }
               ]
@@ -115,20 +115,20 @@
           ]
         },
         {
-          "_$id": "ufk3hu4o",
+          "_$id": "2envfn5t",
           "_$type": "Sprite3D",
-          "name": "Cone_PBR",
+          "name": "Capsule_diffuse_pixel",
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": -1.1507828548342527
+              "x": 0.7306424395665381
             }
           },
           "_$comp": [
             {
               "_$type": "MeshFilter",
               "sharedMesh": {
-                "_$uuid": "51cd3a71-c75c-42b4-ae4e-dd493b26290b",
+                "_$uuid": "81a027ba-bf6c-4112-8e81-2a9b06c53290",
                 "_$type": "Mesh"
               }
             },
@@ -139,7 +139,71 @@
               },
               "sharedMaterials": [
                 {
-                  "_$uuid": "2412a3a6-86f2-4b57-8f6e-01750f1cf756",
+                  "_$uuid": "87495fae-cca3-4145-be76-b65a356e02ed",
+                  "_$type": "Material"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "bzdlqoo7",
+          "_$type": "Sprite3D",
+          "name": "Capsule_specular_vertex",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": 1.329582609078899
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "MeshFilter",
+              "sharedMesh": {
+                "_$uuid": "81a027ba-bf6c-4112-8e81-2a9b06c53290",
+                "_$type": "Mesh"
+              }
+            },
+            {
+              "_$type": "MeshRenderer",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "sharedMaterials": [
+                {
+                  "_$uuid": "c54d29f7-9994-4d43-852a-d82d16421c73",
+                  "_$type": "Material"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "19frc061",
+          "_$type": "Sprite3D",
+          "name": "Capsule_specular_pixel",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": 2.0537469460686046
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "MeshFilter",
+              "sharedMesh": {
+                "_$uuid": "81a027ba-bf6c-4112-8e81-2a9b06c53290",
+                "_$type": "Mesh"
+              }
+            },
+            {
+              "_$type": "MeshRenderer",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "sharedMaterials": [
+                {
+                  "_$uuid": "a8cad559-6db0-4518-827e-0ee8b2b8e4f1",
                   "_$type": "Material"
                 }
               ]
