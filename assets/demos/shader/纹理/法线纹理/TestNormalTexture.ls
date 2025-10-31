@@ -89,9 +89,41 @@
           ]
         },
         {
+          "_$id": "ufk3hu4o",
+          "_$type": "Sprite3D",
+          "name": "Cone_PBR",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": -1.150782823562622
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "MeshFilter",
+              "sharedMesh": {
+                "_$uuid": "51cd3a71-c75c-42b4-ae4e-dd493b26290b",
+                "_$type": "Mesh"
+              }
+            },
+            {
+              "_$type": "MeshRenderer",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "sharedMaterials": [
+                {
+                  "_$uuid": "2412a3a6-86f2-4b57-8f6e-01750f1cf756",
+                  "_$type": "Material"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "_$id": "se5xs76r",
           "_$type": "Sprite3D",
-          "name": "Cone",
+          "name": "Cone_NormalMapTS",
           "_$comp": [
             {
               "_$type": "MeshFilter",
@@ -115,13 +147,45 @@
           ]
         },
         {
-          "_$id": "ufk3hu4o",
+          "_$id": "hmhxzrdo",
           "_$type": "Sprite3D",
-          "name": "Cone_PBR",
+          "name": "Cube_NormalMapTS",
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": -1.1507828548342527
+              "x": 1.4571121803107387
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "MeshFilter",
+              "sharedMesh": {
+                "_$uuid": "6e013e32-fec7-4397-80d1-f918a07607be",
+                "_$type": "Mesh"
+              }
+            },
+            {
+              "_$type": "MeshRenderer",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "sharedMaterials": [
+                {
+                  "_$uuid": "0d48200b-c8f5-49be-8b7b-4c740057e510",
+                  "_$type": "Material"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "kpa72dkv",
+          "_$type": "Sprite3D",
+          "name": "Cone_NormalMapWS",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "z": 1.148435081457586
             }
           },
           "_$comp": [
@@ -139,7 +203,7 @@
               },
               "sharedMaterials": [
                 {
-                  "_$uuid": "2412a3a6-86f2-4b57-8f6e-01750f1cf756",
+                  "_$uuid": "0d48200b-c8f5-49be-8b7b-4c740057e510",
                   "_$type": "Material"
                 }
               ]

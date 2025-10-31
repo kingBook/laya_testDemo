@@ -98,6 +98,7 @@ GLSL Start
         vec3 reflectDir = normalize(reflect(-worldLightDir, worldNormal)); // reflect 函数的入射方向要求是由光源指顶点处，因此取反
         // 视角方向（世界空间）
         vec3 viewDir = normalize(u_CameraPos - worldPosition);
+        //vec3 viewDir = getViewDirection(positionWS);
         // 高光反射颜色
         vec3 specularColor = directionLight.color * u_SpecularColor.rbg * pow(saturate(dot(reflectDir, viewDir)), u_Gloss);
         // -------------
