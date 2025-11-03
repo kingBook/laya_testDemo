@@ -80,13 +80,15 @@ GLSL Start
         uv.zw = vertex.texCoord0.xy * u_TilingOffsetNormal.xy + u_TilingOffsetNormal.zw;
         // transformUV(vertex.texCoord0, u_TilingOffsetNormal);
 
-        // 灯光方向（世界空间 > 对象空间 > 切线空间）
+        // 灯光方向（世界空间）
         DirectionLight directionLight = getDirectionLight(0, positionWS);
-
+        
         // 方向灯光颜色
         directionLightColor = directionLight.color;
 
-        mat2 worldMat3x3 = mat3(worldMat);
+        // 对象空间 > 世界空间的变换矩阵3x3
+        mat3 worldMat3x3 = mat3(worldMat);
+
         // 法线方向（世界空间）
         vec3 worldNormal = normalize(worldMat3x3 * vertex.normalOS);
         // 切线方向（世界空间）

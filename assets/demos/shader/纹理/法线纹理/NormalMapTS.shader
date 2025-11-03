@@ -57,6 +57,8 @@ GLSL Start
     varying vec3 viewDirTS;
     varying vec3 directionLightColor;
     // ============================================
+    varying vec3 worldNormal;
+    varying vec3 worldLightDir;
 
     void main()
     {
@@ -67,11 +69,6 @@ GLSL Start
         mat4 worldMat = getWorldMatrix();
         vec4 pos = (worldMat * vec4(vertex.positionOS, 1.0));
         vec3 positionWS = pos.xyz / pos.w;
-
-        // ============================================
-        // 法线方向（世界空间）
-        vec3 worldNormal = normalize(mat3(worldMat) * vertex.normalOS);
-        // ============================================
 
         // ============================================
         // 使用了两张纹理
@@ -89,19 +86,27 @@ GLSL Start
         
         // 对象空间 > 切线空间的变换矩阵3x3（对象空间切线方向、副法线、对象空间法线，按行排列）
         mat3 tbn = mat3(vertex.tangentOS.xyz, binormal, vertex.normalOS);
+        // 切线空间TBN矩阵的逆转置
+        mat3 tbnInv=transpose(tbn);
         // 世界空间 > 对象空间的变换矩阵3x3
         mat3 worldToObj = inverse(mat3(worldMat));
 
         // 灯光方向（世界空间 > 对象空间 > 切线空间）
         DirectionLight directionLight = getDirectionLight(0, positionWS);
-        lightDirTS = normalize(tbn * worldToObj * (-directionLight.direction));
+        lightDirTS = normalize(tbnInv * (worldToObj * (-directionLight.direction)));
 
         // 方向灯光颜色
         directionLightColor = directionLight.color;
 
         // 视角方向（世界空间 > 对象空间 > 切线空间）
-        viewDirTS = normalize(tbn * worldToObj * getViewDirection(positionWS));
+        viewDirTS = normalize(tbnInv * (worldToObj * getViewDirection(positionWS)));
         // ============================================
+
+         // 法线方向（世界空间）
+        worldNormal = normalize(mat3(worldMat) * vertex.normalOS);
+
+        // 主灯光方向（世界空间），注意反转
+        worldLightDir = normalize(-directionLight.direction);
 
         gl_Position = getPositionCS(positionWS);
 
@@ -130,15 +135,13 @@ GLSL Start
     varying vec3 viewDirTS;
     varying vec3 directionLightColor;
     // ===========================================
+    varying vec3 worldNormal;
+    varying vec3 worldLightDir;
 
     void main()
     {
 
         // ============================================
-        //vec3 normalTS = texture2D(u_NormalTexture, uv.zw).rgb;
-        //normalTS.xy = (normalTS.xy * 2.0 - 1.0) * u_NormalScale;
-        //normalTS.z = sqrt(1.0 - saturate(dot(normalTS.xy, normalTS.xy)));
-
         vec3 normalSampler = texture2D(u_NormalTexture, uv.zw).rgb;
         normalSampler = normalize(normalSampler * 2.0 - 1.0);
         //normalSampler.y *= -1.0;

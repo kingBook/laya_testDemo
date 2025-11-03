@@ -67,7 +67,7 @@
       0,
       0
     ],
-    "u_NormalScale": 0.746,
+    "u_NormalScale": 0.2,
     "u_TilingOffsetNormal": [
       1,
       1,
@@ -80,7 +80,7 @@
       1,
       1
     ],
-    "u_Gloss": 2.783,
+    "u_Gloss": 2,
     "defines": [
       "ALBEDOTEXTURE"
     ]
