@@ -80,23 +80,23 @@ GLSL Start
         uv.zw = vertex.texCoord0.xy * u_TilingOffsetNormal.xy + u_TilingOffsetNormal.zw;
         // transformUV(vertex.texCoord0, u_TilingOffsetNormal);
 
-        // 灯光方向（世界空间）
+        // 主灯光方向（世界空间）
         DirectionLight directionLight = getDirectionLight(0, positionWS);
         
-        // 方向灯光颜色
+        // 主灯光颜色
         directionLightColor = directionLight.color;
 
         // 对象空间 > 世界空间的变换矩阵3x3
         mat3 worldMat3x3 = mat3(worldMat);
 
         // 法线方向（世界空间）
-        vec3 worldNormal = normalize(worldMat3x3 * vertex.normalOS);
+        vec3 normalWS = normalize(worldMat3x3 * vertex.normalOS);
         // 切线方向（世界空间）
-        vec3 worldTangent = normalize(worldMat3x3 * vertex.tangentOS.xyz);
+        vec3 tangentWS = normalize(worldMat3x3 * vertex.tangentOS.xyz);
         // 副法线（世界空间）
-        vec3 worldBinormal = normalize(cross(worldNormal, worldTangent) * sign(vertex.tangentOS.w));
+        vec3 ninormalWS = normalize(cross(normalWS, tangentWS) * sign(vertex.tangentOS.w));
 
-        TBN = mat3(worldTangent, worldBinormal, worldNormal);
+        TBN = mat3(tangentWS, ninormalWS, normalWS);
 
         worldPosition = positionWS;
         // ============================================
@@ -147,7 +147,7 @@ GLSL Start
         //normalSampler.y *= -1.0;
         vec3 normalTS = normalScale(normalSampler, u_NormalScale);
         normalTS.z = sqrt(1.0 - saturate(dot(normalTS.xy, normalTS.xy)));
-        vec3 normalWS = normalize(TBN * normalTS);
+        vec3 normalWS = normalize(TBN * normalTS); // 由于GLSL中，矩阵填充T、B、N向量时，就是按列排列，所以此处不需要对TBN转置
        
         // 漫反射颜色
         vec3 diffuseColor = directionLightColor * u_AlbedoColor.rgb * saturate(dot(normalWS, lightDirWS));

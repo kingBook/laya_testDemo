@@ -95,7 +95,7 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": -1.150782823562622
+              "z": -1.9382774748009757
             }
           },
           "_$comp": [
@@ -153,7 +153,7 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": 1.4571121803107387
+              "x": 1.2844271950302386
             }
           },
           "_$comp": [
@@ -172,6 +172,38 @@
               "sharedMaterials": [
                 {
                   "_$uuid": "0d48200b-c8f5-49be-8b7b-4c740057e510",
+                  "_$type": "Material"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_$id": "motuxn2d",
+          "_$type": "Sprite3D",
+          "name": "Cone_NormalMapTS2",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": 2.647833824157715
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "MeshFilter",
+              "sharedMesh": {
+                "_$uuid": "51cd3a71-c75c-42b4-ae4e-dd493b26290b",
+                "_$type": "Mesh"
+              }
+            },
+            {
+              "_$type": "MeshRenderer",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "sharedMaterials": [
+                {
+                  "_$uuid": "dd9dc127-3952-4307-aba1-916fd6300628",
                   "_$type": "Material"
                 }
               ]

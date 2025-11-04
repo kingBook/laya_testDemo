@@ -1,7 +1,7 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:"纹理/法线纹理/NormalMapTS",
+    name:"纹理/法线纹理/NormalMapTS2",
     enableInstancing:true,
     supportReflectionProbe:true,
     uniformMap:{
@@ -37,7 +37,7 @@ Shader3D End
 GLSL Start
 #defineGLSL unlitVS
 
-    #define SHADER_NAME NormalMapTS
+    #define SHADER_NAME NormalMapTS2
 
     #include "Math.glsl";
 
@@ -63,7 +63,6 @@ GLSL Start
         Vertex vertex;
         getVertexParams(vertex);
 
-
         mat4 worldMat = getWorldMatrix();
         vec4 pos = (worldMat * vec4(vertex.positionOS, 1.0));
         vec3 positionWS = pos.xyz / pos.w;
@@ -79,25 +78,28 @@ GLSL Start
         uv.zw = vertex.texCoord0.xy * u_TilingOffsetNormal.xy + u_TilingOffsetNormal.zw;
         // transformUV(vertex.texCoord0, u_TilingOffsetNormal);
 
-        // 副法线（对象空间）
-        vec3 binormalOS = normalize(cross(vertex.normalOS, vertex.tangentOS.xyz) * sign(vertex.tangentOS.w));
+        // 对象空间 > 世界空间变换矩阵3x3
+        mat3 worldMat3x3 = mat3(worldMat);
+        // 法线方向（世界空间）
+        vec3 normalWS = worldMat3x3 * vertex.normalOS;
+        // 切线方向（世界空间）
+        vec3 tangentWS = worldMat3x3 * vertex.tangentOS.xyz;
+        // 副法线（世界空间）
+        vec3 binormalWS = normalize(cross(normalWS, tangentWS) * sign(vertex.tangentOS.w));
         
-        // 对象空间 > 切线空间的变换矩阵3x3（对象空间切线方向、副法线、法线，按列排列）
-        mat3 tbn = mat3(vertex.tangentOS.xyz, binormalOS, vertex.normalOS);
+        // 世界空间 > 切线空间的变换矩阵3x3（世界空间切线方向、副法线、法线，按列排列）
+        mat3 tbn = mat3(tangentWS, binormalWS, normalWS);
         tbn = transpose(tbn); // GLSL 中矩阵是按列排列的，需要转置成按行排列
 
-        // 世界空间 > 对象空间的变换矩阵3x3
-        mat3 worldToObj = inverse(mat3(worldMat));
-
-        // 主灯光方向（世界空间 > 对象空间 > 切线空间）
+        // 主灯光方向（世界空间 > 切线空间）
         DirectionLight directionLight = getDirectionLight(0, positionWS);
-        lightDirTS = normalize(tbn * (worldToObj * (-directionLight.direction)));
+        lightDirTS = normalize(tbn * (-directionLight.direction));
 
         // 主灯光颜色
         directionLightColor = directionLight.color;
 
-        // 视角方向（世界空间 > 对象空间 > 切线空间）
-        viewDirTS = normalize(tbn * (worldToObj * getViewDirection(positionWS)));
+        // 视角方向（世界空间 > 切线空间）
+        viewDirTS = normalize(tbn * getViewDirection(positionWS));
         // ============================================
 
         gl_Position = getPositionCS(positionWS);
@@ -109,7 +111,7 @@ GLSL Start
 
 #defineGLSL unlitPS
 
-    #define SHADER_NAME NormalMapTS
+    #define SHADER_NAME NormalMapTS2
 
     #include "Color.glsl";
 
@@ -143,7 +145,7 @@ GLSL Start
         // 漫反射颜色
         vec3 diffuseColor = directionLightColor * u_AlbedoColor.rgb * saturate(dot(normalTS, lightDirTS));
         // -------------
-        // 主灯光反射方向（世界空间）
+        // 主灯光反射方向（切线空间）
         vec3 reflectDir = normalize(reflect(-lightDirTS, normalTS)); // reflect 函数的入射方向要求是由光源指顶点处，因此取反
         // 高光反射颜色
         vec3 specularColor = directionLightColor * u_SpecularColor.rbg * pow(saturate(dot(reflectDir, viewDirTS)), u_Gloss);
@@ -161,7 +163,7 @@ GLSL Start
         color *= albedoSampler.rgb;
         alpha *= albedoSampler.a;
     #endif // ALBEDOTEXTURE
-
+        
         gl_FragColor = vec4(color, alpha);
 
         gl_FragColor = outputTransform(gl_FragColor);
