@@ -92,12 +92,6 @@
           "_$id": "ufk3hu4o",
           "_$type": "Sprite3D",
           "name": "Cone_PBR",
-          "transform": {
-            "localPosition": {
-              "_$type": "Vector3",
-              "z": -1.9382774748009757
-            }
-          },
           "_$comp": [
             {
               "_$type": "MeshFilter",
@@ -124,6 +118,12 @@
           "_$id": "se5xs76r",
           "_$type": "Sprite3D",
           "name": "Cone_NormalMapTS",
+          "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": 1.1410868682331985
+            }
+          },
           "_$comp": [
             {
               "_$type": "MeshFilter",
@@ -153,7 +153,7 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": 1.2844271950302386
+              "x": 2.3870422158362428
             }
           },
           "_$comp": [
@@ -185,7 +185,7 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "x": 2.647833824157715
+              "x": 3.6682281233933782
             }
           },
           "_$comp": [
@@ -217,7 +217,7 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "z": 1.148435081457586
+              "z": 1.2288151860831364
             }
           },
           "_$comp": [

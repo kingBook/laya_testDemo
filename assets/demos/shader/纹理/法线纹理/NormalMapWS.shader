@@ -147,7 +147,9 @@ GLSL Start
         //normalSampler.y *= -1.0;
         vec3 normalTS = normalScale(normalSampler, u_NormalScale);
         normalTS.z = sqrt(1.0 - saturate(dot(normalTS.xy, normalTS.xy)));
-        vec3 normalWS = normalize(TBN * normalTS); // 由于GLSL中，矩阵填充T、B、N向量时，就是按列排列，所以此处不需要对TBN转置
+        // 此处原需要由（T、B、N）按行排列构成的矩阵的逆（即转置矩阵，正交矩阵的逆等于转置） * 法线方向向量，
+        // 由于GLSL中，矩阵填充T、B、N向量时，默认就是按列排列，所以此处不需要对TBN转置
+        vec3 normalWS = normalize(TBN * normalTS); 
        
         // 漫反射颜色
         vec3 diffuseColor = directionLightColor * u_AlbedoColor.rgb * saturate(dot(normalWS, lightDirWS));
