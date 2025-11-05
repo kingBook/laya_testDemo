@@ -38,7 +38,7 @@
       "_$comp": [
         {
           "_$type": "27435606-71ca-479f-8940-e0522c726f81",
-          "scriptPath": "scenes/水面/TestWater.ts",
+          "scriptPath": "demos/shader/水面/TestWater.ts",
           "camera": {
             "_$ref": "6jx8h8bvc6"
           }
@@ -100,8 +100,12 @@
         {
           "_$id": "glcfliv8",
           "_$type": "Sprite3D",
-          "name": "Plane",
+          "name": "Water",
           "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "y": 0.5
+            },
             "localScale": {
               "_$type": "Vector3",
               "x": 2,

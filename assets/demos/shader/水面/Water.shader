@@ -1,41 +1,40 @@
 Shader3D Start
 {
-    type:Shader3D,
-    name:Water,
+    type:Shader3D
+    name:"水面/Water",
     enableInstancing:true,
     supportReflectionProbe:true,
     uniformMap:{
-        //u_AlphaTestValue: { type: Float, default: 0.5 },
-        u_TilingOffset: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
+        // =============================================
+        u_SpecularColor: { type: Color, default: [1, 1, 1, 1] },
+        u_Gloss: { type: Float, default:1.0, range: [1.0, 5.0] },
+        u_Shininess: { type: Float, default: 0.078, range: [0.0, 1.0] },
 
-        //u_AlbedoColor: { type: Color, default: [1, 1, 1, 1], block: unlit },
-        //u_AlbedoTexture: { type: Texture2D, options: { define: "ALBEDOTEXTURE" } },
+        u_detailColor: { type: Color, default: [1, 1, 1, 1] },
 
-        // 浅水色
-        u_ShalowColor: { type: Color, default:[1,1,1,1]},
-        // 深水色
-        u_DeepColor: { type: Color, default:[1,1,1,1]},
-        // 泡沫贴图（R: 深浅程度; G: 泡沫; B: 细节）
-        u_FoamTexture: { type: Texture2D, default: "white"},
-        // xy: 水流速1; zw: 水流速2
-        u_WaveParams: { type: Vector4, default: [1, 1, 0, 0]},
+        u_WaveParams: { type: Vector4, default: [0.01,0.0, 0.01, 0.01], tips:"xy: 水流速1; zw: 水流速2"},
+        u_ShalowColor: { type: Color, default:[1,1,1,1], tips:"浅水颜色"},
+        u_DeepColor: { type: Color, default:[1,1,1,1], tips:"深水颜色"},
+        u_FoamTexture: { type: Texture2D, default: "white", tips:"泡沫贴图 (R: 深浅程度; G: 泡沫; B: 细节）"},
+        u_WaterNormalTexture: { type: Texture2D, default: "white", tips:"水面法线贴图（注意：法线贴图的平铺模式必须设置为重复，否则无法看到流动效果）" },
+        u_WaterNormalScale: { type: Float, default: 1.0, range: [0.0, 2.0] },
+        // =============================================
     },
     defines: {
-        //ENABLEVERTEXCOLOR: { type: bool, default: false }
     }
     shaderPass:[
         {
             pipeline:Forward,
-            VS:unlitVS,
-            FS:unlitPS
+            VS:WaterVS,
+            FS:WaterFS
         }
     ]
 }
 Shader3D End
 
-GLSL Start
-#defineGLSL unlitVS
 
+GLSL Start
+#defineGLSL WaterVS
     #define SHADER_NAME Water
 
     #include "Math.glsl";
@@ -48,43 +47,24 @@ GLSL Start
 
     #include "VertexCommon.glsl";
 
-    #ifdef UV
-    varying vec2 v_Texcoord0;
-    #endif // UV
-
-    // #ifdef COLOR
-    // varying vec4 v_VertexColor;
-    // #endif // COLOR
+    #include "BlinnPhongVertex.glsl";
 
     void main()
     {
         Vertex vertex;
         getVertexParams(vertex);
 
-    #ifdef UV
-        v_Texcoord0 = transformUV(vertex.texCoord0, u_TilingOffset);
-    #endif // UV
+        PixelParams pixel;
+        initPixelParams(pixel, vertex);
 
-    // #ifdef COLOR
-    //     v_VertexColor = vertex.vertexColor;
-    // #endif // COLOR
-
-        mat4 worldMat = getWorldMatrix();
-        vec4 pos = (worldMat * vec4(vertex.positionOS, 1.0));
-        vec3 positionWS = pos.xyz / pos.w;
-
-        gl_Position = getPositionCS(positionWS);
+        gl_Position = getPositionCS(pixel.positionWS);
 
         gl_Position = remapPositionZ(gl_Position);
 
-    // #ifdef FOG
-    //     FogHandle(gl_Position.z);
-    // #endif
     }
 #endGLSL
 
-#defineGLSL unlitPS
-
+#defineGLSL WaterFS
     #define SHADER_NAME Water
 
     #include "Color.glsl";
@@ -95,80 +75,64 @@ GLSL Start
     #include "Camera.glsl";
     #include "Sprite3DFrag.glsl";
 
-    //varying vec4 v_Color;
-    varying vec2 v_Texcoord0;
+    #include "BlinnPhongFrag.glsl";
 
-    vec4 lerp(vec4 a, vec4 b, float t) {
-        float r1 = a.r+(b.r-a.r)*t;
-        float g1 = a.g+(b.g-a.g)*t;
-        float b1 = a.b+(b.b-a.b)*t;
-        float a2 = a.a+(b.a-a.a)*t;
-        return vec4(r1,g1,b1,a2);
-    }
+    void getWaterSurface(inout Surface surface, const in PixelParams pixel){
+        vec2 uv = v_Texcoord0;
 
-    vec3 blendNormals(vec3 n1, vec3 n2) {
-        return normalize(vec3(n1.xy+n2.xy, n1.z+n2.z));
-    }
+        vec4 foamTextureSampler = texture2D(u_FoamTexture, uv);
 
-    vec3 UnpackNormal(vec4 packednormal) {
-        //#if defined(SHADER_API_GLES)  defined(SHADER_API_MOBILE)
-        //    return packednormal.xyz * 2 - 1;
-        //#else
-            vec3 normal;
-            normal.xy = packednormal.wy * 2 - 1;
-            normal.z = sqrt(1 - normal.x*normal.x - normal.y * normal.y);
-            return normal;
-        //#endif
+        // 深浅颜色
+        float t = foamTextureSampler.r; // R: 深浅程度
+        vec3 diffuseColor = mix(u_ShalowColor, u_DeepColor, t).rgb; // 使用插值计算出深浅颜色
+
+        // 细节颜色
+        vec3 viewDirWS = getViewDirection(pixel.positionWS);
+        float ndv = max(0.0, dot(pixel.normalWS, viewDirWS));
+        vec3 detailColor = (foamTextureSampler.b * ndv * 0.5) * u_detailColor.rgb;
+        diffuseColor *= detailColor;
+
+        // 水面波纹（注意：法线贴图的平铺模式必须设置为重复，否则无法看到流动效果）
+        vec2 waveOffset1 = uv + u_WaveParams.xy * u_Time; // 水流速1
+        vec2 waveOffset2 = uv + u_WaveParams.zw * u_Time; // 水流速2
+        
+        vec3 normal1 = texture2D(u_WaterNormalTexture, waveOffset1).rgb;
+        normal1 = normalize(normal1 * 2.0 - 1.0);
+        normal1.y *= -1.0;
+
+        vec3 normal2 = texture2D(u_WaterNormalTexture, waveOffset2).rgb;
+        normal2 = normalize(normal2 * 2.0 - 1.0);
+        normal2.y *= -1.0;
+
+        vec3 blendNormalTS = normalize(normal1 + normal2);
+        blendNormalTS = mix(vec3(0.0, 0.0, 1.0), blendNormalTS, u_WaterNormalScale);
+        //blendNormalTS.z = mix(1.0, blendNormalTS.z, u_WaterNormalScale);
+
+        surface.diffuseColor = diffuseColor;
+        surface.specularColor = u_SpecularColor.rgb;
+        surface.shininess = u_Shininess;
+        surface.gloss = vec3(1.0) * u_Gloss;
+        surface.normalTS = blendNormalTS;
+        surface.alpha = 1.0;
+        // surface.alphaClip
     }
 
     void main()
     {
-        vec2 uv = v_Texcoord0;
+        PixelParams pixel;
+        getPixelParams(pixel);
 
-        //vec3 color = u_AlbedoColor.rgb;
-        //float alpha = u_AlbedoColor.a;
+        // =============================================
+        Surface surface;
+        getWaterSurface(surface, pixel);
 
-        // 深浅程度
-        float degree = texture2D(u_FoamTexture, uv).r;
-        // 使用插值计算出颜色
-        vec4 diffuse = lerp(u_ShalowColor, u_DeepColor, degree);
+        vec3 color = BlinnPhongLighting(surface, pixel);
+        // =============================================
 
-        //vec3 color = u_AlbedoColor.rgb;
-        //float alpha = u_AlbedoColor.a;
-
-    // #ifdef ALBEDOTEXTURE
-    //     vec4 albedoSampler = texture2D(u_AlbedoTexture, uv);
-    //     #ifdef Gamma_u_AlbedoTexture
-    //     albedoSampler = gammaToLinear(albedoSampler);
-    //     #endif // Gamma_u_AlbedoTexture
-    //     color *= albedoSampler.rgb;
-    //     alpha *= albedoSampler.a;
-    // #endif // ALBEDOTEXTURE
-
-    // #ifdef COLOR
-    //     #ifdef ENABLEVERTEXCOLOR
-    //     vec4 vertexColor = v_Color;
-    //     color *= vertexColor.rgb;
-    //     alpha *= vertexColor.a;
-    //     #endif // ENABLEVERTEXCOLOR
-    // #endif // COLOR
-
-    // #ifdef ALPHATEST
-    //     if (alpha < u_AlphaTestValue)
-    //         discard;
-    // #endif // ALPHATEST
-
-    // #ifdef FOG
-    //     color = scenUnlitFog(color);
-    // #endif // FOG
-
-        //gl_FragColor = vec4(color, alpha);
-
-        gl_FragColor = diffuse;
+        gl_FragColor = vec4(color, surface.alpha);
 
         gl_FragColor = outputTransform(gl_FragColor);
     }
 #endGLSL
+
 GLSL End
-
-
