@@ -13,4 +13,5 @@ export class TestWater extends Laya.Script {
         console.log("depthTexture:", this.camera.depthTexture);
     }
 
+    
 }
