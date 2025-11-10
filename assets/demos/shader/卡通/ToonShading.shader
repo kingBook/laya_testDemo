@@ -69,6 +69,14 @@ GLSL Start
         vec4 pos = (worldMat * vec4(vertex.positionOS, 1.0));
         vec3 positionWS = pos.xyz / pos.w;
 
+        // ----------------------
+        pos = mat3(u_View) * pos;
+
+        mat3 matrix_i_t_mv = mat3(worldMat * u_View);
+        vec3 normal = vertex.normalOS;
+        
+        // ----------------------
+
         gl_Position = getPositionCS(positionWS);
 
         gl_Position = remapPositionZ(gl_Position);
