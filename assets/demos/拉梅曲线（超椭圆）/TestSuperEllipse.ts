@@ -38,7 +38,7 @@ export class TestSuperEllipse extends Laya.Script {
 
             path.push([i == 0 ? "moveTo" : "lineTo", x, y]);
         }
-
+        
         this._sprite.graphics.clear();
         this._sprite.graphics.drawPath(0, 0, path, { fillStyle: "#ff0000" }, { "strokeStyle": "#ffffff", "lineWidth": "10" });
 
