@@ -1,15 +1,33 @@
 {
   "version": "LAYAMATERIAL:04",
   "props": {
-    "textures": [],
+    "textures": [
+      {
+        "path": "res://c2394cb3-e4fe-4901-8821-373f9142ed24",
+        "constructParams": [
+          1024,
+          1024,
+          1,
+          false,
+          false,
+          true
+        ],
+        "propertyParams": {
+          "filterMode": 1,
+          "wrapModeU": 1,
+          "wrapModeV": 1,
+          "anisoLevel": 1
+        },
+        "name": "u_AlbedoTexture"
+      }
+    ],
     "type": "卡通/ToonShading",
     "renderQueue": 2000,
     "materialRenderMode": 0,
-    "u_AlphaTestValue": 0.5,
     "s_Cull": 2,
     "s_Blend": 0,
-    "s_BlendSrc": 1,
-    "s_BlendDst": 0,
+    "s_BlendSrc": 6,
+    "s_BlendDst": 7,
     "s_BlendSrcRGB": 0,
     "s_BlendDstRGB": 0,
     "s_BlendSrcAlpha": 0,
@@ -31,6 +49,15 @@
       0,
       0
     ],
-    "defines": []
+    "u_OutlineColor": [
+      0.9534883720930233,
+      0,
+      0.517495325953787,
+      1
+    ],
+    "u_OutlineWidth": 0.1,
+    "defines": [
+      "ALBEDOTEXTURE"
+    ]
   }
 }

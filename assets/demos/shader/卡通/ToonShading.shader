@@ -4,42 +4,40 @@ Shader3D Start
     name:"卡通/ToonShading",
     enableInstancing:true,
     supportReflectionProbe:true,
+    statefirst: true,
     uniformMap:{
-        u_AlphaTestValue: { type: Float, default: 0.5 },
         u_TilingOffset: { type: Vector4, default: [1, 1, 0, 0], block: unlit },
 
         u_AlbedoColor: { type: Color, default: [1, 1, 1, 1], block: unlit },
         u_AlbedoTexture: { type: Texture2D, options: { define: "ALBEDOTEXTURE" } },
 
         // =======================================
-        u_Outline: { type:Float, default: 0.1, range: [0, 1] },
+        u_OutlineWidth: { type:Float, default: 0.1, range: [0, 1] },
         u_OutlineColor: { type: Color, default: [0, 0, 0, 1], block: unlit },
         // =======================================
     },
     defines: {
-
     },
-    // ===========================================
-    // 渲染标签
-    tags: {
-        RenderType: "Opaque",
-        Queue: "Geometry"
-    },
-    // 渲染状态
-    state: {
-        cull: "FRONT" // 可选: FRONT, BACK, NONE
-    },
-    // ===========================================
     shaderPass:[
          {
+            // 渲染状态
+            renderState: {
+                cull: "Front"
+            },
+            statefirst: true,
             pipeline:Forward,
             VS:outlineVS,
             FS:outlinePS
         },
         {
+            // 渲染状态
+            // renderState: {
+            //     cull: "Back"
+            // },
+            // statefirst: true,
             pipeline:Forward,
-            VS:unlitVS,
-            FS:unlitPS
+            VS:outlineVS2,
+            FS:outlinePS2
         }
     ]
 }
@@ -47,7 +45,7 @@ Shader3D End
 
 GLSL Start
 #defineGLSL outlineVS
-    #define SHADER_NAME ToonShading
+    #define SHADER_NAME ToonShadingOutline
 
     #include "Math.glsl";
 
@@ -65,27 +63,22 @@ GLSL Start
         Vertex vertex;
         getVertexParams(vertex);
 
-        mat4 worldMat = getWorldMatrix();
-        vec4 pos = (worldMat * vec4(vertex.positionOS, 1.0));
-        vec3 positionWS = pos.xyz / pos.w;
-
         // ----------------------
-        pos = mat3(u_View) * pos;
+        vec4 position = vec4((vertex.positionOS) + (vertex.normalOS) * u_OutlineWidth, 1.0);
 
-        mat3 matrix_i_t_mv = mat3(worldMat * u_View);
-        vec3 normal = vertex.normalOS;
+        mat4 worldMat = getWorldMatrix();
+        vec3 positionWS = (worldMat * vec4(position)).xyz;
         
         // ----------------------
 
         gl_Position = getPositionCS(positionWS);
-
         gl_Position = remapPositionZ(gl_Position);
 
     }
 #endGLSL
 
 #defineGLSL outlinePS
-    #define SHADER_NAME ToonShading
+    #define SHADER_NAME ToonShadingOutline
 
     #include "Color.glsl";
 
@@ -98,8 +91,8 @@ GLSL Start
     void main()
     {
 
-        vec3 color = vec3(0.0);
-        float alpha = 1.0;
+        vec3 color = u_OutlineColor.rgb;
+        float alpha = 0.0;
    
 
         gl_FragColor = vec4(color, alpha);
@@ -108,9 +101,9 @@ GLSL Start
     }
 #endGLSL
 
-#defineGLSL unlitVS
+#defineGLSL outlineVS2
 
-    #define SHADER_NAME ToonShading
+    #define SHADER_NAME ToonShadingOutline2
 
     #include "Math.glsl";
 
@@ -126,9 +119,6 @@ GLSL Start
     varying vec2 v_Texcoord0;
     #endif // UV
 
-    #ifdef COLOR
-    varying vec4 v_VertexColor;
-    #endif // COLOR
 
     void main()
     {
@@ -139,27 +129,18 @@ GLSL Start
         v_Texcoord0 = transformUV(vertex.texCoord0, u_TilingOffset);
     #endif // UV
 
-    #ifdef COLOR
-        v_VertexColor = vertex.vertexColor;
-    #endif // COLOR
-
         mat4 worldMat = getWorldMatrix();
         vec4 pos = (worldMat * vec4(vertex.positionOS, 1.0));
         vec3 positionWS = pos.xyz / pos.w;
 
         gl_Position = getPositionCS(positionWS);
-
         gl_Position = remapPositionZ(gl_Position);
-
-    #ifdef FOG
-        FogHandle(gl_Position.z);
-    #endif
     }
 #endGLSL
 
-#defineGLSL unlitPS
+#defineGLSL outlinePS2
 
-    #define SHADER_NAME ToonShading
+    #define SHADER_NAME ToonShadingOutline2
 
     #include "Color.glsl";
 
@@ -169,7 +150,6 @@ GLSL Start
     #include "Camera.glsl";
     #include "Sprite3DFrag.glsl";
 
-    varying vec4 v_Color;
     varying vec2 v_Texcoord0;
 
     void main()
@@ -178,34 +158,18 @@ GLSL Start
 
         vec3 color = u_AlbedoColor.rgb;
         float alpha = u_AlbedoColor.a;
-    #ifdef ALBEDOTEXTURE
+        
+    //#ifdef ALBEDOTEXTURE //(多pass时， 宏定义似乎无效)
         vec4 albedoSampler = texture2D(u_AlbedoTexture, uv);
         #ifdef Gamma_u_AlbedoTexture
         albedoSampler = gammaToLinear(albedoSampler);
         #endif // Gamma_u_AlbedoTexture
         color *= albedoSampler.rgb;
         alpha *= albedoSampler.a;
-    #endif // ALBEDOTEXTURE
+    //#endif // ALBEDOTEXTURE
 
-    #ifdef COLOR
-        #ifdef ENABLEVERTEXCOLOR
-        vec4 vertexColor = v_Color;
-        color *= vertexColor.rgb;
-        alpha *= vertexColor.a;
-        #endif // ENABLEVERTEXCOLOR
-    #endif // COLOR
-
-    #ifdef ALPHATEST
-        if (alpha < u_AlphaTestValue)
-            discard;
-    #endif // ALPHATEST
-
-    #ifdef FOG
-        color = scenUnlitFog(color);
-    #endif // FOG
-
+       // color = vec3(0.0, 1.0, 0.0);
         gl_FragColor = vec4(color, alpha);
-
         gl_FragColor = outputTransform(gl_FragColor);
     }
 #endGLSL

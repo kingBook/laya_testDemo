@@ -89,14 +89,14 @@
           ]
         },
         {
-          "_$id": "sr3t8o0k",
+          "_$id": "lg2lqi3b",
           "_$type": "Sprite3D",
-          "name": "Sphere",
+          "name": "Cube",
           "_$comp": [
             {
               "_$type": "MeshFilter",
               "sharedMesh": {
-                "_$uuid": "f1e48cc9-d67d-4196-92dd-77d9ee2f076c",
+                "_$uuid": "6e013e32-fec7-4397-80d1-f918a07607be",
                 "_$type": "Mesh"
               }
             },

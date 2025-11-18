@@ -5,13 +5,13 @@ export class TestSuperEllipse extends Laya.Script {
 
     private _sprite: Laya.Sprite;
 
-    @property({ type: Number, min: 0 , step:1})
+    @property({ type: Number, min: 0, step: 1 })
     a: number = 100;
 
-    @property({ type: Number, min: 0, step:1 })
+    @property({ type: Number, min: 0, step: 1 })
     b: number = 100;
 
-    @property({ type: Number, min: 0, step:0.1 })
+    @property({ type: Number, min: 0, step: 0.1, range: [0.5, 10] })
     n: number = 1;
 
     onAwake(): void {
@@ -38,7 +38,7 @@ export class TestSuperEllipse extends Laya.Script {
 
             path.push([i == 0 ? "moveTo" : "lineTo", x, y]);
         }
-        
+
         this._sprite.graphics.clear();
         this._sprite.graphics.drawPath(0, 0, path, { fillStyle: "#ff0000" }, { "strokeStyle": "#ffffff", "lineWidth": "10" });
 

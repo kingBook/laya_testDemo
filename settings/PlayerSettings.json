@@ -29,10 +29,10 @@
     "laya.spine": true,
     "laya.physics2D": true,
     "laya.navMesh2D": true,
-    "laya.tilemap": true
+    "laya.tilemap": true,
+    "laya.trail2D": true
   },
   "splash": {
     "fit": "center"
-  },
-  "stat": true
+  }
 }
