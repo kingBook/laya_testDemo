@@ -1,6 +1,6 @@
 {
   "_$ver": 1,
-  "_$id": "lchdcmve",
+  "_$id": "0hcynr9p",
   "_$type": "Scene",
   "left": 0,
   "right": 0,
@@ -60,11 +60,10 @@
             "_$type": "PostProcess",
             "effects": [
               {
-                "_$type": "ScalableAO"
+                "_$type": "d011b8d1-aa92-4be1-9d42-f6778fa64989"
               }
             ]
-          },
-          "depthTextureMode": 3
+          }
         },
         {
           "_$id": "6ni3p096l5",
@@ -98,7 +97,7 @@
           ]
         },
         {
-          "_$id": "lg2lqi3b",
+          "_$id": "po6vz9cj",
           "_$type": "Sprite3D",
           "name": "Cube",
           "_$comp": [
@@ -116,7 +115,7 @@
               },
               "sharedMaterials": [
                 {
-                  "_$uuid": "543a9661-b510-4c3a-8d4d-37fbf46f4d45",
+                  "_$uuid": "6f90bbb0-bcb2-4311-8a9d-3d8277522098",
                   "_$type": "Material"
                 }
               ]

@@ -174,5 +174,3 @@ GLSL Start
     }
 #endGLSL
 GLSL End
-
-
