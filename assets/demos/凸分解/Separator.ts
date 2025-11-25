@@ -18,7 +18,7 @@ export class Separator {
      * @param scale [可选] 原用于在Box2D中绘制形状的比例。越大，精度越好。默认值为30。
      * @return 返回凸分解多边形顶点
      * */
-    public static separate(verticesVec: V2[], holeVecs: V2[][] = null, scale: number = 30, mergeHoleVertices: V2[] = null): V2[][] {
+    public static separate(verticesVec: V2[], holeVecs: V2[][] = null, scale: number = 30, mergedHoleVertices: V2[] = null): V2[][] {
         let i: number, n: number, j: number = 0, m: number = 0;
         let vec: V2[] = [], vec1: V2[], vec2: V2[], holeVecs2: V2[][] = [], figs: V2[][];
 
@@ -37,11 +37,11 @@ export class Separator {
                 holeVecs2[i] = vec2;
             }
 
-            console.time("mergeHoles");
             // 合并孔洞
-            console.timeEnd("mergeHoles");
             vec = this.mergeHoles(vec, holeVecs2).map(v => { return { x: v.x / scale, y: v.y / scale } });
-            mergeHoleVertices.push(...vec);
+
+            // 输出合并孔洞后的顶点数组
+            mergedHoleVertices.push(...vec);
         }
 
         // 凸分解

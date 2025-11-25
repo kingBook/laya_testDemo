@@ -11,14 +11,17 @@ export class AnimationCurveTest extends Laya.Script {
 
 
 
-    //@property({ type: Laya.ParticleMinMaxCurve })
-    //particleMinMaxCurve: Laya.ParticleMinMaxCurve;
+    @property({ type: Laya.ParticleMinMaxCurve })
+    particleMinMaxCurve: Laya.ParticleMinMaxCurve;
 
     // @property({ type: Laya.Node })
     // testNode: Laya.Node;
 
-    // @property({ type: Laya.GradientDataNumber })
-    // gradientDataNumber: Laya.GradientDataNumber;
+    @property({ type: Laya.GradientDataNumber })
+    gradientDataNumber: Laya.GradientDataNumber;
+
+    @property({ type: Laya.FloatKeyframe })
+    protected widthCurve: Laya.FloatKeyframe[];
 
     onAwake(): void {
         console.log("animationCurve:", this.animationCurve);

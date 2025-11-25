@@ -30,7 +30,8 @@
     "laya.physics2D": true,
     "laya.navMesh2D": true,
     "laya.tilemap": true,
-    "laya.trail2D": true
+    "laya.trail2D": true,
+    "laya.particle": true
   },
   "splash": {
     "fit": "center"
