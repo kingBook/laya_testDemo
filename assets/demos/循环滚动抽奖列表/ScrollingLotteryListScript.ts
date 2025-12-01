@@ -32,6 +32,7 @@ interface BezierEaseData {
  * 
  * // 添加滚动组件，并初始化
  * const lotteryScript = this.list.addComponent(ScrollingLotteryListScript).init(); // 需在 list.array 赋值后调用初始化，且不能赋值空数组
+ * lotteryScript.speedSign = -1; // 滚动方向, 1 或 -1
  * lotteryScript.aniTotalTime = 5000; // 滚动时间<毫秒>
  * lotteryScript.circles = 5; // 滚动圈数
  * lotteryScript.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
@@ -251,6 +252,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
     /**
      * 设置结果
+     * 
+     * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
      * @param index 未添加重复项前的索引
      * @param isImmediate 是否立即设置，默认：false 滚动慢慢停止在结果处；true：立即设置到结果处
      */
