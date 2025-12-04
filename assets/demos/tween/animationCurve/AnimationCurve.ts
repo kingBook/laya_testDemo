@@ -1,28 +1,33 @@
 const { regClass, property } = Laya;
 
-class CurvePoint {
-    /** 位置 */
-    pos = new Laya.Point(0, 0);
-    /** 控制点1 */
-    c1 = new Laya.Point(0, 0);
-    /** 控制点2 */
-    c2 = new Laya.Point(0, 0);
-
-    constructor(posx: number = 0, posy: number = 0, c1x: number = 0, c1y: number = 0, c2x: number = 0, c2y: number = 0) {
-        this.pos.setTo(posx, posy);
-        this.c1.setTo(c1x, c1y);
-        this.c2.setTo(c2x, c2y);
-    }
-}
-
 
 @regClass()
-export class AnimationCurve {
+export default class AnimationCurve {
 
-    private _points: CurvePoint[] = [new CurvePoint(0, 0), new CurvePoint(1, 1)];
+    @property({ type: [Laya.FloatKeyframe] })
+    public keys: Laya.FloatKeyframe[];
 
-    private keys:Laya.FloatKeyframe[]=[];
+    /**
+     * 估算在指定时间的曲线值
+     * @param time 要估算的时间（曲线图中的x轴）。
+     * @returns 曲线值（曲线图中的y轴）。
+     */
+    public evaluate(time: number): number {
+        return 0;
+    }
+
+    constructor() {
+        const key0 = new Laya.FloatKeyframe();
+        key0.time = 0;
+        key0.value = 0;
+
+        const key1 = new Laya.FloatKeyframe();
+        key1.time = 1;
+        key1.value = 1;
+
+        this.keys = [key0, key1];
 
 
+    }
 
 }

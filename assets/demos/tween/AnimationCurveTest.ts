@@ -1,4 +1,4 @@
-import { AnimationCurve } from "./animationCurve/AnimationCurve";
+import AnimationCurve from "./animationCurve/AnimationCurve";
 
 const { regClass, property } = Laya;
 
@@ -8,7 +8,7 @@ export class AnimationCurveTest extends Laya.Script {
     declare owner: Laya.Sprite;
 
     @property({ type: AnimationCurve, inspector: "AnimationCurve" })
-    animationCurve: AnimationCurve = new AnimationCurve();
+    animationCurve: AnimationCurve;
 
     //@property({ type: [Laya.FloatKeyframe], nullable: false, minArrayLength: 2, inspector: "curve" })
     //protected widthCurve: Laya.FloatKeyframe[] = [];
@@ -17,20 +17,20 @@ export class AnimationCurveTest extends Laya.Script {
         console.log("animationCurve:", this.animationCurve);
         console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
 
-        const canvas:Laya.Sprite=this.owner.getChild("canvas");
+        const canvas: Laya.Sprite = this.owner.getChild("canvas");
 
         const pts: Laya.PathPoint[] = [];
         canvas.children.forEach((child: any) => {
-            const c1=child.getChild("c1",Laya.Sprite);
-            const c2=child.getChild("c2",Laya.Sprite);
+            const c1 = child.getChild("c1", Laya.Sprite);
+            const c2 = child.getChild("c2", Laya.Sprite);
 
-            const pathPt=Laya.PathPoint.create(child.x, child.y, 0);
-            
-            pathPt.c1.x=c1.x;
-            pathPt.c1.y=c1.y;
+            const pathPt = Laya.PathPoint.create(child.x, child.y, 0);
 
-            pathPt.c2.x=c2.x;
-            pathPt.c2.y=c2.y;
+            pathPt.c1.x = c1.x;
+            pathPt.c1.y = c1.y;
+
+            pathPt.c2.x = c2.x;
+            pathPt.c2.y = c2.y;
 
             pts.push(pathPt);
         });
@@ -54,6 +54,7 @@ export class AnimationCurveTest extends Laya.Script {
 
     onStart(): void {
         console.log("onStart");
+        console.log("this.animationCurve:", this.animationCurve);
 
     }
 }
