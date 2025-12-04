@@ -1,5 +1,5 @@
 @IEditor.inspectorField("AnimationCurve")
-export default class AnimationCurveInspector extends IEditor.PropertyField {
+export default class AnimationCurveInspector extends IEditor.ObjectField {
 
     /* @IEditor.onLoad
      static async onLoad() {
@@ -8,8 +8,9 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
     //private _input:IEditor.CurveInput;
 
-    public override create(): IEditor.IPropertyFieldCreateResult {
-
+    /**public override create(): IEditor.IPropertyFieldCreateResult {
+        
+        
         const input: IEditor.CurveInput = IEditor.GUIUtils.createCurveInput();
         input.setDefaultPoints();
         input.isCurve = true;
@@ -18,34 +19,22 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         //input.minValue = 0;
         //input.maxValue = 1;
         input.isWeight = true; // 控制点可任意拖动
-
-        console.log("this.property.type:", this.property.type);
-        console.log("this.property.type2:", Editor.typeRegistry.types[`${this.property.type}`]);
-
-        console.log("types:", Editor.typeRegistry.types);
-        console.log("name:", this.property.name);
-
-
-        console.log("super.create", super.create);
-
-        //const superResult = super.create();
-        setTimeout(() => {
-             this.createInstance();
-        }, 10);
-
-
+        
+        
+        this.createInstance();
         return { ui: input };
 
-    }
+    }*/
 
     private createInstance(): void {
         console.log("createInstance");
-
-        const typeDef = Editor.typeRegistry.types[`${this.property.type}`];
+        
+        
+        const typeDef:IEditor.FTypeDescriptor = Editor.typeRegistry.types[`${this.property.type}`];
         console.log("typeDef:", typeDef);
 
 
-        const initProp = Editor.typeRegistry.getInitProps(typeDef);
+        const initProp = Editor.typeRegistry.getInitProps(typeDef)||{};
         console.log("initProp", initProp);
 
 
@@ -54,10 +43,13 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         this.expanded = true;
     }
 
-    // onClickCreateInstance(typeName: string): void {
-    //     super.onClickCreateInstance(typeName);
-    //     console.log("onClickCreateInstance", typeName);
-    // }
+    onClickCreateInstance(typeName: string): void {
+        console.log("onClickCreateInstance", typeName);
+        console.log("super.onClickCreateInstance:", super.onClickCreateInstance);
+        
+        //super.onClickCreateInstance(typeName);
+        this.createInstance();
+    }
 
     // onClickSetNull(): void {
     //     super.onClickSetNull();
