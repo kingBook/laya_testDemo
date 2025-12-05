@@ -9,13 +9,6 @@
   "name": "AnimationCurveTest",
   "width": 750,
   "height": 1600,
-  "_$comp": [
-    {
-      "_$type": "30fb7f5b-3878-4677-b7b1-8a2630e8e02d",
-      "scriptPath": "demos/tween/AnimationCurveTest.ts",
-      "animationCurve": null
-    }
-  ],
   "_$child": [
     {
       "_$id": "pwymxaa7",

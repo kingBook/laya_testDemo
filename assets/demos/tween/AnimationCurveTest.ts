@@ -15,7 +15,7 @@ export class AnimationCurveTest extends Laya.Script {
 
     onAwake(): void {
         console.log("animationCurve:", this.animationCurve);
-        console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
+        //console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
 
         const canvas: Laya.Sprite = this.owner.getChild("canvas");
 
