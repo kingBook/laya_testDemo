@@ -16,18 +16,4 @@ export default class AnimationCurve {
         return 0;
     }
 
-    constructor() {
-        const key0 = new Laya.FloatKeyframe();
-        key0.time = 0;
-        key0.value = 0;
-
-        const key1 = new Laya.FloatKeyframe();
-        key1.time = 1;
-        key1.value = 1;
-
-        this.keys = [key0, key1];
-
-
-    }
-
 }

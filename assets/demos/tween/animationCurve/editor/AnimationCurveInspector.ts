@@ -4,50 +4,20 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     private _input: IEditor.CurveInput;
 
     public override create(): IEditor.IPropertyFieldCreateResult {
+        // 创建曲线图（CurveInput）
         const input: IEditor.CurveInput = IEditor.GUIUtils.createCurveInput();
         input.setDefaultPoints();
         input.isCurve = true;
-        input.maxKeyFrame = 2;
         input.isNormalization = true;
-        //input.minValue = 0;
-        //input.maxValue = 1;
-        //input.checkable =true;
-        //input.hasValue = true;
+        input.maxKeyFrame = 10; // 默认: 4
+        input.minValue = 0;
+        input.maxValue = 1;
+        input.isAutoFillKeyFrame = false; // 关闭这个属性，否则在曲线图双击添加点时，会自动添加点(PathPoint)，使点数量与maxKeyFrame一致
         input.isWeight = true; // 控制点可任意拖动
 
-        input.on("submit", (evt: gui.Event) => {
-            console.log("submit evt:", evt);
-            console.log("_input:", this._input);
-
-            console.log("points:", input.points);
-            console.log("pt0.outTangent:", input.points[0].outTangent, "c1x:", input.points[0].c1x, "c1y:", input.points[0].c1y);
-            console.log("pt1.inTangent:", input.points[1].inTangent, "c0x:", input.points[1].c0x, "c0y:", input.points[1].c0y);
-
-
-            const value = this.target.getValue();
-
-            const pt0 = input.points[0];
-            const key0 = value.keys[0];
-            key0.time = pt0.px;
-            key0.value = pt0.py;
-            key0.inTangent = pt0.inTangent;
-            key0.outTangent = pt0.outTangent;
-            key0.inWeight = pt0.inWeight;
-            key0.outWeight = pt0.outWeight;
-
-            const pt1 = input.points[1];
-            const key1 = value.keys[1];
-            key1.time = pt1.px;
-            key1.value = pt1.py;
-            key1.inTangent = pt1.inTangent;
-            key1.outTangent = pt1.outTangent;
-            key1.inWeight = pt1.inWeight;
-            key1.outWeight = pt1.outWeight;
-
-            this.target.setValue(value);
-
-        });
-
+        // 侦听曲线图（CurveInput）被修改
+        input.on("submit", this.onSubmit, this);
+        console.log("applyChange", input.maxKeyFrame, input.applyChange);
 
         this._input = input;
         return { ui: input };
@@ -56,68 +26,109 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     public override refresh(): void {
         console.log("refresh();");
 
-        // 当字段为空时，创建一个默认字段
+        // 当字段为空时，创建一个默认实例
         if (!this.target.getValue()) {
-            this.createInstance();
-
-            // 默认值
-            const value = this.target.getValue();
-            console.log("value:",value);
-            
-            
-            // const keys: any[] = value.keys;
-            // for (let i = 0, c = keys.length; i < c; i++) {
-            //     const key = value.keys[i];
-
-            //     if (this._input.points.length - 1 < i) this._input.addPoint();
-
-            //     const pt = this._input.points[i];
-            //     pt.px = key.time;
-            //     pt.py = key.value;
-            //     pt.inTangent = key.inTangent;
-            //     pt.outTangent = key.outTangent;
-            //     pt.inWeight = key.inWeight;
-            //     pt.outWeight = key.outWeight;
-            // }
+            this.createDefaultInstance();
         }
 
+        // 设置值到曲线图（CurveInput）
+        const value = this.target.getValue();
+        const valueKeys: any[] = value.keys;
+        for (let i = 0, c = valueKeys.length; i < c; i++) {
+            const key = valueKeys[i];
 
+            if (i >= this._input.points.length) {
+                console.log("addPoint();");
+                this._input.addPoint();
+            }
+            const pt: IEditor.PathPoint = this._input.points[i];
+            pt.px = key.time;
+            pt.py = key.value;
+            pt.inTangent = key.inTangent;
+            pt.outTangent = key.outTangent;
+            pt.inWeight = key.inWeight;
+            pt.outWeight = key.outWeight;
+        }
 
-        console.log("_input:", this._input);
-        console.log("_input.onConstruct:", this._input.onConstruct);
+        this._input.applyChange();
+    }
 
+    public override onResetData(): void {
+        console.log("onResetData();");
 
     }
 
+    // private hermite_to_bezier(current: IEditor.PathPoint, next: IEditor.PathPoint): void {
+    //     const a0 = (next.px - current.px) * current.outWeight;
+    //     const b0 = current.inTangent * a0;
+    //     current.c1x = current.px + a0 / 3;
+    //     current.c1y = current.py + b0 / 3;
 
-    private hermite_to_bezier(current: IEditor.PathPoint, next: IEditor.PathPoint): void {
-        const a0 = (next.px - current.px) * current.outWeight;
-        const b0 = current.inTangent * a0;
-        current.c1x = current.px + a0 / 3;
-        current.c1y = current.py + b0 / 3;
 
+    //     const a1 = (next.px - current.px) * next.inWeight;
+    //     const b1 = next.inTangent * a1;
+    //     next.c0x = next.px - a1 / 3;
+    //     next.c0y = next.py - b1 / 3;
+    // }
 
-        const a1 = (next.px - current.px) * next.inWeight;
-        const b1 = next.inTangent * a1;
-        next.c0x = next.px - a1 / 3;
-        next.c0y = next.py - b1 / 3;
-    }
-
-    private createInstance(): void {
-        console.log("createInstance");
+    /** 创建默认实例 */
+    private createDefaultInstance(): void {
+        console.log("createDefaultInstance();");
 
         const typeDef: IEditor.FTypeDescriptor = Editor.typeRegistry.types[`${this.property.type}`];
 
+        // 默认值
+        const cubicBezierValues = [.25, .1, .25, 1]; // https://cubic-bezier.com/
         const initProp = Editor.typeRegistry.getInitProps(typeDef) || {};
         initProp._$type = typeDef.name;
-
-        console.log("initProp:",initProp);
-        
+        initProp.keys = [
+            this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
+            this.createFloatKeyframe({ time: 1, value: 1, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
+        ];
 
         this.parent.target.setPropertyValue(this.property.name, initProp);
     }
 
+    private createFloatKeyframe(params: { time: number, value: number, inTangent: number, inWeight: number, outTangent: number, outWeight: number }) {
+        console.log("createFloatKeyframe();");
+        return {
+            "_$type": "FloatKeyframe", // Laya.FloatKeyframe
+            "time": params.time,
+            "value": params.value,
+            "inTangent": params.inTangent,
+            "inWeight": params.inWeight,
+            "outTangent": params.outTangent,
+            "outWeight": params.outWeight
+            //"weightedMode": 0 // Laya.WeightedMode{ None = 0, In = 1, Out = 2, Both = 3 }
+        };
+    }
 
+    /** 曲线图（CurveInput）被修改时 */
+    private onSubmit(evt: gui.Event): void {
+        console.log("onSubmit();");
+
+        // 设置曲线图（CurveInput）的值到目标
+        const value = this.target.getValue();
+        const valueKeys: any[] = value.keys;
+
+        console.log("points.len:", this._input.points.length);
+
+        for (let i = 0, c = this._input.points.length; i < c; i++) {
+            const pt: IEditor.PathPoint = this._input.points[i];
+            if (i >= valueKeys.length) {
+                valueKeys.push(this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0, outTangent: 0, outWeight: 0 }));
+            }
+            const key = valueKeys[i];
+            key.time = pt.px;
+            key.value = pt.py;
+            key.inTangent = pt.inTangent;
+            key.outTangent = pt.outTangent;
+            key.inWeight = pt.inWeight;
+            key.outWeight = pt.outWeight;
+        }
+
+        this.target.setValue(value);
+    }
 
 
 }
