@@ -17,7 +17,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         // 侦听曲线图（CurveInput）被修改
         input.on("submit", this.onSubmit, this);
-        console.log("applyChange", input.maxKeyFrame, input.applyChange);
 
         this._input = input;
         return { ui: input };
@@ -34,11 +33,11 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         // 设置值到曲线图（CurveInput）
         const value = this.target.getValue();
         const valueKeys: any[] = value.keys;
+        this._input.clearPoints(); // 先清空，避免顶点数量比实际数量多
         for (let i = 0, c = valueKeys.length; i < c; i++) {
             const key = valueKeys[i];
 
             if (i >= this._input.points.length) {
-                console.log("addPoint();");
                 this._input.addPoint();
             }
             const pt: IEditor.PathPoint = this._input.points[i];
@@ -51,11 +50,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         }
 
         this._input.applyChange();
-    }
-
-    public override onResetData(): void {
-        console.log("onResetData();");
-
     }
 
     // private hermite_to_bezier(current: IEditor.PathPoint, next: IEditor.PathPoint): void {
@@ -82,9 +76,28 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         const initProp = Editor.typeRegistry.getInitProps(typeDef) || {};
         initProp._$type = typeDef.name;
         initProp.keys = [
-            this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
-            this.createFloatKeyframe({ time: 1, value: 1, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
+            this.createFloatKeyframe({
+                time: 0,
+                value: 0,
+                inTangent: 0,
+                inWeight: 0,
+                outTangent: cubicBezierValues[1] / cubicBezierValues[0],
+                outWeight: cubicBezierValues[0]
+            }),
+            this.createFloatKeyframe({
+                time: 1,
+                value: 1,
+                inTangent: (1 - cubicBezierValues[3]) / (1 - cubicBezierValues[2]),
+                inWeight: 1 - cubicBezierValues[2],
+                outTangent: 0,
+                outWeight: 0
+            }),
         ];
+        
+        // initProp.keys = [
+        //     this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
+        //     this.createFloatKeyframe({ time: 1, value: 1, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
+        // ];
 
         this.parent.target.setPropertyValue(this.property.name, initProp);
     }
@@ -99,7 +112,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             "inWeight": params.inWeight,
             "outTangent": params.outTangent,
             "outWeight": params.outWeight
-            //"weightedMode": 0 // Laya.WeightedMode{ None = 0, In = 1, Out = 2, Both = 3 }
+            // "weightedMode": 0
         };
     }
 
@@ -110,9 +123,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         // 设置曲线图（CurveInput）的值到目标
         const value = this.target.getValue();
         const valueKeys: any[] = value.keys;
-
-        console.log("points.len:", this._input.points.length);
-
         for (let i = 0, c = this._input.points.length; i < c; i++) {
             const pt: IEditor.PathPoint = this._input.points[i];
             if (i >= valueKeys.length) {
@@ -125,6 +135,10 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             key.outTangent = pt.outTangent;
             key.inWeight = pt.inWeight;
             key.outWeight = pt.outWeight;
+        }
+
+        if (valueKeys.length > this._input.points.length) {
+            valueKeys.length = this._input.points.length; // 删除多出的点
         }
 
         this.target.setValue(value);

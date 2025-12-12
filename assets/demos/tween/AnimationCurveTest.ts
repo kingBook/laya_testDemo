@@ -10,9 +10,6 @@ export class AnimationCurveTest extends Laya.Script {
     @property({ type: AnimationCurve, inspector: "AnimationCurve" })
     animationCurve: AnimationCurve;
 
-    //@property({ type: [Laya.FloatKeyframe], nullable: false, minArrayLength: 2, inspector: "curve" })
-    //protected widthCurve: Laya.FloatKeyframe[] = [];
-
     onAwake(): void {
         console.log("animationCurve:", this.animationCurve);
         //console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
