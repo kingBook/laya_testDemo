@@ -1,7 +1,10 @@
 {
   "name": "LayaProject1",
-  "startupScene": "res://6f964c1d-44f3-463c-98f7-7ae5d824f6d9",
+  "startupScene": "res://0c0e63b8-360e-465f-9c68-81002d203c5b",
   "includedScenes": [],
+  "web": {
+    "useSafeFileExtensions": true
+  },
   "android": {
     "targetArchitectures": {
       "ARMv7": true,
