@@ -3,6 +3,7 @@ const { regClass, property } = Laya;
 // 需要在 https 环境下测试，普通 IP 访问无效。
 // 做好兼容性，Chrome 不支持 DeviceOrientationEvent 对象
 // 如果记住选项后，需要从设置中清楚 safari 浏览数据，才能重新测试
+
 @regClass()
 export class TestGyroscope extends Laya.Script {
 
@@ -27,7 +28,7 @@ export class TestGyroscope extends Laya.Script {
         console.log("addDeviceorientationListener");
         this._errLabel.text += `addDeviceorientationListener\n`;
 
-        const deviceMotionEvt: any = Laya.Browser.window.DeviceMotionEvent;
+        const deviceMotionEvt: any = Laya.Browser.window.DeviceOrientationEvent;
         if (!deviceMotionEvt) {
             console.error("暂时不支持");
             this._errLabel.text += `暂时不支持\n`;
@@ -38,7 +39,6 @@ export class TestGyroscope extends Laya.Script {
 
                 if (permissionState === "granted") { // 允许
                     Laya.Gyroscope.instance.on(Laya.Event.CHANGE, this, this.onDeviceorientation);
-                    Laya.Browser.window.addEventListener("deviceorientation", this.handleOrientation, true);
                 } else if (permissionState === "denied") { //拒绝
 
                 }
@@ -49,21 +49,8 @@ export class TestGyroscope extends Laya.Script {
         } else {
             console.log("无 requestPermission 方法");
             this._errLabel.text += `无 requestPermission 方法\n`;
-            //Laya.Gyroscope.instance.on(Laya.Event.CHANGE, this, this.onDeviceorientation);
-            //Laya.Browser.window.addEventListener("deviceorientation", this.handleOrientation, true);
+            Laya.Gyroscope.instance.on(Laya.Event.CHANGE, this, this.onDeviceorientation);
         }
-    }
-
-    private handleOrientation(orientData) {
-        const absolute = orientData.absolute;
-        const alpha = orientData.alpha;
-        const beta = orientData.beta;
-        const gamma = orientData.gamma;
-
-        this._label.text =
-            "alpha1:" + Math.floor(alpha) + '\n' +
-            "beta1 :" + Math.floor(beta) + '\n' +
-            "gamma1:" + Math.floor(gamma) + '\n';
     }
 
     private onDeviceorientation(absolute: Boolean, rotationInfo: Laya.RotationInfo): void {
