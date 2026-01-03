@@ -28,12 +28,12 @@ export class TestGyroscope extends Laya.Script {
         console.log("addDeviceorientationListener");
         this._errLabel.text += `addDeviceorientationListener\n`;
 
-        const deviceMotionEvt: any = Laya.Browser.window.DeviceOrientationEvent;
-        if (!deviceMotionEvt) {
+        const orientationEvt: any = Laya.Browser.window.DeviceOrientationEvent;
+        if (!orientationEvt) {
             console.error("暂时不支持");
             this._errLabel.text += `暂时不支持\n`;
-        } else if (deviceMotionEvt.requestPermission) {
-            deviceMotionEvt.requestPermission().then(permissionState => {
+        } else if (orientationEvt.requestPermission) {
+            orientationEvt.requestPermission().then(permissionState => {
                 console.log("permissionState:", permissionState);
                 this._errLabel.text += `permissionState: ${permissionState}\n`;
 
