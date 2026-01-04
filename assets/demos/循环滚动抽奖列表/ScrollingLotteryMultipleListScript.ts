@@ -19,7 +19,6 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         this.owner.callLater(() => {
             this.owner.renderHandler = this.parentRenderHandler ? this.parentRenderHandler : new Laya.Handler(this, this.onRenderParentItem);
 
-            
 
         });
     }
