@@ -67,8 +67,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
     declare owner: Laya.List;
 
-    /** 聚集点插值，范围：[0,1] */
-    @property({ type: Number, range: [0, 1], tips: "聚集点插值，范围：[0,1]" })
+    /** 聚焦点插值，范围：[0,1] */
+    @property({ type: Number, range: [0, 1], tips: "聚焦点插值，范围：[0,1]" })
     public focusT = 0.5;
     /** 滚动方向, 1 或 -1 */
     @property({ type: Number, enumSource: [{ name: "1", value: 1 }, { name: "-1", value: 0 }], tips: "滚动方向, 1 或 -1" })
@@ -252,17 +252,19 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
     /**
      * 设置结果
-     * 
      * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
      * @param index 未添加重复项前的索引
      * @param isImmediate 是否立即设置，默认：false 滚动慢慢停止在结果处；true：立即设置到结果处
+     * @param resultFocusT 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
      */
-    public setResult(index: number, isImmediate: boolean = false): ScrollingLotteryListScript {
+    public setResult(index: number, isImmediate: boolean = false, resultFocusT: number = 0.5): ScrollingLotteryListScript {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能设置结果`);
         if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能设置结果`);
 
         const inRange = index >= 0 && index < this._originalItemCount;
         if (!inRange) throw new Error("设置的结果超出范围");
+
+        resultFocusT = Laya.MathUtil.clamp01(resultFocusT); // 限制区间：[0, 1]
 
         // 符合结果的索引
         this._resultIndices.length = 0;
@@ -274,8 +276,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
         if (isImmediate) { // 立即设置到结果处
             for (let i = 0; i < this._resultIndices.length; i++) {
                 const idx = this._resultIndices[i];
-                if (this.isItemFocusable(idx)) {
-                    this._scrollBar.value = this.getScrollBarValueByIndex(idx, true) - this._focusPos;
+                if (this.isItemFocusable(idx, resultFocusT)) {
+                    this._scrollBar.value = this.getScrollBarValueByIndex(idx, resultFocusT) - this._focusPos;
                     break;
                 }
             }
@@ -284,7 +286,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
         } else { // 非立即设置到结果处
             this._normalizedT = 0;
             this._aniTime = 0;
-            this._totalDistance = this.getResultDistance(); // 当前位置到结果的距离
+            this._totalDistance = this.getResultDistance(resultFocusT); // 当前位置到结果的距离
             this._distance = 0;
             this._startScrollValue = this._scrollBar.value;
             this._flags |= Flag.Scrolling;
@@ -332,13 +334,13 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /**
      * 获取指定列表项的滚动值
      * @param index 列表项索引
-     * @param isCentral 是否取列表项中间的滚动条值，默认： false 取列表项左/上在列表可视区左/上的滚动条值；true：取列表项的中间在列表可视区左/上的滚动条值
+     * @param itemFocusT 列表项聚焦插值，区间为 [0, 1]，0.5 中间，小于 0.5 左侧，大于 0.5 右侧
      */
-    private getScrollBarValueByIndex(index: number, isCentral: boolean = false): number {
+    private getScrollBarValueByIndex(index: number, itemFocusT: number): number {
         if (index < 0 || index > this._itemCount - 1) throw new Error(`索引超出范围, i:${index}, itemCount:${this._itemCount}`);
 
         let val = index * this._cellSize;
-        if (isCentral) val += this._itemSize / 2;
+        val += this._itemSize * itemFocusT;
         return val;
     }
 
@@ -353,19 +355,25 @@ export class ScrollingLotteryListScript extends Laya.Script {
         return Math.trunc(scrollBarValue / this._cellSize);
     }
 
-    /** 指定的列表项能被滚动到焦点处（列表头、尾处的项，就可能滚动不到） */
-    private isItemFocusable(index: number): boolean {
-        const itemScrollBarVal = this.getScrollBarValueByIndex(index, true);
+    /** 
+     * 指定的列表项能被滚动到焦点处（列表头、尾处的项，就可能滚动不到）
+     * @param itemFocusT 列表项聚焦插值，区间为 [0, 1]，0.5 中间，小于 0.5 左侧，大于 0.5 右侧
+     */
+    private isItemFocusable(index: number, itemFocusT: number): boolean {
+        const itemScrollBarVal = this.getScrollBarValueByIndex(index, itemFocusT);
         let ret = itemScrollBarVal >= this._focusPos && itemScrollBarVal <= this._scrollBar.max + this._focusPos;
         return ret;
     }
 
-    /** 获取当前位置到结果的距离 */
-    private getResultDistance(): number {
+    /**
+     * 获取当前位置到结果的距离
+     * @param resultFocusT 结果项聚焦插值，区间为 [0, 1]，0.5 表示停止在结果项的中间
+     */
+    private getResultDistance(resultFocusT: number): number {
         // 当前聚焦项索引
         const focusedIndex = this.getIndexByScrollBarValue(this._scrollBar.value, true);
         // 需要偏移多少能把当前聚焦项显示在焦点中间（focusedIndex项中间-可视区焦点处的偏移量）
-        const distOffset = this.getScrollBarValueByIndex(focusedIndex, true) - (this._scrollBar.value + this._focusPos);
+        const distOffset = this.getScrollBarValueByIndex(focusedIndex, resultFocusT) - (this._scrollBar.value + this._focusPos);
         // 当前聚焦项距离结果有多少个项
         const distItemCount = (this._resultIndices[0] - this.getOriginalIndex(focusedIndex)) * this.speedSign;
         // 总距离

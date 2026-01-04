@@ -60,20 +60,22 @@ export class TestScrollingLotteryListScript extends Laya.Script {
         if (evt.key === 'j') {
             const resultIndex = Math.trunc(Math.random() * 5);
             const speedSign = Math.random() > 0.5 ? 1 : -1;
+            const resultFocusT = 0.5//Math.random();
 
-            console.log("设置结果", resultIndex);
+            console.log("设置结果", resultIndex, "resultFocusT:" + resultFocusT);
             this.hList.getComponent(ScrollingLotteryListScript).speedSign = speedSign;
-            this.hList.getComponent(ScrollingLotteryListScript).setResult(resultIndex);
+            this.hList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, false, resultFocusT);
 
             this.vList.getComponent(ScrollingLotteryListScript).speedSign = speedSign;
-            this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex);
+            this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, false, resultFocusT);
         } else if (evt.key === 'k') {
             const resultIndex = Math.trunc(Math.random() * 5);
+            const resultFocusT = 0.5//Math.random();
 
-            console.log("立即设置到结果处", resultIndex);
-            this.hList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, true);
+            console.log("立即设置到结果处", resultIndex, "resultFocusT:" + resultFocusT);
+            this.hList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, true, resultFocusT);
 
-            this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, true);
+            this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, true, resultFocusT);
         }
 
 
