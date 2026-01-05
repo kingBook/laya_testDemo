@@ -13,7 +13,7 @@ enum Flag {
 }
 
 /** 贝塞尔缓动数据 */
-interface BezierEaseData {
+export interface BezierEaseData {
     /** 精度<正整数> */
     precision: number;
     /** 贝塞尔曲线数据(长度为 4): https://cubic-bezier.com/ */
@@ -21,7 +21,7 @@ interface BezierEaseData {
 }
 
 /**
- * 循环滚动抽奖列表
+ * 循环滚动列表抽奖
  * 
  * * 用法示例：
  * ```
@@ -37,13 +37,13 @@ interface BezierEaseData {
  * lotteryScript.circles = 5; // 滚动圈数
  * lotteryScript.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
  * 
- * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_START_SCROLLING, () => {
- *     console.log("开始滚动");
+ * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_START, () => {
+ *     console.log("滚动开始");
  * });
  * 
- * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_CHANGE_FOCUS_INDEX, (curFocusIdx: number) => {
+ * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLLING, (curFocusIdx: number) => {
  *     const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
- *     console.log(`滚动时，当前焦点下的索引发生改变. 当前焦点下的索引: ${curFocusIdx}, 当前焦点下的原始索引：${curFocusOriginalIdx}`);
+ *     console.log(`滚动中. 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
  * });
  * 
  * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, () => {
@@ -58,11 +58,11 @@ interface BezierEaseData {
 @regClass()
 export class ScrollingLotteryListScript extends Laya.Script {
 
-    /** 开始滚动事件 (事件由 {@link owner} 派发) */
-    public static readonly EVENT_START_SCROLLING: string = "eventStartScrolling";
-    /** 滚动时，当前焦点下的索引发生改变时触发的事件 (事件由 {@link owner} 派发， 回调函数格式： (curFocusIdx: number): void )*/
-    public static readonly EVENT_CHANGE_FOCUS_INDEX: string = "eventChangeFocusIndex";
-    /** 滚动到结果项完成事件 (事件由 {@link owner} 派发) */
+    /** 滚动开始事件，事件由 {@link owner} 派发，回调函数格式：`(): void` */
+    public static readonly EVENT_SCROLL_START: string = "eventScrollStart";
+    /** 滚动中事件，事件由 {@link owner} 派发，回调函数格式：`(curFocusIdx: number): void` */
+    public static readonly EVENT_SCROLLING: string = "eventScrolling";
+    /** 滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(): void` */
     public static readonly EVENT_SCROLL_COMPLETE: string = "eventScrollComplete";
 
     declare owner: Laya.List;
@@ -71,17 +71,23 @@ export class ScrollingLotteryListScript extends Laya.Script {
     @property({ type: Number, range: [0, 1], tips: "聚焦点插值，范围：[0,1]" })
     public focusT = 0.5;
     /** 滚动方向, 1 或 -1 */
-    @property({ type: Number, enumSource: [{ name: "1", value: 1 }, { name: "-1", value: 0 }], tips: "滚动方向, 1 或 -1" })
+    @property({ type: Number, enumSource: [{ name: "1", value: 1 }, { name: "-1", value: -1 }], tips: "滚动方向, 1 或 -1" })
     public speedSign: number = 1;
     /** 动画总时长<毫秒, 大于0的整数>, 默认: 5000 */
-    @property({ type: Number, tips: "动画总时长<毫秒, 大于0的整数>, 默认: 5000" })
+    @property({ type: Number, min: 1, step: 1, tips: "动画总时长<毫秒, 大于0的整数>, 默认: 5000" })
     public aniTotalTime: number = 5000;
     /** 滚动的圈数<大于0的整数>, 默认:5 */
-    @property({ type: Number, tips: "滚动的圈数<大于0的整数>, 默认:5" })
+    @property({ type: Number, min: 1, step: 1, tips: "滚动的圈数<大于0的整数>, 默认:5" })
     public circles: number = 5;
 
     /** 贝塞尔缓动数据，https://cubic-bezier.com/ */
     public bezierEaseData: BezierEaseData = { precision: 16, data: [.25, .1, .25, 1] };
+    /** 滚动开始处理器，格式： `(): void` */
+    public onScrollStartHandler: Laya.Handler;
+    /** 滚动中处理器，格式： `(curFocusIdx: number): void` */
+    public onScrollingHandler: Laya.Handler;
+    /** 滚动到结果项完成处理器，格式： `(): void` */
+    public onScrollCompleteHandler: Laya.Handler;
     /** 是否显示 log */
     public isShowLogMsg: boolean = false;
 
@@ -101,7 +107,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /** 滚动速度(有方向) */
     private _speed: number;
     /** 布尔标记集合 */
-    private _flags: number;
+    private _flags: Flag;
     /** 符合结果的索引（因为列表末尾有一些项是重复的，所以符合结果的项可能会有两个, 最多只会有两个, 有可能只有一个，且[1]的值一定比[0]的值大， [0]:原索引, [1]:重复索引） */
     private _resultIndices: number[];
     /** 滚动条 */
@@ -222,10 +228,11 @@ export class ScrollingLotteryListScript extends Laya.Script {
         // 滚动
         this._scrollBar.value = this._scrollBar.min + Laya.MathUtil.repeat(this._startScrollValue + this._distance * this.speedSign, this._maxScrollBarValue);
 
-        // 滚动中，当前焦点下的索引改变时，派发事件
+        // 滚动中
         const curFocusIdx = this.getIndexByScrollBarValue(this._scrollBar.value, true);
         if (curFocusIdx !== this._currentFocusIndex) {
-            this.owner.event(ScrollingLotteryListScript.EVENT_CHANGE_FOCUS_INDEX, curFocusIdx);
+            this.owner.event(ScrollingLotteryListScript.EVENT_SCROLLING, curFocusIdx); // 滚动中事件
+            this.onScrollingHandler?.runWith(curFocusIdx);
             this._currentFocusIndex = curFocusIdx;
         }
 
@@ -233,6 +240,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
         if (t >= 1) {
             this.stopScrolling();
             this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE); // 滚动完成事件
+            this.onScrollCompleteHandler?.run();
         }
     }
 
@@ -253,7 +261,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /**
      * 设置结果
      * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
-     * @param index 未添加重复项前的索引
+     * @param index 结果索引（未添加重复项前的索引）
      * @param isImmediate 是否立即设置，默认：false 滚动慢慢停止在结果处；true：立即设置到结果处
      * @param resultFocusT 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
      */
@@ -290,7 +298,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
             this._distance = 0;
             this._startScrollValue = this._scrollBar.value;
             this._flags |= Flag.Scrolling;
-            this.owner.event(ScrollingLotteryListScript.EVENT_START_SCROLLING); // 开始滚动事件
+            this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_START); // 滚动开始事件
+            this.onScrollStartHandler?.run();
         }
 
         // 同步设置当前焦点下的索引
