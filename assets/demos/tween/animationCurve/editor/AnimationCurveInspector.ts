@@ -52,19 +52,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         this._input.applyChange();
     }
 
-    // private hermite_to_bezier(current: IEditor.PathPoint, next: IEditor.PathPoint): void {
-    //     const a0 = (next.px - current.px) * current.outWeight;
-    //     const b0 = current.inTangent * a0;
-    //     current.c1x = current.px + a0 / 3;
-    //     current.c1y = current.py + b0 / 3;
-
-
-    //     const a1 = (next.px - current.px) * next.inWeight;
-    //     const b1 = next.inTangent * a1;
-    //     next.c0x = next.px - a1 / 3;
-    //     next.c0y = next.py - b1 / 3;
-    // }
-
     /** 创建默认实例 */
     private createDefaultInstance(): void {
         console.log("createDefaultInstance();");
@@ -93,7 +80,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
                 outWeight: 0
             }),
         ];
-        
+
         // initProp.keys = [
         //     this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
         //     this.createFloatKeyframe({ time: 1, value: 1, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),

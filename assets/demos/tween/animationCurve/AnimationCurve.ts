@@ -12,26 +12,38 @@ export default class AnimationCurve {
     /**
      * 估算在指定时间的曲线值
      * @param t 要估算的时间，范围：[0, 1]（曲线图中的x轴）。
+     * @param precision 精度<正整数>，默认：8
      * @returns 曲线值，范围：[0, 1]（曲线图中的y轴）。
      */
-    public evaluate(t: number): number {
+    public evaluate(t: number, precision: number = 8): number {
+        t = Laya.MathUtil.clamp01(t);
+        let val: number;
         for (let i = 0, c = this.keys.length - 1; i < c; i++) {
             const key0 = this.keys[i];
             const key1 = this.keys[i + 1];
 
+            if (t >= key0.time && t <= key1.time) {
+                if (t === key0.time) {
+                    val = key0.value;
+                } else if (t === key1.time) {
+                    val = key1.value;
+                } else {
+                    // this.getCubicBezierValue();
+                }
+                break;
+            }
         }
-        return 0;
+        return val;
     }
 
     /**
-     * 创建自定义贝塞尔缓动
+     * 获取三次贝塞尔曲线值
      * @param t 0~1
      * @param p1x 
      * @param p1y 
      * @param p2x 
      * @param p2y 
-     * @param precision 精度位数<正整数>，默认：8
-     * @description 工具推荐：https://cubic-bezier.com/ （拖拽生成控制点，复制数字直接用）, 如：创建自定义贝塞尔缓动（控制点：P1(0.25, 0.1), P2(0.25, 1) —— 标准 easeOut）
+     * @param precision 精度<正整数>，默认：8
      * @returns 
      */
     private getCubicBezierValue(t: number, p1x: number, p1y: number, p2x: number, p2y: number, precision: number = 8): number {
