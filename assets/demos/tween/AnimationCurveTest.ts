@@ -10,6 +10,9 @@ export class AnimationCurveTest extends Laya.Script {
     @property({ type: AnimationCurve, inspector: "AnimationCurve" })
     animationCurve: AnimationCurve;
 
+    @property({ type: Laya.TextArea })
+    text: Laya.TextArea;
+
     onAwake(): void {
         console.log("animationCurve:", this.animationCurve);
         //console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
@@ -52,6 +55,13 @@ export class AnimationCurveTest extends Laya.Script {
     onStart(): void {
         console.log("onStart");
         console.log("this.animationCurve:", this.animationCurve);
+
+        for (let i = 0, len = 100; i <= len; i++) {
+            const t = i / len;
+            const y = this.animationCurve.evaluate(t);
+            console.log(y);
+
+        }
 
     }
 }

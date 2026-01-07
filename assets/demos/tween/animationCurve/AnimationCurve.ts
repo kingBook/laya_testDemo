@@ -6,6 +6,7 @@ const { regClass, property } = Laya;
 @regClass()
 export default class AnimationCurve {
 
+    /** 动画曲线上的顶点数组 */
     @property({ type: [Laya.FloatKeyframe] })
     public keys: Laya.FloatKeyframe[];
 
@@ -17,20 +18,30 @@ export default class AnimationCurve {
      */
     public evaluate(t: number, precision: number = 8): number {
         t = Laya.MathUtil.clamp01(t);
-        let val: number;
-        for (let i = 0, c = this.keys.length - 1; i < c; i++) {
-            const key0 = this.keys[i];
-            const key1 = this.keys[i + 1];
 
-            if (t >= key0.time && t <= key1.time) {
-                if (t === key0.time) {
-                    val = key0.value;
-                } else if (t === key1.time) {
-                    val = key1.value;
-                } else {
-                    // this.getCubicBezierValue();
+        let val = NaN;
+
+        const len = this.keys.length;
+        if (len > 2) {
+            for (let i = 0; i < len - 1; i++) {
+                const key0 = this.keys[i];
+                const key1 = this.keys[i + 1];
+
+                if (t >= key0.time && t <= key1.time) {
+                    if (t === key0.time) {
+                        val = key0.value;
+                    } else if (t === key1.time) {
+                        val = key1.value;
+                    } else {
+                        const tb = (t - key0.time) / (key1.time - key0.time);
+                        const p1x = key0.outWeight; // outWeight: cubicBezierValues[0]
+                        const p1y = key0.outTangent * key0.outWeight; // outTangent: cubicBezierValues[1] / cubicBezierValues[0]
+                        const p2x = -key1.inWeight + 1; // inWeight: 1 - cubicBezierValues[2]
+                        const p2y = -(key1.inTangent * key1.inWeight) + 1; // inTangent: (1 - cubicBezierValues[3]) / (1 - cubicBezierValues[2])
+                        val = this.getCubicBezierValue(tb, p1x, p1y, p2x, p2y, precision);
+                    }
+                    break;
                 }
-                break;
             }
         }
         return val;
