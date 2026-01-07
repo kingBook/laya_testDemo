@@ -14,7 +14,7 @@
       "_$type": "7a9b5dd7-7dcc-439b-b894-caea9f0de77b",
       "scriptPath": "demos/循环滚动抽奖列表/TestScrollingLotteryMultipleListScript.ts",
       "_multipleLottry": {
-        "_$ref": "k4qsyepr",
+        "_$ref": "qo7n3zpv",
         "_$type": "168a8568-ba24-4994-a2d0-56f7d7c5dc95"
       }
     }
@@ -28,6 +28,17 @@
       "x": 225,
       "y": 650,
       "visible": true
+    },
+    {
+      "_$id": "22haxuvw",
+      "_$type": "Box",
+      "name": "Box",
+      "x": 375,
+      "y": 598,
+      "width": 1,
+      "height": 500,
+      "centerX": 0,
+      "bgColor": "#00ff34"
     }
   ]
 }
