@@ -11,12 +11,12 @@ export default class AnimationCurve {
     public keys: Laya.FloatKeyframe[];
 
     /**
-     * 估算在指定时间的曲线值
-     * @param t 要估算的时间，范围：[0, 1]（曲线图中的x轴）。
+     * 获取曲线值
+     * @param t 时间插值，区间：[0, 1]（曲线图中的x轴）。
      * @param precision 精度<正整数>，默认：8
      * @returns 曲线值，范围：[0, 1]（曲线图中的y轴）。
      */
-    public evaluate(t: number, precision: number = 8): number {
+    public getValue(t: number, precision: number = 8): number {
         t = Laya.MathUtil.clamp01(t);
 
         let val = NaN;
@@ -38,7 +38,7 @@ export default class AnimationCurve {
                         const p1y = key0.outTangent * key0.outWeight; // outTangent: cubicBezierValues[1] / cubicBezierValues[0]
                         const p2x = -key1.inWeight + 1; // inWeight: 1 - cubicBezierValues[2]
                         const p2y = -(key1.inTangent * key1.inWeight) + 1; // inTangent: (1 - cubicBezierValues[3]) / (1 - cubicBezierValues[2])
-                        val = this.getCubicBezierValue(tb, p1x, p1y, p2x, p2y, precision);
+                        val = this.cubicBezierValue(tb, p1x, p1y, p2x, p2y, precision);
                     }
                     break;
                 }
@@ -48,7 +48,7 @@ export default class AnimationCurve {
     }
 
     /**
-     * 获取三次贝塞尔曲线值
+     * 三次贝塞尔曲线值
      * @param t 0~1
      * @param p1x 
      * @param p1y 
@@ -57,7 +57,7 @@ export default class AnimationCurve {
      * @param precision 精度<正整数>，默认：8
      * @returns 
      */
-    private getCubicBezierValue(t: number, p1x: number, p1y: number, p2x: number, p2y: number, precision: number = 8): number {
+    private cubicBezierValue(t: number, p1x: number, p1y: number, p2x: number, p2y: number, precision: number = 8): number {
         /**
          * 三次贝塞尔曲线计算函数（核心）
          * @param t 0~1

@@ -58,7 +58,7 @@ export class AnimationCurveTest extends Laya.Script {
 
         for (let i = 0, len = 100; i <= len; i++) {
             const t = i / len;
-            const y = this.animationCurve.evaluate(t);
+            const y = this.animationCurve.getValue(t);
             console.log(y);
 
         }

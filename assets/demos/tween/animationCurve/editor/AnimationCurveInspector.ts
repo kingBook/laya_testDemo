@@ -7,6 +7,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     private _easeInputTxt: IEditor.TextInput;
     private _easeComboBox: gui.ComboBox;
 
+    private _oldEaseInputText: string;
+
     public override create(): IEditor.IPropertyFieldCreateResult {
         console.log("create();");
 
@@ -21,8 +23,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         curveInput.isAutoFillKeyFrame = false; // 关闭这个属性，否则在曲线图双击添加点时，会自动添加点(PathPoint)，使点数量与maxKeyFrame一致
         curveInput.isWeight = true; // 控制点可任意拖动
 
-        // 侦听曲线图（CurveInput）被修改
-        curveInput.on("submit", this.onSubmit, this);
+        // 侦听曲线对话框提交数据
+        curveInput.on("submit", this.onCurveEditDialogSubmit, this);
 
         this._curveInput = curveInput;
 
@@ -42,17 +44,17 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         // 间隔
         const space = 5;
         // 高
-        const txtBoxH = 19;
+        const easeBoxH = 19;
 
         // 加高最顶层容器
-        curveInput.height += txtBoxH + space * 2;
+        curveInput.height += easeBoxH + space * 2;
 
-        // 创建一个子容器放输入文本框、下拉列表、url 
+        // 创建一个水平布局的子容器
         const easeBox = new gui.Box();
         easeBox.x = canvas.x;
         easeBox.y = n5.height + space;
         easeBox.width = canvas.width;
-        easeBox.height = txtBoxH;
+        easeBox.height = easeBoxH;
         easeBox.layout.type = gui.LayoutType.SingleRow;
         easeBox.layout.columnGap = space;
         easeBox.layout.stretchX = gui.StretchMode.Stretch;
@@ -71,14 +73,19 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         // 输入文本框
         const easeInputTxt = IEditor.GUIUtils.createTextInput();
-        easeInputTxt.text = ".25, .1, .25, 1";
+        easeInputTxt.text = this._defaultCubicBezierValues.toString();
+        easeInputTxt.on("submit", this.onEaseInputSubmit, this);
         easeBox.addChild(easeInputTxt);
         this._easeInputTxt = easeInputTxt;
+        this._oldEaseInputText = this._easeInputTxt.text;
 
         // 下拉列表
         const easeComboBox = IEditor.GUIUtils.createComboBox();
         easeComboBox.x = easeInputTxt.x + easeInputTxt.width + space;
-        easeComboBox.items = ["ease", "linear", "ease-in", "ease-out", "ease-in-out"];
+        easeComboBox.items = ["ease", "linear", "ease-in", "ease-out", "ease-in-out", "custom"];
+        easeComboBox.on("changed", (evt: gui.Event) => {
+            console.log("下拉列表改变:", easeComboBox.selectedIndex);
+        }, this);
         easeBox.addChild(easeComboBox);
         this._easeComboBox = easeComboBox;
 
@@ -108,10 +115,10 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         // 设置值到曲线图（CurveInput）
         const value = this.target.getValue();
-        const valueKeys: any[] = value.keys;
+        const keys: any[] = value.keys;
         this._curveInput.clearPoints(); // 先清空，避免顶点数量比实际数量多
-        for (let i = 0, c = valueKeys.length; i < c; i++) {
-            const key = valueKeys[i];
+        for (let i = 0, c = keys.length; i < c; i++) {
+            const key = keys[i];
 
             if (i >= this._curveInput.points.length) {
                 this._curveInput.addPoint();
@@ -126,12 +133,34 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         }
 
         this._curveInput.applyChange();
+
+
+        // 设置值到 cubic-bezier.com 数据输入框
+        if (keys.length === 2) {
+            const key0 = keys[0];
+            const key1 = keys[1];
+            const p1x: number = key0.outWeight; // outWeight: cubicBezierValues[0]
+            const p1y: number = key0.outTangent * key0.outWeight; // outTangent: cubicBezierValues[1] / cubicBezierValues[0]
+            const p2x: number = -key1.inWeight + 1; // inWeight: 1 - cubicBezierValues[2]
+            const p2y: number = -(key1.inTangent * key1.inWeight) + 1; // inTangent: (1 - cubicBezierValues[3]) / (1 - cubicBezierValues[2])
+            const p1xStr: string = this.getFloatString(p1x);
+            const p1yStr: string = this.getFloatString(p1y);
+            const p2xStr: string = this.getFloatString(p2x);
+            const p2yStr: string = this.getFloatString(p2y);
+            this._easeInputTxt.text = [p1xStr, p1yStr, p2xStr, p2yStr].toString();
+            this._oldEaseInputText = this._easeInputTxt.text;
+            this._easeInputTxt.editable = true;
+            this._easeInputTxt.alpha = 1;
+        } else {
+            this._easeInputTxt.text = "vertices is not 2";
+            this._easeInputTxt.editable = false;
+            this._easeInputTxt.alpha = 0.7;
+        }
     }
 
     /** 创建默认实例 */
     private createDefaultInstance(): void {
         console.log("createDefaultInstance();");
-
         const typeDescriptor: IEditor.FTypeDescriptor = Editor.typeRegistry.types[`${this.property.type}`];
 
         // 默认值
@@ -178,19 +207,20 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         };
     }
 
-    /** 曲线图（CurveInput）被修改时 */
-    private onSubmit(evt: gui.Event): void {
-        console.log("onSubmit();");
+    /** 曲线对话框提交数据 */
+    private onCurveEditDialogSubmit(evt: gui.Event): void {
+        console.log("onCurveEditDialogSubmit();");
 
-        // 设置曲线图（CurveInput）的值到目标
+        // 设置值到目标
         const value = this.target.getValue();
-        const valueKeys: any[] = value.keys;
+        const keys: any[] = value.keys;
+
         for (let i = 0, c = this._curveInput.points.length; i < c; i++) {
             const pt: IEditor.PathPoint = this._curveInput.points[i];
-            if (i >= valueKeys.length) {
-                valueKeys.push(this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0, outTangent: 0, outWeight: 0 }));
+            if (i >= keys.length) {
+                keys.push(this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0, outTangent: 0, outWeight: 0 }));
             }
-            const key = valueKeys[i];
+            const key = keys[i];
             key.time = pt.px;
             key.value = pt.py;
             key.inTangent = pt.inTangent;
@@ -199,11 +229,61 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             key.outWeight = pt.outWeight;
         }
 
-        if (valueKeys.length > this._curveInput.points.length) {
-            valueKeys.length = this._curveInput.points.length; // 删除多出的点
+        if (keys.length > this._curveInput.points.length) {
+            keys.length = this._curveInput.points.length; // 删除多出的点
         }
 
         this.target.setValue(value);
+    }
+
+    /** cubic-bezier.com 数据输入框提交数据 */
+    private onEaseInputSubmit(evt: gui.Event): void {
+        console.log("onEaseInputSubmit();", this._easeInputTxt.text);
+
+        let values: number[];
+        let isRight = true;
+        const strings = this._easeInputTxt.text.split(',');
+
+        if (strings.length === 4) {
+            values = strings.map(str => Number.parseFloat(str));
+            for (let i = 0; i < 4; i++) {
+                const val = values[i];
+                if (isNaN(val) || val < 0 || val > 1) {
+                    isRight = false;
+                    break;
+                }
+            }
+        } else {
+            isRight = false;
+        }
+
+        if (isRight) {
+            this._oldEaseInputText = this._easeInputTxt.text;
+
+            // 设置值到目标
+            const value = this.target.getValue();
+            const keys: any[] = value.keys;
+            const key0 = keys[0];
+            const key1 = keys[1];
+            key0.outTangent = values[1] / values[0];
+            key0.outWeight = values[0];
+            key1.inTangent = (1 - values[3]) / (1 - values[2]);
+            key1.inWeight = 1 - values[2];
+
+            if (keys.length > this._curveInput.points.length) {
+                keys.length = this._curveInput.points.length; // 删除多出的点
+            }
+
+            this.target.setValue(value);
+        } else {
+            this._easeInputTxt.text = this._oldEaseInputText;
+            Editor.alert("输入错误");
+        }
+    }
+
+    private getFloatString(n: number): string {
+        n = ((n * 100) | 0) / 100;
+        return n.toString().replace("0.", '.');
     }
 
 
