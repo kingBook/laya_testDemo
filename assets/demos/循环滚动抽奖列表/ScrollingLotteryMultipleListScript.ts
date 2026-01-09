@@ -150,11 +150,27 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
 
     /** 初始化 */
     public init(): ScrollingLotteryMultipleListScript {
-        // 父列表
+        // 填平、对齐子列表数据源
+        let maxSubArrayLen = 0;
+        this.array.forEach((subArray, index) => {
+            maxSubArrayLen = Math.max(maxSubArrayLen, subArray.length);
+        });
+        this.array.forEach((subArray, index) => {
+            if (subArray.length < maxSubArrayLen) {
+                for (let i = 0, c = maxSubArrayLen - subArray.length; i < c; i++) {
+                    const ranIdx = Math.min((Math.random() * subArray.length) | 0, subArray.length - 1); // subArray 的随机索引
+                    subArray.push(subArray[ranIdx]);
+                }
+            }
+        });
+
+        // 父列表 ========================
         this.owner.array = this.array; // 父列表数据源
+
+
         this.owner.renderHandler = this.parentListItemRender ? this.parentListItemRender : new Laya.Handler(this, this.onRenderParentListItem);
 
-        // 子列表
+        // 子列表 ========================
         this._subLotteries ||= [];
         for (let i = 0, c = this.owner.content.children.length; i < c; i++) {
             const child = this.owner.content.children[i];

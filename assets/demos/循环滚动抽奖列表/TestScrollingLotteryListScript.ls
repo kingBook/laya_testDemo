@@ -301,6 +301,28 @@
           ]
         }
       ]
+    },
+    {
+      "_$id": "h2dw9doh",
+      "_$type": "List",
+      "name": "List",
+      "x": 622,
+      "y": 502,
+      "width": 200,
+      "height": 300,
+      "repeatX": 1,
+      "repeatY": 1,
+      "_$comp": [
+        {
+          "_$type": "250a8313-8524-4316-aea2-24f623598970",
+          "scriptPath": "demos/循环滚动抽奖列表/ScrollingLotteryListScript.ts",
+          "focusT": 0.5,
+          "speedSign": 1,
+          "aniTotalTime": 5078,
+          "circles": 298,
+          "extraItemNum": 0
+        }
+      ]
     }
   ]
 }
