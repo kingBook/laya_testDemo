@@ -37,17 +37,21 @@ export interface BezierEaseData {
  * lotteryScript.circles = 5; // 滚动圈数
  * lotteryScript.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
  * 
- * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_START, () => {
+ * //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_START, () => {
+ * lotteryScript.onScrollStartHandler = new Laya.Handler(this, () => {
  *     console.log("滚动开始");
  * });
  * 
- * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLLING, (curFocusIdx: number) => {
+ * //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLLING, (curFocusIdx: number) => {
+ * lotteryScript.onScrollingHandler = new Laya.Handler(this, (curFocusIdx: number) => {
  *     const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
  *     console.log(`滚动中. 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
  * });
  * 
- * lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, () => {
- *     console.log("滚动到结果项完成");
+ * //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, (curFocusIdx: number) => {
+ * lotteryScript.onScrollCompleteHandler = new Laya.Handler(this, (curFocusIdx: number) => {
+ *     const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
+ *     console.log(`滚动到结果项完成, 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
  * });
  * 
  * 
@@ -62,7 +66,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     public static readonly EVENT_SCROLL_START: string = "eventScrollStart";
     /** 滚动中事件，事件由 {@link owner} 派发，回调函数格式：`(curFocusIdx: number): void` */
     public static readonly EVENT_SCROLLING: string = "eventScrolling";
-    /** 滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(): void` */
+    /** 滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(curFocusIdx: number): void` */
     public static readonly EVENT_SCROLL_COMPLETE: string = "eventScrollComplete";
 
     declare owner: Laya.List;
@@ -86,7 +90,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     public onScrollStartHandler: Laya.Handler;
     /** 滚动中处理器，格式： `(curFocusIdx: number): void` */
     public onScrollingHandler: Laya.Handler;
-    /** 滚动到结果项完成处理器，格式： `(): void` */
+    /** 滚动到结果项完成处理器，格式： `(curFocusIdx: number): void` */
     public onScrollCompleteHandler: Laya.Handler;
     /** 是否显示 log */
     public isShowLogMsg: boolean = false;
@@ -209,6 +213,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
     public onUpdate(): void {
         if (!(this._flags & Flag.Inited)) return;
+        // 在滚动矩形外则隐藏，优化Drawcall
+        this.optimizeVisible();
         if (this._flags & Flag.Paused) return;
         if (!(this._flags & Flag.Scrolling)) return;
         if (this._resultIndices.length <= 0) return; // 未设置结果
@@ -239,8 +245,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
         // 滚动完成
         if (t >= 1) {
             this.stopScrolling();
-            this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE); // 滚动完成事件
-            this.onScrollCompleteHandler?.run();
+            this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, curFocusIdx); // 滚动完成事件
+            this.onScrollCompleteHandler?.runWith(curFocusIdx);
         }
     }
 
@@ -390,6 +396,15 @@ export class ScrollingLotteryListScript extends Laya.Script {
             + (distItemCount * this._cellSize)
             + (this.speedSign * distOffset);
         return total;
+    }
+
+    /** 在滚动矩形外则隐藏，优化Drawcall */
+    private optimizeVisible(): void {
+        this.owner.cells.forEach((cell: Laya.UIComponent, index: number) => {
+            const scrollRect = this.owner.content.scrollRect;
+            const cellRect = cell.getBounds();
+            cell.visible = scrollRect.intersects(cellRect);
+        });
     }
 
 }

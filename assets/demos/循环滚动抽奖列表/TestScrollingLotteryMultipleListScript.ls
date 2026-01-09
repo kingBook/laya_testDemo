@@ -21,18 +21,35 @@
   ],
   "_$child": [
     {
-      "_$id": "qo7n3zpv",
-      "_$prefab": "9cdb7a64-1b89-4d95-a7e4-2afe0e43f40a",
-      "name": "ScrollingLotteryMultipleList",
-      "active": true,
+      "_$id": "pcoqu27z",
+      "_$type": "Panel",
+      "name": "Panel",
       "x": 225,
       "y": 650,
-      "visible": true
+      "width": 300,
+      "height": 300,
+      "centerX": 0,
+      "centerY": 0,
+      "bgColor": "#8a6e6e",
+      "scrollType": 2,
+      "_$child": [
+        {
+          "_$id": "qo7n3zpv",
+          "_$prefab": "9cdb7a64-1b89-4d95-a7e4-2afe0e43f40a",
+          "name": "ScrollingLotteryMultipleList",
+          "active": true,
+          "x": 0,
+          "y": 100,
+          "height": 900,
+          "visible": true,
+          "repeatY": 8
+        }
+      ]
     },
     {
       "_$id": "22haxuvw",
       "_$type": "Box",
-      "name": "Box",
+      "name": "lineH",
       "x": 375,
       "y": 598,
       "width": 1,

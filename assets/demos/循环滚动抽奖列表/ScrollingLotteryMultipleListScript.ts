@@ -26,7 +26,7 @@ enum Flag {
  *     [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
  * ];
  * // 父列表项渲染处理器
- * multipleLottry.subListItemRender = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
+ * multipleLottry.parentListItemRender = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
  *     
  * });
  * // 子列表项渲染处理器
@@ -65,8 +65,8 @@ enum Flag {
  *     console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
  * });
  * 
- * //multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
- * multipleLottry.onScrollCompleteHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
+ * //multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, (subLottery: ScrollingLotteryListScript, subListIdx: number, subCell: UIComponent) => {
+ * multipleLottry.onScrollCompleteHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number, subCell: UIComponent) => {
  *     console.log(`滚动完成, 子列表索引:${subListIdx}`);
  * });
  * 
@@ -86,7 +86,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     public static readonly EVENT_SCROLL_START: string = "eventScrollStart";
     /** 滚动中事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, curFocusIdx: number): void` */
     public static readonly EVENT_SCROLLING: string = "eventScrolling";
-    /** 滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number): void` */
+    /** 滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, subCell: UIComponent): void` */
     public static readonly EVENT_SCROLL_COMPLETE: string = "eventScrollComplete";
 
     declare owner: Laya.List;
@@ -123,7 +123,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     public onScrollStartHandler: Laya.Handler;
     /** 滚动中处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, curFocusIdx: number): void` */
     public onScrollingHandler: Laya.Handler;
-    /** 滚动到结果项完成处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number): void` */
+    /** 滚动到结果项完成处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, subCell: UIComponent): void` */
     public onScrollCompleteHandler: Laya.Handler;
 
 
@@ -142,6 +142,12 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /** 暂停中... */
     public get isPaused(): boolean { return (this._flags & Flag.Paused) > 0; }
 
+
+    public onUpdate(): void {
+        // 如果父级是 Panel 时，在滚动矩形外则隐藏，优化Drawcall 
+        this.optimizeVisible();
+    }
+
     /** 初始化 */
     public init(): ScrollingLotteryMultipleListScript {
         // 父列表
@@ -156,7 +162,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             if (ret && ret[0] === ret.input) {
                 const subListIdx = Number.parseInt(ret[0].replace("item", "")); // 取 item0,item1,item2,... 后的数字
 
-                const subList = child.getChild(this._subListTemplate.name, Laya.List);
+                const subList = child.findChild(this._subListTemplate.name, Laya.List);
                 subList.array = this.owner.array[subListIdx]; // 子列表数据源
 
                 if (subList.array && subList.array.length > 0) {
@@ -188,12 +194,13 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                     });
 
                     // 子列表滚动完成
-                    subLottery.onScrollCompleteHandler = new Laya.Handler(this, () => {
+                    subLottery.onScrollCompleteHandler = new Laya.Handler(this, (curFocusIdx: number) => {
                         if (subListIdx >= this.owner.array.length - 1) { // 最后一个子列表滚动完成
                             this._flags &= ~Flag.Scrolling;
                         }
-                        this.owner.event(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, [subLottery, subListIdx]); // 滚动完成
-                        this.onScrollCompleteHandler?.runWith([subLottery, subListIdx]);
+                        const subCell = subList.getCell(curFocusIdx);
+                        this.owner.event(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, [subLottery, subListIdx, subCell]); // 滚动完成
+                        this.onScrollCompleteHandler?.runWith([subLottery, subListIdx, subCell]);
                     });
 
                     this._subLotteries[subListIdx] = subLottery; // 保存到子列表抽奖组件数组
@@ -268,6 +275,21 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         const idxLabel = cell.getChild("idxLabel", Laya.Label);
         if (idxLabel) {
             idxLabel.text = `${cellDataSource.id}`;
+        }
+    }
+
+    /** 如果父级是 Panel 时，在滚动矩形外则隐藏，优化Drawcall */
+    private optimizeVisible(): void {
+        if (this._flags & Flag.Inited && this.owner.parent && this.owner.parent instanceof Laya.Panel) {
+            const panel = this.owner.parent as Laya.Panel;
+            const panelScrollRect = panel.content.scrollRect;
+
+            this.owner.cells.forEach((cell: Laya.UIComponent, index: number) => {
+                const cellRect = cell.getBounds();
+                cellRect.x += this.owner.x;
+                cellRect.y += this.owner.y;
+                cell.visible = panelScrollRect.intersects(cellRect);
+            });
         }
     }
 }

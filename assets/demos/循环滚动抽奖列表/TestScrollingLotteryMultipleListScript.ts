@@ -16,6 +16,11 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
             [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
             [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
             [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+
+            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
             [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
         ];
         // 父列表项渲染处理器
@@ -54,13 +59,22 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
             console.log(`滚动完成, 子列表索引:${subListIdx}`);
         });
 
+    }
 
-        // 设置结果，开始滚动
-        const resultIndices = [0, 1, 2, 3]; // 结果索引数组
-        const isImmediate = false; // 是否立即设置，false 滚动慢慢停止在结果处；true：立即设置到结果处
-        const resultsFocusT = [0.1, 0.5, 0.7, 0.9]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
-        const startScrollingInterval = 1000; // 开始滚动间隔<毫秒>
-        this._multipleLottry.setResults(resultIndices, isImmediate, resultsFocusT, startScrollingInterval);
-
+    onKeyDown(evt: Laya.Event): void {
+        if (evt.key === 'j') {
+            // 设置结果，开始滚动
+            const resultIndices = [
+                0, 1, 2, 3,
+                0, 1, 2, 3
+            ]; // 结果索引数组
+            const isImmediate = false; // 是否立即设置，false 滚动慢慢停止在结果处；true：立即设置到结果处
+            const resultsFocusT = [
+                0.1, 0.5, 0.7, 0.9,
+                0.1, 0.5, 0.7, 0.9
+            ]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
+            const startScrollingInterval = 500; // 开始滚动间隔<毫秒>
+            this._multipleLottry.setResults(resultIndices, isImmediate, resultsFocusT, startScrollingInterval);
+        }
     }
 }
