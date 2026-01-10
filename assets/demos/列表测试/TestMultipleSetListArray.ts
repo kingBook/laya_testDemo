@@ -14,15 +14,6 @@ export class TestMultipleSetListArray extends Laya.Script {
 
     onAwake(): void {
         //this._lotteryScript = this.list.addComponent(ScrollingLotteryListScript);
-        
-        const renderItem: Function = this.list['renderItem'];
-        this.list['renderItem'] = ((cell: Laya.UIComponent, cellIndex: number) => {
-            renderItem.call(this.list, cell, cellIndex);
-            //console.log("renderItem", cellIndex);
-
-        }).bind(this.list);
-        console.log(this.list.cacheContent);
-        this.setListArray(10);
     }
 
     onUpdate(): void {

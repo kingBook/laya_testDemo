@@ -30,8 +30,10 @@ export interface BezierEaseData {
  * list.scrollType = Laya.ScrollType.Horizontal; // 必须是水平/垂直滚动
  * list.array = [{ Label: "A" }, { Label: "B" }, { Label: "C" }, { Label: "D" }, { Label: "E" }];
  * 
- * // 添加滚动组件，并初始化
- * const lotteryScript = this.list.addComponent(ScrollingLotteryListScript).init(); // 需在 list.array 赋值后调用初始化，且不能赋值空数组
+ * // 添加滚动组件
+ * const lotteryScript = this.list.addComponent(ScrollingLotteryListScript);
+ * const isResetScrollValue = false; // 是否重置滚动值（注意：当多次初始化，列表数据源长度由短变长，且列表发生了滚动， 如果不重置，列表开头会出现空白）
+ * lotteryScript.init(isResetScrollValue); // 初始化, 需在 list.array 赋值后调用初始化，且不能赋值空数组; 
  * lotteryScript.speedSign = -1; // 滚动方向, 1 或 -1
  * lotteryScript.aniTotalTime = 5000; // 滚动时间<毫秒>
  * lotteryScript.circles = 5; // 滚动圈数
@@ -146,8 +148,11 @@ export class ScrollingLotteryListScript extends Laya.Script {
     public get normalizedT(): number { return this._normalizedT; }
 
 
-    /** 初始化 */
-    public init(): ScrollingLotteryListScript {
+    /**
+     * 初始化
+     * @param isResetScrollValue 是否重置滚动值（注意：当多次初始化，列表数据源长度由短变长，且列表发生了滚动， 如果不重置，列表开头会出现空白）
+     */
+    public init(isResetScrollValue: boolean = false): ScrollingLotteryListScript {
         if (this.owner.scrollType !== Laya.ScrollType.Horizontal && this.owner.scrollType !== Laya.ScrollType.Vertical) {
             throw new Error("使用此组件时, 列表必须是水平或垂直滚动类型");
         }
@@ -199,6 +204,9 @@ export class ScrollingLotteryListScript extends Laya.Script {
             : this.owner.repeatY = this.owner.array.length;
 
         this.isShowLogMsg && console.log(`循环列表共${this.owner.array.length}项, 其中${this._extraItemNum}个额外重复项`);
+
+        // 重置滚动值
+        isResetScrollValue && (this._scrollBar.value = 0);
 
         // 刷新列表
         this.owner.refresh();
