@@ -17,7 +17,7 @@ export class TestMultipleSetListArray extends Laya.Script {
     }
 
     onUpdate(): void {
-        this.optimizeVisible();
+        //this.optimizeVisible();
     }
 
     private optimizeVisible(): void {
@@ -30,12 +30,20 @@ export class TestMultipleSetListArray extends Laya.Script {
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
+            console.log("j===============");
             this.setListArray(5);
             //this._lotteryScript.init(true);
+            for (let i = 0; i < this.list.cells.length; i++) {
+                console.log(i, this.list.cells[i].name);
+            }
         } else if (evt.key === 'k') {
+            console.log("k===============");
             this.setListArray(10);
-           // this._lotteryScript.init(true);
-        }else if(evt.key==='r'){
+            // this._lotteryScript.init(true);
+            for (let i = 0; i < this.list.cells.length; i++) {
+                console.log(i, this.list.cells[i].name);
+            }
+        } else if (evt.key === 'r') {
             this.list.refresh();
         }
     }
@@ -56,8 +64,8 @@ export class TestMultipleSetListArray extends Laya.Script {
         this.list.repeatX = this.list.array.length;
 
         // 当数据源长度由短变长时，需要将滚动值置0，否则滚动值不为0列表开始处会出现空白
-        console.log(this.list.scrollBar.value);
-        this.list.scrollBar.value = 0;
+        //console.log(this.list.scrollBar.value);
+        //this.list.scrollBar.value = 0;
 
 
     }
