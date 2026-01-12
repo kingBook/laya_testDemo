@@ -131,6 +131,10 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     private _subLotteries: ScrollingLotteryListScript[];
     /** 布尔标记集合 */
     private _flags: Flag;
+    /** 开奖结果最大索引数组 */
+    private _resultMaxIndices: number[];
+
+    private _tempRect: Laya.Rectangle = new Laya.Rectangle();
 
 
     /** 子列表抽奖组件数组，注意：需要在初始化完成后调用 */
@@ -151,8 +155,11 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /** 初始化 */
     public init(): ScrollingLotteryMultipleListScript {
         // 填平、对齐子列表数据源
+        this._resultMaxIndices ||= [];
+        this._resultMaxIndices.length = 0;
         let maxSubArrayLen = 0;
         this.array.forEach((subArray, index) => {
+            this._resultMaxIndices[index] = subArray.length - 1; // 记录开奖结果最大索引
             maxSubArrayLen = Math.max(maxSubArrayLen, subArray.length);
         });
         this.array.forEach((subArray, index) => {
@@ -240,17 +247,19 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /**
     * 设置结果
     * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
-    * @param resultIndices 结果索引数组（未添加重复项前的索引）
+    * @param resultIndices 结果索引数组（数组长度：已设置 {@link array} 的长度；元素区间：[0, 子列表数据源长度-1]）
     * @param isImmediate 是否立即设置，默认：false 滚动慢慢停止在结果处；true：立即设置到结果处
-    * @param resultsFocusT 结果项聚焦插值数组，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
-    * @param startScrollingInterval 开始滚动间隔<毫秒>, 非立即设置时有效，默认：1000
+    * @param resultsFocusT 结果项聚焦插值数组（数组长度：已设置 {@link array} 的长度；元素区间：[0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧）
+    * @param startScrollingInterval 子列表开始滚动间隔<毫秒>, 非立即设置时有效，默认：1000
     */
     public async setResults(resultIndices: number[], isImmediate: boolean = false, resultsFocusT: number[], startScrollingInterval: number = 1000): Promise<void> {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能设置结果`);
         if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能设置结果`);
         if (isImmediate) {
             this._subLotteries.forEach((lottery, i) => {
-                lottery.setResult(resultIndices[i], isImmediate, resultsFocusT[i]);
+                const resultIdx = resultIndices[i];
+                if (resultIdx < 0 || resultIdx > this._resultMaxIndices[i]) throw new Error(`resultIndices[${i}]等于 ${resultIdx}, 不在 [0, ${this._resultMaxIndices[i]}] 区间内`);
+                lottery.setResult(resultIdx, isImmediate, resultsFocusT[i]);
             });
         } else {
             for (let i = 0, c = this._subLotteries.length; i < c; i++) {
@@ -302,7 +311,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             const panelScrollRect = panel.content.scrollRect;
 
             this.owner.cells.forEach((cell: Laya.UIComponent, index: number) => {
-                const cellRect = cell.getBounds();
+                const cellRect = cell.getBounds(this._tempRect);
                 cellRect.x += this.owner.x;
                 cellRect.y += this.owner.y;
                 cell.visible = panelScrollRect.intersects(cellRect);

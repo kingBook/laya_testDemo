@@ -132,6 +132,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /** 最大的滚动值 */
     private _maxScrollBarValue: number;
 
+    private _tempRect: Laya.Rectangle = new Laya.Rectangle();
+
 
     /** 是否已初始化 */
     public get isInited(): boolean { return (this._flags & Flag.Inited) > 0; }
@@ -403,7 +405,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     private optimizeVisible(): void {
         this.owner.cells.forEach((cell: Laya.UIComponent, index: number) => {
             const scrollRect = this.owner.content.scrollRect;
-            const cellRect = cell.getBounds();
+            const cellRect = cell.getBounds(this._tempRect);
             cell.visible = scrollRect.intersects(cellRect);
         });
     }
