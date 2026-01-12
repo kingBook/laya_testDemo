@@ -13,36 +13,18 @@ export class TestMultipleSetListArray extends Laya.Script {
     private _lotteryScript: ScrollingLotteryListScript;
 
     onAwake(): void {
-        //this._lotteryScript = this.list.addComponent(ScrollingLotteryListScript);
     }
 
     onUpdate(): void {
-        //this.optimizeVisible();
-    }
-
-    private optimizeVisible(): void {
-        this.list.cells.forEach((cell: Laya.UIComponent, index: number) => {
-            const scrollRect = this.list.content.scrollRect;
-            const cellRect = cell.getBounds();
-            cell.visible = scrollRect.intersects(cellRect);
-        });
     }
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
             console.log("j===============");
             this.setListArray(5);
-            //this._lotteryScript.init(true);
-            for (let i = 0; i < this.list.cells.length; i++) {
-                console.log(i, this.list.cells[i].name);
-            }
         } else if (evt.key === 'k') {
             console.log("k===============");
             this.setListArray(10);
-            // this._lotteryScript.init(true);
-            for (let i = 0; i < this.list.cells.length; i++) {
-                console.log(i, this.list.cells[i].name);
-            }
         } else if (evt.key === 'r') {
             this.list.refresh();
         }
@@ -55,6 +37,7 @@ export class TestMultipleSetListArray extends Laya.Script {
                 id: `${i}`
             };
         }
+        //this.list.array = null; // 方案1：当数据源长度由短变长时，需要将滚动值置0，否则滚动值不为0列表开始处会出现空白
         this.list.array = arr;
         this.list.renderHandler = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
             console.log("渲染列表项：", index);
@@ -63,9 +46,9 @@ export class TestMultipleSetListArray extends Laya.Script {
         });
         this.list.repeatX = this.list.array.length;
 
-        // 当数据源长度由短变长时，需要将滚动值置0，否则滚动值不为0列表开始处会出现空白
+        // 方案2：当数据源长度由短变长时，需要将滚动值置0，否则滚动值不为0列表开始处会出现空白
         //console.log(this.list.scrollBar.value);
-        //this.list.scrollBar.value = 0;
+        this.list.scrollBar.value = 0;
 
 
     }

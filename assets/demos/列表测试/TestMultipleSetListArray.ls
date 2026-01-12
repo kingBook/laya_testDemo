@@ -55,7 +55,7 @@
               "height": 61,
               "centerX": 0,
               "centerY": 0,
-              "text": "0",
+              "text": "-",
               "fontSize": 60,
               "color": "#ffffff",
               "fitContent": "yes",
