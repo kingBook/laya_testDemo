@@ -40,8 +40,7 @@ enum Flag {
  *     }
  * });
  * 
- * const isResetSubScrollValue = false; // 是否重置子列表的滚动值（注意：当多次初始化，子列表数据源长度由短变长，且子列表发生了滚动， 如果不重置，子列表开头会出现空白）
- * multipleLottry.init(isResetSubScrollValue); // 初始化
+ * multipleLottry.init(); // 初始化
  * multipleLottry.speedSign = 1; // 滚动方向, 1 或 -1
  * multipleLottry.aniTotalTime = 5000; // 滚动时间<毫秒>
  * multipleLottry.circles = 5; // 滚动圈数
@@ -149,11 +148,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         this.optimizeVisible();
     }
 
-    /**
-     * 初始化
-     * @param isResetSubScrollValue 是否重置子列表的滚动值（注意：当多次初始化，子列表数据源长度由短变长，且子列表发生了滚动， 如果不重置，子列表开头会出现空白）
-     */
-    public init(isResetSubScrollValue: boolean = false): ScrollingLotteryMultipleListScript {
+    /** 初始化 */
+    public init(): ScrollingLotteryMultipleListScript {
         // 填平、对齐子列表数据源
         let maxSubArrayLen = 0;
         this.array.forEach((subArray, index) => {
@@ -191,7 +187,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
 
                     let subLottery = subList.getComponent(ScrollingLotteryListScript);
                     subLottery ||= subList.addComponent(ScrollingLotteryListScript);
-                    subLottery.init(isResetSubScrollValue);
+                    subLottery.init();
 
                     // 子列表动画数据
                     subLottery.speedSign = this.speedSign;
@@ -228,7 +224,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 }
             }
         }
-        
+
         // 初始化完成
         this._flags = Flag.Inited;
         return this;
