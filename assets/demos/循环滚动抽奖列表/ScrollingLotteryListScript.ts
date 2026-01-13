@@ -211,13 +211,15 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
         // 清除延时
         this.clearDelay();
+
+        // 在滚动矩形外则隐藏，优化Drawcall
+        this.optimizeVisible();
+        this.owner.scrollBar.changeHandler = new Laya.Handler(this, this.optimizeVisible);
         return this;
     }
 
     public onUpdate(): void {
         if (!(this._flags & Flag.Inited)) return;
-        // 在滚动矩形外则隐藏，优化Drawcall
-        this.optimizeVisible();
         if (this._flags & Flag.Paused) return;
         if (!(this._flags & Flag.Scrolling)) return;
         if (this._resultIndices.length <= 0) return; // 未设置结果
