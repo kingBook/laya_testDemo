@@ -19,19 +19,19 @@
           {
             "_$type": "FloatKeyframe",
             "inTangent": 0,
-            "outTangent": 0.4,
+            "outTangent": 0,
             "value": 0,
             "inWeight": 0.33333,
-            "outWeight": 0.25,
+            "outWeight": 0,
             "weightedMode": 0,
             "time": 0
           },
           {
             "_$type": "FloatKeyframe",
-            "inTangent": 0.8474576271186439,
+            "inTangent": 0,
             "outTangent": 0,
             "value": 1,
-            "inWeight": 0.5900000000000001,
+            "inWeight": 0,
             "outWeight": 0.33333,
             "weightedMode": 0,
             "time": 1
