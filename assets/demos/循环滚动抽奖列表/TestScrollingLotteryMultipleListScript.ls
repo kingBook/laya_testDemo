@@ -28,6 +28,7 @@
       "y": 650,
       "width": 300,
       "height": 300,
+      "visible": false,
       "centerX": 0,
       "centerY": 0,
       "bgColor": "#8a6e6e",
@@ -41,6 +42,7 @@
           "x": 0,
           "y": 100,
           "height": 900,
+          "anchorY": 0,
           "visible": true,
           "repeatY": 8
         }

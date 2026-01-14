@@ -4,7 +4,7 @@ import { ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleLi
 const { regClass, property } = Laya;
 
 @regClass()
-export class TestMultipleListArray extends Laya.Script {
+export class TestMultipleLotteryNoPanel extends Laya.Script {
 
     @property({ type: ScrollingLotteryMultipleListScript, private: false, tips: "多列表滚动抽奖" })
     private _multipleLottry: ScrollingLotteryMultipleListScript;
@@ -46,12 +46,12 @@ export class TestMultipleListArray extends Laya.Script {
 
         //this._multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_START, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
         this._multipleLottry.onScrollStartHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
-            // console.log(`滚动开始, 子列表索引:${subListIdx}`);
+            //console.log(`滚动开始, 子列表索引:${subListIdx}`);
         });
 
         //this._multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLLING, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
         this._multipleLottry.onScrollingHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
-            // console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦子列表索引:${curFocusIdx}`);
+           // console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦子列表索引:${curFocusIdx}`);
         });
 
         //this._multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
