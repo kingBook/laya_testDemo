@@ -7,9 +7,13 @@ enum Flag {
     /** 已初始化 */
     Inited = 1,
     /** 滚动中... */
-    Scrolling = 2,
+    Scrolling = 1 << 1,
     /** 暂停中... */
-    Paused = 4,
+    Paused = 1 << 2,
+    /** 用户操作列表，鼠标按下 */
+    MouseDown = 1 << 3,
+    /** 用户中断父列表滚动到已出结果子列表缓动 */
+    UserInterruptScrollToResult = 1 << 4
 }
 
 /**
@@ -140,6 +144,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     private _resultMaxIndices: number[];
     /** 父列表滚动到已出结果子列表的缓动 */
     private _showSubResultTweener: Laya.Tween;
+
     private _tempRect: Laya.Rectangle = new Laya.Rectangle();
 
 
@@ -253,10 +258,24 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
 
 
                 // 父列表滚动到已出结果子列表的缓动
-                this.tweenToToSubResult(subListIdx);
+                if (this.enableParentScrollToResult) {
+                    if (subListIdx === 0) this._flags &= ~Flag.UserInterruptScrollToResult; // 第一个列表滚动完成时，取出 '用户中断..'
+                    if (this._flags & Flag.MouseDown) this._flags |= Flag.UserInterruptScrollToResult;
+                    if (!(this._flags & Flag.UserInterruptScrollToResult)) {
+                        this.tweenToSubResult(subListIdx);
+                    }
+                }
             });
 
             this._subLotteries[subListIdx] = subLottery; // 保存到子列表抽奖组件数组
+        }
+
+        if (this.owner.parent && this.owner.parent instanceof Laya.Panel) {
+            this.owner.parent.on(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
+            this.owner.parent.on(Laya.Event.MOUSE_UP, this, this.onMouseHandler);
+        } else {
+            this.owner.on(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
+            this.owner.on(Laya.Event.MOUSE_UP, this, this.onMouseHandler);
         }
 
         // 初始化完成
@@ -347,6 +366,13 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         // 父列表滚动到已出结果子列表的缓动
         this._showSubResultTweener?.kill();
         this._showSubResultTweener = null;
+
+        if (this.owner.parent) {
+            this.owner.parent.off(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
+            this.owner.parent.off(Laya.Event.MOUSE_UP, this, this.onMouseHandler);
+        }
+        this.owner.off(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
+        this.owner.off(Laya.Event.MOUSE_UP, this, this.onMouseHandler);
     }
 
     /** 渲染父列表项 */
@@ -384,36 +410,71 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
      * 父列表滚动到已出结果子列表的缓动
      * @param subListIdx 已出结果的子列表索引
      */
-    private tweenToToSubResult(subListIdx: number): void {
+    private tweenToSubResult(subListIdx: number): void {
         const focusParentCell = this.getParentCell(subListIdx); // 子列表出结果后，父列表要滚动到的列表项
         if (!focusParentCell) return;
+
+        // 缓动更新回调
+        const onTweenUpdate = _ => {
+            if (this._flags & Flag.MouseDown) this._flags |= Flag.UserInterruptScrollToResult;
+
+            // 用户中断则停止
+            if (this._flags & Flag.UserInterruptScrollToResult) {
+                this._showSubResultTweener?.kill();
+                this._showSubResultTweener = null;
+            }
+        };
+
         if (this.owner.parent && this.owner.parent instanceof Laya.Panel) { // 父级是Panel时，滚动Panel
             const panel = this.owner.parent as Laya.Panel;
             if (panel.scrollType === Laya.ScrollType.Vertical) { // 垂直滚动Panel
                 const panelScrollBar = panel.vScrollBar;
-                const targetValue = this.owner.toParentPoint(Laya.Point.TEMP.setTo(0, focusParentCell.y + this._subListTemplate["itemTemplate"].height * 0.5)).y
+                const targetValue = this.owner.toParentPoint(Laya.Point.TEMP.setTo(0, focusParentCell.y + focusParentCell.height * 0.5)).y
                     - panel.height * 0.5;
-                this._showSubResultTweener = Laya.Tween.create(panelScrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
-                this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                if (panelScrollBar.value < targetValue) {
+                    this._showSubResultTweener = Laya.Tween.create(panelScrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
+                    this._showSubResultTweener.onUpdate(onTweenUpdate, this);
+                    this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                }
             } else if (panel.scrollType === Laya.ScrollType.Horizontal) { // 水平滚动Panel
                 const panelScrollBar = panel.hScrollBar;
-                const targetValue = this.owner.toParentPoint(Laya.Point.TEMP.setTo(focusParentCell.x + this._subListTemplate["itemTemplate"].width * 0.5, 0)).x
+                const targetValue = this.owner.toParentPoint(Laya.Point.TEMP.setTo(focusParentCell.x + focusParentCell.width * 0.5, 0)).x
                     - panel.width * 0.5;
-                this._showSubResultTweener = Laya.Tween.create(panelScrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
-                this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                if (panelScrollBar.value < targetValue) {
+                    this._showSubResultTweener = Laya.Tween.create(panelScrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
+                    this._showSubResultTweener.onUpdate(onTweenUpdate, this);
+                    this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                }
             }
-        } else { // 滚动列表
+        } else { // 父级非Panel时，滚动列表
             if (this.owner.scrollType === Laya.ScrollType.Vertical) { // 垂直滚动列表
-                const targetValue = focusParentCell.y + this._subListTemplate["itemTemplate"].height * 0.5
+                const targetValue = focusParentCell.y + focusParentCell.height * 0.5
                     - this.owner.height * 0.5;
-                this._showSubResultTweener = Laya.Tween.create(this.owner.scrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
-                this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                if (this.owner.scrollBar.value < targetValue) {
+                    this._showSubResultTweener = Laya.Tween.create(this.owner.scrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
+                    this._showSubResultTweener.onUpdate(onTweenUpdate, this);
+                    this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                }
             } else if (this.owner.scrollType === Laya.ScrollType.Horizontal) { // 水平滚动列表
-                const targetValue = focusParentCell.x + this._subListTemplate["itemTemplate"].width * 0.5
+                const targetValue = focusParentCell.x + focusParentCell.width * 0.5
                     - this.owner.width * 0.5;
-                this._showSubResultTweener = Laya.Tween.create(this.owner.scrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
-                this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                if (this.owner.scrollBar.value < targetValue) {
+                    this._showSubResultTweener = Laya.Tween.create(this.owner.scrollBar).duration(this.parentScrollToResultDuration).to("value", targetValue);
+                    this._showSubResultTweener.onUpdate(onTweenUpdate, this);
+                    this._showSubResultTweener.then(_ => { this._showSubResultTweener = null; });
+                }
             }
+        }
+    }
+
+    private onMouseHandler(e: Laya.Event): void {
+        switch (e.type) {
+            case Laya.Event.MOUSE_DOWN:
+                this._flags |= Flag.MouseDown;
+                break;
+            case Laya.Event.MOUSE_UP:
+                this._flags &= ~Flag.MouseDown;
+                break;
         }
     }
 }
