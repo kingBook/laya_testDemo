@@ -94,6 +94,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         const easeComboBox = IEditor.GUIUtils.createComboBox();
         easeComboBox.x = easeInputTxt.x + easeInputTxt.width + space;
         easeComboBox.items = ["ease", "linear", "ease-in", "ease-out", "ease-in-out", "custom"];
+        console.log("getValue",this.target.getValue());
+        //easeComboBox.selectedIndex = this.getEaseComboBoxSelectedIndex();
         easeComboBox.on("changed", (evt: gui.Event) => {
             console.log("下拉列表改变:", easeComboBox.selectedIndex);
             // if (easeComboBox.selectedIndex >= 0 && easeComboBox.selectedIndex <= 4) {
@@ -278,17 +280,15 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             this._oldEaseInputText = this._easeInputTxt.text;
 
             // 设置值到目标
+            const retKeys = this.cubicBezierValuesToKeys(values);
             const value = this.target.getValue();
             const keys: any[] = value.keys;
             const key0 = keys[0];
             const key1 = keys[1];
-            key0.outTangent = values[1] / values[0];
-            key0.outWeight = values[0];
-            key1.inTangent = (1 - values[3]) / (1 - values[2]);
-            key1.inWeight = 1 - values[2];
-
-            //if (values[0] === 0) key0.outTangent = 0;
-           // if ((1 - values[2]) === 0) key1.inTangent = 0;
+            key0.outTangent = retKeys[0].outTangent;
+            key0.outWeight = retKeys[0].outWeight;
+            key1.inTangent = retKeys[1].inTangent;
+            key1.inWeight = retKeys[1].inWeight;
 
             console.log("key0.outTangent:", key0.outTangent, " key0.outWeight:", key0.outWeight, " key1.inTangent:", key1.inTangent, " key1.inWeight:", key1.inWeight);
 
@@ -303,11 +303,64 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         }
     }
 
+    //#region Util
     /** 获取浮点数字符串 */
     private getFloatString(n: number): string {
         n = ((n * 100) | 0) / 100;
         return n.toString().replace("0.", '.');
     }
+
+    /**
+     * cubic-bezier.com 数据转为 KeyFrame
+     * @param values 长度为 4
+     */
+    private cubicBezierValuesToKeys(values: number[]) {
+        const key0 = {
+            inTangent: undefined, // 不使用
+            inWeight: undefined, // 不使用
+            outTangent: values[1] / values[0],
+            outWeight: values[0]
+        };
+        const key1 = {
+            inTangent: (1 - values[3]) / (1 - values[2]),
+            inWeight: 1 - values[2],
+            outTangent: undefined, // 不使用
+            outWeight: undefined // 不使用
+        };
+        if (key0.outTangent === Infinity) key0.outTangent = 0;
+        if (key1.inTangent === Infinity) key1.inTangent = 0;
+
+        console.log("cubicBezierValuesToKeys:", key0.outTangent, key0.outWeight, key1.inTangent, key1.inWeight);
+
+        return [key0, key1];
+    }
+
+    /**
+     * KeyFrame 转为 cubic-bezier.com 数据
+     * @param keys 长度为 2
+     */
+    private keysToCubicBezierValues(keys: any[]): number[] {
+        const key0 = keys[0];
+        const key1 = keys[1];
+        const p1x: number = key0.outWeight; // outWeight: cubicBezierValues[0]
+        const p1y: number = key0.outTangent * key0.outWeight; // outTangent: cubicBezierValues[1] / cubicBezierValues[0]
+        const p2x: number = -key1.inWeight + 1; // inWeight: 1 - cubicBezierValues[2]
+        const p2y: number = -(key1.inTangent * key1.inWeight) + 1; // inTangent: (1 - cubicBezierValues[3]) / (1 - cubicBezierValues[2])
+        return [p1x, p1y, p2x, p2y];
+    }
+
+    /**
+     * cubic-bezier.com 数据 转为字符串
+     * @param values 
+     */
+    private valuesToString(values: number[]): string {
+        const p1xStr = this.getFloatString(values[0]);
+        const p1yStr = this.getFloatString(values[1]);
+        const p2xStr = this.getFloatString(values[2]);
+        const p2yStr = this.getFloatString(values[3]);
+        return [p1xStr, p1yStr, p2xStr, p2yStr].toString();
+    }
+    //#endregion
 
 
 }
