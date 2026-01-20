@@ -43,7 +43,7 @@
       "_$comp": [
         {
           "_$type": "Spine2DRenderNode",
-          "layer": 0,
+          "layer": 1,
           "useFastRender": false,
           "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
           "animationName": "attack",
@@ -65,7 +65,7 @@
       "_$comp": [
         {
           "_$type": "Spine2DRenderNode",
-          "layer": 0,
+          "layer": 1,
           "useFastRender": false,
           "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
           "animationName": "attack",
@@ -87,7 +87,7 @@
       "_$comp": [
         {
           "_$type": "Spine2DRenderNode",
-          "layer": 0,
+          "layer": 1,
           "useFastRender": false,
           "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
           "animationName": "attack",

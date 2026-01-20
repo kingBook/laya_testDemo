@@ -7,5 +7,9 @@
     "Layer3",
     "Layer4",
     "Layer5"
+  ],
+  "2DLayers": [
+    "Default",
+    "1"
   ]
 }
