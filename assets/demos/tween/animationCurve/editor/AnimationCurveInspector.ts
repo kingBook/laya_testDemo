@@ -2,17 +2,12 @@
 export default class AnimationCurveInspector extends IEditor.PropertyField {
 
     private readonly _easeComboBoxDatas = [
-        // 0 "ease"
-        [.25, .1, .25, 1],
-        // 1 "linear"
-        [0, 0, 1, 1],
-        // 2 "ease-in"
-        [.42, 0, 1, 1],
-        // 3 "ease-out"
-        [0, 0, .58, 1],
-        // 4 "ease-in-out"
-        [.42, 0, .58, 1],
-        // 5 "custom"
+        { name: "ease", index: 0, values: [.25, .1, .25, 1] },
+        { name: "linear", index: 1, values: [0, 0, 1, 1] },
+        { name: "ease-in", index: 2, values: [.42, 0, 1, 1] },
+        { name: "ease-out", index: 3, values: [0, 0, .58, 1] },
+        { name: "ease-in-out", index: 4, values: [.42, 0, .58, 1] },
+        { name: "custom", index: 5, values: null }
     ];
 
     private _curveInput: IEditor.CurveInput;
@@ -84,7 +79,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         // 输入文本框
         const easeInputTxt = IEditor.GUIUtils.createTextInput();
-        easeInputTxt.text = this._easeComboBoxDatas[0].toString();
+        easeInputTxt.text = this._easeComboBoxDatas[0].values.toString(); // 初始 "ease"
         easeInputTxt.on("submit", this.onEaseInputSubmit, this);
         easeBox.addChild(easeInputTxt);
         this._easeInputTxt = easeInputTxt;
@@ -93,15 +88,16 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         // 下拉列表
         const easeComboBox = IEditor.GUIUtils.createComboBox();
         easeComboBox.x = easeInputTxt.x + easeInputTxt.width + space;
-        easeComboBox.items = ["ease", "linear", "ease-in", "ease-out", "ease-in-out", "custom"];
-        console.log("getValue",this.target.getValue());
-        //easeComboBox.selectedIndex = this.getEaseComboBoxSelectedIndex();
+        easeComboBox.items = this._easeComboBoxDatas.map(item => item.name);
+        console.log("getValue", this.target.getValue());
+        easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();
         easeComboBox.on("changed", (evt: gui.Event) => {
             console.log("下拉列表改变:", easeComboBox.selectedIndex);
-            // if (easeComboBox.selectedIndex >= 0 && easeComboBox.selectedIndex <= 4) {
-            //     this._easeInputTxt.text = this._easeComboBoxDatas[easeComboBox.selectedIndex].toString();
-            // }
-            // this.onEaseInputSubmit(null);
+            const data = this._easeComboBoxDatas.find(item => item.index === easeComboBox.selectedIndex);
+            if (data.values) {
+                this._easeInputTxt.text = data.values.toString();
+                this.onEaseInputSubmit(null);
+            }
         }, this);
         easeBox.addChild(easeComboBox);
         this._easeComboBox = easeComboBox;
@@ -133,6 +129,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         // 设置值到曲线图（CurveInput）
         const value = this.target.getValue();
         const keys: any[] = value.keys;
+        console.log("refresh();", keys[0].outWeight, keys[0].outTangent, keys[1].inWeight, keys[1].inTangent);
         this._curveInput.clearPoints(); // 先清空，避免顶点数量比实际数量多
         for (let i = 0, c = keys.length; i < c; i++) {
             const key = keys[i];
@@ -141,6 +138,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
                 this._curveInput.addPoint();
             }
             const pt: IEditor.PathPoint = this._curveInput.points[i];
+            //pt.inTangentMode = 2;
+            //pt.outTangentMode = 2;
             pt.px = key.time;
             pt.py = key.value;
             pt.inTangent = key.inTangent;
@@ -148,6 +147,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             pt.inWeight = key.inWeight;
             pt.outWeight = key.outWeight;
         }
+        console.log("refresh(); _curveInput.points", this._curveInput.points, this._curveInput.applyChange);
+
 
         this._curveInput.applyChange();
 
@@ -173,6 +174,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             this._easeInputTxt.editable = false;
             this._easeInputTxt.alpha = 0.7;
         }
+
+        this._easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();
     }
 
     /** 创建默认实例 */
@@ -183,21 +186,23 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         // 默认值
         const initProp = Editor.typeRegistry.getInitProps(typeDescriptor) || {};
         initProp._$type = typeDescriptor.name;
-        const defaultCubicBezierValues = this._easeComboBoxDatas[0];
+
+        const retKeys = this.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.index === 0).values);
+
         initProp.keys = [
             this.createFloatKeyframe({
                 time: 0,
                 value: 0,
                 inTangent: 0,
                 inWeight: 0,
-                outTangent: defaultCubicBezierValues[1] / defaultCubicBezierValues[0],
-                outWeight: defaultCubicBezierValues[0]
+                outTangent: retKeys[0].outTangent,
+                outWeight: retKeys[0].outWeight
             }),
             this.createFloatKeyframe({
                 time: 1,
                 value: 1,
-                inTangent: (1 - defaultCubicBezierValues[3]) / (1 - defaultCubicBezierValues[2]),
-                inWeight: 1 - defaultCubicBezierValues[2],
+                inTangent: retKeys[1].inTangent,
+                inWeight: retKeys[1].inWeight,
                 outTangent: 0,
                 outWeight: 0
             }),
@@ -258,25 +263,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     private onEaseInputSubmit(evt?: gui.Event): void {
         console.log("onEaseInputSubmit();", this._easeInputTxt.text);
 
-        let values: number[];
-        let isRight = true;
-        const strings = this._easeInputTxt.text.split(',');
-
-        // 判断格式是否输入正确
-        if (strings.length === 4) {
-            values = strings.map(str => Number.parseFloat(str));
-            for (let i = 0; i < 4; i++) {
-                const val = values[i];
-                if (isNaN(val) || val < 0 || val > 1) {
-                    isRight = false;
-                    break;
-                }
-            }
-        } else {
-            isRight = false;
-        }
-
-        if (isRight) {
+        let values = this.getEaseInputValues();
+        if (values) {
             this._oldEaseInputText = this._easeInputTxt.text;
 
             // 设置值到目标
@@ -304,6 +292,44 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     }
 
     //#region Util
+    /** 获取 easeInputTxt 文本框输入的值，输入的文本格式不正确时，返回 null */
+    private getEaseInputValues(): number[] {
+        let values: number[];
+        let isRight = true;
+        const strings = this._easeInputTxt.text.split(',');
+
+        // 判断格式是否输入正确
+        if (strings.length === 4) {
+            values = strings.map(str => Number.parseFloat(str));
+            for (let i = 0; i < 4; i++) {
+                const val = values[i];
+                if (isNaN(val) || val < 0 || val > 1) {
+                    isRight = false;
+                    break;
+                }
+            }
+        } else {
+            isRight = false;
+        }
+
+        if (isRight) {
+            return values;
+        }
+        return null;
+    }
+
+    /** 获取与 easeInputTxt 输入值相匹配的 easeComboBox 索引 */
+    private getEaseComboBoxMatchInputIndex(): number {
+        let data = this._easeComboBoxDatas[5]; // custom
+
+        const values = this.getEaseInputValues();
+        if (values) {
+            const tempData = this._easeComboBoxDatas.find(item => item.values && item.values.every((val, idx) => val === values[idx]));
+            if (tempData) data = tempData;
+        }
+        return data.index;
+    }
+
     /** 获取浮点数字符串 */
     private getFloatString(n: number): string {
         n = ((n * 100) | 0) / 100;
@@ -316,20 +342,25 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
      */
     private cubicBezierValuesToKeys(values: number[]) {
         const key0 = {
+            time: 0,
+            value: 0,
             inTangent: undefined, // 不使用
             inWeight: undefined, // 不使用
             outTangent: values[1] / values[0],
             outWeight: values[0]
         };
         const key1 = {
+            time: 1,
+            value: 1,
             inTangent: (1 - values[3]) / (1 - values[2]),
             inWeight: 1 - values[2],
             outTangent: undefined, // 不使用
             outWeight: undefined // 不使用
         };
-        if (key0.outTangent === Infinity) key0.outTangent = 0;
-        if (key1.inTangent === Infinity) key1.inTangent = 0;
+        if (key0.outTangent === Infinity || isNaN(key0.outTangent)) key0.outTangent = 1;
+        if (key1.inTangent === Infinity || isNaN(key1.inTangent)) key1.inTangent = 1;
 
+        console.log("cubicBezierValuesToKeys: values", values);
         console.log("cubicBezierValuesToKeys:", key0.outTangent, key0.outWeight, key1.inTangent, key1.inWeight);
 
         return [key0, key1];
