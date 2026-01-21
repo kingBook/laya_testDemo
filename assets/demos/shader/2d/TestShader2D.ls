@@ -6,7 +6,7 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "TestTwoDshader",
+  "name": "TestShader2D",
   "width": 750,
   "height": 1600
 }
