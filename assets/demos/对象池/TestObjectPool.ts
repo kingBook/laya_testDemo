@@ -1,4 +1,4 @@
-import { Random } from "../utils/Random";
+import { Random } from "kingBook/utils/Random";
 
 const { regClass, property } = Laya;
 
