@@ -2,7 +2,7 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "twoD/VertexWater",
+    "type": "twoD/顶点/VertexWater",
     "renderQueue": 2000,
     "materialRenderMode": 0,
     "s_Cull": 0,

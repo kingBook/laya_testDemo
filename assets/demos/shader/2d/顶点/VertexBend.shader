@@ -1,7 +1,7 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:"twoD/VertexBend",
+    name:"twoD/顶点/VertexBend",
     enableInstancing:true,
     supportReflectionProbe:true,
     shaderType:3,
@@ -53,7 +53,6 @@ GLSL Start
         pos.y += offset;
 
 	    gl_Position = pos;
-
     }
 
 #endGLSL

@@ -34,6 +34,16 @@
       "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
       "useSourceSize": true,
       "color": "#ffffff"
+    },
+    {
+      "_$id": "107c2s0d",
+      "_$type": "Box",
+      "name": "Box",
+      "x": 99,
+      "y": 962,
+      "width": 589,
+      "height": 1,
+      "bgColor": "#ffffff"
     }
   ]
 }

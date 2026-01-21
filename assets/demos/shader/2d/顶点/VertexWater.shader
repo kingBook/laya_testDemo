@@ -1,7 +1,7 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:"twoD/VertexWater",
+    name:"twoD/顶点/VertexWater",
     enableInstancing:true,
     supportReflectionProbe:true,
     shaderType:3,
