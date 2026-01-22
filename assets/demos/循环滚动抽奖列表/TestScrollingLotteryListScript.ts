@@ -18,6 +18,9 @@ export class TestScrollingLotteryListScript extends Laya.Script {
     @property({ type: Laya.List })
     numberList: Laya.List;
 
+    public enableVList = true;
+    public enableLetterList = true;
+
     onAwake(): void {
         // // 水平滚动
         const hListData = [];
@@ -38,22 +41,26 @@ export class TestScrollingLotteryListScript extends Laya.Script {
             const labelIndex = cell.getChild("labelIndex", Laya.Label);
             labelIndex.text = `${index}`;
         });
-        //this.vList.addComponent(ScrollingLotteryListScript).init();
+        if (this.enableVList) {
+            this.vList.addComponent(ScrollingLotteryListScript).init();
+        }
 
 
         // 字母
         this.letterList.array = [{ Label: "A" }, { Label: "B" }, { Label: "C" }, { Label: "D" }, { Label: "E" }];
-        // const letterLottery = this.letterList.addComponent(ScrollingLotteryListScript);
-        // letterLottery.init();
-        // letterLottery.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, () => {
-        //     console.log("滚动到结果项完成");
-        // });
+        if (this.enableLetterList) {
+            const letterLottery = this.letterList.addComponent(ScrollingLotteryListScript);
+            letterLottery.init();
+            letterLottery.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, () => {
+                console.log("滚动到结果项完成");
+            });
+        }
 
         // 数字
         const numberListData = [];
         for (let i = 0; i <= 9; i++)numberListData.push({ Label: `${i}` });
         this.numberList.array = numberListData;
-       // this.numberList.addComponent(ScrollingLotteryListScript).init();
+        // this.numberList.addComponent(ScrollingLotteryListScript).init();
     }
 
     onKeyDown(evt: Laya.Event): void {
@@ -63,36 +70,53 @@ export class TestScrollingLotteryListScript extends Laya.Script {
             const resultFocusT = 0.5//Math.random();
 
             console.log("设置结果", resultIndex, "resultFocusT:" + resultFocusT);
+
             this.hList.getComponent(ScrollingLotteryListScript).speedSign = speedSign;
             this.hList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, false, resultFocusT);
 
-            // this.vList.getComponent(ScrollingLotteryListScript).speedSign = speedSign;
-            // this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, false, resultFocusT);
+            if (this.enableVList) {
+                this.vList.getComponent(ScrollingLotteryListScript).speedSign = speedSign;
+                this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, false, resultFocusT);
+            }
         } else if (evt.key === 'k') {
             const resultIndex = Math.trunc(Math.random() * 5);
             const resultFocusT = 0.5//Math.random();
 
-            console.log("立即设置到结果处", resultIndex, "resultFocusT:" + resultFocusT);
+            console.log("立即滚动到结果处", resultIndex, "resultFocusT:" + resultFocusT);
+
             this.hList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, true, resultFocusT);
 
-            //this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, true, resultFocusT);
+            if (this.enableVList) {
+                this.vList.getComponent(ScrollingLotteryListScript).setResult(resultIndex, true, resultFocusT);
+            }
+        } else if (evt.key === 'l') {
+            console.log("开始滚动");
+
+            this.hList.getComponent(ScrollingLotteryListScript).startScrolling();
+
+            if (this.enableVList) {
+                this.vList.getComponent(ScrollingLotteryListScript).startScrolling();
+            }
         }
 
+        if (this.enableLetterList) {
+            const letterLottery = this.letterList.getComponent(ScrollingLotteryListScript);
+            if (evt.key === 'u') {
+                const resultIndex = Math.trunc(Math.random() * 5);
+                console.log(`设置结果:${resultIndex}, label:${this.letterList.array[resultIndex].Label}`);
+                letterLottery.speedSign = Math.random() > 0.5 ? 1 : -1;
+                letterLottery.setResult(resultIndex);
+            } else if (evt.key === 'i') {
+                const resultIndex = Math.trunc(Math.random() * 5);
+                console.log(`立即滚动到结果处:${resultIndex}, label:${this.letterList.array[resultIndex].Label}`);
+                letterLottery.setResult(resultIndex, true);
+            } else if (evt.key === 'o') {
+                letterLottery.startScrolling();
+            }
 
-        const letterLottery = this.letterList.getComponent(ScrollingLotteryListScript);
-        if (evt.key === 'i') {
-            const resultIndex = Math.trunc(Math.random() * 5);
-            console.log(`设置结果:${resultIndex}, label:${this.letterList.array[resultIndex].Label}`);
-            letterLottery.speedSign = Math.random() > 0.5 ? 1 : -1;
-            letterLottery.setResult(resultIndex);
-        } else if (evt.key === 'o') {
-            const resultIndex = Math.trunc(Math.random() * 5);
-            console.log(`立即设置到结果处:${resultIndex}, label:${this.letterList.array[resultIndex].Label}`);
-            letterLottery.setResult(resultIndex, true);
-        }
-
-        if (evt.key === 'p') {
-            letterLottery.setPaused(!letterLottery.isPaused);
+            if (evt.key === 'p') {
+                letterLottery.setPaused(!letterLottery.isPaused);
+            }
         }
     }
 

@@ -43,7 +43,13 @@
           "height": 900,
           "anchorY": 0,
           "visible": true,
-          "repeatY": 8
+          "repeatY": 8,
+          "_$comp": [
+            {
+              "_$override": "168a8568-ba24-4994-a2d0-56f7d7c5dc95",
+              "circles": 1
+            }
+          ]
         }
       ]
     },

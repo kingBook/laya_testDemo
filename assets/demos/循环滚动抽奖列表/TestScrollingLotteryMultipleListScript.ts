@@ -1,5 +1,5 @@
 import { ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
-import { ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleListScript";
+import { PosMode, ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleListScript";
 
 const { regClass, property } = Laya;
 
@@ -10,6 +10,13 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
     private _multipleLottry: ScrollingLotteryMultipleListScript;
 
     onAwake() {
+        /* for (let i = 0; i < 10000; i++) {
+             const ranFactor = ((Math.random() * 10 + 1)) | 0; // [1,11)
+             const ranSign = Math.random() >= 0.5 ? 1 : -1; // 1或-1
+             let resultIdx = Laya.MathUtil.repeat(5 + ranSign * ranFactor, 10); //  结果索引
+             console.log("resultIdx:", resultIdx);
+             if(resultIdx<0 || resultIdx>10)console.error("超出范围");
+         }*/
 
         // 数据源，二维数组
         this._multipleLottry.array = [
@@ -51,7 +58,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
         //this._multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLLING, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
         this._multipleLottry.onScrollingHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
-            console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦子列表索引:${curFocusIdx}`);
+            //console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦子列表索引:${curFocusIdx}`);
         });
 
         //this._multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
@@ -63,18 +70,28 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
-            // 设置结果，开始滚动
+            // 结果索引数组
             const resultIndices = [
                 0, 1, 2, 3,
                 0, 1, 2, 3
-            ]; // 结果索引数组
-            const isImmediate = false; // 是否立即设置，false 滚动慢慢停止在结果处；true：立即设置到结果处
+            ];
+
+            // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
             const resultsFocusT = [
-                0.1, 0.5, 0.7, 0.9,
-                0.1, 0.5, 0.7, 0.9
-            ]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
+               // 0.1, 0.5, 0.7, 0.9,
+                //0.1, 0.5, 0.7, 0.9
+                0.5, 0.5, 0.5, 0.5,
+                0.5, 0.5, 0.5, 0.5
+            ];
+
+            // 位置模式
+            const posMode = PosMode.AlignStartPoint;
+
+            // 设置结果
+            this._multipleLottry.setResults(resultIndices, resultsFocusT, posMode);
+        } else if (evt.key === 'k') {
             const startScrollingInterval = 500; // 开始滚动间隔<毫秒>
-            this._multipleLottry.setResults(resultIndices, isImmediate, resultsFocusT, startScrollingInterval);
+            this._multipleLottry.startScrolling(startScrollingInterval); // 开始滚动
         }
     }
 }

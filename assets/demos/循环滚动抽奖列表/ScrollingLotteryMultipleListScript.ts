@@ -16,6 +16,12 @@ enum Flag {
     InterruptScrollToSubResult = 1 << 4
 }
 
+export enum PosMode {
+    None,
+    Result,
+    AlignStartPoint
+}
+
 /**
  * 多列表循环滚动抽奖
  * * 用法示例：
@@ -144,6 +150,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     private _resultMaxIndices: number[];
     /** 父列表滚动到已出结果子列表的缓动 */
     private _scrollToSubResultTweener: Laya.Tween;
+    /** 子列表最大的数据源长度 */
+    private _maxSubArraryLen: number;
 
     private _tempRect: Laya.Rectangle = new Laya.Rectangle();
 
@@ -176,6 +184,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             this._resultMaxIndices[index] = subArray.length - 1; // 记录开奖结果最大索引
             maxSubArrayLen = Math.max(maxSubArrayLen, subArray.length);
         });
+        this._maxSubArraryLen = maxSubArrayLen;
         this.array.forEach((subArray, index) => {
             if (subArray.length < maxSubArrayLen) {
                 for (let i = 0, c = maxSubArrayLen - subArray.length; i < c; i++) {
@@ -258,12 +267,14 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             this._subLotteries[subListIdx] = subLottery; // 保存到子列表抽奖组件数组
         }
 
-        if (this.owner.parent && this.owner.parent instanceof Laya.Panel) {
-            this.owner.parent.on(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
-            this.owner.parent.on(Laya.Event.MOUSE_WHEEL, this, this.onMouseHandler);
-        } else {
-            this.owner.on(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
-            this.owner.on(Laya.Event.MOUSE_WHEEL, this, this.onMouseHandler);
+        if (this.enableScrollToSubResult) {
+            if (this.owner.parent && this.owner.parent instanceof Laya.Panel) {
+                this.owner.parent.on(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
+                this.owner.parent.on(Laya.Event.MOUSE_WHEEL, this, this.onMouseHandler);
+            } else {
+                this.owner.on(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
+                this.owner.on(Laya.Event.MOUSE_WHEEL, this, this.onMouseHandler);
+            }
         }
 
         // 初始化完成
@@ -286,32 +297,79 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     }
 
     /**
-    * 设置结果
-    * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
-    * @param resultIndices 结果索引数组（数组长度：已设置 {@link array} 的长度；元素区间：[0, 子列表数据源长度-1]）
-    * @param isImmediate 是否立即设置，默认：false 滚动慢慢停止在结果处；true：立即设置到结果处
-    * @param resultsFocusT 结果项聚焦插值数组（数组长度：已设置 {@link array} 的长度；元素区间：[0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧）
-    * @param startScrollingInterval 子列表开始滚动间隔<毫秒>, 非立即设置时有效，默认：1000
-    */
-    public async setResults(resultIndices: number[], isImmediate: boolean = false, resultsFocusT: number[], startScrollingInterval: number = 1000): Promise<void> {
+     * 设置结果
+     * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
+     * @param resultIndices 结果索引数组（数组长度：已设置 {@link array} 的长度；元素区间：[0, 子列表数据源长度-1]）
+     * @param resultsFocusT 结果项聚焦插值数组，默认: null 表示都停在中间（数组长度：已设置 {@link array} 的长度；元素区间：[0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧）
+     * @param posMode 
+     */
+    public setResults(resultIndices: number[], resultsFocusT: number[], posMode: PosMode): void {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能设置结果`);
         if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能设置结果`);
+
+        if (resultIndices && resultIndices.length !== this.array.length) throw new Error(`resultIndices 的长度必须与 array 一致`);
+        if (resultsFocusT && resultsFocusT.length !== this.array.length) throw new Error(`resultsFocusT 的长度必须与 array 一致`);
+
+        this._subLotteries.forEach((lottery, i) => {
+            const resultIdx = resultIndices[i];
+            const maxResultIdx = this._resultMaxIndices[i];
+            if (resultIdx < 0 || resultIdx > maxResultIdx) throw new Error(`resultIndices[${i}] 等于 ${resultIdx}, 不在 [0, ${maxResultIdx}] 区间内`);
+        });
 
         // 父列表滚动到已出结果子列表的缓动
         this.killScrollToSubResultTweener();
 
-        if (isImmediate) {
-            this._subLotteries.forEach((lottery, i) => {
-                const resultIdx = resultIndices[i];
-                if (resultIdx < 0 || resultIdx > this._resultMaxIndices[i]) throw new Error(`resultIndices[${i}]等于 ${resultIdx}, 不在 [0, ${this._resultMaxIndices[i]}] 区间内`);
-                lottery.setResult(resultIdx, isImmediate, resultsFocusT[i]);
-            });
-        } else {
-            for (let i = 0, c = this._subLotteries.length; i < c; i++) {
-                const lottery = this._subLotteries[i];
-                await lottery.delay(startScrollingInterval);
-                lottery.setResult(resultIndices[i], isImmediate, resultsFocusT[i]);
-            }
+        switch (posMode) {
+            case PosMode.None:
+                this._subLotteries.forEach((lottery, i) => {
+                    const resultIdx = resultIndices[i]; //  结果索引
+                    const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
+                    const isImmediate = false; // 是否立即滚动到结果处
+                    lottery.setResult(resultIdx, isImmediate, resultFocusT);
+                });
+                break;
+            case PosMode.Result:
+                this._subLotteries.forEach((lottery, i) => {
+                    const resultIdx = resultIndices[i]; //  结果索引
+                    const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
+                    const isImmediate = true; // 是否立即滚动到结果处
+                    lottery.setResult(resultIdx, isImmediate, resultFocusT);
+                });
+                break;
+            case PosMode.AlignStartPoint:
+                const ranFactor = (((Math.random() * this._maxSubArraryLen - 1) + 1)) | 0; // 区间: [1, this._maxSubArraryLen)
+                const ranSign = Math.random() >= 0.5 ? 1 : -1; // 1或-1
+
+                this._subLotteries.forEach((lottery, i) => {
+                    let resultIdx = Laya.MathUtil.repeat(resultIndices[i]-1 /*+ ranSign * ranFactor*/, this._maxSubArraryLen); //  结果索引， 区间: [0, this._maxSubArraryLen)
+                    const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
+                    let isImmediate = true; // 是否立即滚动到结果处
+                    lottery.setResult(resultIdx, isImmediate, resultFocusT);
+                    // ----------------------------------------------------
+                    resultIdx = resultIndices[i]; //  结果索引
+                    isImmediate = false; // 是否立即滚动到结果处
+                    lottery.setResult(resultIdx, isImmediate, resultFocusT);
+                });
+                break;
+        }
+    }
+
+    /**
+     * 开始滚动
+     * @param startInterval 子列表开始滚动间隔<毫秒>, 非立即设置时有效，默认：1000
+     */
+    public async startScrolling(startInterval: number = 1000): Promise<void> {
+        if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能开始滚动`);
+        if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能开始滚动`);
+
+        // 父列表滚动到已出结果子列表的缓动
+        this.killScrollToSubResultTweener();
+
+        for (let i = 0, c = this._subLotteries.length; i < c; i++) {
+            const lottery = this._subLotteries[i];
+            await lottery.delay(startInterval);
+            lottery.startScrolling();
+            console.log("_totalDistance:",lottery["_totalDistance"]);
         }
     }
 

@@ -56,8 +56,12 @@ export interface BezierEaseData {
  * });
  * 
  * 
- * // 设置结果, 开始滚动
- * lotteryScript.setResult(4, false); // false: 非立即设置到结果处
+ * // 设置结果索引
+ * const isImmediate = false; // 是否立即滚动到结果处
+ * lotteryScript.setResult(4, false);
+ * 
+ * // 开始滚动
+ * lotteryScript.startScrolling();
  * ```
  */
 @regClass()
@@ -115,6 +119,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
     private _flags: Flag;
     /** 符合结果的索引（因为列表末尾有一些项是重复的，所以符合结果的项可能会有两个, 最多只会有两个, 有可能只有一个，且[1]的值一定比[0]的值大， [0]:原索引, [1]:重复索引） */
     private _resultIndices: number[];
+    /** 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧 */
+    private _resultFocusT: number;
     /** 滚动条 */
     private _scrollBar: Laya.ScrollBar;
     /** 列表项的大小 */
@@ -273,7 +279,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
      * 设置结果
      * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
      * @param index 结果索引（未添加重复项前的索引）
-     * @param isImmediate 是否立即设置，默认：false 滚动慢慢停止在结果处；true：立即设置到结果处
+     * @param isImmediate 是否立即滚动到结果处
      * @param resultFocusT 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
      */
     public setResult(index: number, isImmediate: boolean = false, resultFocusT: number = 0.5): ScrollingLotteryListScript {
@@ -281,9 +287,9 @@ export class ScrollingLotteryListScript extends Laya.Script {
         if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能设置结果`);
 
         const inRange = index >= 0 && index < this._originalItemCount;
-        if (!inRange) throw new Error("设置的结果超出范围");
+        if (!inRange) throw new Error("设置的结果索引超出范围");
 
-        resultFocusT = Laya.MathUtil.clamp01(resultFocusT); // 限制区间：[0, 1]
+        this._resultFocusT = Laya.MathUtil.clamp01(resultFocusT); // 限制区间：[0, 1]
 
         // 符合结果的索引
         this._resultIndices.length = 0;
@@ -292,7 +298,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
             (idx < this._itemCount) && this._resultIndices.push(idx);
         }
 
-        if (isImmediate) { // 立即设置到结果处
+        // 立即滚动到结果处
+        if (isImmediate) {
             for (let i = 0; i < this._resultIndices.length; i++) {
                 const idx = this._resultIndices[i];
                 if (this.isItemFocusable(idx, resultFocusT)) {
@@ -300,18 +307,33 @@ export class ScrollingLotteryListScript extends Laya.Script {
                     break;
                 }
             }
-            this._resultIndices.length = 0;
-            this._normalizedT = 1;
-        } else { // 非立即设置到结果处
-            this._normalizedT = 0;
-            this._aniTime = 0;
-            this._totalDistance = this.getResultDistance(resultFocusT); // 当前位置到结果的距离
-            this._distance = 0;
-            this._startScrollValue = this._scrollBar.value;
-            this._flags |= Flag.Scrolling;
-            this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_START); // 滚动开始事件
-            this.onScrollStartHandler?.run();
         }
+
+        // 同步设置当前焦点下的索引
+        this._currentFocusIndex = this.getIndexByScrollBarValue(this._scrollBar.value, true);
+
+        // 清除延时
+        this.clearDelay();
+        return this;
+    }
+
+    /** 开始滚动 */
+    public startScrolling(): ScrollingLotteryListScript {
+        if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能开始滚动`);
+        if (this._flags & Flag.Scrolling) {
+            console.warn(`正在滚动中，不能再开始滚动`);
+            return;
+        }
+        if (this._resultIndices.length === 0) throw new Error("未设置的结果，不能开始滚动");
+
+        this._normalizedT = 0;
+        this._aniTime = 0;
+        this._totalDistance = this.getResultDistance(this._resultFocusT); // 当前位置到结果的距离
+        this._distance = 0;
+        this._startScrollValue = this._scrollBar.value;
+        this._flags |= Flag.Scrolling;
+        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_START); // 滚动开始事件
+        this.onScrollStartHandler?.run();
 
         // 同步设置当前焦点下的索引
         this._currentFocusIndex = this.getIndexByScrollBarValue(this._scrollBar.value, true);
@@ -332,7 +354,6 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
     /** 停止滚动 */
     public stopScrolling(): ScrollingLotteryListScript {
-        this._resultIndices.length = 0;
         this._speed = 0;
         this._flags &= ~Flag.Scrolling;
         // 清除延时
@@ -396,10 +417,12 @@ export class ScrollingLotteryListScript extends Laya.Script {
         const distOffset = this.getScrollBarValueByIndex(focusedIndex, resultFocusT) - (this._scrollBar.value + this._focusPos);
         // 当前聚焦项距离结果有多少个项
         const distItemCount = (this._resultIndices[0] - this.getOriginalIndex(focusedIndex)) * this.speedSign;
+        console.log(focusedIndex, distItemCount);
+        
         // 总距离
         const total = (this._cellSize * this._originalItemCount) * this.circles
-            + (distItemCount * this._cellSize)
-            + (this.speedSign * distOffset);
+            + (this.speedSign * distOffset)
+            + (distItemCount * this._cellSize);
         return total;
     }
 
