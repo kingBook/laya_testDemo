@@ -16,9 +16,13 @@ enum Flag {
     InterruptScrollToSubResult = 1 << 4
 }
 
+/** 子列表滚动起始点枚举 */
 export enum PosMode {
+    /** 不设置子列表的滚动值，使用当前值 */
     None,
+    /** 立即设置子列表滚动值到结果索引处 */
     Result,
+    /** 立即设置子列表滚动值，对齐所有子列表的滚动起始点（起始点索引是随机计算的），统一滚动速度 */
     AlignStartPoint
 }
 
@@ -81,12 +85,15 @@ export enum PosMode {
  * });
  * 
  * 
- * // 设置结果，开始滚动
+ * // 设置结果，子列表的初始位置
  * const resultIndices = [0, 1, 2, 3]; // 结果索引数组
- * const isImmediate = false; // 是否立即设置，false 滚动慢慢停止在结果处；true：立即设置到结果处
- * const resultsFocusT = [0.1, 0.5, 0.7, 0.9]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
- * const startScrollingInterval = 1000; // 开始滚动间隔<毫秒>
- * multipleLottry.setResults(resultIndices, isImmediate, resultsFocusT, startScrollingInterval);
+ * const resultsFocusT = [0.1, 0.5, 0.7, 0.9]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, 小于 0.5 左, 大于 0.5 右
+ * const posMode = PosMode.AlignStartPoint; // 子列表滚动值的初始位置枚举
+ * multipleLottry.setResults(resultIndices, resultsFocusT, posMode);
+ * 
+ * // 开始滚动
+ * const startInterval = 1000; // 子列表开始滚动间隔<毫秒>
+ * multipleLottry.startScrolling(startInterval);
  * ```
  */
 @regClass()
@@ -301,7 +308,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
      * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
      * @param resultIndices 结果索引数组（数组长度：已设置 {@link array} 的长度；元素区间：[0, 子列表数据源长度-1]）
      * @param resultsFocusT 结果项聚焦插值数组，默认: null 表示都停在中间（数组长度：已设置 {@link array} 的长度；元素区间：[0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧）
-     * @param posMode 
+     * @param posMode 子列表滚动值的位置枚举，{ None: 不设置子列表的滚动值，使用当前值; Result: 立即设置子列表滚动值到结果索引处; AlignStartPoint: 立即设置子列表滚动值，对齐所有子列表的滚动起始点（起始点索引是随机计算的），统一滚动速度}
      */
     public setResults(resultIndices: number[], resultsFocusT: number[], posMode: PosMode): void {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能设置结果`);
@@ -320,7 +327,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         this.killScrollToSubResultTweener();
 
         switch (posMode) {
-            case PosMode.None:
+            case PosMode.None: // 不设置子列表的滚动值，使用当前值
                 this._subLotteries.forEach((lottery, i) => {
                     const resultIdx = resultIndices[i]; //  结果索引
                     const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
@@ -328,7 +335,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                     lottery.setResult(resultIdx, isImmediate, resultFocusT);
                 });
                 break;
-            case PosMode.Result:
+            case PosMode.Result: // 立即设置子列表滚动值到结果索引处
                 this._subLotteries.forEach((lottery, i) => {
                     const resultIdx = resultIndices[i]; //  结果索引
                     const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
@@ -336,12 +343,11 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                     lottery.setResult(resultIdx, isImmediate, resultFocusT);
                 });
                 break;
-            case PosMode.AlignStartPoint:
+            case PosMode.AlignStartPoint: // 立即设置子列表滚动值，对齐所有子列表的滚动起始点（起始点索引是随机计算的），统一滚动速度
                 const ranFactor = (((Math.random() * this._maxSubArraryLen - 1) + 1)) | 0; // 区间: [1, this._maxSubArraryLen)
                 const ranSign = Math.random() >= 0.5 ? 1 : -1; // 1或-1
-
                 this._subLotteries.forEach((lottery, i) => {
-                    let resultIdx = Laya.MathUtil.repeat(resultIndices[i]-1 /*+ ranSign * ranFactor*/, this._maxSubArraryLen); //  结果索引， 区间: [0, this._maxSubArraryLen)
+                    let resultIdx = Laya.MathUtil.repeat(resultIndices[i] + ranSign * ranFactor, this._maxSubArraryLen); //  结果索引， 区间: [0, this._maxSubArraryLen)
                     const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
                     let isImmediate = true; // 是否立即滚动到结果处
                     lottery.setResult(resultIdx, isImmediate, resultFocusT);
@@ -356,7 +362,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
 
     /**
      * 开始滚动
-     * @param startInterval 子列表开始滚动间隔<毫秒>, 非立即设置时有效，默认：1000
+     * @param startInterval 子列表开始滚动间隔<毫秒>，默认：1000
      */
     public async startScrolling(startInterval: number = 1000): Promise<void> {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能开始滚动`);
@@ -369,7 +375,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             const lottery = this._subLotteries[i];
             await lottery.delay(startInterval);
             lottery.startScrolling();
-            console.log("_totalDistance:",lottery["_totalDistance"]);
+            // console.log("_totalDistance:", lottery["_totalDistance"]);
         }
     }
 

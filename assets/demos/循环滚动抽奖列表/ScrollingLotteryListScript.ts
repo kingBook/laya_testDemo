@@ -57,8 +57,10 @@ export interface BezierEaseData {
  * 
  * 
  * // 设置结果索引
- * const isImmediate = false; // 是否立即滚动到结果处
- * lotteryScript.setResult(4, false);
+ * const resultIdx = 4; // 结果索引（未添加重复项前的索引）
+ * const isImmediate = false; // 是否立即滚动到结果处, 默认：false
+ * const resultFocusT = 0.5; // 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
+ * lotteryScript.setResult(resultIdx, isImmediate, resultFocusT);
  * 
  * // 开始滚动
  * lotteryScript.startScrolling();
@@ -279,7 +281,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
      * 设置结果
      * * 注意：正在滚动时不能调这个方法，如果一定要调用，请先调用 {@link stopScrolling()} 强制停止滚动后，才能调用这个方法
      * @param index 结果索引（未添加重复项前的索引）
-     * @param isImmediate 是否立即滚动到结果处
+     * @param isImmediate 是否立即滚动到结果处, 默认：false
      * @param resultFocusT 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
      */
     public setResult(index: number, isImmediate: boolean = false, resultFocusT: number = 0.5): ScrollingLotteryListScript {
@@ -415,14 +417,22 @@ export class ScrollingLotteryListScript extends Laya.Script {
         const focusedIndex = this.getIndexByScrollBarValue(this._scrollBar.value, true);
         // 需要偏移多少能把当前聚焦项显示在焦点中间（focusedIndex项中间-可视区焦点处的偏移量）
         const distOffset = this.getScrollBarValueByIndex(focusedIndex, resultFocusT) - (this._scrollBar.value + this._focusPos);
-        // 当前聚焦项距离结果有多少个项
-        const distItemCount = (this._resultIndices[0] - this.getOriginalIndex(focusedIndex)) * this.speedSign;
-        console.log(focusedIndex, distItemCount);
-        
+        // 当前聚焦项距离结果项有多少个项（按照滚动方向计算）
+        let distItemCount = 0;
+        const retIdx = this._resultIndices[0];
+        const focusedOriginalIdx = this.getOriginalIndex(focusedIndex);
+        for (let i = 0; i < this._itemCount; i++) {
+            const originalIdx = Laya.MathUtil.repeat(focusedOriginalIdx + this.speedSign * i, this._originalItemCount);
+            // console.log("for", `i:${i}`, `originalIdx:${originalIdx}`, `retIdx:${retIdx}`);
+            if (retIdx === originalIdx) break;
+            distItemCount++;
+        }
+        // console.log(`speedSign:${this.speedSign}`, `focusedIndex:${focusedIndex}`, `distOffset:${distOffset}`, `getOriginalIndex:${this.getOriginalIndex(focusedIndex)}`, `retIdx:${retIdx}`, `distItemCount:${distItemCount}`);
         // 总距离
         const total = (this._cellSize * this._originalItemCount) * this.circles
             + (this.speedSign * distOffset)
             + (distItemCount * this._cellSize);
+        // console.log(`total:${total}`, (this._cellSize * this._originalItemCount) * this.circles, (this.speedSign * distOffset), (distItemCount * this._cellSize));
         return total;
     }
 

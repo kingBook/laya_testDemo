@@ -47,7 +47,15 @@
           "_$comp": [
             {
               "_$override": "168a8568-ba24-4994-a2d0-56f7d7c5dc95",
-              "circles": 1
+              "circles": 1,
+              "aniTotalTime": 200
+            }
+          ],
+          "_$child": [
+            {
+              "_$override": "1523uk2c",
+              "disabled": true,
+              "gray": false
             }
           ]
         }

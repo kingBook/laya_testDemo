@@ -19,7 +19,7 @@ export class TestScrollingLotteryListScript extends Laya.Script {
     numberList: Laya.List;
 
     public enableVList = true;
-    public enableLetterList = true;
+    public enableLetterList = false;
 
     onAwake(): void {
         // // 水平滚动
@@ -67,7 +67,7 @@ export class TestScrollingLotteryListScript extends Laya.Script {
         if (evt.key === 'j') {
             const resultIndex = Math.trunc(Math.random() * 5);
             const speedSign = Math.random() > 0.5 ? 1 : -1;
-            const resultFocusT = 0.5//Math.random();
+            const resultFocusT = Math.random();
 
             console.log("设置结果", resultIndex, "resultFocusT:" + resultFocusT);
 
@@ -80,7 +80,7 @@ export class TestScrollingLotteryListScript extends Laya.Script {
             }
         } else if (evt.key === 'k') {
             const resultIndex = Math.trunc(Math.random() * 5);
-            const resultFocusT = 0.5//Math.random();
+            const resultFocusT = Math.random();
 
             console.log("立即滚动到结果处", resultIndex, "resultFocusT:" + resultFocusT);
 
