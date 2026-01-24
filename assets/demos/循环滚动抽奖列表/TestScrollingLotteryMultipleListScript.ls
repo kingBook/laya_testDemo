@@ -48,7 +48,15 @@
             {
               "_$override": "168a8568-ba24-4994-a2d0-56f7d7c5dc95",
               "circles": 1,
-              "aniTotalTime": 200
+              "aniTotalTime": 200,
+              "enableScrollToSubResult": true,
+              "_subListTemplate": {
+                "_$ref": [
+                  "qo7n3zpv",
+                  "1523uk2c"
+                ]
+              },
+              "subArrayAlignMode": 2
             }
           ],
           "_$child": [

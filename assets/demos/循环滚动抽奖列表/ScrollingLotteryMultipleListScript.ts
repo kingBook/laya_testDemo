@@ -16,14 +16,34 @@ enum Flag {
     InterruptScrollToSubResult = 1 << 4
 }
 
+/** 子列表数据源的对齐方式枚举 */
+export enum SubArrayAlignMode {
+    /** 不填平、不对齐子列表的数据源（长度可长、可短，滚动速度会不统一） */
+    None = 0,
+    /** 指定一个长度作为依据，填平、对齐所有子列表的数据源（长的截短，短的补充）*/
+    FixedLength = 1,
+    /** 在子列表数据源中找到最长的一个作为依据， 填平、对齐所有子列表的数据源*/
+    MaxSubLength = 2
+}
+
+/** 子列表数据源对齐配置 */
+export type SubArrayAlignConfig = {
+    /** 子列表数据源的对齐方式枚举 */
+    alignMode: SubArrayAlignMode,
+    /** 固定子列表数据源的长度<大于0的整数>(alignMode 为 {@link SubArrayAlignMode.FixedLength} 时有效) */
+    fixedSubLength?: number;
+    /** 各子列表数据源保留的索引(alignMode 为 {@link SubArrayAlignMode.FixedLength} 时有效)，例: 开奖结果索引是需要保留的， 避免在对齐数据源时被删除*/
+    fixedSubIndices?: number[]
+}
+
 /** 子列表滚动起始点枚举 */
 export enum PosMode {
     /** 不设置子列表的滚动值，使用当前值 */
-    None,
+    None = 0,
     /** 立即设置子列表滚动值到结果索引处 */
-    Result,
+    Result = 1,
     /** 立即设置子列表滚动值，对齐所有子列表的滚动起始点（起始点索引是随机计算的），统一滚动速度 */
-    AlignStartPoint
+    AlignStartPoint = 2
 }
 
 /**
@@ -54,11 +74,13 @@ export enum PosMode {
  *     }
  * });
  * 
+ * 
+ * multipleLottry.speedSign = 1; // 子列表滚动方向, 1 或 -1
+ * multipleLottry.aniTotalTime = 5000; // 子列表动画总时长<毫秒>
+ * multipleLottry.circles = 5; // 子列表滚动的圈数
+ * multipleLottry.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 子列表动画曲线数据
+ * 
  * multipleLottry.init(); // 初始化
- * multipleLottry.speedSign = 1; // 滚动方向, 1 或 -1
- * multipleLottry.aniTotalTime = 5000; // 滚动时间<毫秒>
- * multipleLottry.circles = 5; // 滚动圈数
- * multipleLottry.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
  * 
  * // 如果要求子列表动画数据不一样，在 init() 初始化后遍历以下数组进行设置
  * multipleLottry.subLotteries.forEach((element, index) => {
@@ -87,7 +109,7 @@ export enum PosMode {
  * 
  * // 设置结果，子列表的初始位置
  * const resultIndices = [0, 1, 2, 3]; // 结果索引数组
- * const resultsFocusT = [0.1, 0.5, 0.7, 0.9]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, 小于 0.5 左, 大于 0.5 右
+ * const resultsFocusT = [0.5, 0.5, 0.5, 0.5]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, 小于 0.5 左, 大于 0.5 右
  * const posMode = PosMode.AlignStartPoint; // 子列表滚动值的初始位置枚举
  * multipleLottry.setResults(resultIndices, resultsFocusT, posMode);
  * 
@@ -120,9 +142,18 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     @property({ type: Number, min: 1, step: 1, tips: "子列表滚动的圈数<大于0的整数>, 默认:5" })
     public circles: number = 5;
 
+    // /** 子列表数据源的对齐方式，默认：{@link SubArrayAlignMode.MaxSubLength} */
+    // @property({ type: SubArrayAlignMode, catalog: "SubArrayAlignMode", tips: "子列表数据源的对齐方式" })
+    // public subArrayAlignMode: SubArrayAlignMode = SubArrayAlignMode.MaxSubLength;
+    // /** 固定子列表数据源的长度<大于0的整数>，默认：20 (仅 {@link subArrayAlignMode} 为 {@link SubArrayAlignMode.FixedLength} 时有效) */
+    // @property({ type: Number, min: 1, step: 1, catalog: "SubArrayAlignMode", readonly: "data.subArrayAlignMode!=1", tips: "固定子列表数据源的长度<大于0的整数>, 默认: 20 (仅 subArrayAlignMode 为 FixedLength 时有效)" })
+    // public fixedSubLength: number = 20;
+
+    /** 是否启用父列表滚动到已出结果子列表（缓动）*/
     @property({ type: Boolean, catalog: "ScrollToSubResult", tips: "是否启用父列表滚动到已出结果子列表（缓动）" })
     public enableScrollToSubResult: boolean = true;
-    @property({ type: Number, catalog: "ScrollToSubResult", readonly: "data.enableScrollToSubResult!=true", min: 1, step: 1, tips: "父列表滚动到已出结果子列表缓动的时间" })
+    /** 父列表滚动到已出结果子列表缓动的时间 */
+    @property({ type: Number, min: 1, step: 1, catalog: "ScrollToSubResult", readonly: "data.enableScrollToSubResult!=true", tips: "父列表滚动到已出结果子列表缓动的时间" })
     public scrollToSubResultDuration: number = 500;
 
     /** 子列表动画曲线数据，https://cubic-bezier.com/ */
@@ -157,8 +188,10 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     private _resultMaxIndices: number[];
     /** 父列表滚动到已出结果子列表的缓动 */
     private _scrollToSubResultTweener: Laya.Tween;
-    /** 子列表最大的数据源长度 */
-    private _maxSubArraryLen: number;
+    /** 子列表最小的数据源长度 */
+    private _minSubArraryLen: number;
+    /** 已对齐的子列表数据源长度, 小于等于0: 表示未对齐 */
+    private _curAlignSubArraylen: number;
 
     private _tempRect: Laya.Rectangle = new Laya.Rectangle();
 
@@ -173,8 +206,11 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     public get isPaused(): boolean { return (this._flags & Flag.Paused) > 0; }
 
 
-    /** 初始化 */
-    public init(): ScrollingLotteryMultipleListScript {
+    /**
+     * 初始化
+     * @param subArrayAlignCfg 子列表数据源对齐配置，默认为：{ alignMode: SubArrayAlignMode.MaxSubLength }
+     */
+    public init(subArrayAlignCfg: SubArrayAlignConfig = { alignMode: SubArrayAlignMode.MaxSubLength }): ScrollingLotteryMultipleListScript {
         // 父列表滚动到已出结果子列表的缓动
         this.killScrollToSubResultTweener();
 
@@ -184,22 +220,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         }
 
         // 填平、对齐子列表数据源
-        this._resultMaxIndices ||= [];
-        this._resultMaxIndices.length = 0;
-        let maxSubArrayLen = 0;
-        this.array.forEach((subArray, index) => {
-            this._resultMaxIndices[index] = subArray.length - 1; // 记录开奖结果最大索引
-            maxSubArrayLen = Math.max(maxSubArrayLen, subArray.length);
-        });
-        this._maxSubArraryLen = maxSubArrayLen;
-        this.array.forEach((subArray, index) => {
-            if (subArray.length < maxSubArrayLen) {
-                for (let i = 0, c = maxSubArrayLen - subArray.length; i < c; i++) {
-                    const ranIdx = Math.min((Math.random() * subArray.length) | 0, subArray.length - 1); // subArray 的随机索引
-                    subArray.push(subArray[ranIdx]);
-                }
-            }
-        });
+        this.alignSubArray(subArrayAlignCfg);
 
         // 父列表 ========================
         if (this.owner.scrollType === Laya.ScrollType.Vertical) {
@@ -274,6 +295,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             this._subLotteries[subListIdx] = subLottery; // 保存到子列表抽奖组件数组
         }
 
+        // 启用父列表滚动到已出结果子列表（缓动）时，侦听鼠标事件
         if (this.enableScrollToSubResult) {
             if (this.owner.parent && this.owner.parent instanceof Laya.Panel) {
                 this.owner.parent.on(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
@@ -344,10 +366,11 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 });
                 break;
             case PosMode.AlignStartPoint: // 立即设置子列表滚动值，对齐所有子列表的滚动起始点（起始点索引是随机计算的），统一滚动速度
-                const ranFactor = (((Math.random() * this._maxSubArraryLen - 1) + 1)) | 0; // 区间: [1, this._maxSubArraryLen)
+                const len = this._curAlignSubArraylen > 0 ? this._curAlignSubArraylen : this._minSubArraryLen;
+                const ranFactor = (((Math.random() * len - 1) + 1)) | 0; // 区间: [1, len)
                 const ranSign = Math.random() >= 0.5 ? 1 : -1; // 1或-1
                 this._subLotteries.forEach((lottery, i) => {
-                    let resultIdx = Laya.MathUtil.repeat(resultIndices[i] + ranSign * ranFactor, this._maxSubArraryLen); //  结果索引， 区间: [0, this._maxSubArraryLen)
+                    let resultIdx = Laya.MathUtil.repeat(resultIndices[i] + ranSign * ranFactor, this._resultMaxIndices[i] + 1); //  结果索引， 区间: [0, this._resultMaxIndices[i] + 1)
                     const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
                     let isImmediate = true; // 是否立即滚动到结果处
                     lottery.setResult(resultIdx, isImmediate, resultFocusT);
@@ -429,6 +452,50 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         }
         this.owner.off(Laya.Event.MOUSE_DOWN, this, this.onMouseHandler);
         this.owner.off(Laya.Event.MOUSE_WHEEL, this, this.onMouseHandler);
+    }
+
+    /**
+     * 填平、对齐子列表数据源
+     * @param subArrayAlignCfg 子列表数据源对齐配置
+     */
+    private alignSubArray(subArrayAlignCfg: SubArrayAlignConfig): void {
+        this._resultMaxIndices ||= [];
+        this._resultMaxIndices.length = 0;
+
+        let maxSubArrayLen = 0;
+        let minSubArraryLen = 1e6;
+        this.array.forEach((subArray, index) => {
+            this._resultMaxIndices[index] = subArray.length - 1; // 记录开奖结果最大索引
+            minSubArraryLen = Math.min(minSubArraryLen, subArray.length);
+            maxSubArrayLen = Math.max(maxSubArrayLen, subArray.length);
+        });
+        this._minSubArraryLen = minSubArraryLen;
+
+        switch (subArrayAlignCfg.alignMode) {
+            case SubArrayAlignMode.None: // 不填平、不对齐子列表的数据源（长度可长、可短，滚动速度会不统一）
+
+                break;
+            case SubArrayAlignMode.FixedLength: // 指定一个长度作为依据，填平、对齐所有子列表的数据源（长的截短，短的补充）
+                this._curAlignSubArraylen = subArrayAlignCfg.fixedSubLength | 0;
+                if (this._curAlignSubArraylen <= 0) {
+                    throw new Error(`subArrayAlignCfg.alignMode 为 FixedLength 时, subArrayAlignCfg.fixedSubLength 必须设置为大于0的整数`);
+                }
+                if (!subArrayAlignCfg.fixedSubIndices || subArrayAlignCfg.fixedSubIndices.length !== this.array.length) {
+                    throw new Error(`subArrayAlignCfg.alignMode 为 FixedLength 时, subArrayAlignCfg.fixedSubIndices 必须设置, 且长度与 array.length 一致`);
+                }
+                break;
+            case SubArrayAlignMode.MaxSubLength: // 在子列表数据源中找到最长的一个作为依据， 填平、对齐所有子列表的数据源
+                this._curAlignSubArraylen = maxSubArrayLen;
+                this.array.forEach((subArray, index) => {
+                    if (subArray.length < maxSubArrayLen) {
+                        for (let i = 0, c = maxSubArrayLen - subArray.length; i < c; i++) {
+                            const ranIdx = Math.min((Math.random() * subArray.length) | 0, subArray.length - 1); // subArray 的随机索引，范围：[0, subArray.length)
+                            subArray.push(subArray[ranIdx]);
+                        }
+                    }
+                });
+                break;
+        }
     }
 
     /** 渲染父列表项 */
