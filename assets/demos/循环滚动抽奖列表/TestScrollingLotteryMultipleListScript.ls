@@ -21,6 +21,22 @@
   ],
   "_$child": [
     {
+      "_$id": "2ck703ka",
+      "_$type": "Label",
+      "name": "tip",
+      "x": 253,
+      "y": 20,
+      "width": 245,
+      "height": 74,
+      "top": 20,
+      "centerX": 0,
+      "text": "按 J，设置结果\n按 K，开始滚动",
+      "fontSize": 35,
+      "color": "#ffffff",
+      "fitContent": "yes",
+      "valign": "middle"
+    },
+    {
       "_$id": "pcoqu27z",
       "_$type": "Panel",
       "name": "Panel",
@@ -61,7 +77,7 @@
           "_$child": [
             {
               "_$override": "1523uk2c",
-              "disabled": true,
+              "disabled": false,
               "gray": false
             }
           ]

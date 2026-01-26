@@ -1,4 +1,4 @@
-import { FixedLengthConfig, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
+import { FixedLenCfg, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
 
 const { regClass, property } = Laya;
 
@@ -23,7 +23,7 @@ export class TestScrollingLotteryListFixedLen extends Laya.Script {
         });
 
         this._resultIndex = 3; // 开奖结果索引
-        const fixedLengthCfg: FixedLengthConfig = {
+        const fixedLengthCfg: FixedLenCfg = {
             fixedLength: 8,
             fixedIndices:  this._resultIndex
         };

@@ -1,4 +1,4 @@
-import { FixedLengthConfig, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
+import { FixedLenCfg, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
 
 const { regClass, property } = Laya;
 

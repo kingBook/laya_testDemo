@@ -14,7 +14,7 @@ enum Flag {
 
 
 /** 固定列表数据源长度配置 */
-export type FixedLengthConfig = {
+export type FixedLenCfg = {
     /** 固定列表数据源的长度<大于 0 的整数>。（将对数据源元素进行增加或删除，使长度等于此值） */
     fixedLength: number;
     /** 列表数据源始终保留的索引（避免在对齐数据源删除元素时被删除， 索引值不能超出列表原数据源长度）。例: 开奖结果索引是需要保留的 */
@@ -32,57 +32,56 @@ export interface BezierEaseData {
 /**
  * 循环滚动列表抽奖
  * 
- * * 用法示例：
- * ```
- * // 初始化列表
- * const list = this.owner.getChild("list", Laya.List);
- * list.scrollType = Laya.ScrollType.Horizontal; // 必须是水平/垂直滚动
- * list.array = [{ Label: "A" }, { Label: "B" }, { Label: "C" }, { Label: "D" }, { Label: "E" }];
- * 
- * // 添加滚动组件，并初始化
- * const lotteryScript = this.list.addComponent(ScrollingLotteryListScript);
- * 
- * // // 固定数据源长度配置
- * // const fixedLengthCfg: FixedLengthConfig = {
- * //     fixedLength: 6, // 固定数据源长度
- * //     fixedIndices: 4 // 列表数据源始终保留的索引（避免在对齐数据源删除元素时被删除， 索引值不能超出列表原数据源长度）。例: 开奖结果索引是需要保留的
- * // };
- * // lotteryScript.init(fixedLengthCfg); // 初始化, 需在 list.array 赋值后调用初始化，且不能赋值空数组; 
- * 
- * lotteryScript.init(); // 初始化, 需在 list.array 赋值后调用初始化，且不能赋值空数组; 
- * 
- * lotteryScript.speedSign = -1; // 滚动方向, 1 或 -1
- * lotteryScript.aniTotalTime = 5000; // 滚动时间<毫秒>
- * lotteryScript.circles = 5; // 滚动圈数
- * lotteryScript.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
- * 
- * //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_START, () => {
- * lotteryScript.onScrollStartHandler = new Laya.Handler(this, () => {
- *     console.log("滚动开始");
- * });
- * 
- * //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLLING, (curFocusIdx: number) => {
- * lotteryScript.onScrollingHandler = new Laya.Handler(this, (curFocusIdx: number) => {
- *     const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
- *     console.log(`滚动中. 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
- * });
- * 
- * //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, (curFocusIdx: number) => {
- * lotteryScript.onScrollCompleteHandler = new Laya.Handler(this, (curFocusIdx: number) => {
- *     const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
- *     console.log(`滚动到结果项完成, 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
- * });
- * 
- * 
- * // 设置结果索引
- * const resultIdx = 4; // 结果索引（未添加重复项前的索引）
- * const isImmediate = false; // 是否立即滚动到结果处, 默认：false
- * const resultFocusT = 0.5; // 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
- * lotteryScript.setResult(resultIdx, isImmediate, resultFocusT);
- * 
- * // 开始滚动
- * lotteryScript.startScrolling();
- * ```
+ * @example
+```
+// 初始化列表
+const list = this.owner.getChild("list", Laya.List);
+list.scrollType = Laya.ScrollType.Horizontal; // 必须是水平/垂直滚动
+list.array = [{ Label: "A" }, { Label: "B" }, { Label: "C" }, { Label: "D" }, { Label: "E" }];
+
+// 添加滚动组件，并初始化
+const lotteryScript = this.list.addComponent(ScrollingLotteryListScript);
+
+// 固定数据源长度配置
+let fixedLenCfg: FixedLenCfg = null;
+// fixedLenCfg = {
+//     fixedLength: 6, // 固定数据源长度
+//     fixedIndices: 4 // 列表数据源始终保留的索引（避免在对齐数据源删除元素时被删除， 索引值不能超出列表原数据源长度）。例: 开奖结果索引是需要保留的
+// };
+lotteryScript.init(fixedLenCfg); // 初始化, 需在 list.array 赋值后调用初始化，且不能赋值空数组; 
+
+lotteryScript.speedSign = -1; // 滚动方向, 1 或 -1
+lotteryScript.aniTotalTime = 5000; // 滚动时间<毫秒>
+lotteryScript.circles = 5; // 滚动圈数
+lotteryScript.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
+
+//lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_START, () => {
+lotteryScript.onScrollStartHandler = new Laya.Handler(this, () => {
+    console.log("滚动开始");
+});
+
+//lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLLING, (curFocusIdx: number) => {
+lotteryScript.onScrollingHandler = new Laya.Handler(this, (curFocusIdx: number) => {
+    const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
+    console.log(`滚动中. 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
+});
+
+//lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, (curFocusIdx: number) => {
+lotteryScript.onScrollCompleteHandler = new Laya.Handler(this, (curFocusIdx: number) => {
+    const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
+    console.log(`滚动到结果项完成, 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
+});
+
+
+// 设置结果索引
+const resultIdx = 4; // 结果索引（未添加重复项前的索引）
+const isImmediate = false; // 是否立即滚动到结果处, 默认：false
+const resultFocusT = 0.5; // 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
+lotteryScript.setResult(resultIdx, isImmediate, resultFocusT);
+
+// 开始滚动
+lotteryScript.startScrolling();
+```
  */
 @regClass()
 export class ScrollingLotteryListScript extends Laya.Script {
@@ -179,10 +178,10 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
     /**
      * 初始化
-     * @param fixedLengthCfg 固定列表数据源长度配置，默认：null 表示不固定数据源长度
+     * @param fixedLenCfg 固定列表数据源长度配置，默认：null 表示不固定数据源长度
      * @returns 
      */
-    public init(fixedLengthCfg: FixedLengthConfig = null): ScrollingLotteryListScript {
+    public init(fixedLenCfg: FixedLenCfg = null): ScrollingLotteryListScript {
         if (this.owner.scrollType !== Laya.ScrollType.Horizontal && this.owner.scrollType !== Laya.ScrollType.Vertical) {
             throw new Error("使用此组件时, 列表必须是水平或垂直滚动类型");
         }
@@ -220,9 +219,9 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
         // 固定数据源长度
         this._originResultMap.clear();
-        if (fixedLengthCfg && fixedLengthCfg.fixedLength > 0) {
-            if (Array.isArray(fixedLengthCfg.fixedIndices)) {
-                if ((<number[]>fixedLengthCfg.fixedIndices).length > fixedLengthCfg.fixedLength) {
+        if (fixedLenCfg && fixedLenCfg.fixedLength > 0) {
+            if (Array.isArray(fixedLenCfg.fixedIndices)) {
+                if ((<number[]>fixedLenCfg.fixedIndices).length > fixedLenCfg.fixedLength) {
                     throw new Error(`固定数据源长度配置中, fixedIndices.length 不能大于 fixedLength`);
                 }
             }
@@ -231,8 +230,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
             ownerArr.length = 0;
 
             // 始终保留的元素存入到 ownerArr
-            if (Array.isArray(fixedLengthCfg.fixedIndices)) {
-                fixedLengthCfg.fixedIndices.forEach((element, index) => {
+            if (Array.isArray(fixedLenCfg.fixedIndices)) {
+                fixedLenCfg.fixedIndices.forEach((element, index) => {
                     if (element > -1 && element < cloneArr.length) {
                         ownerArr.push(cloneArr[element]);
                         this._originResultMap.set(element, ownerArr.length - 1);
@@ -241,9 +240,9 @@ export class ScrollingLotteryListScript extends Laya.Script {
                     }
                 });
             } else {
-                if (fixedLengthCfg.fixedIndices > -1 && fixedLengthCfg.fixedIndices < cloneArr.length) {
-                    ownerArr.push(cloneArr[fixedLengthCfg.fixedIndices]);
-                    this._originResultMap.set(fixedLengthCfg.fixedIndices, ownerArr.length - 1);
+                if (fixedLenCfg.fixedIndices > -1 && fixedLenCfg.fixedIndices < cloneArr.length) {
+                    ownerArr.push(cloneArr[fixedLenCfg.fixedIndices]);
+                    this._originResultMap.set(fixedLenCfg.fixedIndices, ownerArr.length - 1);
                 } else {
                     throw new Error(`固定数据源长度配置中, fixedIndices 索引超出范围`);
                 }
@@ -260,7 +259,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
             // 排除始终保留的元素外，还要存入多少到达固定长度
             const fixedCount = ownerArr.length;
-            const c = fixedLengthCfg.fixedLength - fixedCount; // 还要存入多少到达固定长度
+            const c = fixedLenCfg.fixedLength - fixedCount; // 还要存入多少到达固定长度
             // --方案1, 随机一个索引开始循环填充
             const randomFactor = (Math.random() * cloneArr.length) | 0; // 索引区间：[0, cloneArr.length)
             for (let i = 0; i < c; i++) {
@@ -287,8 +286,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
             // }
 
             // 打乱始终保留的元素的位置
-            if (Array.isArray(fixedLengthCfg.fixedIndices)) {
-                fixedLengthCfg.fixedIndices.forEach((element, index) => {
+            if (Array.isArray(fixedLenCfg.fixedIndices)) {
+                fixedLenCfg.fixedIndices.forEach((element, index) => {
                     const i = this._originResultMap.get(element);
                     const temp = ownerArr[i];
                     const randomIdx = (Math.random() * ownerArr.length) | 0; // 索引区间：[0, ownerArr.length)
@@ -297,12 +296,12 @@ export class ScrollingLotteryListScript extends Laya.Script {
                     this._originResultMap.set(element, randomIdx);
                 });
             } else {
-                const i = this._originResultMap.get(fixedLengthCfg.fixedIndices);
+                const i = this._originResultMap.get(fixedLenCfg.fixedIndices);
                 const temp = ownerArr[i];
                 const randomIdx = (Math.random() * ownerArr.length) | 0; // 索引区间：[0, ownerArr.length)
                 ownerArr[i] = ownerArr[randomIdx];
                 ownerArr[randomIdx] = temp;
-                this._originResultMap.set(fixedLengthCfg.fixedIndices, randomIdx);
+                this._originResultMap.set(fixedLenCfg.fixedIndices, randomIdx);
             }
         }
 

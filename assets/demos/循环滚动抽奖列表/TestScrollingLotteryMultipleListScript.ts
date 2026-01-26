@@ -1,5 +1,5 @@
 import { ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
-import { PosMode, ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleListScript";
+import { FixedSubLenCfg, PosMode, ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleListScript";
 
 const { regClass, property } = Laya;
 
@@ -8,6 +8,12 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
     @property({ type: ScrollingLotteryMultipleListScript, private: false, tips: "多列表滚动抽奖" })
     private _multipleLottry: ScrollingLotteryMultipleListScript;
+
+    /** 结果索引数组 */
+    private _resultIndices: number[] = [
+        0, 1, 2, 3,
+        0, 1, 2, 3
+    ];
 
     onAwake() {
         // 数据源，二维数组
@@ -37,7 +43,13 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
             }
         });
 
-        this._multipleLottry.init(); // 初始化
+        let fixedSubLenCfg: FixedSubLenCfg = null;
+        fixedSubLenCfg = {
+            fixedSubLength: 8,
+            fixedSubIndices: this._resultIndices
+        };
+
+        this._multipleLottry.init(fixedSubLenCfg); // 初始化
         this._multipleLottry.speedSign = -1; // 滚动方向, 1 或 -1
         this._multipleLottry.aniTotalTime = 5000; // 滚动时间<毫秒>
         this._multipleLottry.circles = 5; // 滚动圈数
@@ -62,25 +74,20 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
-            // 结果索引数组
-            const resultIndices = [
-                0, 1, 2, 3,
-                0, 1, 2, 3
-            ];
 
             // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
             const resultsFocusT = [
-                0.1, 0.5, 0.7, 0.9,
-                0.1, 0.5, 0.7, 0.9
-                // 0.5, 0.5, 0.5, 0.5,
-                // 0.5, 0.5, 0.5, 0.5
+                // 0.1, 0.5, 0.7, 0.9,
+                // 0.1, 0.5, 0.7, 0.9
+                0.5, 0.5, 0.5, 0.5,
+                0.5, 0.5, 0.5, 0.5
             ];
 
             // 位置模式
             const posMode = PosMode.AlignStartPoint;
 
             // 设置结果
-            this._multipleLottry.setResults(resultIndices, resultsFocusT, posMode);
+            this._multipleLottry.setResults(this._resultIndices, resultsFocusT, posMode);
         } else if (evt.key === 'k') {
             const startScrollingInterval = 500; // 开始滚动间隔<毫秒>
             this._multipleLottry.startScrolling(startScrollingInterval); // 开始滚动
