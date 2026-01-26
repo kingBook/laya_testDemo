@@ -1,4 +1,4 @@
-import { ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
+import { FixedLengthConfig, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
 
 const { regClass, property } = Laya;
 
@@ -18,7 +18,7 @@ export class TestScrollingLotteryListScript extends Laya.Script {
     @property({ type: Laya.List })
     numberList: Laya.List;
 
-    public enableVList = true;
+    public enableVList = false;
     public enableLetterList = false;
 
     onAwake(): void {

@@ -55,8 +55,7 @@
                   "qo7n3zpv",
                   "1523uk2c"
                 ]
-              },
-              "subArrayAlignMode": 2
+              }
             }
           ],
           "_$child": [

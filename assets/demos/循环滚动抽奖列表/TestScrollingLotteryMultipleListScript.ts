@@ -10,14 +10,6 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
     private _multipleLottry: ScrollingLotteryMultipleListScript;
 
     onAwake() {
-        /* for (let i = 0; i < 10000; i++) {
-             const ranFactor = ((Math.random() * 10 + 1)) | 0; // [1,11)
-             const ranSign = Math.random() >= 0.5 ? 1 : -1; // 1或-1
-             let resultIdx = Laya.MathUtil.repeat(5 + ranSign * ranFactor, 10); //  结果索引
-             console.log("resultIdx:", resultIdx);
-             if(resultIdx<0 || resultIdx>10)console.error("超出范围");
-         }*/
-
         // 数据源，二维数组
         this._multipleLottry.array = [
             [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
