@@ -157,7 +157,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /** 最大的滚动值 */
     private _maxScrollBarValue: number;
     /** 用于数据源的元素顺序在固定长度时打乱后，通过原结果索引能找到对应打乱后的位置 */
-    private _originResultMap: Map<number, number> = new Map();
+    private _randomizedResultMap: Map<number, number> = new Map();
 
     private _tempRect: Laya.Rectangle = new Laya.Rectangle();
 
@@ -182,6 +182,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
      * @returns 
      */
     public init(fixedLenCfg: FixedLenCfg = null): ScrollingLotteryListScript {
+        this.isShowLogMsg && console.log("ScrollingLotteryListScript 初始化", "this.owner.array:", this.owner.array, "fixedLenCfg:", fixedLenCfg);
+
         if (this.owner.scrollType !== Laya.ScrollType.Horizontal && this.owner.scrollType !== Laya.ScrollType.Vertical) {
             throw new Error("使用此组件时, 列表必须是水平或垂直滚动类型");
         }
@@ -218,7 +220,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
             : Math.ceil(scrollRect.height / cellSize);
 
         // 固定数据源长度
-        this._originResultMap.clear();
+        this._randomizedResultMap.clear();
         if (fixedLenCfg && fixedLenCfg.fixedLength > 0) {
             if (Array.isArray(fixedLenCfg.fixedIndices)) {
                 if ((<number[]>fixedLenCfg.fixedIndices).length > fixedLenCfg.fixedLength) {
@@ -234,7 +236,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
                 fixedLenCfg.fixedIndices.forEach((element, index) => {
                     if (element > -1 && element < cloneArr.length) {
                         ownerArr.push(cloneArr[element]);
-                        this._originResultMap.set(element, ownerArr.length - 1);
+                        this._randomizedResultMap.set(element, ownerArr.length - 1);
                     } else {
                         throw new Error(`固定数据源长度配置中, fixedIndices[${index}] 索引超出范围`);
                     }
@@ -242,7 +244,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
             } else {
                 if (fixedLenCfg.fixedIndices > -1 && fixedLenCfg.fixedIndices < cloneArr.length) {
                     ownerArr.push(cloneArr[fixedLenCfg.fixedIndices]);
-                    this._originResultMap.set(fixedLenCfg.fixedIndices, ownerArr.length - 1);
+                    this._randomizedResultMap.set(fixedLenCfg.fixedIndices, ownerArr.length - 1);
                 } else {
                     throw new Error(`固定数据源长度配置中, fixedIndices 索引超出范围`);
                 }
@@ -288,20 +290,21 @@ export class ScrollingLotteryListScript extends Laya.Script {
             // 打乱始终保留的元素的位置
             if (Array.isArray(fixedLenCfg.fixedIndices)) {
                 fixedLenCfg.fixedIndices.forEach((element, index) => {
-                    const i = this._originResultMap.get(element);
+                    const i = this._randomizedResultMap.get(element);
                     const temp = ownerArr[i];
                     const randomIdx = (Math.random() * ownerArr.length) | 0; // 索引区间：[0, ownerArr.length)
                     ownerArr[i] = ownerArr[randomIdx];
                     ownerArr[randomIdx] = temp;
-                    this._originResultMap.set(element, randomIdx);
+                    this._randomizedResultMap.set(element, randomIdx);
                 });
             } else {
-                const i = this._originResultMap.get(fixedLenCfg.fixedIndices);
+                const i = this._randomizedResultMap.get(fixedLenCfg.fixedIndices);
                 const temp = ownerArr[i];
                 const randomIdx = (Math.random() * ownerArr.length) | 0; // 索引区间：[0, ownerArr.length)
                 ownerArr[i] = ownerArr[randomIdx];
                 ownerArr[randomIdx] = temp;
-                this._originResultMap.set(fixedLenCfg.fixedIndices, randomIdx);
+
+                this._randomizedResultMap.set(fixedLenCfg.fixedIndices, randomIdx);
             }
         }
 
@@ -394,19 +397,25 @@ export class ScrollingLotteryListScript extends Laya.Script {
      * @param index 结果索引（未添加重复项前的索引）
      * @param isImmediate 是否立即滚动到结果处, 默认：false
      * @param resultFocusT 结果项聚焦插值，区间为 [0, 1]，默认：0.5 表示停在中间，小于 0.5 表示停在左侧，大于 0.5 表示停在右侧
+     * @param others 
      */
-    public setResult(index: number, isImmediate: boolean = false, resultFocusT: number = 0.5): ScrollingLotteryListScript {
+    public setResult(index: number, isImmediate: boolean = false, resultFocusT: number = 0.5, others: any = null): ScrollingLotteryListScript {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能设置结果`);
         if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能设置结果`);
 
+        // 其他参数
+        let isRandomizedIndex = false; // 是否已是打乱后的结果索引
+        if (others) {
+            isRandomizedIndex = others.isRandomizedIndex;
+        }
 
-        // 取数据源元素顺序打乱后的结果索引
-        if (this._originResultMap.has(index)) {
-            index = this._originResultMap.get(index);
+        if (!isRandomizedIndex) {
+            // 取数据源元素顺序打乱后的结果索引
+            index = this.getRandomizedResultIndex(index);
         }
 
         const inRange = index >= 0 && index < this._originalItemCount;
-        if (!inRange) throw new Error("设置的结果索引超出范围");
+        if (!inRange) throw new Error(`设置的结果索引 ${index} 超出范围 [0, ${this._originalItemCount})`);
 
         this._resultFocusT = Laya.MathUtil.clamp01(resultFocusT); // 限制区间：[0, 1]
 
@@ -479,6 +488,33 @@ export class ScrollingLotteryListScript extends Laya.Script {
         this.clearDelay();
         return this;
     }
+
+    /**
+     * 取数据源元素顺序打乱后的结果索引（原结果索引在固定数据源长度时，位置会被打乱）
+     * @param resultIndex 数据源被打乱前的结果索引
+     * @returns 如果字典中没有，则返回自身
+     */
+    public getRandomizedResultIndex(resultIndex: number): number {
+        if (this._randomizedResultMap.has(resultIndex)) {
+            resultIndex = this._randomizedResultMap.get(resultIndex);
+        }
+        return resultIndex;
+    }
+
+    // /**
+    //  * 取数据源元素顺序前的结果索引
+    //  * @param randomizedResultIndex 数据源元素顺序打乱后的结果索引（原结果索引在固定数据源长度时，位置会被打乱）
+    //  * @returns 如果字典中没有，则返回 -1
+    //  */
+    // public getOriginalResultIndex(randomizedResultIndex: number): number {
+    //     let originalResultIdx = -1;
+    //     this._randomizedResultMap.forEach((value: number, key: number) => {
+    //         if (randomizedResultIndex === value) {
+    //             originalResultIdx = key;
+    //         }
+    //     });
+    //     return originalResultIdx;
+    // }
 
     public onDisable(): void {
         // 清除延时

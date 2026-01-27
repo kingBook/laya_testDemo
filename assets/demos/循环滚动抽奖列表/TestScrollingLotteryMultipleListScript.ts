@@ -15,19 +15,41 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
         0, 1, 2, 3
     ];
 
+    /** 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右 */
+    private _resultsFocusT: number[] = [
+        // 0.1, 0.5, 0.7, 0.9,
+        // 0.1, 0.5, 0.7, 0.9
+        0.5, 0.5, 0.5, 0.5,
+        0.5, 0.5, 0.5, 0.5
+    ];
+
+    private _arrayDatas: any[][] = [
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
+    ];
+
+    private _arrayDatas2: any[][] = [
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
+        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
+    ];
+
     onAwake() {
         // 数据源，二维数组
-        this._multipleLottry.array = [
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
-        ];
+        this._multipleLottry.array = this._arrayDatas2;
         // 父列表项渲染处理器
         this._multipleLottry.subListItemRender = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
 
@@ -45,7 +67,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
         let fixedSubLenCfg: FixedSubLenCfg = null;
         fixedSubLenCfg = {
-            fixedSubLength: 8,
+            fixedSubLength: 4,
             fixedSubIndices: this._resultIndices
         };
 
@@ -75,19 +97,11 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
 
-            // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
-            const resultsFocusT = [
-                // 0.1, 0.5, 0.7, 0.9,
-                // 0.1, 0.5, 0.7, 0.9
-                0.5, 0.5, 0.5, 0.5,
-                0.5, 0.5, 0.5, 0.5
-            ];
-
             // 位置模式
             const posMode = PosMode.AlignStartPoint;
 
             // 设置结果
-            this._multipleLottry.setResults(this._resultIndices, resultsFocusT, posMode);
+            this._multipleLottry.setResults(this._resultIndices, this._resultsFocusT, posMode);
         } else if (evt.key === 'k') {
             const startScrollingInterval = 500; // 开始滚动间隔<毫秒>
             this._multipleLottry.startScrolling(startScrollingInterval); // 开始滚动

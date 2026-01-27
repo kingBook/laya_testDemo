@@ -200,13 +200,14 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     * @param fixedLenCfg 子列表固定数据源长度配置，默认：null 表示不固定子列表数据源长度（数据源长度不相同，各子列表会出现滚动速度不一致）
     * @example
         // 子列表固定数据源长度配置，（如果不固定子列表数据源长度，各子列表数据源长度不相同，滚动速度会不一致）
-        let fixedSubLenCfg: FixedSubLenCfg = null;
-        fixedSubLenCfg = {
+        const fixedSubLenCfg: FixedSubLenCfg = {
             fixedSubLength: 8, // 子列表固定数据源的长度<大于 0 的整数>
             fixedSubIndices: resultIndices // 子列表数据源始终保留的索引。例: 开奖结果索引是需要保留的
         };
     */
     public init(fixedSubLenCfg: FixedSubLenCfg = null): ScrollingLotteryMultipleListScript {
+        console.log(`ScrollingLotteryMultipleListScript 初始化`, "this.array:", this.array, "fixedSubLenCfg:", fixedSubLenCfg);
+
         this._fixedSubLenCfg = fixedSubLenCfg;
 
         // 父列表滚动到已出结果子列表的缓动
@@ -348,6 +349,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
      * @param posMode 子列表滚动值的位置枚举，{ None: 不设置子列表的滚动值，使用当前值; Result: 立即设置子列表滚动值到结果索引处; AlignStartPoint: 立即设置子列表滚动值，对齐所有子列表的滚动起始点（起始点索引是随机计算的），统一滚动速度}
      */
     public setResults(resultIndices: number[], resultsFocusT: number[], posMode: PosMode): void {
+        // console.log(`ScrollingLotteryMultipleListScript 设置结果`, "resultIndices:", resultIndices, "resultsFocusT:", resultsFocusT, "posMode:", posMode);
+
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能设置结果`);
         if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能设置结果`);
 
@@ -385,10 +388,16 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 const ranFactor = (((Math.random() * len - 1) + 1)) | 0; // 区间: [1, len)
                 const ranSign = Math.random() >= 0.5 ? 1 : -1; // 1或-1
                 this._subLotteries.forEach((lottery, i) => {
-                    let resultIdx = Laya.MathUtil.repeat(resultIndices[i] + ranSign * ranFactor, this._resultMaxIndices[i] + 1); //  结果索引， 区间: [0, this._resultMaxIndices[i] + 1)
                     const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
+                    // ----------------------------------------------------
+                    const maxResultIdx = (this._fixedSubLenCfg && this._fixedSubLenCfg.fixedSubLength > 0) ? this._fixedSubLenCfg.fixedSubLength - 1 : this._resultMaxIndices[i];
+                    let resultIdx = lottery.getRandomizedResultIndex(resultIndices[i]);
+                    const resultRepeatIdx = Laya.MathUtil.repeat(resultIdx + ranSign * ranFactor, maxResultIdx + 1) | 0; //  结果索引， 区间: [0, maxResultIdx + 1)
                     let isImmediate = true; // 是否立即滚动到结果处
-                    lottery.setResult(resultIdx, isImmediate, resultFocusT);
+                    const others = {
+                        isRandomizedIndex: true // 标记已是打乱后的索引
+                    };
+                    lottery.setResult(resultRepeatIdx, isImmediate, resultFocusT, others);
                     // ----------------------------------------------------
                     resultIdx = resultIndices[i]; //  结果索引
                     isImmediate = false; // 是否立即滚动到结果处
@@ -413,7 +422,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             const lottery = this._subLotteries[i];
             await lottery.delay(startInterval);
             lottery.startScrolling();
-            // console.log("_totalDistance:", lottery["_totalDistance"]);
+            console.log("_totalDistance:", lottery["_totalDistance"]);
         }
     }
 
