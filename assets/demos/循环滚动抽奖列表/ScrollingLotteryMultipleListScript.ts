@@ -206,8 +206,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         };
     */
     public init(fixedSubLenCfg: FixedSubLenCfg = null): ScrollingLotteryMultipleListScript {
-        console.log(`ScrollingLotteryMultipleListScript 初始化`, "this.array:", this.array, "fixedSubLenCfg:", fixedSubLenCfg);
-
+        // console.log(`ScrollingLotteryMultipleListScript 初始化`, "this.array:", this.array, "fixedSubLenCfg:", fixedSubLenCfg);
         this._fixedSubLenCfg = fixedSubLenCfg;
 
         // 父列表滚动到已出结果子列表的缓动
@@ -422,7 +421,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             const lottery = this._subLotteries[i];
             await lottery.delay(startInterval);
             lottery.startScrolling();
-            console.log("_totalDistance:", lottery["_totalDistance"]);
+            // console.log("_totalDistance:", lottery["_totalDistance"]);
         }
     }
 
