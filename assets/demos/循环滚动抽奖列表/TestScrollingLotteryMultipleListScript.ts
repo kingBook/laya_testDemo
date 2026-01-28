@@ -1,3 +1,4 @@
+import Utils from "utils/Utils";
 import { ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
 import { FixedSubLenCfg, PosMode, ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleListScript";
 
@@ -8,6 +9,14 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
     @property({ type: ScrollingLotteryMultipleListScript, private: false, tips: "多列表滚动抽奖" })
     private _multipleLottry: ScrollingLotteryMultipleListScript;
+
+    /** 品质颜色 */
+    private _qualityColors = {
+        1: "#9a9a04",
+        2: "#b00202",
+        3: "#9b079b",
+        4: "#040494"
+    };
 
     /** 结果索引数组 */
     private _resultIndices: number[] = [
@@ -24,30 +33,57 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
     ];
 
     private _arrayDatas: any[][] = [
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
 
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }]
     ];
 
     private _arrayDatas2: any[][] = [
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }, { id: 4, quality: 1 }, { id: 5, quality: 2 }, { id: 6, quality: 3 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }, { id: 4, quality: 1 }, { id: 5, quality: 2 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
 
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
-        [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }, { id: 4, quality: 1 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }, { id: 4, quality: 1 }, { id: 5, quality: 2 }],
+        [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }]
     ];
 
     onAwake() {
+        /*const items = [
+            { id: 1, name: "蓝A", quality: 2 },
+            { id: 2, name: "蓝B", quality: 2 },
+            { id: 3, name: "紫C", quality: 3 },
+            { id: 4, name: "橙D", quality: 4 },
+            { id: 5, name: "白E", quality: 1 },
+            { id: 6, name: "橙F", quality: 4 }  // 另一个橙装
+        ];
+
+        // 强制指定具体对象出现在特定位置
+        const orangeD = items[3];  // 橙D
+
+        console.log(Utils.repeatFillWithQuality(items, 'quality', 6, {
+            forcedItems: [
+                { index: 0, item: orangeD },      // 第1位强制放橙D
+                { index: 10, item: items[5] }     // 第11位强制放橙F
+            ],
+            forcedPositions: [
+                { index: 5, quality: 3 },         // 第6位强制紫装（如果位置没被具体对象占用）
+            ],
+            qualityWeights: {
+                4: 0.4,  // 橙装出现概率高
+                1: 0.05  // 白装很少
+            }
+        }));*/
+
+
         // 数据源，二维数组
         this._multipleLottry.array = this._arrayDatas2;
         // 父列表项渲染处理器
@@ -59,6 +95,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
             const cellDataSource = cell.dataSource;
             if (!cellDataSource) return;
 
+            cell.bgColor = this._qualityColors[cellDataSource.quality];
             const idxLabel = cell.getChild("idxLabel", Laya.Label);
             if (idxLabel) {
                 idxLabel.text = `${cellDataSource.id}`;
@@ -67,8 +104,11 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
         let fixedSubLenCfg: FixedSubLenCfg = null;
         fixedSubLenCfg = {
-            fixedSubLength: 4,
-            fixedSubIndices: this._resultIndices
+            subTargetLength: 4,
+            subReservedIndices: this._resultIndices,
+            subFillOptions: {
+                qualityKey: "quality"
+            }
         };
 
         this._multipleLottry.init(fixedSubLenCfg); // 初始化

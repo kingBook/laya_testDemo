@@ -24,8 +24,8 @@ export class TestScrollingLotteryListFixedLen extends Laya.Script {
 
         this._resultIndex = 3; // 开奖结果索引
         const fixedLengthCfg: FixedLenCfg = {
-            fixedLength: 8,
-            fixedIndices:  this._resultIndex
+            targetLength: 8,
+            reservedIndices:  this._resultIndex
         };
         const hListComp = this.hList.addComponent(ScrollingLotteryListScript).init(fixedLengthCfg);
         //hListComp.isShowLogMsg = true;

@@ -1,3 +1,4 @@
+import Utils from "utils/Utils";
 import { BezierEaseData, FixedLenCfg, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
 
 const { regClass, property, classInfo } = Laya;
@@ -18,10 +19,22 @@ enum Flag {
 
 /** 子列表固定数据源长度配置 */
 export type FixedSubLenCfg = {
-    /** 子列表固定数据源的长度<大于 0 的整数>。（将对子列表数据源元素进行增加或删除，使长度等于此值） */
-    fixedSubLength: number;
+    /**
+     * 子列表固定数据源的长度<大于 0 的整数>。（将对子列表数据源元素进行裁剪、填充，使长度等于此值）
+     * * 注意： 固定后子列表的数据源实际长度并非此长度，为了能循环滚动在此长度末尾还会加入一些重复项
+     */
+    subTargetLength: number;
     /** 子列表数据源始终保留的索引（避免在对齐数据源删除元素时被删除， 索引值不能超出对应子列表原数据源长度）。例: 开奖结果索引是需要保留的 */
-    fixedSubIndices: number[] | number[][];
+    subReservedIndices: number[] | number[][];
+    /** 子列表数据源填充选项 {@linkcode Utils.repeatFillWithQuality} */
+    subFillOptions?: {
+        /** 品质 key */
+        qualityKey: string,
+        /** 最大连续相同品质次数，默认 2 */
+        maxConsecutive?: number;
+        /** 品质权重 */
+        qualityWeights?: Record<string | number, number>;
+    };
 }
 
 /** 子列表滚动起始点枚举 */
@@ -68,8 +81,22 @@ const resultIndices = [0, 1, 2, 3]; // 结果索引数组
 // 子列表固定数据源长度配置，（如果不固定子列表数据源长度，各子列表数据源长度不相同，滚动速度会不一致）
 let fixedSubLenCfg: FixedSubLenCfg = null;
 // fixedSubLenCfg = {
-//     fixedSubLength: 8, // 子列表固定数据源的长度<大于 0 的整数>
-//     fixedSubIndices: resultIndices // 子列表数据源始终保留的索引。例: 开奖结果索引是需要保留的
+//     // 子列表固定数据源的长度<大于 0 的整数>（注意： 固定后子列表的数据源实际长度并非此长度，为了能循环滚动在此长度末尾还会加入一些重复项）
+//     subTargetLength: 8,
+//     // 子列表数据源始终保留的索引。例: 开奖结果索引是需要保留的
+//     subReservedIndices: resultIndices, 
+//     // 子列表数据源填充选项（可选）
+//     subFillOptions: {
+//         // 品质 key
+//         qualityKey: xx,
+//         // 最大连续相同品质次数（可选），默认 2
+//         maxConsecutive: 2,
+//         // 品质权重（可选）
+//         qualityWeights: {
+//             4: 0.4,
+//             1: 0.05
+//          }
+//     }
 // };
 multipleLottry.init(fixedSubLenCfg); // 初始化
 
@@ -201,12 +228,28 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     * @example
         // 子列表固定数据源长度配置，（如果不固定子列表数据源长度，各子列表数据源长度不相同，滚动速度会不一致）
         const fixedSubLenCfg: FixedSubLenCfg = {
-            fixedSubLength: 8, // 子列表固定数据源的长度<大于 0 的整数>
-            fixedSubIndices: resultIndices // 子列表数据源始终保留的索引。例: 开奖结果索引是需要保留的
+            // 子列表固定数据源的长度<大于 0 的整数>（注意： 固定后子列表的数据源实际长度并非此长度，为了能循环滚动在此长度末尾还会加入一些重复项）
+            subTargetLength: 8,
+            // 子列表数据源始终保留的索引。例: 开奖结果索引是需要保留的
+            subReservedIndices: resultIndices, 
+            // 子列表数据源填充选项（可选）
+            subFillOptions: {
+                // 品质 key
+                qualityKey: xx,
+                // 最大连续相同品质次数（可选），默认 2
+                maxConsecutive: 2,
+                // 品质权重（可选）
+                qualityWeights: {
+                    4: 0.4,
+                    1: 0.05
+                }
+            }
         };
     */
     public init(fixedSubLenCfg: FixedSubLenCfg = null): ScrollingLotteryMultipleListScript {
         // console.log(`ScrollingLotteryMultipleListScript 初始化`, "this.array:", this.array, "fixedSubLenCfg:", fixedSubLenCfg);
+        console.time("init");
+
         this._fixedSubLenCfg = fixedSubLenCfg;
 
         // 父列表滚动到已出结果子列表的缓动
@@ -262,8 +305,9 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             let fixedLenCfg: FixedLenCfg = null;
             if (fixedSubLenCfg) {
                 fixedLenCfg = {
-                    fixedLength: fixedSubLenCfg.fixedSubLength,
-                    fixedIndices: fixedSubLenCfg.fixedSubIndices[subListIdx]
+                    targetLength: fixedSubLenCfg.subTargetLength,
+                    reservedIndices: fixedSubLenCfg.subReservedIndices[subListIdx],
+                    fillOptions: fixedSubLenCfg.subFillOptions
                 };
             }
             // 子列表抽奖，初始化
@@ -323,6 +367,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
 
         // 初始化完成
         this._flags = Flag.Inited;
+        console.timeEnd("init");
         return this;
     }
 
@@ -383,13 +428,13 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 });
                 break;
             case PosMode.AlignStartPoint: // 立即设置子列表滚动值，对齐所有子列表的滚动起始点（起始点索引是随机计算的），统一滚动速度
-                const len = this._fixedSubLenCfg && this._fixedSubLenCfg.fixedSubLength > 0 ? this._fixedSubLenCfg.fixedSubLength : this._minSubArraryLen;
+                const len = this._fixedSubLenCfg && this._fixedSubLenCfg.subTargetLength > 0 ? this._fixedSubLenCfg.subTargetLength : this._minSubArraryLen;
                 const ranFactor = (((Math.random() * len - 1) + 1)) | 0; // 区间: [1, len)
                 const ranSign = Math.random() >= 0.5 ? 1 : -1; // 1或-1
                 this._subLotteries.forEach((lottery, i) => {
                     const resultFocusT = resultsFocusT[i]; // 结果项聚焦插值
                     // ----------------------------------------------------
-                    const maxResultIdx = (this._fixedSubLenCfg && this._fixedSubLenCfg.fixedSubLength > 0) ? this._fixedSubLenCfg.fixedSubLength - 1 : this._resultMaxIndices[i];
+                    const maxResultIdx = (this._fixedSubLenCfg && this._fixedSubLenCfg.subTargetLength > 0) ? this._fixedSubLenCfg.subTargetLength - 1 : this._resultMaxIndices[i];
                     let resultIdx = lottery.getRandomizedResultIndex(resultIndices[i]);
                     const resultRepeatIdx = Laya.MathUtil.repeat(resultIdx + ranSign * ranFactor, maxResultIdx + 1) | 0; //  结果索引， 区间: [0, maxResultIdx + 1)
                     let isImmediate = true; // 是否立即滚动到结果处
@@ -421,7 +466,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             const lottery = this._subLotteries[i];
             await lottery.delay(startInterval);
             lottery.startScrolling();
-            // console.log("_totalDistance:", lottery["_totalDistance"]);
+            console.log("_totalDistance:", lottery["_totalDistance"]);
         }
     }
 
