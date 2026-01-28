@@ -57,7 +57,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
     ];
 
     onAwake() {
-        /*const items = [
+        const items = [
             { id: 1, name: "蓝A", quality: 2 },
             { id: 2, name: "蓝B", quality: 2 },
             { id: 3, name: "紫C", quality: 3 },
@@ -69,7 +69,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
         // 强制指定具体对象出现在特定位置
         const orangeD = items[3];  // 橙D
 
-        console.log(Utils.repeatFillWithQuality(items, 'quality', 6, {
+        console.log(Utils.repeatFillWithQuality(items, 'quality', 10, {
             forcedItems: [
                 { index: 0, item: orangeD },      // 第1位强制放橙D
                 { index: 10, item: items[5] }     // 第11位强制放橙F
@@ -81,7 +81,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
                 4: 0.4,  // 橙装出现概率高
                 1: 0.05  // 白装很少
             }
-        }));*/
+        }));
 
 
         // 数据源，二维数组
@@ -104,7 +104,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
         let fixedSubLenCfg: FixedSubLenCfg = null;
         fixedSubLenCfg = {
-            subTargetLength: 4,
+            subTargetLength: 6,
             subReservedIndices: this._resultIndices,
             subFillOptions: {
                 qualityKey: "quality"

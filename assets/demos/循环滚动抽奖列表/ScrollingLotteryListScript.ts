@@ -267,53 +267,11 @@ export class ScrollingLotteryListScript extends Laya.Script {
         // 固定数据源长度
         this._randomizedResultMap.clear();
         if (fixedLenCfg && fixedLenCfg.targetLength > 0) {
-            if (Array.isArray(fixedLenCfg.reservedIndices)) {
-                if ((<number[]>fixedLenCfg.reservedIndices).length > fixedLenCfg.targetLength) {
-                    throw new Error(`固定数据源长度配置中, reservedIndices.length 不能大于 targetLength`);
-                }
-            }
-
-            const forcedItems: Array<{ index: number; item: any }> = []; // 强制指定某个具体对象在某位置
-
-            // 始终保留的元素，随机放置到固定的数据源长度内
-            if (Array.isArray(fixedLenCfg.reservedIndices)) {
-                const randomIndices = this.getRandomizeIndexes(0, fixedLenCfg.targetLength - 1, this._tempNums); // 随机索引，区间:[0, fixedLenCfg.targetLength)
-                fixedLenCfg.reservedIndices.forEach((element, index) => {
-                    if (element >= 0 && element < ownerArr.length) {
-                        const randomIdx = randomIndices[index];
-                        const temp = ownerArr[randomIdx];
-                        ownerArr[randomIdx] = ownerArr[element];
-                        forcedItems.push({ index: randomIdx, item: ownerArr[element] });
-                        ownerArr[element] = temp;
-                        this._randomizedResultMap.set(element, randomIdx);
-                    } else {
-                        throw new Error(`固定数据源长度配置中, reservedIndices[${index}]:${element} 索引超出范围`);
-                    }
-                });
+            if (fixedLenCfg.fillOptions) {
+                this.fixedLenFillPlaneA(ownerArr, fixedLenCfg);
             } else {
-                if (fixedLenCfg.reservedIndices >= 0 && fixedLenCfg.reservedIndices < ownerArr.length) {
-                    const randomIdx = this.rangeInt(0, fixedLenCfg.targetLength); // 区间:[0, fixedLenCfg.targetLength)
-                    const temp = ownerArr[randomIdx];
-                    ownerArr[randomIdx] = ownerArr[fixedLenCfg.reservedIndices];
-                    forcedItems.push({ index: randomIdx, item: ownerArr[fixedLenCfg.reservedIndices] });
-                    ownerArr[fixedLenCfg.reservedIndices] = temp;
-                    this._randomizedResultMap.set(fixedLenCfg.reservedIndices, randomIdx);
-                } else {
-                    throw new Error(`固定数据源长度配置中, reservedIndices:${fixedLenCfg.reservedIndices} 索引超出范围`);
-                }
+                this.fixedLenFillPlaneB(ownerArr, fixedLenCfg);
             }
-
-            const options = {
-                // 最大连续相同品质次数
-                maxConsecutive: fixedLenCfg.fillOptions ? fixedLenCfg.fillOptions.maxConsecutive : undefined,
-                // 品质权重
-                qualityWeights: fixedLenCfg.fillOptions ? fixedLenCfg.fillOptions.qualityWeights : undefined,
-                // 强制指定某个具体对象在某位置
-                forcedItems: forcedItems
-            };
-            const repeatFillArr = Utils.repeatFillWithQuality(ownerArr, fixedLenCfg.fillOptions.qualityKey, fixedLenCfg.targetLength, options);
-            ownerArr.length = 0;
-            ownerArr.push(...repeatFillArr);
         }
 
         // 列表的末尾加入额外重复项
@@ -604,6 +562,152 @@ export class ScrollingLotteryListScript extends Laya.Script {
             const cellRect = cell.getBounds(this._tempRect);
             cell.visible = scrollRect.intersects(cellRect);
         });
+    }
+
+    /**
+     * 固定数据源长度填充，方案A
+     * @param ownerArr 
+     * @param fixedLenCfg 
+     */
+    private fixedLenFillPlaneA(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
+        if (Array.isArray(fixedLenCfg.reservedIndices)) {
+            if ((<number[]>fixedLenCfg.reservedIndices).length > fixedLenCfg.targetLength) {
+                throw new Error(`固定数据源长度配置中, reservedIndices.length 不能大于 targetLength`);
+            }
+        }
+
+        const forcedItems: Array<{ index: number; item: any }> = []; // 强制指定某个具体对象在某位置
+
+        // 始终保留的元素，随机放置到固定的数据源长度内
+        if (Array.isArray(fixedLenCfg.reservedIndices)) {
+            const randomIndices = this.getRandomizeIndexes(0, Math.min(fixedLenCfg.targetLength, ownerArr.length) - 1, this._tempNums); // 随机索引，区间:[0, Math.min(fixedLenCfg.targetLength, ownerArr.length))
+            fixedLenCfg.reservedIndices.forEach((element, index) => {
+                if (element >= 0 && element < ownerArr.length) {
+                    const randomIdx = randomIndices[index];
+                    const temp = ownerArr[randomIdx];
+                    ownerArr[randomIdx] = ownerArr[element];
+                    forcedItems.push({ index: randomIdx, item: ownerArr[element] });
+                    ownerArr[element] = temp;
+                    this._randomizedResultMap.set(element, randomIdx);
+                } else {
+                    throw new Error(`固定数据源长度配置中, reservedIndices[${index}]:${element} 索引超出范围`);
+                }
+            });
+        } else {
+            if (fixedLenCfg.reservedIndices >= 0 && fixedLenCfg.reservedIndices < ownerArr.length) {
+                const randomIdx = this.rangeInt(0, Math.min(fixedLenCfg.targetLength, ownerArr.length)); // 区间:[0, Math.min(fixedLenCfg.targetLength, ownerArr.length))
+                const temp = ownerArr[randomIdx];
+                ownerArr[randomIdx] = ownerArr[fixedLenCfg.reservedIndices];
+                forcedItems.push({ index: randomIdx, item: ownerArr[fixedLenCfg.reservedIndices] });
+                ownerArr[fixedLenCfg.reservedIndices] = temp;
+                this._randomizedResultMap.set(fixedLenCfg.reservedIndices, randomIdx);
+            } else {
+                throw new Error(`固定数据源长度配置中, reservedIndices:${fixedLenCfg.reservedIndices} 索引超出范围`);
+            }
+        }
+        const options = {
+            // 最大连续相同品质次数
+            maxConsecutive: fixedLenCfg.fillOptions.maxConsecutive,
+            // 品质权重
+            qualityWeights: fixedLenCfg.fillOptions.qualityWeights,
+            // 强制指定某个具体对象在某位置
+            forcedItems: forcedItems
+        };
+        const repeatFillArr = Utils.repeatFillWithQuality(ownerArr, fixedLenCfg.fillOptions.qualityKey, fixedLenCfg.targetLength, options);
+        ownerArr.length = 0;
+        ownerArr.push(...repeatFillArr);
+    }
+
+    /**
+     * 固定数据源长度填充，方案B
+     * @param ownerArr 
+     * @param fixedLenCfg 
+     */
+    private fixedLenFillPlaneB(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
+        if (Array.isArray(fixedLenCfg.reservedIndices)) {
+            if ((<number[]>fixedLenCfg.reservedIndices).length > fixedLenCfg.targetLength) {
+                throw new Error(`固定数据源长度配置中, reservedIndices.length 不能大于 targetLength`);
+            }
+        }
+
+        const cloneArr = ownerArr.concat();
+        ownerArr.length = 0;
+
+        // 始终保留的元素存入到 ownerArr
+        if (Array.isArray(fixedLenCfg.reservedIndices)) {
+            fixedLenCfg.reservedIndices.forEach((element, index) => {
+                if (element > -1 && element < cloneArr.length) {
+                    ownerArr.push(cloneArr[element]);
+                    this._randomizedResultMap.set(element, ownerArr.length - 1);
+                } else {
+                    throw new Error(`固定数据源长度配置中, reservedIndices[${index}]:${element} 索引超出范围`);
+                }
+            });
+        } else {
+            if (fixedLenCfg.reservedIndices > -1 && fixedLenCfg.reservedIndices < cloneArr.length) {
+                ownerArr.push(cloneArr[fixedLenCfg.reservedIndices]);
+                this._randomizedResultMap.set(fixedLenCfg.reservedIndices, ownerArr.length - 1);
+            } else {
+                throw new Error(`固定数据源长度配置中, reservedIndices:${fixedLenCfg.reservedIndices} 索引超出范围`);
+            }
+        }
+        // console.log("始终保留的元素存入到 ownerArr:", ownerArr.concat());
+
+        // 从 cloneArr 移除已存入 ownerArr 的元素
+        for (let i = cloneArr.length - 1; i >= 0; i--) {
+            if (ownerArr.indexOf(cloneArr[i]) > -1) {
+                cloneArr.splice(i, 1);
+            }
+        }
+        // console.log("从 cloneArr 移除已存入 ownerArr 的元素后：", cloneArr);
+
+        // 排除始终保留的元素外，还要存入多少到达固定长度
+        const fixedCount = ownerArr.length;
+        const c = fixedLenCfg.targetLength - fixedCount; // 还要存入多少到达固定长度
+        // --方案1, 随机一个索引开始循环填充
+        const randomFactor = (Math.random() * cloneArr.length) | 0; // 索引区间：[0, cloneArr.length)
+        for (let i = 0; i < c; i++) {
+            const randomIdx = Laya.MathUtil.repeat(randomFactor + i, cloneArr.length) | 0; // 索引区间：[0, cloneArr.length)
+            ownerArr.push(cloneArr[randomIdx]); // 随机取元素，存入到 ownerArr
+        }
+        // --方案2
+        // if (cloneArr.length > c) { // 余数超过存入数时，随机存入
+        //     for (let i = 0; i < c; i++) {
+        //         const randomIdx = (Math.random() * cloneArr.length) | 0; // 索引区间：[0, cloneArr.length)
+        //         ownerArr.push(cloneArr[randomIdx]); // 随机取元素，存入到 ownerArr
+        //     }
+        // } else { // 余数小于等于存入数时，整个数组直接存入，还未到达固定长度再随机存入
+        //     const n = (c / cloneArr.length) | 0;
+        //     for (let i = 0; i < n; i++) {
+        //         ownerArr.push(...cloneArr);
+        //     }
+        //     // 按整数组存入，还差多少到达固定长度
+        //     const c2 = c - ownerArr.length;
+        //     for (let i = 0; i < c2; i++) {
+        //         const randomIdx = (Math.random() * cloneArr.length) | 0; // 索引区间：[0, cloneArr.length)
+        //         ownerArr.push(cloneArr[randomIdx]); // 随机取元素，存入到 ownerArr
+        //     }
+        // }
+
+        // 打乱始终保留的元素的位置
+        if (Array.isArray(fixedLenCfg.reservedIndices)) {
+            fixedLenCfg.reservedIndices.forEach((element, index) => {
+                const i = this._randomizedResultMap.get(element);
+                const temp = ownerArr[i];
+                const randomIdx = (Math.random() * ownerArr.length) | 0; // 索引区间：[0, ownerArr.length)
+                ownerArr[i] = ownerArr[randomIdx];
+                ownerArr[randomIdx] = temp;
+                this._randomizedResultMap.set(element, randomIdx);
+            });
+        } else {
+            const i = this._randomizedResultMap.get(fixedLenCfg.reservedIndices);
+            const temp = ownerArr[i];
+            const randomIdx = (Math.random() * ownerArr.length) | 0; // 索引区间：[0, ownerArr.length)
+            ownerArr[i] = ownerArr[randomIdx];
+            ownerArr[randomIdx] = temp;
+
+            this._randomizedResultMap.set(fixedLenCfg.reservedIndices, randomIdx);
+        }
     }
 
     //#region Util
