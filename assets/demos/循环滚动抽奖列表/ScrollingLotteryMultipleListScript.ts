@@ -210,6 +210,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     private _fixedSubLenCfg: FixedSubLenCfg;
 
     private _tempRect: Laya.Rectangle = new Laya.Rectangle();
+    private readonly _itemRegExp: RegExp = /item\d+/;
 
 
     /** 子列表抽奖组件数组，注意：需要在初始化完成后调用 */
@@ -285,7 +286,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         this._subLotteries.length = 0; // 清空
         for (let i = 0, c = this.owner.content.children.length; i < c; i++) {
             const child = this.owner.content.children[i];
-            const ret = child.name.match(/item\d+/); // 找 item0,item1,item2,...命名的 child
+            const ret = child.name.match(this._itemRegExp); // 找 item0,item1,item2,...命名的 child
             if (!ret || ret[0] !== ret.input) continue;
 
             const subListIdx = Number.parseInt(ret[0].replace("item", "")); // 取 item0,item1,item2,... 后的数字
@@ -455,7 +456,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
      */
     public async startScrolling(startInterval: number = 1000): Promise<void> {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能开始滚动`);
-        if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能开始滚动`);
+        if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能再开始滚动`);
 
         // 父列表滚动到已出结果子列表的缓动
         this.killScrollToSubResultTweener();
@@ -539,16 +540,19 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /** 如果父级是 Panel 时，在滚动矩形外则隐藏，优化Drawcall */
     private optimizeVisible(): void {
         if (!this.owner.parent || !(this.owner.parent instanceof Laya.Panel)) return;
-
         const panel = this.owner.parent as Laya.Panel;
         const panelScrollRect = panel.content.scrollRect;
+        for (let i = 0, c = this.owner.content.children.length; i < c; i++) {
+            const cell = this.owner.content.children[i] as Laya.UIComponent;
+            if (!cell) continue;
+            const ret = cell.name.match(this._itemRegExp); // 找 item0,item1,item2,...命名的 child
+            if (!ret || ret[0] !== ret.input) continue;
 
-        this.owner.cells.forEach((cell: Laya.UIComponent, index: number) => {
             const cellRect = cell.getBounds(this._tempRect);
             cellRect.x += this.owner.x;
             cellRect.y += this.owner.y;
             cell.visible = panelScrollRect.intersects(cellRect);
-        });
+        }
     }
 
     /**
