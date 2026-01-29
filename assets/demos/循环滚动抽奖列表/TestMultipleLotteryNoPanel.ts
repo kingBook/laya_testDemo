@@ -1,5 +1,5 @@
 import { ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
-import { ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleListScript";
+import { PosMode, ScrollingLotteryMultipleListScript } from "./ScrollingLotteryMultipleListScript";
 
 const { regClass, property } = Laya;
 
@@ -51,7 +51,7 @@ export class TestMultipleLotteryNoPanel extends Laya.Script {
 
         //this._multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLLING, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
         this._multipleLottry.onScrollingHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
-           // console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦子列表索引:${curFocusIdx}`);
+            // console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦子列表索引:${curFocusIdx}`);
         });
 
         //this._multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
@@ -63,18 +63,22 @@ export class TestMultipleLotteryNoPanel extends Laya.Script {
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
-            // 设置结果，开始滚动
+            // 结果索引数组
             const resultIndices = [
                 0, 1, 2, 3,
                 0, 1, 2, 3
-            ]; // 结果索引数组
-            const isImmediate = false; // 是否立即设置，false 滚动慢慢停止在结果处；true：立即设置到结果处
+            ];
+            // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
             const resultsFocusT = [
                 0.1, 0.5, 0.7, 0.9,
                 0.1, 0.5, 0.7, 0.9
-            ]; // 结果项聚焦插值数组，区间为 [0, 1]，0.5 中间, <0.5 左, >0.5 右
-            const startScrollingInterval = 500; // 开始滚动间隔<毫秒>
-            this._multipleLottry.setResults(resultIndices, isImmediate, resultsFocusT, startScrollingInterval);
+            ];
+            // 设置结果
+            this._multipleLottry.setResults(resultIndices, resultsFocusT, PosMode.AlignStartPoint);
+        } else if (evt.key === 'k') {
+            //  子列表开始滚动间隔<毫秒>，默认：1000
+            const startInterval = 500;
+            this._multipleLottry.startScrolling(startInterval);
         }
     }
 }
