@@ -25,10 +25,11 @@
       "_$type": "Box",
       "name": "lineH",
       "x": 375,
-      "y": 598,
+      "y": 550,
       "width": 1,
       "height": 500,
       "centerX": 0,
+      "centerY": 0,
       "bgColor": "#00ff34"
     },
     {
@@ -41,13 +42,7 @@
       "height": 300,
       "anchorY": 0,
       "visible": true,
-      "repeatY": 8,
-      "_$comp": [
-        {
-          "_$override": "168a8568-ba24-4994-a2d0-56f7d7c5dc95",
-          "enableParentScrollToResult": true
-        }
-      ]
+      "repeatY": 8
     }
   ]
 }

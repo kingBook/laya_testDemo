@@ -56,33 +56,41 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
         [{ id: 0, quality: 1 }, { id: 1, quality: 2 }, { id: 2, quality: 3 }, { id: 3, quality: 4 }]
     ];
 
+    private _fixedSubLenCfg: FixedSubLenCfg = {
+        subTargetLength: 6,
+        subReservedIndices: this._resultIndices,
+        subFillOptions: {
+            qualityKey: "quality"
+        }
+    };
+
     onAwake() {
-        const items = [
-            { id: 1, name: "蓝A", quality: 2 },
-            { id: 2, name: "蓝B", quality: 2 },
-            { id: 3, name: "紫C", quality: 3 },
-            { id: 4, name: "橙D", quality: 4 },
-            { id: 5, name: "白E", quality: 1 },
-            { id: 6, name: "橙F", quality: 4 }  // 另一个橙装
-        ];
+        // const items = [
+        //     { id: 1, name: "蓝A", quality: 2 },
+        //     { id: 2, name: "蓝B", quality: 2 },
+        //     { id: 3, name: "紫C", quality: 3 },
+        //     { id: 4, name: "橙D", quality: 4 },
+        //     { id: 5, name: "白E", quality: 1 },
+        //     { id: 6, name: "橙F", quality: 4 }  // 另一个橙装
+        // ];
 
-        // 强制指定具体对象出现在特定位置
-        const orangeD = items[3];  // 橙D
+        // // 强制指定具体对象出现在特定位置
+        // const orangeD = items[3];  // 橙D
 
-        console.log(Utils.repeatFillWithQuality(items, 'quality', 10, {
-            forcedItems: [
-                { index: 0, item: orangeD },      // 第1位强制放橙D
-                { index: 10, item: items[5] }     // 第11位强制放橙F
-            ],
-            forcedPositions: [
-                { index: 5, quality: 3 },         // 第6位强制紫装（如果位置没被具体对象占用）
-            ],
-            qualityWeights: {
-                4: 0.4,  // 橙装出现概率高
-                1: 0.05  // 白装很少
-            }
-        }));
-
+        // console.log(Utils.repeatFillWithQuality(items, 'quality', 10, {
+        //     forcedItems: [
+        //         { index: 0, item: orangeD },      // 第1位强制放橙D
+        //         { index: 10, item: items[5] }     // 第11位强制放橙F
+        //     ],
+        //     forcedPositions: [
+        //         { index: 5, quality: 3 },         // 第6位强制紫装（如果位置没被具体对象占用）
+        //     ],
+        //     qualityWeights: {
+        //         4: 0.4,  // 橙装出现概率高
+        //         1: 0.05  // 白装很少
+        //     }
+        // }));
+        
 
         // 数据源，二维数组
         this._multipleLottry.array = this._arrayDatas2;
@@ -94,7 +102,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
         this._multipleLottry.subListItemRender = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
             const cellDataSource = cell.dataSource;
             if (!cellDataSource) return;
-
+            
             cell.bgColor = this._qualityColors[cellDataSource.quality];
             const idxLabel = cell.getChild("idxLabel", Laya.Label);
             if (idxLabel) {
@@ -102,16 +110,6 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
             }
         });
 
-        let fixedSubLenCfg: FixedSubLenCfg = null;
-        fixedSubLenCfg = {
-            subTargetLength: 6,
-            subReservedIndices: this._resultIndices,
-            subFillOptions: {
-                qualityKey: "quality"
-            }
-        };
-
-        this._multipleLottry.init(fixedSubLenCfg); // 初始化
         this._multipleLottry.speedSign = -1; // 滚动方向, 1 或 -1
         this._multipleLottry.aniTotalTime = 5000; // 滚动时间<毫秒>
         this._multipleLottry.circles = 5; // 滚动圈数
@@ -136,15 +134,13 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
-
-            // 位置模式
-            const posMode = PosMode.AlignStartPoint;
-
+            // 初始化
+            this._multipleLottry.init(this._fixedSubLenCfg);
             // 设置结果
-            this._multipleLottry.setResults(this._resultIndices, this._resultsFocusT, posMode);
+            this._multipleLottry.setResults(this._resultIndices, this._resultsFocusT, PosMode.AlignStartPoint);
         } else if (evt.key === 'k') {
-            const startScrollingInterval = 500; // 开始滚动间隔<毫秒>
-            this._multipleLottry.startScrolling(startScrollingInterval); // 开始滚动
+            // 开始滚动
+            this._multipleLottry.startScrolling(500);
         }
     }
 }
