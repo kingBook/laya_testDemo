@@ -32,13 +32,13 @@
       "_$id": "x8dexbj3",
       "_$type": "Label",
       "name": "tip",
-      "x": 165,
+      "x": 183,
       "y": 20,
-      "width": 420,
-      "height": 74,
+      "width": 385,
+      "height": 112,
       "top": 20,
       "centerX": 0,
-      "text": "按 J，设置结果并开始滚动\n按 K，立即设置到结果处",
+      "text": "按 J，设置结果\n按 K，立即设置到结果处\n按 L，开始滚动",
       "fontSize": 35,
       "color": "#ffffff",
       "fitContent": "yes",
@@ -319,8 +319,7 @@
           "focusT": 0.5,
           "speedSign": 1,
           "aniTotalTime": 5078,
-          "circles": 298,
-          "extraItemNum": 0
+          "circles": 298
         }
       ]
     }

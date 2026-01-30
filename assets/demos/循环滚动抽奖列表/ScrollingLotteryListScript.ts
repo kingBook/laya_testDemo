@@ -198,6 +198,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     private readonly _tempRect: Laya.Rectangle = new Laya.Rectangle();
     private readonly _tempNums: number[] = [];
     private readonly _itemRegExp: RegExp = /item\d+/;
+    private readonly _scrollBarChangeHandler = new Laya.Handler();
 
 
     /** 是否已初始化 */
@@ -218,6 +219,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
      * 初始化
      * @param fixedLenCfg 固定列表数据源长度配置，默认：null 表示不固定数据源长度
      * @example
+    // 固定数据源长度配置
     const fixedLenCfg: FixedLenCfg = {
         // 固定数据源的长度（注意： 固定后数据源实际长度并非此长度，为了能循环滚动在此长度末尾还会加入一些重复项）
         targetLength: 6, 
@@ -311,9 +313,15 @@ export class ScrollingLotteryListScript extends Laya.Script {
         // 清除延时
         this.clearDelay();
 
-        // 在滚动矩形外则隐藏，优化Drawcall
-        this.optimizeVisible();
-        this.owner.scrollBar.changeHandler = new Laya.Handler(this, this.optimizeVisible);
+        // 两次 callLater, 修复：项目发布后，多列表嵌套时，首次初始化，列表中间项显示不全
+        Laya.timer.callLater(this, () => {
+            Laya.timer.callLater(this, () => {
+                // 在滚动矩形外则隐藏，优化Drawcall
+                this.optimizeVisible();
+                this._scrollBarChangeHandler.setTo(this, this.optimizeVisible, null);
+                this.owner.scrollBar.changeHandler = this._scrollBarChangeHandler;
+            });
+        });
         return this;
     }
 
@@ -347,7 +355,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
         }
 
         // 滚动进度事件
-        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, t);
+        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_PROGRESS, t);
         this.onScrollProgressHandler?.runWith(t);
 
         // 滚动完成
@@ -504,6 +512,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     // }
 
     public onDisable(): void {
+        Laya.timer.clearAll(this);
         // 清除延时
         this.clearDelay();
     }
@@ -597,8 +606,12 @@ export class ScrollingLotteryListScript extends Laya.Script {
      */
     private fixedLenFillPlaneA(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
         if (Array.isArray(fixedLenCfg.reservedIndices)) {
-            if ((<number[]>fixedLenCfg.reservedIndices).length > fixedLenCfg.targetLength) {
-                throw new Error(`固定数据源长度配置中, reservedIndices.length 不能大于 targetLength`);
+            const reservedLen = fixedLenCfg.reservedIndices.length;
+            if (reservedLen > ownerArr.length) {
+                throw new Error(`固定数据源长度配置中, reservedIndices 的长度不能大于数据源长度`);
+            }
+            if (reservedLen > fixedLenCfg.targetLength) {
+                throw new Error(`固定数据源长度配置中, reservedIndices 的长度不能大于 targetLength`);
             }
         }
 
@@ -606,7 +619,14 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
         // 始终保留的元素，随机放置到固定的数据源长度内
         if (Array.isArray(fixedLenCfg.reservedIndices)) {
-            const randomIndices = this.getRandomizeIndexes(0, Math.min(fixedLenCfg.targetLength, ownerArr.length) - 1, this._tempNums); // 随机索引，区间:[0, Math.min(fixedLenCfg.targetLength, ownerArr.length))
+            let min = 0;
+            let len = Math.min(fixedLenCfg.targetLength, ownerArr.length);
+            // 始终保留的元素，如果长度够，不固定在第一个和最后一个（对后续设置最大连续相同品质次数，首尾相连时有影响）
+            if (len - 2 >= fixedLenCfg.reservedIndices.length) {
+                min += 1;
+                len -= 1;
+            }
+            const randomIndices = this.getRandomizeIndexes(min, len - 1, this._tempNums); // 随机索引，区间:[min, len)
             fixedLenCfg.reservedIndices.forEach((element, index) => {
                 if (element >= 0 && element < ownerArr.length) {
                     const randomIdx = randomIndices[index];
@@ -621,7 +641,14 @@ export class ScrollingLotteryListScript extends Laya.Script {
             });
         } else {
             if (fixedLenCfg.reservedIndices >= 0 && fixedLenCfg.reservedIndices < ownerArr.length) {
-                const randomIdx = this.rangeInt(0, Math.min(fixedLenCfg.targetLength, ownerArr.length)); // 区间:[0, Math.min(fixedLenCfg.targetLength, ownerArr.length))
+                let min = 0;
+                let len = Math.min(fixedLenCfg.targetLength, ownerArr.length);
+                // 始终保留的元素，如果长度够，不固定在第一个和最后一个（对后续设置最大连续相同品质次数，首尾相连时有影响）
+                if (len - 2 >= 1) {
+                    min += 1;
+                    len -= 1;
+                }
+                const randomIdx = this.rangeInt(min, len); // 随机索引，区间:[min, len)
                 const temp = ownerArr[randomIdx];
                 ownerArr[randomIdx] = ownerArr[fixedLenCfg.reservedIndices];
                 forcedItems.push({ index: randomIdx, item: ownerArr[fixedLenCfg.reservedIndices] });
@@ -651,8 +678,12 @@ export class ScrollingLotteryListScript extends Laya.Script {
      */
     private fixedLenFillPlaneB(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
         if (Array.isArray(fixedLenCfg.reservedIndices)) {
-            if ((<number[]>fixedLenCfg.reservedIndices).length > fixedLenCfg.targetLength) {
-                throw new Error(`固定数据源长度配置中, reservedIndices.length 不能大于 targetLength`);
+            const reservedLen = fixedLenCfg.reservedIndices.length;
+            if (reservedLen > ownerArr.length) {
+                throw new Error(`固定数据源长度配置中, reservedIndices 的长度不能大于数据源长度`);
+            }
+            if (reservedLen > fixedLenCfg.targetLength) {
+                throw new Error(`固定数据源长度配置中, reservedIndices 的长度不能大于 targetLength`);
             }
         }
 

@@ -18,21 +18,53 @@ export class TestScrollingLotteryListScript extends Laya.Script {
     @property({ type: Laya.List })
     numberList: Laya.List;
 
+    /** 品质颜色 */
+    private _qualityColors = {
+        1: "#9a9a04",
+        2: "#b00202",
+        3: "#9b079b",
+        4: "#040494"
+    };
+
     public enableVList = false;
     public enableLetterList = false;
 
     onAwake(): void {
-        // // 水平滚动
+        // 水平滚动
         const hListData = [];
-        for (let i = 0; i < 5; i++)hListData.push({ Label: `${i}` });
+        for (let i = 0; i < 5; i++)hListData.push({ Label: `${i}`, quality: Laya.MathUtil.repeat(i, 4) + 1 });
         this.hList.array = hListData;
-        this.hList.renderHandler = new Laya.Handler(this, (cell: Laya.UIComponent, index: number) => {
+        this.hList.renderHandler = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
             console.log("渲染", index);
+
+            cell.bgColor = this._qualityColors[cell.dataSource.quality];
 
             const labelIndex = cell.getChild("labelIndex", Laya.Label);
             labelIndex.text = `${index}`;
         });
-        const hListComp = this.hList.addComponent(ScrollingLotteryListScript).init();
+
+        // 固定数据源长度配置
+        const fixedLenCfg: FixedLenCfg = {
+            // 固定数据源的长度（注意： 固定后数据源实际长度并非此长度，为了能循环滚动在此长度末尾还会加入一些重复项）
+            targetLength: 6,
+            // 列表数据源始终保留的索引（避免在对齐数据源删除元素时被删除， 索引值不能超出列表原数据源长度）。例: 开奖结果索引是需要保留的
+            reservedIndices: 4,
+            // 数据源填充选项（可选）
+            fillOptions: {
+                // 品质 key
+                qualityKey: "quality",
+                // 最大连续相同品质次数（可选），默认 2
+                maxConsecutive: 2,
+                // 品质权重（可选）
+                qualityWeights: {
+                    1: 1,
+                    2: 1,
+                    3: 1,
+                    4: 1
+                }
+            }
+        };
+        const hListComp = this.hList.addComponent(ScrollingLotteryListScript).init(fixedLenCfg);
         //hListComp.isShowLogMsg = true;
 
         // 垂直滚动
