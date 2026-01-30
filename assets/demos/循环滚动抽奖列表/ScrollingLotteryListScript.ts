@@ -92,6 +92,12 @@ lotteryScript.onScrollingHandler = new Laya.Handler(this, (curFocusIdx: number) 
     console.log(`滚动中. 当前聚焦的索引: ${curFocusIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
 });
 
+//lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_PROGRESS, (progress: number) => {
+lotteryScript.onScrollProgressHandler = new Laya.Handler(this, (progress: number) => {
+    // progress 区间: [0, 1]
+    console.log(`滚动进度: ${progress}`);
+});
+
 //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, (curFocusIdx: number) => {
 lotteryScript.onScrollCompleteHandler = new Laya.Handler(this, (curFocusIdx: number) => {
     const curFocusOriginalIdx = lotteryScript.getOriginalIndex(curFocusIdx);
@@ -114,8 +120,10 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
     /** 滚动开始事件，事件由 {@link owner} 派发，回调函数格式：`(): void` */
     public static readonly EVENT_SCROLL_START: string = "eventScrollStart";
-    /** 滚动中事件，事件由 {@link owner} 派发，回调函数格式：`(curFocusIdx: number): void` */
+    /** 滚动中事件，聚焦索引发生改变时触发，事件由 {@link owner} 派发，回调函数格式：`(curFocusIdx: number): void` */
     public static readonly EVENT_SCROLLING: string = "eventScrolling";
+    /** 滚动进度事件，滚动后每帧触发，事件由 {@link owner} 派发，回调函数格式：`(progress: number): void */
+    public static readonly EVENT_SCROLL_PROGRESS: string = "eventScrollProgress";
     /** 滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(curFocusIdx: number): void` */
     public static readonly EVENT_SCROLL_COMPLETE: string = "eventScrollComplete";
 
@@ -138,8 +146,10 @@ export class ScrollingLotteryListScript extends Laya.Script {
     public bezierEaseData: BezierEaseData = { precision: 16, data: [.25, .1, .25, 1] };
     /** 滚动开始处理器，格式： `(): void` */
     public onScrollStartHandler: Laya.Handler;
-    /** 滚动中处理器，格式： `(curFocusIdx: number): void` */
+    /** 滚动中处理器，聚焦索引发生改变时触发，格式： `(curFocusIdx: number): void` */
     public onScrollingHandler: Laya.Handler;
+    /** 滚动进度处理器，滚动后每帧触发，格式：`(progress: number): void` */
+    public onScrollProgressHandler: Laya.Handler;
     /** 滚动到结果项完成处理器，格式： `(curFocusIdx: number): void` */
     public onScrollCompleteHandler: Laya.Handler;
     /** 是否显示 log */
@@ -336,6 +346,10 @@ export class ScrollingLotteryListScript extends Laya.Script {
             this._currentFocusIndex = curFocusIdx;
         }
 
+        // 滚动进度事件
+        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, t);
+        this.onScrollProgressHandler?.runWith(t);
+
         // 滚动完成
         if (t >= 1) {
             this.stopScrolling();
@@ -427,8 +441,14 @@ export class ScrollingLotteryListScript extends Laya.Script {
         this._distance = 0;
         this._startScrollValue = this._scrollBar.value;
         this._flags |= Flag.Scrolling;
-        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_START); // 滚动开始事件
+
+        // 滚动开始事件
+        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_START);
         this.onScrollStartHandler?.run();
+
+        // 滚动进度事件
+        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, this._normalizedT);
+        this.onScrollProgressHandler?.runWith(this._normalizedT);
 
         // 同步设置当前焦点下的索引
         this._currentFocusIndex = this.getIndexByScrollBarValue(this._scrollBar.value, true);

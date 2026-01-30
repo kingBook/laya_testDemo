@@ -71,7 +71,8 @@
                   "qo7n3zpv",
                   "1523uk2c"
                 ]
-              }
+              },
+              "scrollToSubResultTriggerT": 0.85
             }
           ],
           "_$child": [

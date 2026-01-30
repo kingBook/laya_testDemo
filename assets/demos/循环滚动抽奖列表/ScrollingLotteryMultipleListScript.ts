@@ -115,18 +115,24 @@ multipleLottry.subLotteries.forEach((element, index) => {
 
 //multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_START, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
 multipleLottry.onScrollStartHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
-    console.log(`滚动开始, 子列表索引:${subListIdx}`);
+    console.log(`子列表滚动开始, 子列表索引:${subListIdx}`);
 });
 
 //multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLLING, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
 multipleLottry.onScrollingHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number, curFocusIdx: number) => {
     const curFocusOriginalIdx = subLottery.getOriginalIndex(curFocusIdx);
-    console.log(`滚动中, 子列表索引:${subListIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
+    console.log(`子列表滚动中, 子列表索引:${subListIdx}, 当前聚焦的原始索引：${curFocusOriginalIdx}`);
+});
+
+//multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_PROGRESS, (subLottery: ScrollingLotteryListScript, subListIdx: number, progress: number) => {
+multipleLottry.onScrollProgressHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number, progress: number) => {
+    // progress 区间: [0, 1]
+    console.log(`子列表索引: ${subListIdx}`, `子列表滚动进度: ${progress}`);
 });
 
 //multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, (subLottery: ScrollingLotteryListScript, subListIdx: number, subCell: UIComponent) => {
 multipleLottry.onScrollCompleteHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number, subCell: UIComponent) => {
-    console.log(`滚动完成, 子列表索引:${subListIdx}`);
+    console.log(`子列表滚动完成, 子列表索引:${subListIdx}`);
 });
 
 
@@ -144,11 +150,13 @@ multipleLottry.startScrolling(startInterval);
 @regClass()
 export class ScrollingLotteryMultipleListScript extends Laya.Script {
 
-    /** 滚动开始事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number): void` */
+    /** 子列表滚动开始事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number): void` */
     public static readonly EVENT_SCROLL_START: string = "eventScrollStart";
-    /** 滚动中事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, curFocusIdx: number): void` */
+    /** 子列表滚动中事件，聚焦索引发生改变时触发，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, curFocusIdx: number): void` */
     public static readonly EVENT_SCROLLING: string = "eventScrolling";
-    /** 滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, subCell: UIComponent): void` */
+    /** 子列表滚动进度事件，滚动后每帧触发，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, progress: number): void */
+    public static readonly EVENT_SCROLL_PROGRESS: string = "eventScrollProgress";
+    /** 子列表滚动到结果项完成事件，事件由 {@link owner} 派发，回调函数格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, subCell: UIComponent): void` */
     public static readonly EVENT_SCROLL_COMPLETE: string = "eventScrollComplete";
 
     declare owner: Laya.List;
@@ -168,6 +176,9 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /** 是否启用父列表滚动到已出结果子列表（缓动）*/
     @property({ type: Boolean, catalog: "ScrollToSubResult", tips: "是否启用父列表滚动到已出结果子列表（缓动）" })
     public enableScrollToSubResult: boolean = true;
+    /** 子列表滚动进度到达什么值, 父列表滚动到这个子列表, 默认: 0.85, 值区间: [0, 1] */
+    @property({ type: Number, range: [0, 1], catalog: "ScrollToSubResult", readonly: "data.enableScrollToSubResult!=true", tips: "子列表滚动进度到达什么值, 父列表滚动到这个子列表, 默认: 0.85, 值区间: [0, 1]" })
+    public scrollToSubResultTriggerT: number = 0.85;
     /** 父列表滚动到已出结果子列表缓动的时间 */
     @property({ type: Number, min: 1, step: 1, catalog: "ScrollToSubResult", readonly: "data.enableScrollToSubResult!=true", tips: "父列表滚动到已出结果子列表缓动的时间" })
     public scrollToSubResultDuration: number = 500;
@@ -188,11 +199,13 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /** 子列表渲染处理器，格式：`(cell: Laya.UIComponent, index: number): void` */
     public subListItemRender: Laya.Handler;
 
-    /** 滚动开始处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number): void` */
+    /** 子列表滚动开始处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number): void` */
     public onScrollStartHandler: Laya.Handler;
-    /** 滚动中处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, curFocusIdx: number): void` */
+    /** 子列表滚动中处理器，聚焦索引发生改变时触发，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, curFocusIdx: number): void` */
     public onScrollingHandler: Laya.Handler;
-    /** 滚动到结果项完成处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, subCell: UIComponent): void` */
+    /** 子列表滚动进度处理器，滚动后每帧触发，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, progress: number): void` */
+    public onScrollProgressHandler: Laya.Handler;
+    /** 子列表滚动到结果项完成处理器，格式：`(subLottery:ScrollingLotteryListScript, subListIdx:number, subCell: UIComponent): void` */
     public onScrollCompleteHandler: Laya.Handler;
 
 
@@ -202,6 +215,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     private _flags: Flag;
     /** 开奖结果最大索引数组 */
     private _resultMaxIndices: number[];
+    /** 当前父列表滚动到已出结果子列表的缓动的当前子列表索引 */
+    private _scrollToResultSubIdx: number;
     /** 父列表滚动到已出结果子列表的缓动 */
     private _scrollToSubResultTweener: Laya.Tween;
     /** 子列表最小的数据源长度 */
@@ -209,7 +224,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /** 子列表固定数据源长度配置 */
     private _fixedSubLenCfg: FixedSubLenCfg;
 
-    private _tempRect: Laya.Rectangle = new Laya.Rectangle();
+    private readonly _tempRect: Laya.Rectangle = new Laya.Rectangle();
     private readonly _itemRegExp: RegExp = /item\d+/;
 
 
@@ -251,6 +266,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         // console.log(`ScrollingLotteryMultipleListScript 初始化`, "this.array:", this.array, "fixedSubLenCfg:", fixedSubLenCfg);
 
         this._fixedSubLenCfg = fixedSubLenCfg;
+        this._scrollToResultSubIdx = -1;
 
         // 父列表滚动到已出结果子列表的缓动
         this.killScrollToSubResultTweener();
@@ -334,6 +350,19 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 this.onScrollingHandler?.runWith([subLottery, subListIdx, curFocusIdx]);
             });
 
+            // 子列表滚动进度
+            subLottery.onScrollProgressHandler = new Laya.Handler(this, (progress: number) => {
+                this.owner.event(ScrollingLotteryMultipleListScript.EVENT_SCROLL_PROGRESS, [subLottery, subListIdx, progress]);
+                this.onScrollProgressHandler?.runWith([subLottery, subListIdx, progress]);
+                // 父列表滚动到的子列表索引
+                if (this.enableScrollToSubResult && progress > this.scrollToSubResultTriggerT) {
+                    if (subListIdx > this._scrollToResultSubIdx) {
+                        this._scrollToResultSubIdx = subListIdx;
+                        this.ScrollToSubResult(subListIdx);
+                    }
+                }
+            });
+
             // 子列表滚动完成
             subLottery.onScrollCompleteHandler = new Laya.Handler(this, (curFocusIdx: number) => {
                 if (subListIdx >= this.owner.array.length - 1) { // 最后一个子列表滚动完成
@@ -343,12 +372,6 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 const subCell = subList.getCell(curFocusIdx);
                 this.owner.event(ScrollingLotteryMultipleListScript.EVENT_SCROLL_COMPLETE, [subLottery, subListIdx, subCell]); // 滚动完成
                 this.onScrollCompleteHandler?.runWith([subLottery, subListIdx, subCell]);
-
-
-                // 父列表滚动到已出结果子列表的缓动
-                if (this.enableScrollToSubResult) {
-                    this.ScrollToSubResult(subListIdx);
-                }
             });
 
             this._subLotteries[subListIdx] = subLottery; // 保存到子列表抽奖组件数组
@@ -457,6 +480,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     public async startScrolling(startInterval: number = 1000): Promise<void> {
         if (!(this._flags & Flag.Inited)) throw new Error(`还未初始化, 不能开始滚动`);
         if (this._flags & Flag.Scrolling) throw new Error(`正在滚动中，不能再开始滚动`);
+
+        this._scrollToResultSubIdx = -1;
 
         // 父列表滚动到已出结果子列表的缓动
         this.killScrollToSubResultTweener();
@@ -618,9 +643,11 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
         }
     }
 
+    /** 销毁父列表滚动到已出结果子列表的缓动 */
     private killScrollToSubResultTweener(): void {
         this._scrollToSubResultTweener?.kill();
         this._scrollToSubResultTweener = null;
+        this._scrollToResultSubIdx = -1;
         this._flags &= ~Flag.ScrollingToSubResult;
     }
 
