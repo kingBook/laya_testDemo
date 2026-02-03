@@ -21,18 +21,6 @@
   ],
   "_$child": [
     {
-      "_$id": "22haxuvw",
-      "_$type": "Box",
-      "name": "lineH",
-      "x": 375,
-      "y": 550,
-      "width": 1,
-      "height": 500,
-      "centerX": 0,
-      "centerY": 0,
-      "bgColor": "#00ff34"
-    },
-    {
       "_$id": "qo7n3zpv",
       "_$prefab": "9cdb7a64-1b89-4d95-a7e4-2afe0e43f40a",
       "name": "ScrollingLotteryMultipleList",
@@ -43,6 +31,18 @@
       "anchorY": 0,
       "visible": true,
       "repeatY": 8
+    },
+    {
+      "_$id": "22haxuvw",
+      "_$type": "Box",
+      "name": "lineH",
+      "x": 375,
+      "y": 550,
+      "width": 1,
+      "height": 500,
+      "centerX": 0,
+      "centerY": 0,
+      "bgColor": "#00ff34"
     }
   ]
 }

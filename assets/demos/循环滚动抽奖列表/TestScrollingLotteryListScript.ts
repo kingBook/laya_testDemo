@@ -35,9 +35,9 @@ export class TestScrollingLotteryListScript extends Laya.Script {
         for (let i = 0; i < 5; i++)hListData.push({ Label: `${i}`, quality: Laya.MathUtil.repeat(i, 4) + 1 });
         this.hList.array = hListData;
         this.hList.renderHandler = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
-            console.log("渲染", index);
+           // console.log("渲染", index);
 
-            cell.bgColor = this._qualityColors[cell.dataSource.quality];
+           // cell.bgColor = this._qualityColors[cell.dataSource.quality];
 
             const labelIndex = cell.getChild("labelIndex", Laya.Label);
             labelIndex.text = `${index}`;
