@@ -65,32 +65,49 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
     };
 
     onAwake() {
-        // const items = [
-        //     { id: 1, name: "蓝A", quality: 2 },
-        //     { id: 2, name: "蓝B", quality: 2 },
-        //     { id: 3, name: "紫C", quality: 3 },
-        //     { id: 4, name: "橙D", quality: 4 },
-        //     { id: 5, name: "白E", quality: 1 },
-        //     { id: 6, name: "橙F", quality: 4 }  // 另一个橙装
-        // ];
+        /*const items = [
+            { id: 1, name: "蓝A", quality: 2 },
+            { id: 2, name: "蓝B", quality: 2 },
+            { id: 3, name: "紫C", quality: 3 },
+            { id: 4, name: "橙D", quality: 4 },
+            { id: 5, name: "白E", quality: 1 },
 
-        // // 强制指定具体对象出现在特定位置
-        // const orangeD = items[3];  // 橙D
+            { id: 6, name: "橙F", quality: 4 },  // 另一个橙装
+            { id: 1, name: "蓝A", quality: 2 },
+            { id: 2, name: "蓝B", quality: 2 },
+            { id: 3, name: "紫C", quality: 3 },
+            { id: 4, name: "橙D", quality: 4 },
 
-        // console.log(Utils.repeatFillWithQuality(items, 'quality', 10, {
-        //     forcedItems: [
-        //         { index: 0, item: orangeD },      // 第1位强制放橙D
-        //         { index: 10, item: items[5] }     // 第11位强制放橙F
-        //     ],
-        //     forcedPositions: [
-        //         { index: 5, quality: 3 },         // 第6位强制紫装（如果位置没被具体对象占用）
-        //     ],
-        //     qualityWeights: {
-        //         4: 0.4,  // 橙装出现概率高
-        //         1: 0.05  // 白装很少
-        //     }
-        // }));
+            { id: 1, name: "蓝A", quality: 2 },
+            { id: 2, name: "蓝B", quality: 2 },
+            { id: 3, name: "紫C", quality: 3 },
+            { id: 4, name: "橙D", quality: 4 },
+            { id: 1, name: "蓝A", quality: 2 },
+
+            { id: 2, name: "蓝B", quality: 2 },
+            { id: 3, name: "紫C", quality: 3 },
+            { id: 4, name: "橙D", quality: 4 }
+        ];
+
+        // 强制指定具体对象出现在特定位置
+        const orangeD = items[4];  
         
+        console.log(Utils.repeatFillWithQuality(items, 'quality', 10, {
+            forcedItems: [
+                { index: 4, item: orangeD },      
+                { index: 9, item: items[5] }
+            ],
+            forcedPositions: [
+                { index: 5, quality: 3 }         // 第6位强制紫装（如果位置没被具体对象占用）
+            ],
+            qualityWeights: {
+                1:0.7,
+                2:0.1,
+                3:0.1,
+                4:0.1
+            }
+        }));*/
+
 
         // 数据源，二维数组
         this._multipleLottry.array = this._arrayDatas2;
@@ -102,7 +119,7 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
         this._multipleLottry.subListItemRender = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
             const cellDataSource = cell.dataSource;
             if (!cellDataSource) return;
-            
+
             cell.bgColor = this._qualityColors[cellDataSource.quality];
             const idxLabel = cell.getChild("idxLabel", Laya.Label);
             if (idxLabel) {
@@ -142,5 +159,39 @@ export class TestScrollingLotteryMultipleListScript extends Laya.Script {
             // 开始滚动
             this._multipleLottry.startScrolling(500);
         }
+    }
+
+    static repeatFillWithQuality2<T extends Record<string, any>>(
+        items: T[],
+        qualityKey: string,
+        targetLength: number,
+        options: {
+            maxConsecutive?: number;              // 最大连续相同品质次数，默认 2
+            qualityWeights?: Record<string | number, number>;  // 品质权重
+            forcedPositions?: Array<{ index: number; quality: string | number; }>;  // 强制品质在某位置
+            forcedItems?: Array<{ index: number; item: T }>;     // ← 新增：强制指定某个具体对象在某位置
+        } = {},
+        output?: T[]
+    ): T[] {
+        const {
+            maxConsecutive = 2,
+            qualityWeights: customWeights = {},
+            forcedPositions = [],
+            forcedItems = [],
+        } = options;
+        output ||= [];
+        output.length = 0;
+
+        const finalWeights: Record<string | number, number> = {};
+        const qualitySet = new Set<string | number>();
+        let totalWeight = 0;
+        for (const q of qualitySet) {
+            // const custom = customWeights[q];
+            // finalWeights[q] = (custom !== undefined && custom > 0) ? custom : baseWeights[q] || 0;
+            // totalWeight += finalWeights[q];
+        }
+
+        return output;
+
     }
 }
