@@ -1,4 +1,4 @@
-@IEditor.inspectorField("AnimationCurve")
+@IEditor.inspectorField("AnimationCurve2")
 export default class AnimationCurveInspector extends IEditor.PropertyField {
 
     private readonly _easeComboBoxDatas = [
@@ -15,10 +15,24 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     private _easeComboBox: gui.ComboBox;
     private _oldEaseInputText: string;
 
+    // @IEditor.onLoad
+    // static async onLoad(){
+    //     await gui.UIPackage.resourceMgr.load("~/ui/basic/CurveEdit/CurveInput.widget");
+    // }
+
     public override create(): IEditor.IPropertyFieldCreateResult {
         console.log("create();");
+        const curveInput = new gui.Shape();
+        curveInput.drawRect(1,gui.Color.RED,gui.Color.WHITE,5,5,5,5);
+        /*
+        const sRect = new gui.SRect();
+        sRect.fillColor=gui.Color.WHITE;
+        curveInput.graphics=sRect;
+        sRect.refresh();*/
+        console.log("curveInput",curveInput.graphics);
+        
 
-        // 创建曲线图（CurveInput）
+       /* // 创建曲线图（CurveInput）
         const curveInput: IEditor.CurveInput = IEditor.GUIUtils.createCurveInput();
         curveInput.setDefaultPoints();
         curveInput.isCurve = true;
@@ -147,7 +161,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         }, this);
         easeBox.addChild(toPageTxt);
 
-        console.log("curveInput.applyChange:", curveInput.applyChange);
+        console.log("curveInput.applyChange:", curveInput.applyChange);*/
 
         return { ui: curveInput };
     }
@@ -155,7 +169,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     public override refresh(): void {
         console.log("refresh();");
 
-        // 当字段为空时，创建一个默认实例
+        /*// 当字段为空时，创建一个默认实例
         if (!this.target.getValue()) {
             this.createDefaultInstance();
         }
@@ -209,7 +223,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             this._easeInputTxt.alpha = 0.7;
         }
 
-        this._easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();
+        this._easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();*/
     }
 
     /** 创建默认实例 */

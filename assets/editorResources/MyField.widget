@@ -39,6 +39,16 @@
           ]
         }
       ]
+    },
+    {
+      "_$id": "xmlzqnfm",
+      "_$prefab": "81c42400-7369-5481-49c1-62cd6097c250",
+      "name": "InspectorPanel",
+      "active": true,
+      "x": -45,
+      "y": 33,
+      "visible": true,
+      "touchable": true
     }
   ]
 }
