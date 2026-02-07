@@ -21,6 +21,22 @@
   ],
   "_$child": [
     {
+      "_$id": "0p0mc95q",
+      "_$type": "Label",
+      "name": "tip",
+      "x": 183,
+      "y": 20,
+      "width": 385,
+      "height": 112,
+      "top": 20,
+      "centerX": 0,
+      "text": "按 H，初始化多列表抽奖\n按 J，设置结果\n按 K，开始滚动",
+      "fontSize": 35,
+      "color": "#ffffff",
+      "fitContent": "yes",
+      "valign": "middle"
+    },
+    {
       "_$id": "pcoqu27z",
       "_$type": "Panel",
       "name": "Panel",

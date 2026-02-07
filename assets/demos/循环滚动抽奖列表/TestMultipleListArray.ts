@@ -11,18 +11,37 @@ export class TestMultipleListArray extends Laya.Script {
 
     onAwake() {
 
-        // 数据源，二维数组
-        this._multipleLottry.array = [
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+    }
 
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
-            [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
-        ];
+    private init(): void {
+        // 数据源，二维数组
+        const ranIdx = Math.random() <= 0.5 ? 0 : 1;
+        console.log("ranIdx:",ranIdx);
+        
+        this._multipleLottry.array = [
+            [
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }]
+            ],
+            [
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }],
+                [{ id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]
+            ]
+        ][ranIdx];
         // 父列表项渲染处理器
         this._multipleLottry.subListItemRender = new Laya.Handler(this, (cell: Laya.Box, index: number) => {
 
@@ -58,11 +77,13 @@ export class TestMultipleListArray extends Laya.Script {
         this._multipleLottry.onScrollCompleteHandler = new Laya.Handler(this, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
             console.log(`滚动完成, 子列表索引:${subListIdx}`);
         });
-
     }
 
     onKeyDown(evt: Laya.Event): void {
-        if (evt.key === 'j') {
+        if (evt.key === 'h') {
+            this.init();
+        }
+        else if (evt.key === 'j') {
             // 结果索引数组
             const resultIndices = [
                 0, 1, 2, 3,
