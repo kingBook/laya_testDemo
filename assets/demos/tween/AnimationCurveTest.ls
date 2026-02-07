@@ -38,6 +38,14 @@
           }
         ]
       },
+      "keys": [
+        {
+          "_$type": "FloatKeyframe",
+          "inWeight": 0.33333,
+          "outWeight": 0.33333,
+          "weightedMode": 0
+        }
+      ],
       "text": null
     }
   ],

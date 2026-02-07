@@ -9,6 +9,9 @@ export class AnimationCurveTest extends Laya.Script {
 
     @property({ type: AnimationCurve, inspector: "AnimationCurve2" })
     animationCurve: AnimationCurve;
+     
+    @property({ type: [Laya.FloatKeyframe], inspector:"curve"})
+    public keys: Laya.FloatKeyframe[]; 
 
     @property({ type: Laya.TextArea })
     text: Laya.TextArea;

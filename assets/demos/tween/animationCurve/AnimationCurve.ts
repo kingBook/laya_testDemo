@@ -6,6 +6,12 @@ const { regClass, property } = Laya;
 @regClass()
 export default class AnimationCurve {
 
+    // @property({ type: Number })
+    // public precision: number = 8;
+
+    // @property({ type: [Number] })
+    // public data: number[];
+
     /** 动画曲线上的顶点数组 */
     @property({ type: [Laya.FloatKeyframe] })
     public keys: Laya.FloatKeyframe[];
