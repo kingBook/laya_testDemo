@@ -29,17 +29,26 @@ export class TestSpine extends Laya.Script {
         Laya.SpineBakeScript;
 
 
-        Laya.loader.load("resources/rocketPlayer/player.skel", Laya.Loader.SPINE).then((res: Laya.Templet) => {
-            console.log("res", res);
-            //const skeleton = res.buildArmature(0);
-            //console.log(skeleton);
+        // Laya.loader.load("resources/rocketPlayer/player.skel", Laya.Loader.SPINE).then((res: Laya.Templet) => {
+        //     console.log("res", res);
+        //     //const skeleton = res.buildArmature(0);
+        //     //console.log(skeleton);
 
-        });
-
+        // });
+        
+        
+        
 
     }
 
+    canvasBitmap = Laya.Stat.canvasBitmap;
     onUpdate(): void {
         // console.log(this.spineNodes[0]._materials);
+        console.log(Laya.Stat.canvasBitmap-this.canvasBitmap);
+        this.canvasBitmap = Laya.Stat.canvasBitmap;
+
+        
     }
+
+
 }
