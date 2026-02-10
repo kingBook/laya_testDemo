@@ -36,7 +36,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         curveInput.on("click", () => {
             const curveEditDialog: any = this.getCurveEditDialog();
-            //console.log("curveEditDialog:", curveEditDialog);
+            console.log("curveEditDialog:", curveEditDialog);
             const contentPane: any = curveEditDialog._contentPane;
             console.log("contentPane:", curveEditDialog._contentPane);
             const changeList: any[] = contentPane._changeList;
@@ -44,21 +44,13 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             //console.log("children:", children);
             const coords = children.find(value => value._name === "coords");
             //console.log("coords:", coords);
-            const canvas: gui.Panel = coords._canvas;
+            //const canvas: gui.Panel = coords._canvas;
             //console.log("canvas:", canvas);
-            const bg = canvas.getChild("bg", gui.Shape);
+            //const bg = canvas.getChild("bg", gui.Shape);
             //console.log("bg:", bg);
 
-            contentPane.minNum.touchable = false;
-            contentPane.maxNum.touchable = false;
-    
-            contentPane.minNum.alpha=0;
-            contentPane.maxNum.alpha=0;
             
-            const children2  = contentPane.container.children;
-            children2[2].touchable=false;
-            console.log(children2[2]);
-
+            console.log("children:", children);
 
             
            

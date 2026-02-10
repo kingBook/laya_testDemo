@@ -7,11 +7,14 @@ export class AnimationCurveTest extends Laya.Script {
 
     declare owner: Laya.Sprite;
 
+    // @property({ type: AnimationCurve, inspector: "AnimationCurve" })
+    // animationCurve1: AnimationCurve;
+
     @property({ type: AnimationCurve, inspector: "AnimationCurve2" })
     animationCurve: AnimationCurve;
-     
-    @property({ type: [Laya.FloatKeyframe], inspector:"curve"})
-    public keys: Laya.FloatKeyframe[]; 
+
+    @property({ type: [Laya.FloatKeyframe], inspector: "curve" })
+    public keys: Laya.FloatKeyframe[];
 
     @property({ type: Laya.TextArea })
     text: Laya.TextArea;

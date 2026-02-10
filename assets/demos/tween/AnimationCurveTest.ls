@@ -13,31 +13,7 @@
     {
       "_$type": "30fb7f5b-3878-4677-b7b1-8a2630e8e02d",
       "scriptPath": "demos/tween/AnimationCurveTest.ts",
-      "animationCurve": {
-        "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
-        "keys": [
-          {
-            "_$type": "FloatKeyframe",
-            "inTangent": 0,
-            "outTangent": 1,
-            "value": 0,
-            "inWeight": 0.33333,
-            "outWeight": 5e-324,
-            "weightedMode": 0,
-            "time": 0
-          },
-          {
-            "_$type": "FloatKeyframe",
-            "inTangent": 1,
-            "outTangent": 0,
-            "value": 1,
-            "inWeight": 5e-324,
-            "outWeight": 0.33333,
-            "weightedMode": 0,
-            "time": 1
-          }
-        ]
-      },
+      "animationCurve": null,
       "keys": [
         {
           "_$type": "FloatKeyframe",

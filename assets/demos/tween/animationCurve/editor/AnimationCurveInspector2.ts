@@ -1,7 +1,7 @@
 import { CurveEditDialog } from "./CurveEditDialog";
 
 @IEditor.inspectorField("AnimationCurve2")
-export default class AnimationCurveInspector extends IEditor.PropertyField {
+export default class AnimationCurveInspector2 extends IEditor.PropertyField {
 
     private readonly _easeComboBoxDatas = [
         { name: "ease", index: 0, values: [.25, .1, .25, 1] },
@@ -93,137 +93,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         });
 
 
-        /* // 创建曲线图（CurveInput）
-         const curveInput: IEditor.CurveInput = IEditor.GUIUtils.createCurveInput();
-         curveInput.setDefaultPoints();
-         curveInput.isCurve = true;
-         curveInput.isNormalization = true;
-         curveInput.maxKeyFrame = 10;
-         curveInput.minValue = 0;
-         curveInput.maxValue = 1;
-         curveInput.isAutoFillKeyFrame = false; // 关闭这个属性，否则在曲线图双击添加点时，会自动添加点(PathPoint)，使点数量与maxKeyFrame一致
-         curveInput.isWeight = true; // 控制点可任意拖动
-         curveInput.curveMax = 1;
-         curveInput.curveMin = 0;
- 
-         // 侦听曲线对话框提交数据
-         curveInput.on("submit", this.onCurveEditDialogSubmit, this);
- 
-         curveInput.on("click", () => {
-             const curveEditDialog: any = this.getCurveEditDialog();
-             //console.log("curveEditDialog:", curveEditDialog);
-             const contentPane: any = curveEditDialog._contentPane;
-             console.log("contentPane:", curveEditDialog._contentPane);
-             const changeList: any[] = contentPane._changeList;
-             const children: any[] = contentPane._children;
-             //console.log("children:", children);
-             const coords = children.find(value => value._name === "coords");
-             //console.log("coords:", coords);
-             const canvas: gui.Panel = coords._canvas;
-             //console.log("canvas:", canvas);
-             const bg = canvas.getChild("bg", gui.Shape);
-             //console.log("bg:", bg);
- 
-             contentPane.minNum.touchable = false;
-             contentPane.maxNum.touchable = false;
-     
-             contentPane.minNum.alpha=0;
-             contentPane.maxNum.alpha=0;
-             
-             const children2  = contentPane.container.children;
-             children2[2].touchable=false;
-             console.log(children2[2]);
- 
- 
-             
-            
- 
-         }, this);
- 
-         this._curveInput = curveInput;
- 
-         //
-         // =================== 创建 cubic-bezier.com 数据设置栏 ===================
-         //
-         // curveInput 子对象
-         const n5 = curveInput.getChild("n5");
-         const n1 = curveInput.getChild("n1");
-         const canvas = curveInput.getChild("canvas");
- 
-         // 调整 curveInput 子对象的对齐策略，取消高度拉伸
-         n5.removeRelation(curveInput, gui.RelationType.Height);
-         n1.removeRelation(curveInput, gui.RelationType.Height);
-         canvas.removeRelation(curveInput, gui.RelationType.Height);
- 
-         // 间隔
-         const space = 5;
-         // 高
-         const easeBoxH = 19;
- 
-         // 加高最顶层容器
-         curveInput.height += easeBoxH + space * 2;
- 
-         // 创建一个水平布局的子容器
-         const easeBox = new gui.Box();
-         easeBox.x = canvas.x;
-         easeBox.y = n5.height + space;
-         easeBox.width = canvas.width;
-         easeBox.height = easeBoxH;
-         easeBox.layout.type = gui.LayoutType.SingleRow;
-         easeBox.layout.columnGap = space;
-         easeBox.layout.stretchX = gui.StretchMode.Stretch;
-         easeBox.layout.stretchY = gui.StretchMode.Stretch;
-         const stretchParams0 = new gui.StretchParam();
-         const stretchParams1 = new gui.StretchParam();
-         const stretchParams2 = new gui.StretchParam();
-         stretchParams0.setRatio(0.4);
-         stretchParams1.setRatio(0.4);
-         stretchParams2.setRatio(0.2);
-         stretchParams1.max = 90;
-         stretchParams2.max = 50;
-         easeBox.layout.stretchParamsX.push(stretchParams0, stretchParams1, stretchParams2);
-         easeBox.addRelation(curveInput, gui.RelationType.Width);
-         curveInput.addChild(easeBox);
- 
-         // 输入文本框
-         const easeInputTxt = IEditor.GUIUtils.createTextInput();
-         easeInputTxt.text = this._easeComboBoxDatas[0].values.toString(); // 初始 "ease"
-         easeInputTxt.on("submit", this.onEaseInputSubmit, this);
-         easeBox.addChild(easeInputTxt);
-         this._easeInputTxt = easeInputTxt;
-         this._oldEaseInputText = this._easeInputTxt.text;
- 
-         // 下拉列表
-         const easeComboBox = IEditor.GUIUtils.createComboBox();
-         easeComboBox.x = easeInputTxt.x + easeInputTxt.width + space;
-         easeComboBox.items = this._easeComboBoxDatas.map(item => item.name);
-         console.log("getValue", this.target.getValue());
-         easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();
-         easeComboBox.on("changed", (evt: gui.Event) => {
-             console.log("下拉列表改变:", easeComboBox.selectedIndex);
-             const data = this._easeComboBoxDatas.find(item => item.index === easeComboBox.selectedIndex);
-             if (data.values) {
-                 this._easeInputTxt.text = data.values.toString();
-                 this.onEaseInputSubmit(null);
-             }
-         }, this);
-         easeBox.addChild(easeComboBox);
-         this._easeComboBox = easeComboBox;
- 
-         // cubic-bezier.com 链接文本
-         const toPageTxt = new gui.TextField();
-         toPageTxt.x = easeComboBox.x + easeComboBox.width + space;
-         toPageTxt.color = easeInputTxt.titleColor;
-         toPageTxt.style.fontSize = easeInputTxt.titleFontSize;
-         toPageTxt.style.align = gui.AlignType.Left;
-         toPageTxt.text = "↪ Page";
-         toPageTxt.onClick((evt: gui.Event) => {
-             IEditor.utils.openBrowser("https://cubic-bezier.com/");
-         }, this);
-         easeBox.addChild(toPageTxt);
- 
-         console.log("curveInput.applyChange:", curveInput.applyChange);*/
-
+       
         return { ui: curveInput };
     }
 
