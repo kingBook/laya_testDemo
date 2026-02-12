@@ -1,3 +1,19 @@
+
+// import { Config } from "../../Config";
+// import { Laya } from "../../Laya";
+// import { Blit2DCMD } from "../display/Scene2DSpecial/RenderCMD2D/Blit2DCMD";
+// import { CommandBuffer2D } from "../display/Scene2DSpecial/RenderCMD2D/CommandBuffer2D";
+// import { LayaGL } from "../layagl/LayaGL";
+// import { Vector4 } from "../maths/Vector4";
+// import { FilterMode } from "../RenderEngine/RenderEnum/FilterMode";
+// import { RenderTargetFormat } from "../RenderEngine/RenderEnum/RenderTargetFormat";
+// import { TextureFormat } from "../RenderEngine/RenderEnum/TextureFormat";
+// import { Shader3D } from "../RenderEngine/RenderShader/Shader3D";
+// import { RenderTexture } from "../resource/RenderTexture";
+// import { Texture2D } from "../resource/Texture2D";
+// import { TextureArrayRegistry2D } from "../webgl/utils/TextureArrayRegistry2D";
+// import { TextureMergeShaderInit } from "./shader/TextureMergeShaderInit";
+
 import { TextureMergeShaderInit } from "./shader/TextureMergeShaderInit";
 import { TextureArrayRegistry2D } from "./TextureArrayRegistry2D";
 

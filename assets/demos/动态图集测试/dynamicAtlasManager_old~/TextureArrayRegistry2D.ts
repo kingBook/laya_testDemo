@@ -1,3 +1,9 @@
+// import { BaseTexture } from "../../resource/BaseTexture";
+// import { Texture } from "../../resource/Texture";
+// import { Texture2D } from "../../resource/Texture2D";
+// import { Texture2DArray } from "../../resource/Texture2DArray";
+// import { TextureFormat } from "../../RenderEngine/RenderEnum/TextureFormat";
+
 /**
  * @en Minimal registry to map a 2D texture to a Texture2DArray layer.
  * @zh 最小注册表：将单张纹理映射到 Texture2DArray 的某一层。

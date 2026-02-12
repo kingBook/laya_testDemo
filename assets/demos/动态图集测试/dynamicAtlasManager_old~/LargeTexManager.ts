@@ -1,4 +1,20 @@
+// import { ILaya } from "../../ILaya";
+// import { Command2D } from "../display/Scene2DSpecial/RenderCMD2D/Command2D";
+// import { CommandBuffer2D } from "../display/Scene2DSpecial/RenderCMD2D/CommandBuffer2D";
+// import { Vector2 } from "../maths/Vector2";
+// import { Vector3 } from "../maths/Vector3";
+// import { Vector4 } from "../maths/Vector4";
+// import { FilterMode } from "../RenderEngine/RenderEnum/FilterMode";
+// import { RenderTargetFormat } from "../RenderEngine/RenderEnum/RenderTargetFormat";
+// import { TextureFormat } from "../RenderEngine/RenderEnum/TextureFormat";
+// import { WrapMode } from "../RenderEngine/RenderEnum/WrapMode";
+// import { Texture2D } from "../resource/Texture2D";
+// import { Utils } from "../utils/Utils";
+// import { LargeTex } from "./LargeTex";
+// import { LargeTexProcessor } from "./LargeTexProcessor";
+
 import { LargeTex } from "./LargeTex";
+import { LargeTexProcessor } from "./LargeTexProcessor";
 
 //被合并的纹理单元
 export class TextureItem {
@@ -1146,6 +1162,7 @@ export class LargeTexManager extends LargeTexBase {
      */
     constructor(lts: number[], ltn: number, tsm: number = 16, exs: number = 0, texFormat: Laya.RenderTargetFormat = Laya.RenderTargetFormat.R8G8B8A8) {
         super(lts, ltn, tsm, exs, texFormat);
+        //LargeTexProcessor.addMgr(this);
         for (let i = 0; i < this.LARGE_TEX_N; i++) {
             this._curColor[i] = new Laya.Vector3(0, 0, -1);
             this._curColorMap[i] = []; 
@@ -1214,6 +1231,7 @@ export class LargeTexManager extends LargeTexBase {
      * @param keepRes
      */
     destroy(keepRes: boolean = false) {
+        //LargeTexProcessor.removeMgr(this);
         super.destroy(keepRes);
         this.active = false;
     }

@@ -7,6 +7,8 @@ export class TestDynamicAtlas extends Laya.Script {
 
     @property({ type: [Laya.Texture2D] })
     public texs: Laya.Texture2D[];
+    @property({ type: Laya.Label })
+    public label: Laya.Label;
 
     @property({ type: Laya.Image })
     public img: Laya.Image;
@@ -55,7 +57,6 @@ export class TestDynamicAtlas extends Laya.Script {
 
     onUpdate(): void {
         this._largeTexMgr && this._largeTexMgr.onUpdate();
-        
     }
 
     onKeyDown(evt: Laya.Event): void {

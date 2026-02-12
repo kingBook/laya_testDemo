@@ -119,6 +119,7 @@
           "_$type": "Texture2D"
         }
       ],
+      "label": null,
       "img": {
         "_$ref": "8jou5xrb"
       }
@@ -134,6 +135,20 @@
       "left": 0,
       "top": 0,
       "color": "#ffffff"
+    },
+    {
+      "_$id": "1b003jo1",
+      "_$type": "Label",
+      "name": "Label",
+      "x": 340,
+      "y": 501,
+      "width": 148,
+      "height": 96,
+      "text": "ABC",
+      "fontSize": 95,
+      "color": "#ffffff",
+      "fitContent": "yes",
+      "bold": true
     }
   ]
 }
