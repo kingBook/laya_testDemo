@@ -1,5 +1,5 @@
-import { DynamicAtlasManager } from "./dynamicAtlasManager/DynamicAtlasManager";
-import { LargeTexManager } from "./dynamicAtlasManager/LargeTexManager";
+import { DynamicAtlasManager } from "./dynamicAtlas/DynamicAtlasManager";
+import { LargeTexManager } from "./dynamicAtlas/LargeTexManager";
 
 const { regClass, property } = Laya;
 
@@ -75,7 +75,7 @@ export class TestDynamicAtlas extends Laya.Script {
     }
 
     onUpdate(): void {
-        this._largeTexMgr && this._largeTexMgr.onUpdate();
+        // this._largeTexMgr && this._largeTexMgr.onUpdate();
     }
 
     onKeyDown(evt: Laya.Event): void {
@@ -113,21 +113,39 @@ export class TestDynamicAtlas extends Laya.Script {
                 autoExtend: true,
                 /** 是否查重 */
                 checkDuplicate: true
-            }, false);
-
-            console.time("addTexture");
-            this.texs.forEach((tex, i) => {
-                const result = this._dyAtlasMgr.addTextureByUrl(tex.url);
-                console.log(`i:${i}, add result:${result}`);
             });
-            console.timeEnd("addTexture");
 
-            console.time("replaceOriginalTexture");
-            this.texs.forEach((tex, i) => {
-                const result = this._dyAtlasMgr.replaceOriginalTexture(tex.bitmap.id);
-                console.log(`i:${i}, replace result:${result}`);
-            });
-            console.timeEnd("replaceOriginalTexture");
+            // 测试多张
+            {
+                console.time("addTexture");
+                this.texs.forEach((tex, i) => {
+                    const result = this._dyAtlasMgr.addTextureByUrl(tex.url);
+                    console.log(`i:${i}, add result:${result}`);
+                });
+                console.timeEnd("addTexture");
+
+                console.time("replaceOriginalTexture");
+                this.texs.forEach((tex, i) => {
+                    const result = this._dyAtlasMgr.replaceOriginalTexture(tex.bitmap.id);
+                    console.log(`i:${i}, replace result:${result}`);
+                });
+                console.timeEnd("replaceOriginalTexture");
+            }
+
+            // 测试单独一张
+            // {
+            //     console.time("addTexture");
+            //     const tex = this.texs[17];
+            //     const result = this._dyAtlasMgr.addTextureByUrl(tex.url);
+            //     console.log(`add result:${result}`);
+            //     console.timeEnd("addTexture");
+
+            //     console.time("replaceOriginalTexture");
+            //     console.log(`替换前 tex.bitmap.id:${tex.bitmap.id}`);
+            //     const result2 = this._dyAtlasMgr.replaceOriginalTexture(tex.bitmap.id);
+            //     console.log(`replace result:${result2}`, `替换后 tex.bitmap.id:${tex.bitmap.id}`);
+            //     console.timeEnd("replaceOriginalTexture");
+            // }
 
         } else if (evt.key === 'i') {
             this.img.texture = new Laya.Texture(this._dyAtlasMgr.getLargeTexture(0));

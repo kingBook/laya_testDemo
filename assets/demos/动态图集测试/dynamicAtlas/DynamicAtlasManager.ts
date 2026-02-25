@@ -4,18 +4,7 @@
  * 支持动态添加、移除纹理，自动管理UV坐标，替换原始纹理对象
  */
 
-// import { ILaya } from "../../ILaya";
-// import { Laya } from "../../Laya";
-// import { Event } from "../events/Event";
-// import { Vector4 } from "../maths/Vector4";
-// import { Loader } from "../net/Loader";
-// import { RenderTargetFormat } from "../RenderEngine/RenderEnum/RenderTargetFormat";
-// import { Resource } from "../resource/Resource";
-// import { DynamicTexInfo, Texture } from "../resource/Texture";
-// import { Texture2D } from "../resource/Texture2D";
 import { LargeTexBase, LargeTexManager, TextureItem, TextureOut } from "./LargeTexManager";
-
-
 
 /** @internal */
 type _$TextureData = {
@@ -100,7 +89,7 @@ export class DynamicAtlasManager {
     private _totalDrawCount: number = 1;
     private _waitReplace: Set<number> = new Set();
 
-    constructor(config?: Partial<DynamicAtlasConfig> , autoReplace: boolean = true) {
+    constructor(config?: Partial<DynamicAtlasConfig> /*, autoReplace: boolean = true*/) {
         this._config = {
             largeTextureSize: [1024, 1024],
             maxLargeTextures: 4,
@@ -121,17 +110,18 @@ export class DynamicAtlasManager {
             this._config.textureFormat
         );
 
-        this._largeTexManager.gammaCorrection = 2.2;
+        this._largeTexManager.gammaCorrection = 2.2; //（by: pq）
+        this._largeTexManager.backColor = new Laya.Vector4(0, 0, 0, 0); // 背景透明（by: pq）
         this._largeTexManager.sRGB = false;
 
         this._largeTexManager.immediately = this._config.immediately;
         this._largeTexManager.autoExtend = this._config.autoExtend;
         this._largeTexManager.checkDup = this._config.checkDuplicate;
         this._largeTexManager.name = "DynamicAtlas";
-        this._autoReplace = autoReplace;
-        if (autoReplace) {
-            this._largeTexManager.updateHook = this.afterUpdate.bind(this);
-        }
+        // this._autoReplace = autoReplace;
+        // if (autoReplace) {
+        //     this._largeTexManager.updateHook = this.afterUpdate.bind(this);
+        // }
         this._totalDrawCount = this._config.extendSize > 0 ? 2 : 1;
     }
 
@@ -424,7 +414,7 @@ export class DynamicAtlasManager {
         let y = textureOut.texItem.y;
         let w = textureOut.texItem.w;
         let h = textureOut.texItem.h;
-
+        
         textureMap.forEach(({ texture , uv }  , id) => {
             if (texture.bitmap !== rt) {
                 let oSWidth = texture.sourceWidth;
