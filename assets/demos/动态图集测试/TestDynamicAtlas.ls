@@ -105,6 +105,12 @@
       "img": {
         "_$ref": "8jou5xrb"
       },
+      "imgRect": {
+        "_$ref": "57pe0km4"
+      },
+      "imgRect1": {
+        "_$ref": "ud54x4oz"
+      },
       "list": {
         "_$ref": "2c638rxl"
       }
@@ -126,7 +132,7 @@
       "_$id": "1b003jo1",
       "_$type": "Label",
       "name": "Label",
-      "x": 503,
+      "x": 572,
       "y": 344,
       "width": 148,
       "height": 96,
@@ -140,12 +146,25 @@
     {
       "_$id": "57pe0km4",
       "_$type": "Image",
-      "name": "roll_item_bg1_1",
-      "x": 323,
-      "y": 342,
+      "name": "imgRect",
+      "x": 265,
+      "y": 343,
       "width": 134,
       "height": 104,
-      "centerY": -406,
+      "centerY": -405,
+      "skin": "res://7a319744-ce88-4c54-92db-3aaa17ee2920",
+      "useSourceSize": true,
+      "color": "#ffffff"
+    },
+    {
+      "_$id": "ud54x4oz",
+      "_$type": "Image",
+      "name": "imgRect_1",
+      "x": 418,
+      "y": 343,
+      "width": 134,
+      "height": 104,
+      "centerY": -405,
       "skin": "res://7a319744-ce88-4c54-92db-3aaa17ee2920",
       "useSourceSize": true,
       "color": "#ffffff"

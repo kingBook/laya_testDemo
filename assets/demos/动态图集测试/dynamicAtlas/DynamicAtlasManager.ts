@@ -398,7 +398,6 @@ export class DynamicAtlasManager {
         return this.removeTexture(texture.id, largeTextureIndex);
     }
 
-
     private _replaceTexture(textureInfo: TextureInfo, textureOut: TextureOut): boolean {
         // 标记为已合并，避免重复处理
         textureInfo.merged = true;
