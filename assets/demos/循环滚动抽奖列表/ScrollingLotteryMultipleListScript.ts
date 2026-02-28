@@ -236,7 +236,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     private readonly _tempRect: Laya.Rectangle = new Laya.Rectangle();
     private readonly _itemRegExp: RegExp = /item\d+/;
 
-
+    /** 子列表固定数据源长度配置 */
+    public get fixedSubLenCfg(): FixedSubLenCfg { return this._fixedSubLenCfg; }
     /** 子列表抽奖组件数组，注意：需要在初始化完成后调用 */
     public get subLotteries(): ScrollingLotteryListScript[] { return this._subLotteries; }
     /** 是否已初始化 */
@@ -609,7 +610,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 const ret = cell.name.match(this._itemRegExp); // 找 item0,item1,item2,...命名的 child
                 if (!ret || ret[0] !== ret.input) continue;
 
-                const cellRect = cell.getBounds(this._tempRect);
+                // const cellRect = cell.getBounds(this._tempRect);
+                const cellRect = this._tempRect.setTo(cell.x - cell.pivotX, cell.y - cell.pivotY, cell.width, cell.height);
                 cellRect.x += this.owner.x;
                 cellRect.y += this.owner.y;
                 cell.visible = panelScrollRect.intersects(cellRect);
@@ -621,7 +623,8 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 if (!cell) continue;
                 const ret = cell.name.match(this._itemRegExp); // 找 item0,item1,item2,...命名的 child
                 if (!ret || ret[0] !== ret.input) continue;
-                const cellRect = cell.getBounds(this._tempRect);
+                //const cellRect = cell.getBounds(this._tempRect);
+                const cellRect = this._tempRect.setTo(cell.x - cell.pivotX, cell.y - cell.pivotY, cell.width, cell.height);
                 cell.visible = scrollRect.intersects(cellRect);
             }
         }

@@ -281,9 +281,9 @@ export class ScrollingLotteryListScript extends Laya.Script {
         this._randomizedResultMap.clear();
         if (fixedLenCfg && fixedLenCfg.targetLength > 0) {
             if (fixedLenCfg.fillOptions) {
-                this.fixedLenFillPlaneA(ownerArr, fixedLenCfg);
+                this.fixedLenFillPlanA(ownerArr, fixedLenCfg);
             } else {
-                this.fixedLenFillPlaneB(ownerArr, fixedLenCfg);
+                this.fixedLenFillPlanB(ownerArr, fixedLenCfg);
             }
         }
 
@@ -594,7 +594,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
             if (!cell) continue;
             const ret = cell.name.match(this._itemRegExp); // 找 item0,item1,item2,...命名的 child
             if (!ret || ret[0] !== ret.input) continue;
-            const cellRect = cell.getBounds(this._tempRect);
+            // const cellRect = cell.getBounds(this._tempRect);
+            const cellRect = this._tempRect.setTo(cell.x - cell.pivotX, cell.y - cell.pivotY, cell.width, cell.height);
             cell.visible = scrollRect.intersects(cellRect);
         }
     }
@@ -604,7 +605,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
      * @param ownerArr 
      * @param fixedLenCfg 
      */
-    private fixedLenFillPlaneA(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
+    private fixedLenFillPlanA(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
         if (Array.isArray(fixedLenCfg.reservedIndices)) {
             const reservedLen = fixedLenCfg.reservedIndices.length;
             if (reservedLen > ownerArr.length) {
@@ -676,7 +677,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
      * @param ownerArr 
      * @param fixedLenCfg 
      */
-    private fixedLenFillPlaneB(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
+    private fixedLenFillPlanB(ownerArr: any[], fixedLenCfg: FixedLenCfg): void {
         if (Array.isArray(fixedLenCfg.reservedIndices)) {
             const reservedLen = fixedLenCfg.reservedIndices.length;
             if (reservedLen > ownerArr.length) {
