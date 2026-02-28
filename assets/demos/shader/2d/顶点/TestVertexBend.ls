@@ -23,8 +23,8 @@
       "_$id": "nbd579fx",
       "_$type": "Image",
       "name": "Image",
-      "x": 125,
-      "y": 649,
+      "x": 119,
+      "y": 644,
       "width": 512,
       "height": 313,
       "material": {
@@ -42,7 +42,7 @@
       "x": 99,
       "y": 962,
       "width": 589,
-      "height": 1,
+      "height": 5,
       "bgColor": "#ffffff"
     }
   ]

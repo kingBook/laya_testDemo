@@ -14,7 +14,7 @@ Shader3D Start
     shaderType:3,
     uniformMap:{
         // ========== 波动基础参数 ==========
-        u_Magnitude: {type:Float, default:0.1, tips: "Y轴波动幅度"},
+        //u_Magnitude: {type:Float, default:0.1, tips: "Y轴波动幅度"},
         u_Frequency: {type:Float, default:1.0, tips: "波动频率，值越大波动越快"},
         u_InvWaveLength: {type:Float, default:0.5, tips: "波长倒数，值越大波纹越密集"},
         u_Time: { type:Float, default: 0, tips: "时间变量（通常由脚本更新）"},
