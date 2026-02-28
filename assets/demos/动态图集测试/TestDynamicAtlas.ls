@@ -13,6 +13,21 @@
     {
       "_$type": "7a6534f3-98d1-4930-ae63-6c4ffb0e21af",
       "scriptPath": "demos/动态图集测试/TestDynamicAtlas.ts",
+      "label": {
+        "_$ref": "1b003jo1"
+      },
+      "img": {
+        "_$ref": "8jou5xrb"
+      },
+      "imgRect": {
+        "_$ref": "57pe0km4"
+      },
+      "imgRect1": {
+        "_$ref": "ud54x4oz"
+      },
+      "list": {
+        "_$ref": "2c638rxl"
+      },
       "texs": [
         {
           "_$uuid": "9f67b653-19d8-48e9-9f49-afe1065dce05",
@@ -98,22 +113,7 @@
           "_$uuid": "63142bf4-b894-4f47-b8e4-7cea71a7d2b1",
           "_$type": "Texture"
         }
-      ],
-      "label": {
-        "_$ref": "1b003jo1"
-      },
-      "img": {
-        "_$ref": "8jou5xrb"
-      },
-      "imgRect": {
-        "_$ref": "57pe0km4"
-      },
-      "imgRect1": {
-        "_$ref": "ud54x4oz"
-      },
-      "list": {
-        "_$ref": "2c638rxl"
-      }
+      ]
     }
   ],
   "_$child": [
@@ -121,11 +121,12 @@
       "_$id": "8jou5xrb",
       "_$type": "Image",
       "name": "Image",
-      "width": 512,
-      "height": 313,
+      "width": 750,
+      "height": 488,
       "visible": false,
-      "left": 0,
       "top": 0,
+      "centerX": 0,
+      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
       "color": "#ffffff"
     },
     {

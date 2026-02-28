@@ -1,0 +1,15 @@
+{
+  "perFolder": false,
+  "includeSubFolders": false,
+  "maxWidth": 2048,
+  "maxHeight": 2048,
+  "eachMaxWidth": 1024,
+  "eachMaxHeight": 1024,
+  "scale": 1,
+  "pot": false,
+  "trimImage": false,
+  "platformDefault": {
+    "format": 0,
+    "quality": 1
+  }
+}

@@ -110,7 +110,7 @@ export class DynamicAtlasManager {
             this._config.textureFormat
         );
 
-        this._largeTexManager.gammaCorrection = 2.2; //（by: pq）
+        //this._largeTexManager.gammaCorrection = 2.2; //（by: pq）
         this._largeTexManager.backColor = new Laya.Vector4(0, 0, 0, 0); // 背景透明（by: pq）
         this._largeTexManager.sRGB = false;
 
