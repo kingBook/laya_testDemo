@@ -7,10 +7,10 @@ export class AnimationCurveTest extends Laya.Script {
 
     declare owner: Laya.Sprite;
 
-    // @property({ type: AnimationCurve, inspector: "AnimationCurve" })
-    // animationCurve1: AnimationCurve;
+    @property({ type: AnimationCurve, inspector: "AnimationCurve" })
+    animationCurve1: AnimationCurve;
 
-    @property({ type: AnimationCurve, inspector: "AnimationCurve2" })
+    @property({ type: AnimationCurve, inspector: "AnimationCurveOld" })
     animationCurve: AnimationCurve;
 
     @property({ type: [Laya.FloatKeyframe], inspector: "curve" })
@@ -54,7 +54,6 @@ export class AnimationCurveTest extends Laya.Script {
         }
 
         // this.owner.graphics.drawCurves(10, 58, [0, 0, 19, -100, 100, 0], "#ff0000", 3);
-
 
     }
 

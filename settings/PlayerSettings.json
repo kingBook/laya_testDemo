@@ -5,7 +5,8 @@
     "scaleMode": "fixedwidth"
   },
   "2D": {
-    "isAlpha": true
+    "isAlpha": true,
+    "defaultFont": ""
   },
   "physics2D": {
     "defaultConfig": {

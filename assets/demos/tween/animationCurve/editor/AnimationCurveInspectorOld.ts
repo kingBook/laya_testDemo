@@ -1,7 +1,5 @@
-import { CurveEditDialog } from "./CurveEditDialog";
-
-@IEditor.inspectorField("AnimationCurve2")
-export default class AnimationCurveInspector2 extends IEditor.PropertyField {
+@IEditor.inspectorField("AnimationCurveOld")
+export default class AnimationCurveInspectorOld extends IEditor.PropertyField {
 
     private readonly _easeComboBoxDatas = [
         { name: "ease", index: 0, values: [.25, .1, .25, 1] },
@@ -12,95 +10,144 @@ export default class AnimationCurveInspector2 extends IEditor.PropertyField {
         { name: "custom", index: 5, values: null }
     ];
 
-    private _curveInput: gui.Shape;
+    private _curveInput: IEditor.CurveInput;
     private _easeInputTxt: IEditor.TextInput;
     private _easeComboBox: gui.ComboBox;
     private _oldEaseInputText: string;
 
-    // @IEditor.onLoad
-    // static async onLoad(){
-    //     await gui.UIPackage.resourceMgr.load("~/ui/basic/CurveEdit/CurveInput.widget");
-    // }
-
-
     public override create(): IEditor.IPropertyFieldCreateResult {
         console.log("create();");
-        const w = 93, h = 23;
-        const curveInput = new gui.Shape();
-        curveInput.sourceWidth = w;
-        curveInput.sourceHeight = h;
-        curveInput.width = w;
-        curveInput.height = h;
-        curveInput.drawRect(1, gui.Color.BLACK, new gui.Color("#666666"));
+
+        // 创建曲线图（CurveInput）
+        const curveInput: IEditor.CurveInput = IEditor.GUIUtils.createCurveInput();
+        curveInput.setDefaultPoints();
+        curveInput.isCurve = true;
+        curveInput.isNormalization = true;
+        curveInput.maxKeyFrame = 10;
+        curveInput.minValue = 0;
+        curveInput.maxValue = 1;
+        curveInput.isAutoFillKeyFrame = false; // 关闭这个属性，否则在曲线图双击添加点时，会自动添加点(PathPoint)，使点数量与maxKeyFrame一致
+        curveInput.isWeight = true; // 控制点可任意拖动
+        curveInput.curveMax = 1;
+        curveInput.curveMin = 0;
+
+        // 侦听曲线对话框提交数据
+        curveInput.on("submit", this.onCurveEditDialogSubmit, this);
+
+        curveInput.on("click", () => {
+            const curveEditDialog: any = this.getCurveEditDialog();
+            console.log("curveEditDialog:", curveEditDialog);
+            const contentPane: any = curveEditDialog._contentPane;
+            console.log("contentPane:", curveEditDialog._contentPane);
+            const changeList: any[] = contentPane._changeList;
+            const children: any[] = contentPane._children;
+            //console.log("children:", children);
+            const coords = children.find(value => value._name === "coords");
+            //console.log("coords:", coords);
+            //const canvas: gui.Panel = coords._canvas;
+            //console.log("canvas:", canvas);
+            //const bg = canvas.getChild("bg", gui.Shape);
+            //console.log("bg:", bg);
+
+            
+            console.log("children:", children);
+
+            
+           
+
+        }, this);
+
         this._curveInput = curveInput;
 
+        //
+        // =================== 创建 cubic-bezier.com 数据设置栏 ===================
+        //
+        // curveInput 子对象
+        const n5 = curveInput.getChild("n5");
+        const n1 = curveInput.getChild("n1");
+        const canvas = curveInput.getChild("canvas");
 
+        // 调整 curveInput 子对象的对齐策略，取消高度拉伸
+        n5.removeRelation(curveInput, gui.RelationType.Height);
+        n1.removeRelation(curveInput, gui.RelationType.Height);
+        canvas.removeRelation(curveInput, gui.RelationType.Height);
 
-        const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg") as SVGSVGElement;
-        svg.setAttribute("xmlns", svgNS);
-        svg.style.position = "absolute";
-        svg.style.left = "0";
-        svg.style.top = "0";
-        svg.style.pointerEvents = "none";
+        // 间隔
+        const space = 5;
+        // 高
+        const easeBoxH = 19;
 
-        function syncSize() {
-            const w = curveInput.width;
-            const h = curveInput.height;
-            svg.setAttribute("width", String(w));
-            svg.setAttribute("height", String(h));
-            svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-            svg.style.width = w + "px";
-            svg.style.height = h + "px";
-        }
+        // 加高最顶层容器
+        curveInput.height += easeBoxH + space * 2;
 
-        syncSize();
-        curveInput.element.appendChild(svg as any);
+        // 创建一个水平布局的子容器
+        const easeBox = new gui.Box();
+        easeBox.x = canvas.x;
+        easeBox.y = n5.height + space;
+        easeBox.width = canvas.width;
+        easeBox.height = easeBoxH;
+        easeBox.layout.type = gui.LayoutType.SingleRow;
+        easeBox.layout.columnGap = space;
+        easeBox.layout.stretchX = gui.StretchMode.Stretch;
+        easeBox.layout.stretchY = gui.StretchMode.Stretch;
+        const stretchParams0 = new gui.StretchParam();
+        const stretchParams1 = new gui.StretchParam();
+        const stretchParams2 = new gui.StretchParam();
+        stretchParams0.setRatio(0.4);
+        stretchParams1.setRatio(0.4);
+        stretchParams2.setRatio(0.2);
+        stretchParams1.max = 90;
+        stretchParams2.max = 50;
+        easeBox.layout.stretchParamsX.push(stretchParams0, stretchParams1, stretchParams2);
+        easeBox.addRelation(curveInput, gui.RelationType.Width);
+        curveInput.addChild(easeBox);
 
-        function mapX(px: number) { return px * Number(svg.getAttribute("width")); }
-        function mapY(py: number) { return (1 - py) * Number(svg.getAttribute("height")); }
+        // 输入文本框
+        const easeInputTxt = IEditor.GUIUtils.createTextInput();
+        easeInputTxt.text = this._easeComboBoxDatas[0].values.toString(); // 初始 "ease"
+        easeInputTxt.on("submit", this.onEaseInputSubmit, this);
+        easeBox.addChild(easeInputTxt);
+        this._easeInputTxt = easeInputTxt;
+        this._oldEaseInputText = this._easeInputTxt.text;
 
-        const pathEl = document.createElementNS(svgNS, "path");
-        pathEl.setAttribute("fill", "none");
-        pathEl.setAttribute("stroke", "#00ff00");
-        pathEl.setAttribute("stroke-width", "1");
-        svg.appendChild(pathEl);
+        // 下拉列表
+        const easeComboBox = IEditor.GUIUtils.createComboBox();
+        easeComboBox.x = easeInputTxt.x + easeInputTxt.width + space;
+        easeComboBox.items = this._easeComboBoxDatas.map(item => item.name);
+        console.log("getValue", this.target.getValue());
+        easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();
+        easeComboBox.on("changed", (evt: gui.Event) => {
+            console.log("下拉列表改变:", easeComboBox.selectedIndex);
+            const data = this._easeComboBoxDatas.find(item => item.index === easeComboBox.selectedIndex);
+            if (data.values) {
+                this._easeInputTxt.text = data.values.toString();
+                this.onEaseInputSubmit(null);
+            }
+        }, this);
+        easeBox.addChild(easeComboBox);
+        this._easeComboBox = easeComboBox;
 
-        const c1 = { x: 0.42, y: 0.0 };
-        const c2 = { x: 0.58, y: 1.0 };
+        // cubic-bezier.com 链接文本
+        const toPageTxt = new gui.TextField();
+        toPageTxt.x = easeComboBox.x + easeComboBox.width + space;
+        toPageTxt.color = easeInputTxt.titleColor;
+        toPageTxt.style.fontSize = easeInputTxt.titleFontSize;
+        toPageTxt.style.align = gui.AlignType.Left;
+        toPageTxt.text = "↪ Page";
+        toPageTxt.onClick((evt: gui.Event) => {
+            IEditor.utils.openBrowser("https://cubic-bezier.com/");
+        }, this);
+        easeBox.addChild(toPageTxt);
 
-        function redrawSVG() {
-            const w = Number(svg.getAttribute("width"));
-            const h = Number(svg.getAttribute("height"));
-            if (!w || !h) return;
-            const x0 = mapX(0), y0 = mapY(0);
-            const x1 = mapX(c1.x), y1 = mapY(c1.y);
-            const x2 = mapX(c2.x), y2 = mapY(c2.y);
-            const x3 = mapX(1), y3 = mapY(1);
-            const d = `M ${x0} ${y0} C ${x1} ${y1} ${x2} ${y2} ${x3} ${y3}`;
-            pathEl.setAttribute("d", d);
-        }
+        console.log("curveInput.applyChange:", curveInput.applyChange);
 
-        (curveInput as any)._redrawOverlay = () => { syncSize(); redrawSVG(); };
-        redrawSVG();
-
-        curveInput.on("click", (e: gui.Event) => {
-            Editor.showDialog(CurveEditDialog, null);
-        });
-
-        curveInput.on("size_changed", (e: gui.Event) => {
-            (this._curveInput as any)._redrawOverlay();
-        });
-
-
-       
         return { ui: curveInput };
     }
 
     public override refresh(): void {
+        console.log("refresh();");
 
-
-        /*// 当字段为空时，创建一个默认实例
+        // 当字段为空时，创建一个默认实例
         if (!this.target.getValue()) {
             this.createDefaultInstance();
         }
@@ -154,7 +201,7 @@ export default class AnimationCurveInspector2 extends IEditor.PropertyField {
             this._easeInputTxt.alpha = 0.7;
         }
 
-        this._easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();*/
+        this._easeComboBox.selectedIndex = this.getEaseComboBoxMatchInputIndex();
     }
 
     /** 创建默认实例 */
@@ -215,68 +262,68 @@ export default class AnimationCurveInspector2 extends IEditor.PropertyField {
         console.log("getCurveEditDialog", this.getCurveEditDialog());
 
 
-        // // 设置值到目标
-        // const value = this.target.getValue();
-        // const keys: any[] = value.keys;
+        // 设置值到目标
+        const value = this.target.getValue();
+        const keys: any[] = value.keys;
 
-        // for (let i = 0, c = this._curveInput.points.length; i < c; i++) {
-        //     const pt: IEditor.PathPoint = this._curveInput.points[i];
-        //     if (i >= keys.length) {
-        //         keys.push(this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0, outTangent: 0, outWeight: 0 }));
-        //     }
-        //     const key = keys[i];
-        //     key.time = pt.px;
-        //     key.value = pt.py;
-        //     key.inTangent = pt.inTangent;
-        //     key.outTangent = pt.outTangent;
-        //     key.inWeight = pt.inWeight;
-        //     key.outWeight = pt.outWeight;
-        // }
+        for (let i = 0, c = this._curveInput.points.length; i < c; i++) {
+            const pt: IEditor.PathPoint = this._curveInput.points[i];
+            if (i >= keys.length) {
+                keys.push(this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0, outTangent: 0, outWeight: 0 }));
+            }
+            const key = keys[i];
+            key.time = pt.px;
+            key.value = pt.py;
+            key.inTangent = pt.inTangent;
+            key.outTangent = pt.outTangent;
+            key.inWeight = pt.inWeight;
+            key.outWeight = pt.outWeight;
+        }
 
-        // // 删除多出的点
-        // if (keys.length > this._curveInput.points.length) {
-        //     keys.length = this._curveInput.points.length;
-        // }
+        // 删除多出的点
+        if (keys.length > this._curveInput.points.length) {
+            keys.length = this._curveInput.points.length;
+        }
 
-        // // 第一个点为(0,0)，最后一个点为(1,1)
-        // keys[0].time = 0;
-        // keys[0].value = 0;
-        // keys[keys.length - 1].time = 1;
-        // keys[keys.length - 1].value = 1;
+        // 第一个点为(0,0)，最后一个点为(1,1)
+        keys[0].time = 0;
+        keys[0].value = 0;
+        keys[keys.length - 1].time = 1;
+        keys[keys.length - 1].value = 1;
 
-        // this.target.setValue(value);
+        this.target.setValue(value);
     }
 
     /** cubic-bezier.com 数据输入框提交数据 */
     private onEaseInputSubmit(evt?: gui.Event): void {
         console.log("onEaseInputSubmit();", this._easeInputTxt.text);
 
-        // let values = this.getEaseInputValues();
-        // if (values) {
-        //     this._oldEaseInputText = this._easeInputTxt.text;
+        let values = this.getEaseInputValues();
+        if (values) {
+            this._oldEaseInputText = this._easeInputTxt.text;
 
-        //     // 设置值到目标
-        //     const retKeys = this.cubicBezierValuesToKeys(values);
-        //     const value = this.target.getValue();
-        //     const keys: any[] = value.keys;
-        //     const key0 = keys[0];
-        //     const key1 = keys[1];
-        //     key0.outTangent = retKeys[0].outTangent;
-        //     key0.outWeight = retKeys[0].outWeight;
-        //     key1.inTangent = retKeys[1].inTangent;
-        //     key1.inWeight = retKeys[1].inWeight;
+            // 设置值到目标
+            const retKeys = this.cubicBezierValuesToKeys(values);
+            const value = this.target.getValue();
+            const keys: any[] = value.keys;
+            const key0 = keys[0];
+            const key1 = keys[1];
+            key0.outTangent = retKeys[0].outTangent;
+            key0.outWeight = retKeys[0].outWeight;
+            key1.inTangent = retKeys[1].inTangent;
+            key1.inWeight = retKeys[1].inWeight;
 
-        //     console.log("key0.outTangent:", key0.outTangent, " key0.outWeight:", key0.outWeight, " key1.inTangent:", key1.inTangent, " key1.inWeight:", key1.inWeight);
+            console.log("key0.outTangent:", key0.outTangent, " key0.outWeight:", key0.outWeight, " key1.inTangent:", key1.inTangent, " key1.inWeight:", key1.inWeight);
 
-        //     if (keys.length > this._curveInput.points.length) {
-        //         keys.length = this._curveInput.points.length; // 删除多出的点
-        //     }
+            if (keys.length > this._curveInput.points.length) {
+                keys.length = this._curveInput.points.length; // 删除多出的点
+            }
 
-        //     this.target.setValue(value);
-        // } else {
-        //     this._easeInputTxt.text = this._oldEaseInputText;
-        //     Editor.alert("输入错误");
-        // }
+            this.target.setValue(value);
+        } else {
+            this._easeInputTxt.text = this._oldEaseInputText;
+            Editor.alert("输入错误");
+        }
     }
 
     private getCurveEditDialog(): any {

@@ -114,6 +114,16 @@
       "y": 196,
       "visible": true,
       "touchable": true
+    },
+    {
+      "_$id": "tmn5knvz",
+      "_$prefab": "89f7dd13-1814-2401-fb38-88d6218a3596",
+      "name": "CurveInput",
+      "active": true,
+      "x": 158,
+      "y": 235,
+      "visible": true,
+      "touchable": true
     }
   ]
 }
