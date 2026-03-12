@@ -12,7 +12,7 @@ Laya.addBeforeInitCallback(stageCfg => {
             console.log("PLATFORM_PC");
             break;
     }
-    Laya.Config.defaultFont = "resources/font/迷你简剪纸.ttf";
+    //Laya.Config.defaultFont = "resources/font/迷你简剪纸.ttf";
 });
 
 @regClass()

@@ -149,25 +149,27 @@ export class TestDynamicAtlas extends Laya.Script {
                 console.timeEnd("replaceOriginalTexture");
             });
         } else if (evt.key === 'i') {
-            this._dyAtlasMgr ||= new DynamicAtlasManager({
-                /** 大纹理尺寸 [宽度, 高度] */
-                largeTextureSize: [2048, 2048],
-                /** 大纹理最大数量 */
-                maxLargeTextures: 4,
-                /** 小纹理单元尺寸 */
-                textureUnitSize: 16,
-                /** 纹理扩边尺寸 */
-                extendSize: 0,
-                /** 纹理格式 */
-                textureFormat: Laya.RenderTargetFormat.R8G8B8A8,
-                /** 是否立即执行合并 */
-                immediately: true,
-                /** 是否自动扩展大纹理数量 */
-                autoExtend: true,
-                /** 是否查重 */
-                checkDuplicate: true
-            });
-            this._dyAtlasMgr["_largeTexManager"].gammaCorrection = 2.2; // 仅用于查看替换效果
+            if(!this._dyAtlasMgr) {
+                this._dyAtlasMgr = new DynamicAtlasManager({
+                    /** 大纹理尺寸 [宽度, 高度] */
+                    largeTextureSize: [2048, 2048],
+                    /** 大纹理最大数量 */
+                    maxLargeTextures: 4,
+                    /** 小纹理单元尺寸 */
+                    textureUnitSize: 16,
+                    /** 纹理扩边尺寸 */
+                    extendSize: 0,
+                    /** 纹理格式 */
+                    textureFormat: Laya.RenderTargetFormat.R8G8B8A8,
+                    /** 是否立即执行合并 */
+                    immediately: true,
+                    /** 是否自动扩展大纹理数量 */
+                    autoExtend: true,
+                    /** 是否查重 */
+                    checkDuplicate: true
+                });
+                this._dyAtlasMgr["_largeTexManager"].gammaCorrection = 2.2; // 仅用于查看替换效果
+            }
 
             // 测试单独一张
             console.time("addTexture");
