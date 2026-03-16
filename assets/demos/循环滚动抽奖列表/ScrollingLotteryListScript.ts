@@ -287,8 +287,12 @@ export class ScrollingLotteryListScript extends Laya.Script {
             }
         }
 
+        // 重置滚动值，避免数据源出错
+        // (注意：此操作必须在赋值列表数据源之前， 因调用了 optimizeVisible 优化显示， 
+        // 当再次赋值不一样长度的数据源时，列表又发生滚动，如果不重置滚动值，可能引起无法渲染的默认项)
+        this.owner.scrollBar.value = 0;
+
         // 列表的末尾加入额外重复项
-        this.owner.array = null; // 重置滚动值，避免数据源出错
         this._originalItemCount = ownerArr.length;
         for (let i = 0; i < this._extraItemNum; i++) {
             let idx = i % this._originalItemCount;

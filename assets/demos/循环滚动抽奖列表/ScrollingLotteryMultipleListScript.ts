@@ -369,7 +369,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
                 if (this.enableScrollToSubResult && progress > this.scrollToSubResultTriggerT) {
                     if (subListIdx > this._scrollToResultSubIdx) {
                         this._scrollToResultSubIdx = subListIdx;
-                        this.ScrollToSubResult(subListIdx);
+                        this.scrollToSubResult(subListIdx);
                     }
                 }
             });
@@ -634,7 +634,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
      * 父列表滚动到已出结果子列表的缓动
      * @param subListIdx 已出结果的子列表索引
      */
-    private ScrollToSubResult(subListIdx: number): void {
+    private scrollToSubResult(subListIdx: number): void {
         const focusParentCell = this.getParentCell(subListIdx); // 子列表出结果后，父列表要滚动到的列表项
         if (!focusParentCell) return;
 
