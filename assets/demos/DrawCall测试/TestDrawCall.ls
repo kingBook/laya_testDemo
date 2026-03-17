@@ -13,6 +13,24 @@
     {
       "_$type": "f444a0dc-e4ef-40b5-b8c4-3f6793305300",
       "scriptPath": "demos/DrawCall测试/TestDrawCall.ts",
+      "material": {
+        "_$uuid": "fb2c04a0-9c24-4855-817a-6073b1a4eb54",
+        "_$type": "Material"
+      },
+      "imgs": [
+        {
+          "_$ref": "o3uuguc4"
+        },
+        {
+          "_$ref": "6hm5hrxx"
+        },
+        {
+          "_$ref": "7xeetwzr"
+        },
+        {
+          "_$ref": "3itkpap4"
+        }
+      ],
       "label": {
         "_$ref": "y77g9ejz"
       },
@@ -39,10 +57,6 @@
           "y": -75,
           "width": 512,
           "height": 313,
-          "material": {
-            "_$uuid": "fb2c04a0-9c24-4855-817a-6073b1a4eb54",
-            "_$type": "Material"
-          },
           "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
           "useSourceSize": true,
           "color": "#ffffff"
@@ -55,10 +69,6 @@
           "y": 29,
           "width": 134,
           "height": 104,
-          "material": {
-            "_$uuid": "fb2c04a0-9c24-4855-817a-6073b1a4eb54",
-            "_$type": "Material"
-          },
           "skin": "res://7a319744-ce88-4c54-92db-3aaa17ee2920",
           "useSourceSize": true,
           "color": "#ffffff"
@@ -71,10 +81,6 @@
           "y": -75,
           "width": 512,
           "height": 313,
-          "material": {
-            "_$uuid": "fb2c04a0-9c24-4855-817a-6073b1a4eb54",
-            "_$type": "Material"
-          },
           "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
           "useSourceSize": true,
           "color": "#ffffff"
@@ -87,10 +93,6 @@
           "y": 29,
           "width": 134,
           "height": 104,
-          "material": {
-            "_$uuid": "fb2c04a0-9c24-4855-817a-6073b1a4eb54",
-            "_$type": "Material"
-          },
           "skin": "res://7a319744-ce88-4c54-92db-3aaa17ee2920",
           "useSourceSize": true,
           "color": "#ffffff"
@@ -103,6 +105,7 @@
           "y": -67,
           "width": 380,
           "height": 31,
+          "visible": false,
           "drawCallOptimize": true,
           "text": "两图集，穿插会增加drawcall",
           "fontSize": 30,
@@ -117,6 +120,7 @@
           "y": -13,
           "width": 145,
           "height": 31,
+          "visible": false,
           "drawCallOptimize": true,
           "text": "ABCDEFG",
           "fontSize": 30,
@@ -133,6 +137,7 @@
       "y": 96,
       "width": 158,
       "height": 120,
+      "visible": false,
       "skin": "res://433de793-e61c-4fbf-8b0f-c794ed0bdd61",
       "useSourceSize": true,
       "color": "#ffffff"
