@@ -14,30 +14,30 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
     private _manager: IEditorEnv.IGizmosManager;
     private _luckWheel: LuckWheel;
 
-    private _outsidePolygon: IEditorEnv.IGizmoPolygon;
+    private _outerPolygon: IEditorEnv.IGizmoPolygon;
     private _innerPolygon: IEditorEnv.IGizmoPolygon;
-    private _outsideNumberTexts: IEditorEnv.IGizmoText[] = [];
+    private _outerNumberTexts: IEditorEnv.IGizmoText[] = [];
     private _innerNumberTexts: IEditorEnv.IGizmoText[] = [];
-
+    
 
     public onDrawGizmosSelected() {
         this._manager = IEditorEnv.Gizmos2D.getManager(this.owner);
         this._luckWheel = this.owner.getComponent(LuckWheel);
 
         // 清空绘图
-        if (this._outsidePolygon) {
-            this._outsidePolygon.points.length = 0;
-            this._outsidePolygon.refresh();
+        if (this._outerPolygon) {
+            this._outerPolygon.points.length = 0;
+            this._outerPolygon.refresh();
         }
         if (this._innerPolygon) {
             this._innerPolygon.points.length = 0;
             this._innerPolygon.refresh();
         }
-        if (this._outsideNumberTexts.length > 0) {
-            for (let i = 0; i < this._outsideNumberTexts.length; i++) {
-                this._outsideNumberTexts[i].node.remove();
+        if (this._outerNumberTexts.length > 0) {
+            for (let i = 0; i < this._outerNumberTexts.length; i++) {
+                this._outerNumberTexts[i].node.remove();
             }
-            this._outsideNumberTexts.length = 0;
+            this._outerNumberTexts.length = 0;
         }
         if (this._innerNumberTexts.length > 0) {
             for (let i = 0; i < this._innerNumberTexts.length; i++) {
@@ -49,15 +49,15 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
         // _gizmoVisible 为 true 时才在场景视图中显示绘图
         if ((this._luckWheel as any)._gizmoVisible) {
             // 外转盘
-            if (this._luckWheel.currentOutsideSplitData && this._luckWheel.currentOutsideSplitData.splitAngles) {
-                this.drawOutsideSplitPolygon(); // 绘制多边形
-                this.drawOutsideNumberTexts(); // 绘制索引编号
+            if (this._luckWheel.currentOuterSectorData && this._luckWheel.currentOuterSectorData.sectorAngles) {
+                this.drawOuterSectorPolygon(); // 绘制多边形
+                this.drawOuterNumberTexts(); // 绘制索引编号
             }
 
-            if (this._luckWheel.mode & LuckWheelMode.DoubleFixedPointer) {
+            if ((this._luckWheel.mode & LuckWheelMode.DoubleFixedPointer) || (this._luckWheel.mode & LuckWheelMode.DoubleOnlyFixedInner)) {
                 // 内转盘
-                if (this._luckWheel.currentInnerSplitData && this._luckWheel.currentInnerSplitData.splitAngles) {
-                    this.drawInnerSplitPolygon(); // 绘制多边形
+                if (this._luckWheel.currentInnerSectorData && this._luckWheel.currentInnerSectorData.sectorAngles) {
+                    this.drawInnerSectorPolygon(); // 绘制多边形
                     this.drawInnerNumberTexts(); // 绘制索引编号
                 }
             }
@@ -66,21 +66,21 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
 
 
     /** 绘制外部的多边形 */
-    private drawOutsideSplitPolygon(): void {
+    private drawOuterSectorPolygon(): void {
         // 创建外多边形
-        if (!this._outsidePolygon) {
-            this._outsidePolygon = this._manager.createPolygon();
-            this._outsidePolygon.stroke({ color: LuckWheelGizmoConfig.outsideLineColor, width: LuckWheelGizmoConfig.lineWidth });
-            this._outsidePolygon.fill(LuckWheelGizmoConfig.outsideFillColor);
-            this._outsidePolygon.touchable = false; // 不可交互
+        if (!this._outerPolygon) {
+            this._outerPolygon = this._manager.createPolygon();
+            this._outerPolygon.stroke({ color: LuckWheelGizmoConfig.outerLineColor, width: LuckWheelGizmoConfig.lineWidth });
+            this._outerPolygon.fill(LuckWheelGizmoConfig.outerFillColor);
+            this._outerPolygon.touchable = false; // 不可交互
         }
         // 画外分割线
-        const { angleOffset, splitAngles } = this._luckWheel.currentOutsideSplitData;
-        this.drawSplitLines(this._outsidePolygon, angleOffset, splitAngles, (this._luckWheel as any)._gizmoOutsideRadius);
+        const { angleOffset, sectorAngles } = this._luckWheel.currentOuterSectorData;
+        this.drawSectorLines(this._outerPolygon, angleOffset, sectorAngles, (this._luckWheel as any)._gizmoOuterRadius);
     }
 
     /** 绘制内部的多边形 */
-    private drawInnerSplitPolygon(): void {
+    private drawInnerSectorPolygon(): void {
         // 创建内多边形
         if (!this._innerPolygon) {
             this._innerPolygon = this._manager.createPolygon();
@@ -89,12 +89,12 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
             this._innerPolygon.touchable = false; // 不可交互
         }
         // 画内分割线
-        const { angleOffset, splitAngles } = this._luckWheel.currentInnerSplitData;
-        this.drawSplitLines(this._innerPolygon, angleOffset, splitAngles, (this._luckWheel as any)._gizmoInnerRadius);
+        const { angleOffset, sectorAngles } = this._luckWheel.currentInnerSectorData;
+        this.drawSectorLines(this._innerPolygon, angleOffset, sectorAngles, (this._luckWheel as any)._gizmoInnerRadius);
     }
 
     /** 绘制区块分割线 */
-    private drawSplitLines(polygon: IEditorEnv.IGizmoPolygon, angleOffset: number, splitAngles: number[], radius: number): void {
+    private drawSectorLines(polygon: IEditorEnv.IGizmoPolygon, angleOffset: number, sectorAngles: number[], radius: number): void {
         polygon.points.length = 0; // 清空
 
         let angleIndex = 0; // 分割线角度数组的索引
@@ -106,8 +106,8 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
             polygon.points.push(x, y);
 
             // 距离分割线角<=1度，则添加分割线点
-            if (angleIndex < splitAngles.length && splitAngles[angleIndex] - i <= 1) {
-                rad = Laya.Utils.toRadian(splitAngles[angleIndex] + angleOffset);
+            if (angleIndex < sectorAngles.length && sectorAngles[angleIndex] - i <= 1) {
+                rad = Laya.Utils.toRadian(sectorAngles[angleIndex] + angleOffset);
                 x = Math.cos(rad) * radius * this.owner.globalScaleX;
                 y = Math.sin(rad) * radius * this.owner.globalScaleY;
                 polygon.points.push(x, y);
@@ -122,24 +122,24 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
     }
 
     /** 绘制外多边形的索引编号 */
-    private drawOutsideNumberTexts(): void {
-        const radius = (this._luckWheel as any)._gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
-        const splitPositions: number[] = this._luckWheel.getOutsideSplitPositions(radius, false); // 外转盘各分块的中线点列表
-        this.drawNumberTexts(splitPositions, radius, LuckWheelGizmoConfig.outsideLineColor, this._outsideNumberTexts);
+    private drawOuterNumberTexts(): void {
+        const radius = (this._luckWheel as any)._gizmoOuterRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const sectorPositions: number[] = this._luckWheel.getOuterSectorPositions(radius, false); // 外转盘各分块的中线点列表
+        this.drawNumberTexts(sectorPositions, radius, LuckWheelGizmoConfig.outerLineColor, this._outerNumberTexts);
     }
 
     /** 绘制内多边形的索引编号 */
     private drawInnerNumberTexts(): void {
         const radius = (this._luckWheel as any)._gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
-        const splitPositions: number[] = this._luckWheel.getInnerSplitPositions(radius, false); // 内转盘各分块的中线点列表
-        this.drawNumberTexts(splitPositions, radius, LuckWheelGizmoConfig.innerLineColor, this._innerNumberTexts);
+        const sectorPositions: number[] = this._luckWheel.getInnerSectorPositions(radius, false); // 内转盘各分块的中线点列表
+        this.drawNumberTexts(sectorPositions, radius, LuckWheelGizmoConfig.innerLineColor, this._innerNumberTexts);
     }
 
     /** 绘制索引编号 */
-    private drawNumberTexts(splitPositions: number[], radius: number, textColor: string, outTexts: IEditorEnv.IGizmoText[]): void {
-        for (let i = 0, len = splitPositions.length; i < len; i += 2) {
-            const x = splitPositions[i] + this.owner.pivotX;
-            const y = splitPositions[i + 1] + this.owner.pivotY;
+    private drawNumberTexts(sectorPositions: number[], radius: number, textColor: string, outTexts: IEditorEnv.IGizmoText[]): void {
+        for (let i = 0, len = sectorPositions.length; i < len; i += 2) {
+            const x = sectorPositions[i] + this.owner.pivotX;
+            const y = sectorPositions[i + 1] + this.owner.pivotY;
             const i2 = Math.trunc((i + 1) / 2);
 
             let text = outTexts[i2];

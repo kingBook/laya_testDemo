@@ -1,9 +1,9 @@
 export class LuckWheelGizmoConfig {
 
     /** 外转盘线条颜色 */
-    public static readonly outsideLineColor: string = "#ff0000";
+    public static readonly outerLineColor: string = "#ff0000";
     /** 外转盘填充颜色 */
-    public static readonly outsideFillColor: string = "#7c272770";
+    public static readonly outerFillColor: string = "#7c272770";
 
     /** 内转盘线条颜色 */
     public static readonly innerLineColor: string = "#00fff6";
@@ -14,8 +14,8 @@ export class LuckWheelGizmoConfig {
     public static readonly zeroDegLineColor: string = "#ffffff";
 
     /** 线条宽度 */
-    public static readonly lineWidth: number = 2;
+    public static readonly lineWidth: number = 1;
 
     /** 索引号数字的字体大小 */
-    public static readonly indexNumberFontSize:number = 15;
+    public static readonly indexNumberFontSize:number = 11;
 }
