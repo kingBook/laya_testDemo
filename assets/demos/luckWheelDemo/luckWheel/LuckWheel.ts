@@ -887,8 +887,8 @@ export class RotationObject extends Laya.EventDispatcher {
         if (this._flags & RotationObjectFlag.RotationComplete) return;
         if (isNaN(this._rewardAngle)) return;
 
+        // 时间，进度
         this._aniTime += Laya.timer.delta;
-
         const t = Laya.MathUtil.clamp01(Math.trunc(this._aniTime / this.aniTotalTime * 1000) / 1000);
         this._progress = t;
 
@@ -911,12 +911,11 @@ export class RotationObject extends Laya.EventDispatcher {
      * @param value 角度值, NaN：表示不设置
      */
     public setRewardAngle(value: number): void {
-        const rewardAngle360 = Laya.MathUtil.repeat(value, 360); // 转为: [0, 360]
-
         // 旋转起始角度
         this._angleStart = this._angle;
 
         // 旋转的最终角度
+        const rewardAngle360 = Laya.MathUtil.repeat(value, 360); // 转为: [0, 360]
         const deltaAngle = this.getDeltaAngle(rewardAngle360);
         this._rewardAngle = this._angleStart + this._rotationSign * (deltaAngle + this.circles * 360);
 
