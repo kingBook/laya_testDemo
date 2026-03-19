@@ -16,9 +16,9 @@ export class TestStopLuckWheel extends Laya.Script {
     public onKeyDown(evt: Laya.Event): void {
         if (evt.keyCode === Laya.Keyboard.J) {
             // 随机取一个外转盘的开奖结果
-            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitData.splitAngles.length);
+            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOuterSectorData.sectorAngles.length);
             // 随机取一个内转盘的开奖结果
-            const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentInnerSplitData.splitAngles.length);
+            const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentInnerSectorData.sectorAngles.length);
             switch (this._luckWheel.mode) {
                 case LuckWheelMode.SingleRotatePointer:
                 case LuckWheelMode.SingleFixedPointer:
@@ -40,18 +40,18 @@ export class TestStopLuckWheel extends Laya.Script {
                 case LuckWheelMode.SingleRotatePointer:
                 case LuckWheelMode.SingleFixedPointer:
                     this._luckWheel.setRewardAngle(outsideRewardAngle);
-                    outsideAngleOffset = this._luckWheel.currentOutsideSplitData.angleOffset;
-                    outsideSplitAngle0 = this._luckWheel.currentOutsideSplitData.splitAngles[0];
-                    console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "外转盘索引:" + this._luckWheel.outsideRewardIndex);
+                    outsideAngleOffset = this._luckWheel.currentOuterSectorData.angleOffset;
+                    outsideSplitAngle0 = this._luckWheel.currentOuterSectorData.sectorAngles[0];
+                    console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "外转盘索引:" + this._luckWheel.outerRewardIndex);
                     console.log("outsideAngleOffset:", outsideAngleOffset, "outsideSplitAngle[0]:", outsideSplitAngle0);
                     break;
                 case LuckWheelMode.DoubleFixedPointer:
                     this._luckWheel.setRewardAngle(outsideRewardAngle, innerRewardAngle);
-                    outsideAngleOffset = this._luckWheel.currentOutsideSplitData.angleOffset;
-                    outsideSplitAngle0 = this._luckWheel.currentOutsideSplitData.splitAngles[0];
-                    const innerAngleOffset = this._luckWheel.currentOutsideSplitData.angleOffset;
-                    const innerSplitAngle0 = this._luckWheel.currentInnerSplitData.splitAngles[0];
-                    console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "内转盘角度：" + innerRewardAngle, "外转盘索引：" + this._luckWheel.outsideRewardIndex, "内转盘索引：" + this._luckWheel.innerRewardIndex);
+                    outsideAngleOffset = this._luckWheel.currentOuterSectorData.angleOffset;
+                    outsideSplitAngle0 = this._luckWheel.currentOuterSectorData.sectorAngles[0];
+                    const innerAngleOffset = this._luckWheel.currentOuterSectorData.angleOffset;
+                    const innerSplitAngle0 = this._luckWheel.currentInnerSectorData.sectorAngles[0];
+                    console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "内转盘角度：" + innerRewardAngle, "外转盘索引：" + this._luckWheel.outerRewardIndex, "内转盘索引：" + this._luckWheel.innerRewardIndex);
                     console.log("outsideAngleOffset:", outsideAngleOffset, "outsideSplitAngle[0]:", outsideSplitAngle0);
                     console.log("innerAngleOffset:", innerAngleOffset, "innerSplitAngle0:", innerSplitAngle0);
 
@@ -62,9 +62,9 @@ export class TestStopLuckWheel extends Laya.Script {
             this._luckWheel.setPause(!this._luckWheel.isPausing);
             console.log("设置暂停为：", this._luckWheel.isPausing);
         } else if (evt.keyCode === Laya.Keyboard.L) {
-            this._luckWheel.outsideSelectIndex = Math.trunc(Math.random() * this._luckWheel.outsideSplitDatas.length);
-            this._luckWheel.innerSelectIndex = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas.length);
-            console.log("选择分割数据：", "外转盘：" + this._luckWheel.outsideSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
+            this._luckWheel.outerSelectIndex = Math.trunc(Math.random() * this._luckWheel.outerSectorDatas.length);
+            this._luckWheel.innerSelectIndex = Math.trunc(Math.random() * this._luckWheel.innerSectorDatas.length);
+            console.log("选择分割数据：", "外转盘：" + this._luckWheel.outerSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
 
         } else if (evt.keyCode === Laya.Keyboard.I) {
             this._luckWheel.stopRotation();
