@@ -69,9 +69,16 @@ export class TestLuckWheel extends Laya.Script {
             this._luckWheel.innerSelectIndex = Math.trunc(Math.random() * this._luckWheel.innerSectorDatas.length);
             console.log("选择分割数据：", "外转盘：" + this._luckWheel.outerSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
 
-        }else if (evt.keyCode === Laya.Keyboard.I) {
+        } else if (evt.keyCode === Laya.Keyboard.I) {
             this._luckWheel.stopRotation();
             console.log("停止旋转");
+        } else if (evt.keyCode === Laya.Keyboard.O) {
+            // 随机取一个外转盘的索引
+            const outsideIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOuterSectorData.sectorAngles.length);
+            // 随机取一个内转盘的索引
+            const innerIndex: number = Math.trunc(Math.random() * this._luckWheel.currentInnerSectorData.sectorAngles.length);
+            this._luckWheel.setRotationObjectAngleToIndex(outsideIndex, innerIndex);
+            console.log(`设置旋转对象角度到：外索引:${outsideIndex}, 内索引:${innerIndex}`);
         }
     }
 

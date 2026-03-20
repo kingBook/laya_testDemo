@@ -10,7 +10,7 @@ export class TestDoubleRotate extends Laya.Script {
     private _luckWheelInner: LuckWheel;
 
     public onAwake(): void {
-        this._luckWheelOutside = this.owner.getChildByPath("WheelGroup.LuckWheelOutside").getComponent(LuckWheel);
+        this._luckWheelOutside = this.owner.getChildByPath("WheelGroup.LuckWheelOuter").getComponent(LuckWheel);
         this._luckWheelInner = this.owner.getChildByPath("WheelGroup.LuckWheelInner").getComponent(LuckWheel);
         this._luckWheelInner.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onInnerWheelRotationComplete);
         this._luckWheelOutside.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onOutsideWheelRotationComplete);
@@ -33,6 +33,11 @@ export class TestDoubleRotate extends Laya.Script {
             const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheelOutside.currentOuterSectorData.sectorAngles.length);
             this._luckWheelOutside.setRewardIndex(outsideRewardIndex);
             console.log("外幸运轮，设置奖励索引：", outsideRewardIndex, "pointerAngle:", this._luckWheelOutside.pointerAngle);
+
+            this._luckWheelOutside.startRotation();
+            this._luckWheelInner.startRotation();
+            console.log("开始旋转");
+            
         }
     }
 

@@ -33,6 +33,10 @@ export class TestCustomBezier extends Laya.Script {
             this._luckWheel.setRewardAngle(outsideRewardAngle);
             console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "外转盘索引:" + this._luckWheel.outerRewardIndex);
 
+            this._luckWheel.startRotation();
+            console.log("开始旋转");
+
+
             this._luckWheel.owner.offAll(LuckWheel.EVENT_ROTATION_COMPLETE);
             this._luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, () => {
                 console.log("旋转完成");
