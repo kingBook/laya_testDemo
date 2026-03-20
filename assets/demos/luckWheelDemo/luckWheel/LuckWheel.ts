@@ -17,6 +17,16 @@ export enum LuckWheelMode {
     DoubleOnlyFixedInner = 8
 }
 
+/** 旋转对象类型 */
+export enum RotationObjectType {
+    /** 指针 */
+    Pointer = "pointer",
+    /** 外转盘 */
+    Outer = "outer",
+    /** 内转盘 */
+    Inner = "innter"
+}
+
 enum Flag {
     /** 旋转中... */
     Rotating = 1,
@@ -26,8 +36,9 @@ enum Flag {
 
 /**
  * 幸运转盘
- * 
- * 旋转完成时，{@link owner} 将派发 {@link EVENT_ROTATION_COMPLETE} 事件
+ * @event {@link EVENT_ROTATION_START} 旋转开始事件，由 {@link owner} 派发
+ * @event {@link EVENT_POINTER_TOUCH} 指针触碰事件，由 {@link owner} 派发
+ * @event {@link EVENT_ROTATION_COMPLETE} 旋转完成事件，{@link owner} 派发
  * 
  * @example
  ```
@@ -43,7 +54,7 @@ luckWheel.isInitPointerClockwise = true; // 固定指针的模式，可以不设
 
 // 角度分割数据
 const sectorData = new SectorData();
-sectorData.itemsContainer = xxx; // 必须是转盘(outerDisc/innerDisc)的子级
+sectorData.itemsBox = xxx; // 必须是转盘(outerDisc/innerDisc)的子级
 sectorData.sectorAngles = [0, 90, 182, 270]; // 切分区块的分割线角度值，[0-359] 小 -> 大
 
 // 设置外转盘
@@ -59,10 +70,16 @@ luckWheel.innerSectorDatas = [sectorData,...]; // 切分区块的分割线角度
 // ================ 其他接口 ======================================
 // 设置奖励的索引
 luckWheel.setRewardIndex(outerRewardIndex, innerRewardIndex);
+// 开始旋转
+luckWheel.startRotation();
 // 暂停旋转
 luckWheel.setPause(true);
 // 停止旋转
 luckWheel.stopRotation();
+// 侦听指针触碰
+luckWheel.owner.on(LuckWheel.EVENT_POINTER_TOUCH, this, (type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number)=>{
+    console.log(`指针触碰类型：${type}, 上一次触碰的扇区索引: ${preSectorIndex}, 当前触碰的扇区索引: ${curSectorIndex}`);
+});
 // 侦听旋转完成
 luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, ()=>{
     // 旋转完成
@@ -81,15 +98,29 @@ luckWheel.getInnerIndexByAngle(innerAngle);
 @regClass()
 export class LuckWheel extends Laya.Script {
 
-    /** 旋转完成事件 */
-    public static readonly EVENT_ROTATION_COMPLETE: string = "eventRotationComplete";
+    /** 旋转开始事件，由 {@link owner} 派发，回调函数格式：`(): void` */
+    public static readonly EVENT_ROTATION_START = "eventRotationStart";
+    /**
+     * 指针触碰事件，由 {@link owner} 派发，回调函数格式：`(type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number): void`
+     * @param type 触碰类型，内转盘或外转盘
+     * @param preSectorIndex 上一次触碰的扇区索引
+     * @param curSectorIndex 当前触碰的扇区索引
+    */
+    public static readonly EVENT_POINTER_TOUCH = "eventPointerTouch";
+    /** 旋转完成事件，由 {@link owner} 派发，回调函数格式：`(): void` */
+    public static readonly EVENT_ROTATION_COMPLETE = "eventRotationComplete";
 
     declare owner: Laya.Sprite;
 
     @property({ type: LuckWheelMode, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _mode: LuckWheelMode = LuckWheelMode.SingleRotatePointer;
     /** 转盘的模式 */
-    @property({ type: LuckWheelMode, serializable: false, tips: "转盘的模式" }) // serializable：false，不会被保存到场景文件中
+    @property({
+        type: LuckWheelMode,
+        /** serializable：false，不会被保存到场景文件中 */
+        serializable: false,
+        tips: `转盘的模式:\n${LuckWheelMode[LuckWheelMode.SingleRotatePointer]} (单转盘，旋转指针)\n${LuckWheelMode[LuckWheelMode.SingleFixedPointer]} (单转盘，固定指针)\n${LuckWheelMode[LuckWheelMode.DoubleFixedPointer]} (双转盘，固定指针)\n${LuckWheelMode[LuckWheelMode.DoubleOnlyFixedInner]} (双转盘，固定内转盘，旋转指针和外转盘)`
+    })
     public get mode(): LuckWheelMode { return this._mode; }
 
 
@@ -190,8 +221,16 @@ export class LuckWheel extends Laya.Script {
     }
     // =====================  Inner end   =========================
 
-    /** 指针触碰处理器，格式：`(type: "inner" | "outer", sectorIndex: number): void` */
-    public onPointerTouchedHandler: Laya.Handler;
+
+    /** 旋转开始处理器，格式：`(): void` */
+    public onRotationStartHandler: Laya.Handler;
+    /**
+     * 指针触碰处理器，格式：`(type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number): void`
+     * @param type 触碰类型，内转盘或外转盘
+     * @param preSectorIndex 上一次触碰的扇区索引
+     * @param curSectorIndex 当前触碰的扇区索引
+    */
+    public onPointerTouchHandler: Laya.Handler;
     /** 旋转完成处理器，格式：`(): void` */
     public onRotationCompleteHandler: Laya.Handler;
 
@@ -207,15 +246,17 @@ export class LuckWheel extends Laya.Script {
     /** 内转盘奖励结果索引 */
     private _innerRewardIndex: number;
     /** 指针触碰的外转盘扇形索引 */
-    private _pointerTouchedOuterIndex: number;
+    private _pointerTouchOuterIndex: number;
     /** 指针触碰的外转盘扇形索引 */
-    private _pointerTouchedInnerIndex: number;
+    private _pointerTouchInnerIndex: number;
     /** 布尔标记 */
     private _flags: Flag;
 
     private _pointerRotationObj: RotationObject;
     private _outerRotationObj: RotationObject;
     private _innerRotationObj: RotationObject;
+
+    private readonly _tempParams: any[] = [];
 
     /** 指针半径 */
     public get pointerRadius(): number { return this._pointerRadius; }
@@ -320,26 +361,18 @@ export class LuckWheel extends Laya.Script {
         // 根据模式初始化
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
-                this._pointerRotationObj.setRewardAngle(NaN);
-                this._pointerRotationObj.init(this._pointerAngle, this.isInitPointerClockwise ? 1 : -1);
+                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.isInitPointerClockwise ? 1 : -1);
                 break;
             case LuckWheelMode.SingleFixedPointer:
-                this._outerRotationObj.setRewardAngle(NaN);
-                this._outerRotationObj.init(this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
+                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
-                this._outerRotationObj.setRewardAngle(NaN);
-                this._outerRotationObj.init(this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
-
-                this._innerRotationObj.setRewardAngle(NaN);
-                this._innerRotationObj.init(this.innerDisc.rotation, this.isInitInnerClockwise ? 1 : -1);
+                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
+                this._innerRotationObj.init(RotationObjectType.Inner, this.innerDisc.rotation, this.isInitInnerClockwise ? 1 : -1);
                 break;
             case LuckWheelMode.DoubleOnlyFixedInner:
-                this._pointerRotationObj.setRewardAngle(NaN);
-                this._pointerRotationObj.init(this._pointerAngle, this.isInitPointerClockwise ? 1 : -1);
-
-                this._outerRotationObj.setRewardAngle(NaN);
-                this._outerRotationObj.init(this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
+                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.isInitPointerClockwise ? 1 : -1);
+                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
                 break;
         }
     }
@@ -347,31 +380,20 @@ export class LuckWheel extends Laya.Script {
     public onUpdate(): void {
         if (!(this._flags & Flag.Rotating)) return;
         if (this._flags & Flag.Pausing) return;
-
-        let sectorIndex: number;
-
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
                 this._pointerRotationObj.update();
                 this.setPointerAngle(this._pointerRotationObj.angle360);
 
                 // 检测指针触碰(外)
-                sectorIndex = this.getOuterIndexByAngle(this.pointerAngle - this.currentOuterSectorData.angleOffset - this.outerDisc.rotation);
-                if (sectorIndex != this._pointerTouchedOuterIndex) {
-                    this._pointerTouchedOuterIndex = sectorIndex;
-                    this.onPointerTouchedHandler?.runWith(["outer", sectorIndex]);
-                }
+                this.detectPointerTouch(RotationObjectType.Outer);
                 break;
             case LuckWheelMode.SingleFixedPointer:
                 this._outerRotationObj.update();
                 this.outerDisc.rotation = this._outerRotationObj.angle360;
 
                 // 检测指针触碰(外)
-                sectorIndex = this.getOuterIndexByAngle(this.pointerAngle - this.currentOuterSectorData.angleOffset - this.outerDisc.rotation);
-                if (sectorIndex != this._pointerTouchedOuterIndex) {
-                    this._pointerTouchedOuterIndex = sectorIndex;
-                    this.onPointerTouchedHandler?.runWith(["outer", sectorIndex]);
-                }
+                this.detectPointerTouch(RotationObjectType.Outer);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
                 this._outerRotationObj.update();
@@ -381,18 +403,9 @@ export class LuckWheel extends Laya.Script {
                 this.innerDisc.rotation = this._innerRotationObj.angle360;
 
                 // 检测指针触碰(外)
-                sectorIndex = this.getOuterIndexByAngle(this.pointerAngle - this.currentOuterSectorData.angleOffset - this.outerDisc.rotation);
-                if (sectorIndex != this._pointerTouchedOuterIndex) {
-                    this._pointerTouchedOuterIndex = sectorIndex;
-                    this.onPointerTouchedHandler?.runWith(["outer", sectorIndex]);
-                }
-
+                this.detectPointerTouch(RotationObjectType.Outer);
                 // 检测指针触碰(内)
-                sectorIndex = this.getInnerIndexByAngle(this.pointerAngle - this.currentInnerSectorData.angleOffset - this.innerDisc.rotation);
-                if (sectorIndex != this._pointerTouchedInnerIndex) {
-                    this._pointerTouchedInnerIndex = sectorIndex;
-                    this.onPointerTouchedHandler?.runWith(["inner", sectorIndex]);
-                }
+                this.detectPointerTouch(RotationObjectType.Inner);
                 break;
             case LuckWheelMode.DoubleOnlyFixedInner:
                 this._pointerRotationObj.update();
@@ -402,25 +415,18 @@ export class LuckWheel extends Laya.Script {
                 this.outerDisc.rotation = this._outerRotationObj.angle360;
 
                 // 检测指针触碰(外)
-                sectorIndex = this.getOuterIndexByAngle(this.pointerAngle - this.currentOuterSectorData.angleOffset - this.outerDisc.rotation);
-                if (sectorIndex != this._pointerTouchedOuterIndex) {
-                    this._pointerTouchedOuterIndex = sectorIndex;
-                    this.onPointerTouchedHandler?.runWith(["outer", sectorIndex]);
-                }
-
+                this.detectPointerTouch(RotationObjectType.Outer);
                 // 检测指针触碰(内)
-                sectorIndex = this.getInnerIndexByAngle(this.pointerAngle - this.currentInnerSectorData.angleOffset - this.innerDisc.rotation);
-                if (sectorIndex != this._pointerTouchedInnerIndex) {
-                    this._pointerTouchedInnerIndex = sectorIndex;
-                    this.onPointerTouchedHandler?.runWith(["inner", sectorIndex]);
-                }
+                this.detectPointerTouch(RotationObjectType.Inner);
                 break;
         }
     }
 
     /** 开始旋转 */
     public startRotation(): void {
+        if (this._flags & Flag.Rotating) return;
         this._flags |= Flag.Rotating;
+
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
                 this._pointerRotationObj.startRotation();
@@ -437,6 +443,10 @@ export class LuckWheel extends Laya.Script {
                 this._outerRotationObj.startRotation();
                 break;
         }
+
+        // 旋转开始事件
+        this.owner.event(LuckWheel.EVENT_ROTATION_START);
+        this.onRotationStartHandler?.run();
     }
 
     /** 停止旋转 */
@@ -599,6 +609,31 @@ export class LuckWheel extends Laya.Script {
      */
     public getInnerIndexByAngle(innerAngle: number): number {
         return this.getIndexByAngle(innerAngle, this.currentInnerSectorData.sectorAngles);
+    }
+
+    /** 检测指针触碰 */
+    private detectPointerTouch(type: RotationObjectType.Outer | RotationObjectType.Inner): void {
+        if (type === RotationObjectType.Outer) {
+            // 检测指针触碰(外)
+            const sectorIndex = this.getOuterIndexByAngle(this.pointerAngle - this.currentOuterSectorData.angleOffset - this.outerDisc.rotation);
+            if (sectorIndex != this._pointerTouchOuterIndex) {
+                this._tempParams.length = 0;
+                this._tempParams.push(type, this._pointerTouchOuterIndex, sectorIndex);
+                this.owner.event(LuckWheel.EVENT_POINTER_TOUCH, this._tempParams);
+                this.onPointerTouchHandler?.runWith(this._tempParams);
+                this._pointerTouchOuterIndex = sectorIndex;
+            }
+        } else if (type === RotationObjectType.Inner) {
+            // 检测指针触碰(内)
+            const sectorIndex = this.getInnerIndexByAngle(this.pointerAngle - this.currentInnerSectorData.angleOffset - this.innerDisc.rotation);
+            if (sectorIndex != this._pointerTouchInnerIndex) {
+                this._tempParams.length = 0;
+                this._tempParams.push(type, this._pointerTouchInnerIndex, sectorIndex);
+                this.owner.event(LuckWheel.EVENT_POINTER_TOUCH, this._tempParams);
+                this.onPointerTouchHandler?.runWith(this._tempParams);
+                this._pointerTouchInnerIndex = sectorIndex;
+            }
+        }
     }
 
     /**
@@ -812,21 +847,34 @@ enum RotationObjectFlag {
 }
 
 /**
- * 旋转的对象
- * 
- * 开始旋转时，this 派发 {@link EVENT_START_ROTATION} 事件
- * 
- * 旋转完成时，this 派发 {@link EVENT_ROTATION_COMPLETE} 事件
+ * 旋转对象
+ * @event {@link EVENT_ROTATION_START} 旋转开始事件，由 {@link this} 派发
+ * @event {@link EVENT_ROTATION_PROGRESS} 旋转进度事件，旋转开始后，由 {@link this} 每帧派发
+ * @event {@link EVENT_ROTATION_COMPLETE} 旋转完成事件，由 {@link this} 派发
  */
 export class RotationObject extends Laya.EventDispatcher {
 
+    /**
+     * 旋转开始事件，由 {@link this} 派发，回调函数格式：`(rotationObj: RotationObject): void`
+     * @param rotationObj this
+     */
+    public static readonly EVENT_ROTATION_START = "eventRotationStart";
+    /** 
+     * 旋转进度事件，旋转开始后，由 {@link this} 每帧派发，回调函数格式：`(rotationObj: RotationObject, progress: number): void`
+     * @param rotationObj this
+     * @param progress 旋转进度，范围：[0, 1]
+     */
+    public static readonly EVENT_ROTATION_PROGRESS = "eventRotationProgress";
+    /**
+     * 旋转完成事件，由 {@link this} 派发，回调函数格式：`(rotationObj: RotationObject): void`
+     * @param rotationObj this
+     */
+    public static readonly EVENT_ROTATION_COMPLETE = "eventRotationComplete";
 
-    /** 开始旋转事件(this 派发) */
-    public static readonly EVENT_START_ROTATION: string = "eventStartRotation";
-    /** 旋转完成事件(this 派发) */
-    public static readonly EVENT_ROTATION_COMPLETE: string = "eventRotationComplete";
+    private readonly _tempParams: any[] = [];
 
-
+    /** 旋转对象类型 */
+    private _rotationObjType: RotationObjectType;
     /** 当前所在的角 */
     private _angle: number;
     /** 旋转的方向，1或-1 */
@@ -851,6 +899,8 @@ export class RotationObject extends Laya.EventDispatcher {
     /** 是否显示 log */
     public isShowLogMsg: boolean = false;
 
+    /** 旋转对象类型 */
+    public get rotationObjectType(): RotationObjectType { return this._rotationObjType; }
     /** 当前所在的角 */
     public get angle(): number { return this._angle; }
     /** 当前所在的角 [0,360] */
@@ -868,14 +918,18 @@ export class RotationObject extends Laya.EventDispatcher {
 
     /**
      * 初始化
+     * @param rotationObjType 旋转对象类型
      * @param angle 当前所在的角 [0,360]
      * @param rotationSign 旋转方向, 1或-1
      * @param bezierEaseData 贝塞尔缓动数据
      */
-    public init(angle: number, rotationSign: number, bezierEaseData: BezierEaseData = null): void {
+    public init(rotationObjType: RotationObjectType, angle: number, rotationSign: number, bezierEaseData: BezierEaseData = null): void {
+        this._rotationObjType = rotationObjType;
         this.setAngle(Laya.MathUtil.repeat(angle, 360));
-
         this._rotationSign = rotationSign;
+        this._rewardAngle = NaN;
+        this._angleStart = NaN;
+        this._aniTime = 0;
         this._progress = 0;
         this._flags = RotationObjectFlag.Inited;
 
@@ -898,11 +952,18 @@ export class RotationObject extends Laya.EventDispatcher {
         this.isShowLogMsg && console.log(`动画进度：${t}, tb:${tb}, newAngle:${newAngle}`);
         this.setAngle(newAngle);
 
+        // 旋转进度事件
+        this._tempParams.length = 0;
+        this._tempParams.push(this, this._progress);
+        this.event(RotationObject.EVENT_ROTATION_PROGRESS, this._tempParams);
+
         // 旋转完成
         if (t >= 1) {
             this.setAngle(this._rewardAngle);
-            this.event(RotationObject.EVENT_ROTATION_COMPLETE, this);
+            this._flags &= ~RotationObjectFlag.Rotating;
             this._flags |= RotationObjectFlag.RotationComplete;
+
+            this.event(RotationObject.EVENT_ROTATION_COMPLETE, this); // 旋转完成事件
         }
     }
 
@@ -931,8 +992,9 @@ export class RotationObject extends Laya.EventDispatcher {
         this._progress = 0;
         this._flags &= ~RotationObjectFlag.RotationComplete;
 
-        // 开始旋转事件
-        this.event(RotationObject.EVENT_START_ROTATION, this);
+        // 旋转开始事件
+        this.event(RotationObject.EVENT_ROTATION_START, this);
+
         this.isShowLogMsg && console.log(`开始旋转 起始角：${this._angleStart}, 最终角度:${this._rewardAngle}`);
     }
 
