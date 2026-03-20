@@ -25,7 +25,7 @@
       "left": 0,
       "right": 0,
       "top": 0,
-      "text": "按 J，用索引设置奖励结果",
+      "text": "按 J，用索引设置奖励结果，并开始旋转",
       "fontSize": 35,
       "color": "#ffffff",
       "align": "center",
