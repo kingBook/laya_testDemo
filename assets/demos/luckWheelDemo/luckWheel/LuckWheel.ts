@@ -504,6 +504,10 @@ export class LuckWheel extends Laya.Script {
      * @param innerRewardAngle 内转盘的奖励角 [0, 360],（角度分割线的第一条线为0度, 顺时针）
      */
     public setRewardAngle(outerRewardAngle: number, innerRewardAngle?: number): void {
+        if (this._flags & Flag.Rotating) {
+            console.error(`正在旋转中, 不能设置奖励角`);
+            return;
+        }
         // 加上偏移量
         outerRewardAngle += this.currentOuterSectorData.angleOffset + this.currentOuterSectorData.sectorAngles[0];
         // 转为 [0, 360]
@@ -983,6 +987,8 @@ export class RotationObject extends Laya.EventDispatcher {
      * @param value 角度值, NaN：表示不设置
      */
     public setRewardAngle(value: number): void {
+        if (this._flags & RotationObjectFlag.Rotating) return;
+
         // 旋转起始角度
         this._angleStart = this._angle;
 
