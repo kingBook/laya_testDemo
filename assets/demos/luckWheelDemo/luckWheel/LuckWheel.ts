@@ -353,11 +353,6 @@ export class LuckWheel extends Laya.Script {
         this.outerSelectIndex = this._outerSelectIndex;
         this.innerSelectIndex = this._innerSelectIndex;
 
-        //
-        this.setPause(false);
-
-        //this.setPointerAngle(Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x)));
-
         // 根据模式初始化
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
@@ -452,6 +447,22 @@ export class LuckWheel extends Laya.Script {
     /** 停止旋转 */
     public stopRotation(): void {
         this._flags &= ~Flag.Rotating;
+        switch (this.mode) {
+            case LuckWheelMode.SingleRotatePointer:
+                this._pointerRotationObj.stopRotation();
+                break;
+            case LuckWheelMode.SingleFixedPointer:
+                this._outerRotationObj.stopRotation();
+                break;
+            case LuckWheelMode.DoubleFixedPointer:
+                this._outerRotationObj.stopRotation();
+                this._innerRotationObj.stopRotation();
+                break;
+            case LuckWheelMode.DoubleOnlyFixedInner:
+                this._pointerRotationObj.stopRotation();
+                this._outerRotationObj.stopRotation();
+                break;
+        }
     }
 
     /**
@@ -996,6 +1007,19 @@ export class RotationObject extends Laya.EventDispatcher {
         this.event(RotationObject.EVENT_ROTATION_START, this);
 
         this.isShowLogMsg && console.log(`开始旋转 起始角：${this._angleStart}, 最终角度:${this._rewardAngle}`);
+    }
+
+    /** 停止旋转 */
+    public stopRotation(): void {
+        if (!(this._flags & RotationObjectFlag.Rotating)) return;
+
+        this._flags &= ~RotationObjectFlag.Rotating;
+        this._flags |= RotationObjectFlag.RotationComplete;
+
+        // 如果存在奖励角，重新设置奖励角、对齐起始角，再次开始旋转时不出现瞬移
+        if (!isNaN(this._rewardAngle)) {
+            this.setRewardAngle(this._rewardAngle);
+        }
     }
 
     /** 设置角度值 */
