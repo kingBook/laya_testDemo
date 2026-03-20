@@ -26,9 +26,6 @@ export class TestLuckWheel extends Laya.Script {
                     this._luckWheel.setRewardIndex(outerRewardIndex);
                     break;
                 case LuckWheelMode.DoubleFixedPointer:
-                    console.log("得到开奖结果", "外转盘：" + outerRewardIndex, "内转盘：" + innerRewardIndex);
-                    this._luckWheel.setRewardIndex(outerRewardIndex, innerRewardIndex);
-                    break;
                 case LuckWheelMode.DoubleOnlyFixedInner:
                     console.log("得到开奖结果", "外转盘：" + outerRewardIndex, "内转盘：" + innerRewardIndex);
                     this._luckWheel.setRewardIndex(outerRewardIndex, innerRewardIndex);
@@ -50,6 +47,7 @@ export class TestLuckWheel extends Laya.Script {
                     console.log("outerAngleOffset:", outerAngleOffset, "outerSectorAngles0:", outerSectorAngles0);
                     break;
                 case LuckWheelMode.DoubleFixedPointer:
+                case LuckWheelMode.DoubleOnlyFixedInner:
                     this._luckWheel.setRewardAngle(outerRewardAngle, innerRewardAngle);
                     outerAngleOffset = this._luckWheel.currentOuterSectorData.angleOffset;
                     outerSectorAngles0 = this._luckWheel.currentOuterSectorData.sectorAngles[0];
