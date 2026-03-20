@@ -69,6 +69,9 @@ export class TestLuckWheel extends Laya.Script {
             this._luckWheel.innerSelectIndex = Math.trunc(Math.random() * this._luckWheel.innerSectorDatas.length);
             console.log("选择分割数据：", "外转盘：" + this._luckWheel.outerSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
 
+        }else if (evt.keyCode === Laya.Keyboard.I) {
+            this._luckWheel.stopRotation();
+            console.log("停止旋转");
         }
     }
 

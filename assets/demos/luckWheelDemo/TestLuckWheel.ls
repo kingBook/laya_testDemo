@@ -25,7 +25,7 @@
       "height": 373,
       "top": 0,
       "centerX": 0,
-      "text": "按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，开始旋转\n按 P，设置暂停\n按 L，选择分割数据",
+      "text": "按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，开始旋转\n按 P，设置暂停\n按 L，选择分割数据\n按 I，选择分割数据",
       "fontSize": 50,
       "color": "#ffffff",
       "valign": "middle",
