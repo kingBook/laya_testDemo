@@ -50,7 +50,7 @@ luckWheel.mode = LuckWheelMode.SingleRotatePointer;
 // 设置指针
 luckWheel.pointer = xxx;
 luckWheel.pointerAngleOffset = 90; // 指针素材的角度修正值
-luckWheel.isInitPointerClockwise = true; // 固定指针的模式，可以不设置
+luckWheel.isPointerClockwise = true; // 指针的旋转方向，是否为顺时针（固定指针模式时，无须设置）
 
 // 角度分割数据
 const sectorData = new SectorData();
@@ -59,12 +59,12 @@ sectorData.sectorAngles = [0, 90, 182, 270]; // 切分区块的分割线角度�
 
 // 设置外转盘
 luckWheel.outerDisc = xxx;
-luckWheel.isInitOuterClockwise = true; // 只旋转指针的模式，可以不设置
+luckWheel.isOuterClockwise = true; // 外转盘的旋转方向，是否为顺时针（仅旋转指针的模式，无须设置）
 luckWheel.outerSectorDatas = [sectorData,...];
 
-// 设置内转盘（单转盘的模式，可以不设置）
+// 设置内转盘（单转盘的模式，无须设置）
 luckWheel.innerDisc = xxx;
-luckWheel.isInitInnerClockwise = false; // 只旋转指针的模式，可以不设置
+luckWheel.isInnerClockwise = false; // 内转盘的旋转方向，是否为顺时针（仅旋转指针的模式，无须设置）
 luckWheel.innerSectorDatas = [sectorData,...]; // 切分区块的分割线角度值，[0-359] 小 -> 大
 
 // ================ 其他接口 ======================================
@@ -142,9 +142,15 @@ export class LuckWheel extends Laya.Script {
     /** 指针素材的角度修正 */
     @property({ type: Number, catalog: "Pointer", step: 0.1, fractionDigits: 1, range: [-180, 180], tips: "指针素材的角度修正" })
     public pointerAngleOffset: number = 90;
-    /** 初始指针的旋转方向，是否为顺时针 */
-    @property({ type: Boolean, catalog: "Pointer", readonly: "data.mode==2||data.mode==4", tips: "初始指针的旋转方向，是否为顺时针" })
-    public isInitPointerClockwise: boolean = true;
+    /** 指针的旋转方向, 1:顺时针; -1:逆时针 */
+    @property({ type: Number, catalog: "Pointer", readonly: "data.mode==2||data.mode==4", enumSource: [{ name: "1", value: 1 }, { name: "-1", value: -1 }], tips: "指针的旋转方向, 1:顺时针; -1:逆时针" })
+    public pointerRotationSign: number = 1;
+    /** 指针旋转总时长<毫秒, 大于0的整数> */
+    @property({ type: Number, catalog: "Pointer", readonly: "data.mode==2||data.mode==4", min: 1, step: 1, tips: "指针旋转总时长<毫秒, 大于0的整数>" })
+    public pointerAniTotalTime: number = 7000;
+    /** 指针旋转圈数<大于0的整数> */
+    @property({ type: Number, catalog: "Pointer", readonly: "data.mode==2||data.mode==4", min: 1, step: 1, tips: "指针旋转圈数<大于0的整数>" })
+    public pointerAniCircles: number = 5;
     // =====================  Pointer end  ========================
 
 
@@ -152,9 +158,15 @@ export class LuckWheel extends Laya.Script {
     /** 外转盘 */
     @property({ type: Laya.Sprite, catalog: "Outer", tips: "外转盘" })
     public outerDisc: Laya.Sprite;
-    /** 初始外转盘的旋转方向，是否为顺时针 */
-    @property({ type: Boolean, catalog: "Outer", readonly: "data.mode==1", tips: "初始外转盘的旋转方向，是否为顺时针" })
-    public isInitOuterClockwise: boolean = true;
+    /** 外转盘的旋转方向, 1:顺时针; -1:逆时针 */
+    @property({ type: Number, catalog: "Outer", readonly: "data.mode==1", enumSource: [{ name: "1", value: 1 }, { name: "-1", value: -1 }], tips: "外转盘的旋转方向, 1:顺时针; -1:逆时针" })
+    public outerRotationSign: number = 1;
+    /** 外转盘旋转总时长<毫秒, 大于0的整数> */
+    @property({ type: Number, catalog: "Outer", readonly: "data.mode==1", min: 1, step: 1, tips: "外转盘旋转总时长<毫秒, 大于0的整数>" })
+    public outerAniTotalTime: number = 7000;
+    /** 外转盘旋转圈数<大于0的整数> */
+    @property({ type: Number, catalog: "Outer", readonly: "data.mode==1", min: 1, step: 1, tips: "外转盘旋转圈数<大于0的整数>" })
+    public outerAniCircles: number = 5;
 
     @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _outerSelectIndex: number = 0;
@@ -189,9 +201,15 @@ export class LuckWheel extends Laya.Script {
     /** 内转盘 */
     @property({ type: Laya.Sprite, catalog: "Inner", readonly: "data.mode==1||data.mode==2", tips: "内转盘" })
     public innerDisc: Laya.Sprite;
-    /** 初始内转盘的旋转方向，是否为顺时针 */
-    @property({ type: Boolean, catalog: "Inner", readonly: "data.mode==1||data.mode==2||data.mode==8", tips: "初始内转盘的旋转方向，是否为顺时针" })
-    public isInitInnerClockwise: boolean = true;
+    /** 内转盘的旋转方向, 1:顺时针; -1:逆时针 */
+    @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2||data.mode==8", enumSource: [{ name: "1", value: 1 }, { name: "-1", value: -1 }], tips: "内转盘的旋转方向, 1:顺时针; -1:逆时针" })
+    public innterRotationSign: number = 1;
+    /** 内转盘旋转总时长<毫秒, 大于0的整数> */
+    @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2||data.mode==8", min: 1, step: 1, tips: "内转盘旋转总时长<毫秒, 大于0的整数>" })
+    public innerAniTotalTime: number = 7000;
+    /** 内转盘旋转圈数<大于0的整数> */
+    @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2||data.mode==8", min: 1, step: 1, tips: "内转盘旋转圈数<大于0的整数>" })
+    public innerAniCircles: number = 5;
 
     @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _innerSelectIndex: number = 0;
@@ -347,6 +365,11 @@ export class LuckWheel extends Laya.Script {
         this._outerRotationObj.on(RotationObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
         this._innerRotationObj.on(RotationObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
 
+        this.init();
+    }
+
+    /** 初始化 */
+    public init(): void {
         // 调用 setter 方法, 初始显示或隐藏转盘
         this.mode = this._mode;
         // 调用 setter 方法，初始显示或隐藏物品容器
@@ -356,18 +379,18 @@ export class LuckWheel extends Laya.Script {
         // 根据模式初始化
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
-                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.isInitPointerClockwise ? 1 : -1);
+                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.pointerRotationSign, this.pointerAniTotalTime, this.pointerAniCircles);
                 break;
             case LuckWheelMode.SingleFixedPointer:
-                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
+                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.outerRotationSign, this.outerAniTotalTime, this.outerAniCircles);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
-                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
-                this._innerRotationObj.init(RotationObjectType.Inner, this.innerDisc.rotation, this.isInitInnerClockwise ? 1 : -1);
+                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.outerRotationSign, this.outerAniTotalTime, this.outerAniCircles);
+                this._innerRotationObj.init(RotationObjectType.Inner, this.innerDisc.rotation, this.innterRotationSign, this.innerAniTotalTime, this.innerAniCircles);
                 break;
             case LuckWheelMode.DoubleOnlyFixedInner:
-                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.isInitPointerClockwise ? 1 : -1);
-                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.isInitOuterClockwise ? 1 : -1);
+                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.pointerRotationSign, this.pointerAniTotalTime, this.pointerAniCircles);
+                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.outerRotationSign, this.outerAniTotalTime, this.outerAniCircles);
                 break;
         }
     }
@@ -892,12 +915,12 @@ export class RotationObject extends Laya.EventDispatcher {
     private _rotationObjType: RotationObjectType;
     /** 当前所在的角 */
     private _angle: number;
-    /** 旋转的方向，1或-1 */
-    private _rotationSign: number;
     /** 奖励角度 */
     private _rewardAngle: number;
-    /** 旋转开始时的角度 */
+    /** 旋转起始角 */
     private _angleStart: number;
+    /** 旋转最终角 */
+    private _angleEnd: number;
     /** 动画当前时间<毫秒> */
     private _aniTime: number;
     /** 动画的进度 [0, 1] */
@@ -905,10 +928,12 @@ export class RotationObject extends Laya.EventDispatcher {
     /** 布尔集合 */
     private _flags: RotationObjectFlag;
 
-    /** 动画总时长<毫秒，大于0的整数>，默认：7000 */
-    public aniTotalTime: number = 7000;
-    /** 旋转的圈数<大于0的整数>，默认：5 */
-    public circles: number = 5;
+    /** 旋转方向，1或-1 */
+    private rotationSign: number;
+    /** 动画总时长<毫秒，大于0的整数>*/
+    public aniTotalTime: number;
+    /** 旋转圈数<大于0的整数>*/
+    public circles: number;
     /** 贝塞尔缓动数据，https://cubic-bezier.com/ */
     public bezierEaseData: BezierEaseData = { precision: 8, data: [.42, 0, .58, 1] };
     /** 是否显示 log */
@@ -924,6 +949,8 @@ export class RotationObject extends Laya.EventDispatcher {
     public get rewardAngle(): number { return this._rewardAngle; }
     /** 奖励角度[0,360] */
     public get rewardAngle360(): number { return Laya.MathUtil.repeat(this._rewardAngle, 360); }
+    /** 旋转最终角 */
+    public get angleEnd(): number { return this._angleEnd; }
     /** 是否旋转结束 */
     public get isRotationComplete(): boolean { return (this._flags & RotationObjectFlag.RotationComplete) > 0; }
     /** 动画的进度 [0, 1] */
@@ -936,14 +963,19 @@ export class RotationObject extends Laya.EventDispatcher {
      * @param rotationObjType 旋转对象类型
      * @param angle 当前所在的角 [0,360]
      * @param rotationSign 旋转方向, 1或-1
+     * @param aniTotalTime 旋转总时长<毫秒，大于0的整数>
+     * @param circles 旋转圈数<大于0的整数>
      * @param bezierEaseData 贝塞尔缓动数据
      */
-    public init(rotationObjType: RotationObjectType, angle: number, rotationSign: number, bezierEaseData: BezierEaseData = null): void {
+    public init(rotationObjType: RotationObjectType, angle: number, rotationSign: number, aniTotalTime: number, circles: number, bezierEaseData: BezierEaseData = null): void {
         this._rotationObjType = rotationObjType;
         this.setAngle(Laya.MathUtil.repeat(angle, 360));
-        this._rotationSign = rotationSign;
+        this.rotationSign = rotationSign;
+        this.aniTotalTime = aniTotalTime;
+        this.circles = circles;
         this._rewardAngle = NaN;
         this._angleStart = NaN;
+        this._angleEnd = NaN;
         this._aniTime = 0;
         this._progress = 0;
         this._flags = RotationObjectFlag.Inited;
@@ -963,7 +995,7 @@ export class RotationObject extends Laya.EventDispatcher {
 
         // 贝塞尔曲线运动
         const tb = Utils.createBezierEase(t, this.bezierEaseData.data[0], this.bezierEaseData.data[1], this.bezierEaseData.data[2], this.bezierEaseData.data[3], this.bezierEaseData.precision);
-        const newAngle = Math.trunc(Laya.MathUtil.lerp(this._angleStart, this._rewardAngle, tb) * 100) / 100;
+        const newAngle = Math.trunc(Laya.MathUtil.lerp(this._angleStart, this._angleEnd, tb) * 100) / 100;
         this.isShowLogMsg && console.log(`动画进度：${t}, tb:${tb}, newAngle:${newAngle}`);
         this.setAngle(newAngle);
 
@@ -974,7 +1006,7 @@ export class RotationObject extends Laya.EventDispatcher {
 
         // 旋转完成
         if (t >= 1) {
-            this.setAngle(this._rewardAngle);
+            this.setAngle(this._angleEnd);
             this._flags &= ~RotationObjectFlag.Rotating;
             this._flags |= RotationObjectFlag.RotationComplete;
 
@@ -989,20 +1021,21 @@ export class RotationObject extends Laya.EventDispatcher {
     public setRewardAngle(value: number): void {
         if (this._flags & RotationObjectFlag.Rotating) return;
 
-        // 旋转起始角度
-        this._angleStart = this._angle;
+        this._rewardAngle = value;
 
-        // 旋转的最终角度
-        const rewardAngle360 = Laya.MathUtil.repeat(value, 360); // 转为: [0, 360]
-        const deltaAngle = this.getDeltaAngle(rewardAngle360);
-        this._rewardAngle = this._angleStart + this._rotationSign * (deltaAngle + this.circles * 360);
-
-        this.isShowLogMsg && console.log(`设置奖励角：${rewardAngle360}, 起始角：${this._angleStart}, 最终角度:${this._rewardAngle}`);
+        this.isShowLogMsg && console.log(`设置奖励角：${value}`);
     }
 
     /** 开始旋转 */
     public startRotation(): void {
         if (this._flags & RotationObjectFlag.Rotating) return;
+
+        // 如果存在奖励角，重新计算旋转起始角、最终角
+        // 否而会出现以下问题：
+        // * 同一奖励结果，旋转完成后，再次开始旋转时出现瞬移
+        // * 强制停止旋转后，再次开始旋转时出现瞬移
+        this.calcAngleStartAndEnd();
+
         this._flags |= RotationObjectFlag.Rotating;
 
         this._aniTime = 0;
@@ -1012,7 +1045,7 @@ export class RotationObject extends Laya.EventDispatcher {
         // 旋转开始事件
         this.event(RotationObject.EVENT_ROTATION_START, this);
 
-        this.isShowLogMsg && console.log(`开始旋转 起始角：${this._angleStart}, 最终角度:${this._rewardAngle}`);
+        this.isShowLogMsg && console.log(`开始旋转, 起始角：${this._angleStart}, 最终角度:${this._rewardAngle}`);
     }
 
     /** 停止旋转 */
@@ -1021,11 +1054,6 @@ export class RotationObject extends Laya.EventDispatcher {
 
         this._flags &= ~RotationObjectFlag.Rotating;
         this._flags |= RotationObjectFlag.RotationComplete;
-
-        // 如果存在奖励角，重新设置奖励角、对齐起始角，再次开始旋转时不出现瞬移
-        if (!isNaN(this._rewardAngle)) {
-            this.setRewardAngle(this._rewardAngle);
-        }
     }
 
     /** 设置角度值 */
@@ -1035,12 +1063,25 @@ export class RotationObject extends Laya.EventDispatcher {
 
     /** 获取距离奖励角的度数，根据旋转的方向计算，此值始终为正数 */
     private getDeltaAngle(rewardAngle360: number): number {
-        const targetAngle = this._rotationSign >= 0
+        const targetAngle = this.rotationSign >= 0
             ? rewardAngle360
             : (360 - rewardAngle360);
-        const currentAngle = this._rotationSign >= 0
+        const currentAngle = this.rotationSign >= 0
             ? this._angle
             : 360 - this._angle;
         return Laya.MathUtil.repeat(targetAngle - currentAngle, 360);
+    }
+
+    /** 计算旋转起始角、最终角（{@link _rewardAngle} 非 NaN 时，才能调用这个方法） */
+    private calcAngleStartAndEnd(): void {
+        if (isNaN(this._rewardAngle)) return;
+
+        // 旋转起始角
+        this._angleStart = this._angle;
+
+        // 旋转的最终角
+        const rewardAngle360 = Laya.MathUtil.repeat(this._rewardAngle, 360); // 转为: [0, 360]
+        const deltaAngle = this.getDeltaAngle(rewardAngle360);
+        this._angleEnd = this._angleStart + this.rotationSign * (deltaAngle + this.circles * 360);
     }
 }

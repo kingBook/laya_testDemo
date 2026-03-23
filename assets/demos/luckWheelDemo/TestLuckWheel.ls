@@ -55,11 +55,15 @@
             "_$ref": "jrcr0gae"
           },
           "pointerAngleOffset": 90,
-          "isInitPointerClockwise": true,
+          "pointerRotationSign": 1,
+          "pointerAniTotalTime": 7000,
+          "pointerAniCircles": 5,
           "outerDisc": {
             "_$ref": "4mj7wmn8"
           },
-          "isInitOuterClockwise": false,
+          "outerRotationSign": -1,
+          "outerAniTotalTime": 7000,
+          "outerAniCircles": 5,
           "_outerSelectIndex": 0,
           "outerSectorDatas": [
             {
@@ -106,7 +110,9 @@
           "innerDisc": {
             "_$ref": "6a1eqsdh"
           },
-          "isInitInnerClockwise": true,
+          "innterRotationSign": 1,
+          "innerAniTotalTime": 7000,
+          "innerAniCircles": 5,
           "_innerSelectIndex": 0,
           "innerSectorDatas": [
             {
