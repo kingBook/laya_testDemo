@@ -2,6 +2,11 @@ const svgNS = "http://www.w3.org/2000/svg";
 
 export class CurveEditDialog extends IEditor.Dialog {
 
+    // /** 展示事件 */
+    // public static readonly EVENT_SHOWN = "eventShown";
+    // /** 隐藏事件 */
+    // public static readonly EVENT_HIDE = "eventHide";
+
     /** 对话框画布大小 */
     public static readonly dialogCanvasSize = { width: 350, height: 350 };
     /** 对话框顶部空白大小 */
@@ -15,41 +20,45 @@ export class CurveEditDialog extends IEditor.Dialog {
     /** 右边距 */
     public static readonly marginRight = 50;
 
+    /** 曲线画布 */
     private _curveCanvas: CurveCanvas;
-    private _target:IEditor.IInspectingTarget;
+    /** 序列化的目标对象 */
+    private _target: IEditor.IInspectingTarget;
+
+    /** 序列化的目标对象 */
+    public get target(): IEditor.IInspectingTarget { return this._target; }
 
     async create() {
-        const panel = new gui.Widget();
+        // 窗口
+        const contentPane = new gui.Widget();
         const w = CurveEditDialog.dialogCanvasSize.width + CurveEditDialog.marginLeft + CurveEditDialog.marginRight;
         const h = CurveEditDialog.dialogCanvasSize.height + CurveEditDialog.dialogTopSpace + CurveEditDialog.marginTop + CurveEditDialog.marginBottom;
-        panel.setSize(w, h);
+        contentPane.setSize(w, h);
+        this.contentPane = contentPane;
+        this.title = "CurveEdit"; // 窗口标题
+        this.resizable = false; // 窗口大小，是否可调节
 
+        // 下拉列表
         const comboBox = await gui.UIPackage.createWidget<gui.ComboBox>("~/ui/basic/ComboBox/ComboBox.widget");
-        panel.addChild(comboBox);
+        contentPane.addChild(comboBox);
 
-        this._curveCanvas = new CurveCanvas(panel);
-
-        this.contentPane = panel;
-        this.title = "CurveEdit";
-        this.resizable = false;
+        /** 曲线画布 */
+        this._curveCanvas = new CurveCanvas(this);
 
     }
 
+    /** 展示窗口 */
     protected onShown(...args: any[]): void {
         this._target = args[0];
-        
-        console.log("target:",this._target);
-        
-        this._curveCanvas.keyPoints.forEach(key => {
-            key.addListeners(this._groot);
-        });
+        console.log("target:", this._target);
+        /** 曲线画布 onShown */
+        this._curveCanvas.onShown(this, this._groot);
     }
 
+    /** 隐藏窗口 */
     protected onHide(): void {
-        // this._curveCanvas.onDestroy();
-        this._curveCanvas.keyPoints.forEach(key => {
-            key.removeListeners(this._groot);
-        });
+        /** 曲线画布 onHide */
+        this._curveCanvas.onHide();
     }
 
     protected onAction(): void {
@@ -65,31 +74,29 @@ export class CurveEditDialog extends IEditor.Dialog {
 
 }
 
-
+/** 曲线画布 */
 class CurveCanvas {
 
-    public readonly keyPoints: KeyPoint[] = [];
+    /** 鼠标侦听的 GRoot */
+    private _groot: gui.GRoot;
 
-    constructor(parent: gui.Widget) {
-        // canvas
+    /** svg 节点 */
+    private _svg: SVGSVGElement;
+
+    /** 曲线上的关键帧点 */
+    private readonly _keyPoints: KeyPoint[] = [];
+
+    constructor(curveEditDialog: CurveEditDialog) {
+        // 画布
         const canvas = new gui.Shape();
         canvas.x = CurveEditDialog.marginLeft;
         canvas.y = CurveEditDialog.dialogTopSpace + CurveEditDialog.marginTop;
         canvas.width = CurveEditDialog.dialogCanvasSize.width;
         canvas.height = CurveEditDialog.dialogCanvasSize.height;
         canvas.drawRect(0, gui.Color.BLACK, new gui.Color("#434343")); // 不要设置轮廓线宽，会导致位置偏差
-        parent.addChild(canvas);
+        curveEditDialog.contentPane.addChild(canvas);
 
-        // bg
-        // const bg = new gui.Shape();
-        // bg.x = CurveEditDialog.margin;
-        // bg.y = CurveEditDialog.margin;
-        // bg.width = canvas.width - CurveEditDialog.margin * 2;
-        // bg.height = canvas.height - CurveEditDialog.margin * 2;
-        // bg.drawRect(1, gui.Color.BLACK, new gui.Color("#434343"));
-        // canvas.addChild(bg);
-
-        // svg
+        // svg 节点
         const svg = document.createElementNS(svgNS, "svg") as SVGSVGElement;
         svg.setAttribute("xmlns", svgNS);
         svg.setAttribute("x", "0");
@@ -101,36 +108,71 @@ class CurveCanvas {
         svg.style.right = "0";
         svg.style.top = "0";
         svg.style.bottom = "0";
-        svg.style.pointerEvents = "auto";
+        svg.style.pointerEvents = "auto"; // 鼠标指针事件
         svg.setAttribute("overflow", "visible"); // 溢出时显示
-
         canvas.element.appendChild(svg);
+        this._svg = svg;
+    }
+
+    /** 展示窗口 */
+    public onShown(curveEditDialog: CurveEditDialog, groot: gui.GRoot): void {
+        this._groot = groot;
+
+        // // 测试单独创建一个 KeyPoint
+        // const keyPoint = new KeyPoint(this._groot, this._svg, 0, 0);
+        // this._keyPoints.push(keyPoint);
 
         // 创建 KeyPoint
-        const keyPoint = new KeyPoint(svg, 0, 0);
-        this.keyPoints.push(keyPoint);
+        const keys: any[] = curveEditDialog.target.getPropertyValue("keys");
+        keys.forEach((key, index) => {
+            console.log("onShown::key", key);
+
+            const keyPoint = new KeyPoint(this._groot, this._svg, key.time, key.value);
+            this._keyPoints.push(keyPoint);
+        });
 
     }
 
+    /** 隐藏窗口 */
+    public onHide(): void {
+        // 销毁所有 KeyPoint
+        this.destroyAllKeyPoints();
+    }
 
-    // public onDestroy(): void {
+    /** 销毁所有 KeyPoint */
+    private destroyAllKeyPoints(): void {
+        this._keyPoints.forEach(keyPoint => {
+            keyPoint.onDestroy();
+        });
+    }
 
-    // }
 }
 
+/** 曲线上的关键帧点 */
 class KeyPoint {
 
+    /** 关键帧点大小 */
     private readonly size = 10;
+    /** 关键帧点的控制点数组 */
     private readonly controlPoints: ControlPoint[] = [];
 
-    private _group: SVGGElement;
+    /** 鼠标侦听的 GRoot */
+    private _groot: gui.GRoot;
+    /** 曲线画布的 svg 节点 */
     private _svg: SVGSVGElement;
+    /** 旋转45度矩形的容器 */
+    private _group: SVGGElement;
+    /** 鼠标拖动中... */
     private _dragging: boolean;
+    /** 临时 SVgPoint，用于缓存鼠标移动时的位置信息 */
     private _tempSvgPoint: SVGPoint;
+    /** 关键帧点在曲线图的横坐标 */
     private _time: number;
+    /** 关键帧点在曲线图的纵坐标 */
     private _value: number;
 
-    constructor(svg: SVGSVGElement, time: number, value: number) {
+    constructor(groot: gui.GRoot, svg: SVGSVGElement, time: number, value: number) {
+        this._groot = groot;
         this._svg = svg;
         this._time = time;
         this._value = value;
@@ -157,21 +199,25 @@ class KeyPoint {
         svg.appendChild(group);
         this._group = group;
 
-        // 临时 DOMPoint
+        // 临时 SvgPoint
         this._tempSvgPoint ||= this._svg.createSVGPoint();
+
+        // 添加鼠标侦听
+        this.addListeners();
     }
 
-    /** 鼠标侦听 */
-    public addListeners(groot: gui.GRoot): void {
-        groot.on("pointer_down", this.onPointerDown, this);
-        groot.on("pointer_move", this.onPointerMove, this);
-        groot.on("pointer_up", this.onPointerUp, this);
+    /** 添加鼠标侦听 */
+    private addListeners(): void {
+        this._groot.on("pointer_down", this.onPointerDown, this);
+        this._groot.on("pointer_move", this.onPointerMove, this);
+        this._groot.on("pointer_up", this.onPointerUp, this);
     }
 
-    public removeListeners(groot: gui.GRoot): void {
-        groot.offAll("pointer_down");
-        groot.offAll("pointer_move");
-        groot.offAll("pointer_up");
+    /** 移除鼠标侦听 */
+    private removeListeners(): void {
+        this._groot.off("pointer_down", this.onPointerDown, this);
+        this._groot.off("pointer_move", this.onPointerMove, this);
+        this._groot.off("pointer_up", this.onPointerUp, this);
     }
 
     /** 鼠标按下 */
@@ -181,7 +227,7 @@ class KeyPoint {
 
         // 鼠标位置转到 svg 局部坐标
         const mousePoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
-        console.log(mousePoint.x, mousePoint.y);
+        console.log("KeyPoint.onPointerDown:", mousePoint.x, mousePoint.y);
 
         // 矩形与鼠标距离
         const groupMatrix = this._group.getCTM();
@@ -224,11 +270,16 @@ class KeyPoint {
         this._dragging = false;
     }
 
-    // public onDestroy(): void {
+    public onDestroy(): void {
+        // 移除鼠标侦听
+        this.removeListeners();
+        // 移除容器节点
+        this._group.remove();
 
-    // }
+    }
 }
 
+/** 曲线关键帧点的控制点 */
 class ControlPoint {
 
     private readonly size = 10;

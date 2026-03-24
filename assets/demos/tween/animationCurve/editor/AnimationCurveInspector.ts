@@ -26,7 +26,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         const canvas = this._curveInput.getChild("canvas");
         
-
+        // 创建 svg 节点
         const svgNS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(svgNS, "svg") as SVGSVGElement;
         svg.setAttribute("xmlns", svgNS);
@@ -34,7 +34,9 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         svg.style.left = "0";
         svg.style.top = "0";
         svg.style.pointerEvents = "none";
+        canvas.element.appendChild(svg as any);
 
+        // 同步大小
         function syncSize() {
             const w = canvas.width;
             const h = canvas.height;
@@ -44,22 +46,24 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             svg.style.width = `${w}px`;
             svg.style.height = `${h}px`;
         }
-
         syncSize();
-        canvas.element.appendChild(svg as any);
 
+        // 坐标映射函数
         function mapX(px: number) { return px * Number(svg.getAttribute("width")); }
         function mapY(py: number) { return (1 - py) * Number(svg.getAttribute("height")); }
 
+        // 创建 Path 节点（曲线）
         const pathEl = document.createElementNS(svgNS, "path");
         pathEl.setAttribute("fill", "none");
         pathEl.setAttribute("stroke", "#00ff00");
         pathEl.setAttribute("stroke-width", "1");
         svg.appendChild(pathEl);
 
+        // 控制点
         const c1 = { x: 0.42, y: 0.0 };
         const c2 = { x: 0.58, y: 1.0 };
 
+        // 重画
         function redrawSVG() {
             const w = Number(svg.getAttribute("width"));
             const h = Number(svg.getAttribute("height"));
@@ -71,20 +75,21 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             const d = `M ${x0} ${y0} C ${x1} ${y1} ${x2} ${y2} ${x3} ${y3}`;
             pathEl.setAttribute("d", d);
         }
-
-        (this._curveInput as any)._redrawOverlay = () => { syncSize(); redrawSVG(); };
         redrawSVG();
 
+        // 同步大小、重新画全并为一个方法，动态属性 _redrawOverlay
+        (this._curveInput as any)._redrawOverlay = () => { syncSize(); redrawSVG(); };
+
+        // 点击事件侦听
         this._curveInput.on("click", (e: gui.Event) => {
-            Editor.showDialog(CurveEditDialog, null, this.target);
+            Editor.showDialog(CurveEditDialog, null, this.target); // 显示曲线编辑窗口
         });
 
+        // 大小改变事件
         this._curveInput.on("size_changed", (e: gui.Event) => {
-            (this._curveInput as any)._redrawOverlay();
+            (this._curveInput as any)._redrawOverlay(); // 同步大小、重新画
         });
-
-
-
+        
         return { ui: this._curveInput };
     }
 

@@ -22,18 +22,28 @@
             "inTangent": 0,
             "outTangent": 0.4,
             "value": 0,
-            "inWeight": 0,
-            "outWeight": 0.25,
+            "inWeight": 0.33333,
+            "outWeight": 0.40991945097321186,
             "weightedMode": 0,
             "time": 0
+          },
+          {
+            "_$type": "FloatKeyframe",
+            "inTangent": 2.286575923919489,
+            "outTangent": 2.286575923919489,
+            "value": 0.6266356250266503,
+            "inWeight": 0.3247064367943757,
+            "outWeight": 0.16332493595134212,
+            "weightedMode": 0,
+            "time": 0.27956989247311836
           },
           {
             "_$type": "FloatKeyframe",
             "inTangent": 0,
             "outTangent": 0,
             "value": 1,
-            "inWeight": 0.75,
-            "outWeight": 0,
+            "inWeight": 0.6185593553644834,
+            "outWeight": 0.33333,
             "weightedMode": 0,
             "time": 1
           }
