@@ -382,7 +382,7 @@ export default class AnimationCurveInspectorOld extends IEditor.PropertyField {
     }
 
     /**
-     * cubic-bezier.com 数据转为 KeyFrame
+     * cubic-bezier.com 数据转为 FloatKeyFrame
      * @param values 长度为 4
      */
     private cubicBezierValuesToKeys(values: number[]) {
@@ -423,7 +423,7 @@ export default class AnimationCurveInspectorOld extends IEditor.PropertyField {
     }
 
     /**
-     * KeyFrame 转为 cubic-bezier.com 数据
+     * FloatKeyFrame 转为 cubic-bezier.com 数据
      * @param keys 长度为 2
      */
     private keysToCubicBezierValues(keys: any[]): number[] {
