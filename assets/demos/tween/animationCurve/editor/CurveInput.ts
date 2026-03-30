@@ -1,12 +1,36 @@
 import { CurveEditDialog } from "./CurveEditDialog";
 
-export default class CurveInput extends gui.Widget {
+/** 关键帧点 */
+export class FloatKeyFrame {
+    /** 内切 */
+    public inTangent: number = 0;
+    /** 内权重 */
+    public inWeight: number = 0;
+    /** 外切 */
+    public outTangent: number = 0;
+    /** 外权重 */
+    public outWeight: number = 0;
+    /** 时间 t */
+    public time: number = 0;
+    /** 值 */
+    public value: number = 0;
+}
+
+export class CurveInput extends gui.Widget {
 
     private _canvas: gui.Shape;
     private _svg: SVGSVGElement;
     private _path: SVGPathElement;
+    /** 关键帧点数组 */
+    private _keys: FloatKeyFrame[];
+
     public c1: { x: number, y: number } = { x: 0.42, y: 0.0 };
     public c2: { x: number, y: number } = { x: 0.58, y: 1.0 };
+
+    /** 关键帧点数组 */
+    public get keys(): readonly FloatKeyFrame[] {
+        return this._keys;
+    }
 
     constructor() {
         super();
@@ -53,9 +77,6 @@ export default class CurveInput extends gui.Widget {
         this._svg = svg;
         this._canvas.element.appendChild(svg as any);
 
-        // 同步大小
-        this.syncSize();
-
         // 创建 Path 节点（曲线）
         const path = document.createElementNS(svgNS, "path");
         path.setAttribute("fill", "none");
@@ -64,7 +85,18 @@ export default class CurveInput extends gui.Widget {
         this._path = path;
         this._svg.appendChild(path);
 
-        // 
+        // 默认点
+        const k0 = new FloatKeyFrame();
+        k0.time = 0;
+        k0.value = 0;
+        const k1 = new FloatKeyFrame();
+        k1.time = 1;
+        k1.value = 1;
+        this._keys = [k0, k1];
+
+        // 同步大小
+        this.syncSize();
+        // 重画SVG
         this.redrawSVG();
 
         // // 点击事件侦听
@@ -92,24 +124,71 @@ export default class CurveInput extends gui.Widget {
 
     /** 重画SVG */
     private redrawSVG(): void {
-        const w = Number(this._svg.getAttribute("width"));
-        const h = Number(this._svg.getAttribute("height"));
-        if (!w || !h) return;
-        const x0 = this.mapX(0), y0 = this.mapY(0);
-        const x1 = this.mapX(this.c1.x), y1 = this.mapY(this.c1.y);
-        const x2 = this.mapX(this.c2.x), y2 = this.mapY(this.c2.y);
-        const x3 = this.mapX(1), y3 = this.mapY(1);
-        const d = `M ${x0} ${y0} C ${x1} ${y1} ${x2} ${y2} ${x3} ${y3}`;
-        this._path.setAttribute("d", d);
+        let d = "";
+        this._keys.forEach((k, i) => {
+            if (i === 0) {
+                // 起点
+                let x = k.time;
+                let y = k.value;
+
+                // 坐标映射
+                x = this.mapX(x);
+                y = this.mapY(y);
+
+                d += `M ${x} ${y}`;
+            } else {
+                const prevKey = this._keys[i - 1];
+                // 控制点1
+                let c1x = prevKey.outWeight; // outWeight = c1.x
+                let c1y = prevKey.outTangent * prevKey.outWeight; // outTangent = c1.y / c1.x
+                // 控制点2
+                let c2x = -k.inWeight + 1; // inWeight = 1 - c2.x
+                let c2y = -(k.inTangent * k.inWeight) + 1; // inTangent = (1 - c2.y) / (1 - c2.x)
+                // 终点
+                let x = k.time;
+                let y = k.value;
+
+                // 坐标映射
+                c1x = this.mapX(c1x);
+                c1y = this.mapY(c1y);
+                c2x = this.mapX(c2x);
+                c2y = this.mapY(c2y);
+                x = this.mapX(x);
+                y = this.mapY(y);
+
+                // C 控制点1, 控制点2, 终点
+                d += ` C ${c1x} ${c1y} ${c2x} ${c2y} ${x} ${y}`;
+            }
+        });
+
+        console.log("d:", d);
+
+        this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }
 
     /** x坐标映射函数 */
     private mapX(px: number): number {
         return px * Number(this._svg.getAttribute("width"));
     }
+
     /** y坐标映射函数 */
     private mapY(py: number): number {
         return (1 - py) * Number(this._svg.getAttribute("height"));
+    }
+
+    /** 清空所有关键帧点 */
+    public clearKeys(): void {
+        this._keys.length = 0;
+    }
+
+    /** 添加一个关键帧点 */
+    public addKey(): void {
+        this._keys.push(new FloatKeyFrame());
+    }
+
+    /** 应用修改 */
+    public applyChange(): void {
+
     }
 
 }

@@ -1,22 +1,8 @@
+import { FloatKeyFrame } from "./CurveInput";
+
 /** svg 命名空间 URI */
 const svgNS = "http://www.w3.org/2000/svg";
 
-type FloatKeyFrame = {
-    /** 内切 */
-    inTangent: number;
-    /** 内权重 */
-    inWeight: number;
-    /** 外切 */
-    outTangent: number;
-    /** 外权重 */
-    outWeight: number;
-    /** 时间 t */
-    time: number;
-    /** 值 */
-    value: number;
-    /** 权重模式 */
-    weightedMode: number;
-}
 
 export class CurveEditDialog extends IEditor.Dialog {
 
