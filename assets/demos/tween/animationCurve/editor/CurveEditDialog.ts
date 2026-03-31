@@ -1,5 +1,5 @@
 import AnimationCurveUtil from "../AnimationCurveUtil";
-import { FloatKeyFrame } from "./FloatKeyFrame";
+import { FloatKey } from "./FloatKey";
 
 /** svg 命名空间 URI */
 const svgNS = "http://www.w3.org/2000/svg";
@@ -22,10 +22,10 @@ export class CurveEditDialog extends IEditor.Dialog {
     /** 曲线画布 */
     private _curveCanvas: CurveCanvas;
     /** 关键帧点数组 */
-    private _keys: FloatKeyFrame[] = [];
+    private _keys: FloatKey[] = [];
 
     /** 关键帧点数组 */
-    public get keys(): readonly FloatKeyFrame[] {
+    public get keys(): readonly FloatKey[] {
         return this._keys;
     }
 
@@ -51,7 +51,8 @@ export class CurveEditDialog extends IEditor.Dialog {
     /** 展示窗口 */
     protected onShown(...args: any[]): void {
         this._keys = args[0];
-
+        console.log("CurveEditDialog::onShown() _keys:", this._keys);
+        
         // 曲线画布 onShown
         this._curveCanvas.emit(CurveCanvas.EVENT_SHOWN, [this._groot]);
     }
@@ -320,7 +321,7 @@ class KeyPoint {
     /** 临时 SVgPoint，用于储存位置信息，放便矩阵运算 */
     private _tempSvgPoint: SVGPoint;
     /** 关键帧点 */
-    private _key: FloatKeyFrame;
+    private _key: FloatKey;
     /** 拖动中... */
     private _draging: boolean;
 
@@ -332,7 +333,7 @@ class KeyPoint {
 
 
     /** 关键帧点 */
-    public get key(): FloatKeyFrame {
+    public get key(): FloatKey {
         return this._key;
     }
 
@@ -365,7 +366,7 @@ class KeyPoint {
     }
 
 
-    constructor(groot: gui.GRoot, svg: SVGSVGElement, key: FloatKeyFrame) {
+    constructor(groot: gui.GRoot, svg: SVGSVGElement, key: FloatKey) {
         this._groot = groot;
         this._svg = svg;
         this._key = key;

@@ -1,5 +1,5 @@
 /** 关键帧点 */
-export class FloatKeyFrame {
+export class FloatKey {
     /** 内切 */
     public inTangent: number = 0;
     /** 内权重 */

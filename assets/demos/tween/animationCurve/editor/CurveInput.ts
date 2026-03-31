@@ -1,5 +1,5 @@
 import { CurveEditDialog } from "./CurveEditDialog";
-import { FloatKeyFrame } from "./FloatKeyFrame";
+import { FloatKey } from "./FloatKey";
 
 /**
  * 
@@ -15,10 +15,10 @@ export class CurveInput extends gui.Widget {
     /** svg 路径节点 */
     private _path: SVGPathElement;
     /** 关键帧点数组 */
-    private _keys: FloatKeyFrame[];
+    private _keys: FloatKey[];
 
     /** 关键帧点数组 */
-    public get keys(): readonly FloatKeyFrame[] {
+    public get keys(): readonly FloatKey[] {
         return this._keys;
     }
 
@@ -76,10 +76,10 @@ export class CurveInput extends gui.Widget {
         this._svg.appendChild(path);
 
         // 默认点
-        const k0 = new FloatKeyFrame();
+        const k0 = new FloatKey();
         k0.time = 0;
         k0.value = 0;
-        const k1 = new FloatKeyFrame();
+        const k1 = new FloatKey();
         k1.time = 1;
         k1.value = 1;
         this._keys = [k0, k1];
@@ -173,7 +173,7 @@ export class CurveInput extends gui.Widget {
 
     /** 添加一个关键帧点 */
     public addKey(): void {
-        this._keys.push(new FloatKeyFrame());
+        this._keys.push(new FloatKey());
     }
 
     /** 应用修改 */
