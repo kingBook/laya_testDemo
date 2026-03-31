@@ -1,31 +1,21 @@
 import { CurveEditDialog } from "./CurveEditDialog";
+import { FloatKeyFrame } from "./FloatKeyFrame";
 
-/** 关键帧点 */
-export class FloatKeyFrame {
-    /** 内切 */
-    public inTangent: number = 0;
-    /** 内权重 */
-    public inWeight: number = 0;
-    /** 外切 */
-    public outTangent: number = 0;
-    /** 外权重 */
-    public outWeight: number = 0;
-    /** 时间 t */
-    public time: number = 0;
-    /** 值 */
-    public value: number = 0;
-}
-
+/**
+ * 
+ * @event {@link EVENT_SUBMIT} 修改后的提交事件, 事件由 {@link this} 派发，回调函数格式: `(): void`
+ */
 export class CurveInput extends gui.Widget {
+
+    /** 修改后的提交事件, 事件由 {@link this} 派发，回调函数格式: `(): void` */
+    public static readonly EVENT_SUBMIT = "eventSubmit";
 
     private _canvas: gui.Shape;
     private _svg: SVGSVGElement;
+    /** svg 路径节点 */
     private _path: SVGPathElement;
     /** 关键帧点数组 */
     private _keys: FloatKeyFrame[];
-
-    public c1: { x: number, y: number } = { x: 0.42, y: 0.0 };
-    public c2: { x: number, y: number } = { x: 0.58, y: 1.0 };
 
     /** 关键帧点数组 */
     public get keys(): readonly FloatKeyFrame[] {
@@ -99,10 +89,10 @@ export class CurveInput extends gui.Widget {
         // 重画SVG
         this.redrawSVG();
 
-        // // 点击事件侦听
-        // this.on("click", (e: gui.Event) => {
-        //     Editor.showDialog(CurveEditDialog, null, this.target); // 显示曲线编辑窗口
-        // });
+        // 点击事件侦听
+        this.on("click", (e: gui.Event) => {
+            Editor.showDialog(CurveEditDialog, null, this._keys); // 显示曲线编辑窗口
+        });
 
         // 大小改变事件
         this.on("size_changed", (e: gui.Event) => {
@@ -188,7 +178,7 @@ export class CurveInput extends gui.Widget {
 
     /** 应用修改 */
     public applyChange(): void {
-
+        this.emit(CurveInput.EVENT_SUBMIT);
     }
 
 }

@@ -1,5 +1,4 @@
 import AnimationCurveUtil from "../AnimationCurveUtil";
-import { CurveEditDialog } from "./CurveEditDialog";
 import { CurveInput } from "./CurveInput";
 
 @IEditor.inspectorField("AnimationCurve")
@@ -25,10 +24,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         console.log("create();");
         this._curveInput = new CurveInput();
 
-        // 点击事件侦听
-        this._curveInput.on("click", (e: gui.Event) => {
-            Editor.showDialog(CurveEditDialog, null, this.target); // 显示曲线编辑窗口
-        });
         return { ui: this._curveInput };
     }
 
@@ -53,10 +48,11 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         const keys: any[] = value.keys;
 
         //console.log("refresh();", keys[0].outWeight, keys[0].outTangent, keys[1].inWeight, keys[1].inTangent);
-        this._curveInput.clearKeys(); // 先清空，避免顶点数量比实际数量多
-        for (let i = 0, c = keys.length; i < c; i++) {
-            const key = keys[i];
+        // 先清空，避免顶点数量比实际数量多
+        this._curveInput.clearKeys();
 
+        // 设置 CurveInput 的值，等于当前值
+        keys.forEach((key, i) => {
             if (i >= this._curveInput.keys.length) {
                 this._curveInput.addKey();
             }
@@ -69,7 +65,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             ikey.outTangent = key.outTangent;
             ikey.inWeight = key.inWeight;
             ikey.outWeight = key.outWeight;
-        }
+        });
     }
 
     /** 创建默认实例 */
@@ -85,22 +81,26 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         const retKeys = AnimationCurveUtil.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.isDefault).values);
 
         initProp.keys = [
-            this.createFloatKeyframe({
+            {
+                _$type: "FloatKeyframe", // Laya.FloatKeyframe
                 time: 0,
                 value: 0,
                 inTangent: 0,
                 inWeight: 0,
                 outTangent: retKeys[0].outTangent,
                 outWeight: retKeys[0].outWeight
-            }),
-            this.createFloatKeyframe({
+                // "weightedMode": 0
+            },
+            {
+                _$type: "FloatKeyframe", // Laya.FloatKeyframe
                 time: 1,
                 value: 1,
                 inTangent: retKeys[1].inTangent,
                 inWeight: retKeys[1].inWeight,
                 outTangent: 0,
                 outWeight: 0
-            })
+                // "weightedMode": 0
+            }
         ];
 
         // test
@@ -113,21 +113,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         this.parent.target.setPropertyValue(this.property.name, initProp);
     }
 
-    /** 创建一个 FloatKeyframe */
-    private createFloatKeyframe(params: { time: number, value: number, inTangent: number, inWeight: number, outTangent: number, outWeight: number }) {
-        console.log("createFloatKeyframe();");
-        return {
-            "_$type": "FloatKeyframe", // Laya.FloatKeyframe
-            "time": params.time,
-            "value": params.value,
-            "inTangent": params.inTangent,
-            "inWeight": params.inWeight,
-            "outTangent": params.outTangent,
-            "outWeight": params.outWeight
-            // "weightedMode": 0
-        };
-    }
 
-    
+
 
 }

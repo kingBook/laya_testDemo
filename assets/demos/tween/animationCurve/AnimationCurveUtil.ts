@@ -2,6 +2,26 @@
 export default class AnimationCurveUtil {
 
     /**
+     * x坐标映射函数
+     * @param px [0,1]
+     * @param svg 父容器节点
+     * @returns 
+     */
+    public static mapX(px: number, svg: SVGSVGElement): number {
+        return px * parseFloat(svg.getAttribute("width"));
+    }
+
+    /**
+     * y坐标映射函数
+     * @param py [0,1]
+     * @param svg 父容器节点
+     * @returns 
+     */
+    public static mapY(py: number, svg: SVGSVGElement): number {
+        return (1 - py) * parseFloat(svg.getAttribute("height"));
+    }
+
+    /**
     * cubic-bezier.com 数据转为 FloatKeyFrame
     * @param values 长度为 4
     */
