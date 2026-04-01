@@ -1,3 +1,4 @@
+import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
 import { CurveEditDialog } from "./CurveEditDialog";
 import { FloatKey } from "./FloatKey";
 
@@ -122,48 +123,35 @@ export class CurveInput extends gui.Widget {
                 let y = k.value;
 
                 // 坐标映射
-                x = this.mapX(x);
-                y = this.mapY(y);
+                x = AnimationCurveEditorUtil.mapX(x, this._svg);
+                y = AnimationCurveEditorUtil.mapY(y, this._svg);
 
                 d += `M ${x} ${y}`;
             } else {
                 const prevKey = this._keys[i - 1];
                 // 控制点1
-                let c1x = prevKey.outWeight; // outWeight = c1.x
-                let c1y = prevKey.outTangent * prevKey.outWeight; // outTangent = c1.y / c1.x
+                const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
                 // 控制点2
-                let c2x = -k.inWeight + 1; // inWeight = 1 - c2.x
-                let c2y = -(k.inTangent * k.inWeight) + 1; // inTangent = (1 - c2.y) / (1 - c2.x)
+                const c2 = AnimationCurveEditorUtil.inKeyToControlPoint(k);
                 // 终点
                 let x = k.time;
                 let y = k.value;
 
                 // 坐标映射
-                c1x = this.mapX(c1x);
-                c1y = this.mapY(c1y);
-                c2x = this.mapX(c2x);
-                c2y = this.mapY(c2y);
-                x = this.mapX(x);
-                y = this.mapY(y);
+                c1.x = AnimationCurveEditorUtil.mapX(c1.x, this._svg);
+                c1.y = AnimationCurveEditorUtil.mapY(c1.y, this._svg);
+                c2.x = AnimationCurveEditorUtil.mapX(c2.x, this._svg);
+                c2.y = AnimationCurveEditorUtil.mapY(c2.y, this._svg);
+                x = AnimationCurveEditorUtil.mapX(x, this._svg);
+                y = AnimationCurveEditorUtil.mapY(y, this._svg);
 
                 // C 控制点1, 控制点2, 终点
-                d += ` C ${c1x} ${c1y} ${c2x} ${c2y} ${x} ${y}`;
+                d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;
             }
         });
-
         console.log("d:", d);
 
         this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
-    }
-
-    /** x坐标映射函数 */
-    private mapX(px: number): number {
-        return px * Number(this._svg.getAttribute("width"));
-    }
-
-    /** y坐标映射函数 */
-    private mapY(py: number): number {
-        return (1 - py) * Number(this._svg.getAttribute("height"));
     }
 
     /** 清空所有关键帧点 */
@@ -178,6 +166,11 @@ export class CurveInput extends gui.Widget {
 
     /** 应用修改 */
     public applyChange(): void {
+        // 同步大小
+        this.syncSize();
+        // 重画SVG
+        this.redrawSVG();
+        // 修改提交事件
         this.emit(CurveInput.EVENT_SUBMIT);
     }
 

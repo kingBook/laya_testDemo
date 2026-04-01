@@ -20,7 +20,7 @@ export class AnimationCurveTest extends Laya.Script {
     text: Laya.TextArea;
 
     onAwake(): void {
-        console.log("animationCurve:", this.animationCurve);
+        //console.log("animationCurve:", this.animationCurve);
         //console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
 
         const canvas: Laya.Sprite = this.owner.getChild("canvas");
@@ -58,15 +58,15 @@ export class AnimationCurveTest extends Laya.Script {
     }
 
     onStart(): void {
-        console.log("onStart");
-        console.log("this.animationCurve:", this.animationCurve);
+        // console.log("onStart");
+        // console.log("this.animationCurve:", this.animationCurve);
 
-        for (let i = 0, len = 100; i <= len; i++) {
-            const t = i / len;
-            const y = this.animationCurve.getValue(t);
-            console.log(y);
+        // for (let i = 0, len = 100; i <= len; i++) {
+        //     const t = i / len;
+        //     const y = this.animationCurve.getValue(t);
+        //     console.log(y);
 
-        }
+        // }
 
     }
 }

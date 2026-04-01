@@ -1,4 +1,4 @@
-import AnimationCurveUtil from "../AnimationCurveUtil";
+import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
 import { CurveInput } from "./CurveInput";
 
 @IEditor.inspectorField("AnimationCurve")
@@ -23,7 +23,10 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     public override create(): IEditor.IPropertyFieldCreateResult {
         console.log("create();");
         this._curveInput = new CurveInput();
-
+        // 侦听修改
+        this._curveInput.on(CurveInput.EVENT_SUBMIT, e => {
+            this.onCurveInputSubmit();
+        });
         return { ui: this._curveInput };
     }
 
@@ -32,14 +35,47 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         //console.log("target.getValue:", this.target.getValue());
 
-        // 当字段为空时，创建一个默认实例
+        // 当字段为空时，创建默认属性
         if (!this.target.getValue()) {
-            this.createDefaultInstance();
+            this.createDefaultProperty();
         }
-
 
         // 同步值到 CurveInput
         this.syncValueToCurveInput();
+    }
+
+    /** CurveInput 修改后提交 */
+    private onCurveInputSubmit(): void {
+        // 设置值到目标
+        const value = this.target.getValue();
+        const keys: any[] = value.keys;
+
+        this._curveInput.keys.forEach((k, i) => {
+            if (i >= keys.length) {
+                keys.push(this.createFloatKeyframe());
+            }
+            const key = keys[i];
+            key.time = k.time;
+            key.value = k.value;
+            key.inTangent = k.inTangent;
+            key.outTangent = k.outTangent;
+            key.inWeight = k.inWeight;
+            key.outWeight = k.outWeight;
+        });
+
+        // 删除多出的点
+        if (keys.length > this._curveInput.keys.length) {
+            keys.length = this._curveInput.keys.length;
+        }
+
+        // // 第一个点永远为(0,0)
+        // keys[0].time = 0;
+        // keys[0].value = 0;
+        // // 最后一个永远点为(1,1)
+        // keys[keys.length - 1].time = 1;
+        // keys[keys.length - 1].value = 1;
+
+        this.target.setValue(value);
     }
 
     /** 同步值到 CurveInput */
@@ -68,49 +104,38 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         });
     }
 
-    /** 创建默认实例 */
-    private createDefaultInstance(): void {
-        //console.log("createDefaultInstance();");
+    /** 创建默认属性 */
+    private createDefaultProperty(): void {
+        //console.log("createDefaultProperty();");
         const typeDescriptor: IEditor.FTypeDescriptor = Editor.typeRegistry.types[`${this.property.type}`];
 
         // 默认值
         const initProp = Editor.typeRegistry.getInitProps(typeDescriptor) || {};
         initProp._$type = typeDescriptor.name;
 
-        // _easeComboBoxDatas 中默认值项，转为 FloatKeyFrame 数组
-        const retKeys = AnimationCurveUtil.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.isDefault).values);
+        // _easeComboBoxDatas 中默认值项，转为 FloatKey 数组
+        const retKeys = AnimationCurveEditorUtil.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.isDefault).values);
 
-        initProp.keys = [
-            {
-                _$type: "FloatKeyframe", // Laya.FloatKeyframe
-                time: 0,
-                value: 0,
-                inTangent: 0,
-                inWeight: 0,
-                outTangent: retKeys[0].outTangent,
-                outWeight: retKeys[0].outWeight
-                // "weightedMode": 0
-            },
-            {
-                _$type: "FloatKeyframe", // Laya.FloatKeyframe
-                time: 1,
-                value: 1,
-                inTangent: retKeys[1].inTangent,
-                inWeight: retKeys[1].inWeight,
-                outTangent: 0,
-                outWeight: 0
-                // "weightedMode": 0
-            }
-        ];
-
-        // test
-        // initProp.keys = [
-        //     this.createFloatKeyframe({ time: 0, value: 0, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 }),
-        //     this.createFloatKeyframe({ time: 1, value: 1, inTangent: 0, inWeight: 0.33333, outTangent: 0, outWeight: 0.33333 })
-        // ];
+        initProp.keys = retKeys.map(k => {
+            return this.createFloatKeyframe(k.time, k.value, k.inTangent, k.inWeight, k.outTangent, k.outWeight);
+        });
 
         // 设置新属性值
         this.parent.target.setPropertyValue(this.property.name, initProp);
+    }
+
+    private createFloatKeyframe(time: number = 0, value: number = 0, inTangent: number = 0, inWeight: number = 0, outTangent: number = 0, outWeight: number = 0) {
+        console.log("createFloatKeyframe();");
+        return {
+            _$type: "FloatKeyframe", // Laya.FloatKeyframe
+            time: time,
+            value: value,
+            inTangent: inTangent,
+            inWeight: inWeight,
+            outTangent: outTangent,
+            outWeight: outWeight
+            // "weightedMode": 0
+        };
     }
 
 

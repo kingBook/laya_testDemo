@@ -1,10 +1,10 @@
 /** 关键帧点 */
 export class FloatKey {
-    /** 内切 */
+    /** 内切线 */
     public inTangent: number = 0;
     /** 内权重 */
     public inWeight: number = 0;
-    /** 外切 */
+    /** 外切线 */
     public outTangent: number = 0;
     /** 外权重 */
     public outWeight: number = 0;

@@ -1,4 +1,4 @@
-import AnimationCurveUtil from "../AnimationCurveUtil";
+import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
 import { FloatKey } from "./FloatKey";
 
 /** svg 命名空间 URI */
@@ -6,7 +6,7 @@ const svgNS = "http://www.w3.org/2000/svg";
 
 /**
  * 曲线编辑窗口
- * @event {@link EVENT_SUBMIT } 修改后的提交事件, 事件由 {@link contentPane} 派发, 回调函数格式: `(): void`
+ * @emit {@link EVENT_SUBMIT } 修改后的提交事件, 事件由 {@link contentPane} 派发, 回调函数格式: `(): void`
  */
 export class CurveEditDialog extends IEditor.Dialog {
 
@@ -25,7 +25,7 @@ export class CurveEditDialog extends IEditor.Dialog {
     private _keys: FloatKey[] = [];
 
     /** 关键帧点数组 */
-    public get keys(): readonly FloatKey[] {
+    public get keys(): FloatKey[] {
         return this._keys;
     }
 
@@ -45,14 +45,13 @@ export class CurveEditDialog extends IEditor.Dialog {
 
         /** 曲线画布 */
         this._curveCanvas = new CurveCanvas(this);
-
     }
 
     /** 展示窗口 */
     protected onShown(...args: any[]): void {
         this._keys = args[0];
         console.log("CurveEditDialog::onShown() _keys:", this._keys);
-        
+
         // 曲线画布 onShown
         this._curveCanvas.emit(CurveCanvas.EVENT_SHOWN, [this._groot]);
     }
@@ -148,16 +147,20 @@ class CurveCanvas extends gui.EventDispatcher {
     private onShown(groot: gui.GRoot): void {
         this._groot = groot;
 
-
         // 创建 KeyPoint
         const keys = this._curveEditDialog.keys;
         keys.forEach((k, i) => {
             const keyPoint = new KeyPoint(this._groot, this._svg, k);
+            const isFirst = i === 0;
+            const isLast = i === keys.length - 1;
+            keyPoint.allowMovement = !isFirst && !isLast; // 非第一或最后一个才可移动
+            keyPoint.controlPoints[0].enabled = !isFirst; // 第一个关键帧点，内控制点不可用
+            keyPoint.controlPoints[1].enabled = !isLast; // 最后一个关键帧点，外控制点不可用
             this._keyPoints.push(keyPoint);
         });
 
-        this.syncSize();
-        this.redrawSVG();
+        // 应用修改
+        this.applyChange();
 
         // 添加鼠标侦听
         this.addListeners();
@@ -200,13 +203,13 @@ class CurveCanvas extends gui.EventDispatcher {
 
             // 是否选中，鼠标按下触碰关键帧点及其控制点都视为选中
             const isTouchKeyPoint = kpt.containsPoint(e.input);
-            const touchedControlPoint = kpt.controlPoints.find(cpt => cpt.visible && cpt.containsPoint(e.input));
+            const touchedControlPoint = kpt.controlPoints.find(cpt => cpt.enabled && cpt.visible && cpt.containsPoint(e.input));
             kpt.isSelected = Boolean(isTouchKeyPoint || touchedControlPoint);
             if (kpt.isSelected) {
                 hasSelected = true;
 
                 if (isTouchKeyPoint) { // 鼠标按下触碰关键帧点，则拖动关键帧点
-                    kpt.startDrag();
+                    kpt.allowMovement && kpt.startDrag();
                 } else { // 鼠标按下触碰控制点，则拖动控制点
                     touchedControlPoint.startDrag();
                 }
@@ -253,32 +256,30 @@ class CurveCanvas extends gui.EventDispatcher {
                 let y = k.value;
 
                 // 坐标映射
-                x = this.mapX(x);
-                y = this.mapY(y);
+                x = AnimationCurveEditorUtil.mapX(x, this._svg);
+                y = AnimationCurveEditorUtil.mapY(y, this._svg);
 
                 d += `M ${x} ${y}`;
             } else {
                 const prevKey = this._curveEditDialog.keys[i - 1];
                 // 控制点1
-                let c1x = prevKey.outWeight; // outWeight = c1.x
-                let c1y = prevKey.outTangent * prevKey.outWeight; // outTangent = c1.y / c1.x
+                const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
                 // 控制点2
-                let c2x = -k.inWeight + 1; // inWeight = 1 - c2.x
-                let c2y = -(k.inTangent * k.inWeight) + 1; // inTangent = (1 - c2.y) / (1 - c2.x)
+                const c2 = AnimationCurveEditorUtil.inKeyToControlPoint(k);
                 // 终点
                 let x = k.time;
                 let y = k.value;
 
                 // 坐标映射
-                c1x = this.mapX(c1x);
-                c1y = this.mapY(c1y);
-                c2x = this.mapX(c2x);
-                c2y = this.mapY(c2y);
-                x = this.mapX(x);
-                y = this.mapY(y);
+                c1.x = AnimationCurveEditorUtil.mapX(c1.x, this._svg);
+                c1.y = AnimationCurveEditorUtil.mapY(c1.y, this._svg);
+                c2.x = AnimationCurveEditorUtil.mapX(c2.x, this._svg);
+                c2.y = AnimationCurveEditorUtil.mapY(c2.y, this._svg);
+                x = AnimationCurveEditorUtil.mapX(x, this._svg);
+                y = AnimationCurveEditorUtil.mapY(y, this._svg);
 
                 // C 控制点1, 控制点2, 终点
-                d += ` C ${c1x} ${c1y} ${c2x} ${c2y} ${x} ${y}`;
+                d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;
             }
         });
 
@@ -287,14 +288,12 @@ class CurveCanvas extends gui.EventDispatcher {
         this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }
 
-    /** x坐标映射函数 */
-    private mapX(px: number): number {
-        return px * Number(this._svg.getAttribute("width"));
-    }
-
-    /** y坐标映射函数 */
-    private mapY(py: number): number {
-        return (1 - py) * Number(this._svg.getAttribute("height"));
+    /** 应用修改 */
+    public applyChange(): void {
+        // 同步大小
+        this.syncSize();
+        // 重画SVG
+        this.redrawSVG();
     }
 
 }
@@ -326,6 +325,8 @@ class KeyPoint {
     private _draging: boolean;
 
 
+    /** 允许移动 */
+    public allowMovement: boolean = true;
     /** 坐标x */
     public x: number;
     /** 坐标y */
@@ -361,7 +362,9 @@ class KeyPoint {
 
         // 显示控制点
         this.controlPoints.forEach(cpt => {
-            cpt.visible = v;
+            if (cpt.enabled) {
+                cpt.visible = v;
+            }
         });
     }
 
@@ -387,8 +390,8 @@ class KeyPoint {
 
         // 容器节点
         const group = document.createElementNS(svgNS, "g");
-        this.x = this.mapX(this._key.time, svg);
-        this.y = this.mapY(this._key.value, svg);
+        this.x = AnimationCurveEditorUtil.mapX(this._key.time, svg);
+        this.y = AnimationCurveEditorUtil.mapY(this._key.value, svg);
         group.setAttribute("transform", `translate(${this.x} ${this.y})`);
         group.appendChild(rect);
         svg.appendChild(group);
@@ -445,6 +448,7 @@ class KeyPoint {
 
     /** 开始拖动 */
     public startDrag(): void {
+        if (!this.allowMovement) return;
         this._draging = true;
 
     }
@@ -492,26 +496,6 @@ class KeyPoint {
         // 更新
         this._key.time = mousePoint.x / xmax;
         this._key.value = mousePoint.y / ymax;
-    }
-
-    /**
-    * x坐标映射函数
-    * @param px [0,1]
-    * @param svg 父容器节点
-    * @returns 
-    */
-    private mapX(px: number, svg: SVGSVGElement) {
-        return px * parseFloat(svg.getAttribute("width"));
-    }
-
-    /**
-     * y坐标映射函数
-     * @param py [0,1]
-     * @param svg 父容器节点
-     * @returns 
-     */
-    private mapY(py: number, svg: SVGSVGElement) {
-        return (1 - py) * parseFloat(svg.getAttribute("height"));
     }
 
     public onDestroy(): void {
@@ -565,6 +549,9 @@ class ControlPoint {
     /** 控制点类型 */
     private _type: ControlPointType;
 
+    /** 可用 */
+    public enabled: boolean = true;
+
     /** 拖动中... */
     public get draging(): boolean {
         return this._draging;
@@ -584,7 +571,7 @@ class ControlPoint {
      * 构造函数
      * @param groot 鼠标侦听的 GRoot
      * @param svg 画图所用的 svg 节点
-     * @param keyPoint 控制点所属的 KeyPoint
+     * @param keyPoint 控制点所属的关键帧点 (KeyPoint)
      * @param type 控制点类型（内/外）
      */
     constructor(groot: gui.GRoot, svg: SVGSVGElement, keyPoint: KeyPoint, type: ControlPointType) {
@@ -612,28 +599,29 @@ class ControlPoint {
         this._parent = keyPoint.group;
 
         // 初始位置
-        let initX: number, initY: number;
+        let pt: { x: number, y: number };
         if (this._type === ControlPointType.In) {
-            initX = AnimationCurveUtil.mapX(-keyPoint.key.inWeight + 1, svg);
-            initY = AnimationCurveUtil.mapY(-(keyPoint.key.inTangent * keyPoint.key.inWeight) + 1, svg);
+            pt = AnimationCurveEditorUtil.inKeyToControlPoint(keyPoint.key);
         } else {
-            initX = AnimationCurveUtil.mapX(keyPoint.key.outWeight, svg);
-            initY = AnimationCurveUtil.mapY(keyPoint.key.outTangent * keyPoint.key.outWeight, svg);
+            pt = AnimationCurveEditorUtil.outKeyToControlPoint(keyPoint.key);
         }
-        console.log("ControlPoint:", `type:${this._type}`, initX, initY, `in:`, keyPoint.key.inWeight, keyPoint.key.inTangent, `out:`, keyPoint.key.outWeight, keyPoint.key.outTangent);
+        console.log(`ControlPoint: type:${this._type}`, pt.x, pt.y, `in:`, keyPoint.key.inWeight, keyPoint.key.inTangent, `out:`, keyPoint.key.outWeight, keyPoint.key.outTangent);
+        pt.x = AnimationCurveEditorUtil.mapX(pt.x, svg);
+        pt.y = AnimationCurveEditorUtil.mapY(pt.y, svg);
+
         // 转换初始位置，由 svg -> parent
-        this._tempSvgPoint.x = initX;
-        this._tempSvgPoint.y = initY;
+        this._tempSvgPoint.x = pt.x;
+        this._tempSvgPoint.y = pt.y;
         this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._parent.getCTM().inverse());
-        initX = this._tempSvgPoint.x;
-        initY = this._tempSvgPoint.y;
+        pt.x = this._tempSvgPoint.x;
+        pt.y = this._tempSvgPoint.y;
 
         // 线
         const line = document.createElementNS(svgNS, "line");
         line.setAttribute("x1", `${0}`);
         line.setAttribute("y1", `${0}`);
-        line.setAttribute("x2", `${initX}`);
-        line.setAttribute("y2", `${initY}`);
+        line.setAttribute("x2", `${pt.x}`);
+        line.setAttribute("y2", `${pt.y}`);
         line.setAttribute("stroke", "#ffffff");
         line.setAttribute("stroke-width", `${1}`);
         this._line = line;
@@ -641,7 +629,7 @@ class ControlPoint {
 
         // 矩形容器
         const group = document.createElementNS(svgNS, "g");
-        group.setAttribute("transform", `translate(${initX} ${initY})`);
+        group.setAttribute("transform", `translate(${pt.x} ${pt.y})`);
         group.appendChild(rect);
         this._parent.appendChild(group);
         this._group = group;
@@ -667,17 +655,6 @@ class ControlPoint {
         this._groot.off("pointer_up", this.onPointerUp, this);
     }
 
-    /** 开始拖动 */
-    public startDrag(): void {
-        this._draging = true;
-
-    }
-
-    /** 停止拖动 */
-    public stopDrag(): void {
-        this._draging = false;
-    }
-
     /** 鼠标按下 */
     private onPointerDown(e: gui.Event): void {
 
@@ -685,6 +662,9 @@ class ControlPoint {
 
     /** 鼠标移动 */
     private onPointerMove(e: gui.Event): void {
+        if (!this.enabled) return;
+        if (!this.visible) return;
+
         if (this._draging) {
             this.move(e.input);
         }
@@ -693,6 +673,34 @@ class ControlPoint {
     /** 鼠标释放 */
     private onPointerUp(e: gui.Event): void {
         this.stopDrag();
+
+        // 应用修改
+        if (this.enabled && this.visible) {
+            this.applyChange();
+        }
+    }
+
+    /** 应用修改 */
+    private applyChange(): void {
+
+    }
+
+    /** 移动 */
+    private move(input: gui.InputInfo): void {
+        this._tempSvgPoint.x = input.x;
+        this._tempSvgPoint.y = input.y;
+
+        // 输入点 -> svg 局部坐标
+        let mousePoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
+        // svg 局部坐标 -> 父级
+        mousePoint = mousePoint.matrixTransform(this._parent.getCTM().inverse());
+
+        // 矩形容器位置
+        this._group.setAttribute('transform', `translate(${mousePoint.x} ${mousePoint.y})`);
+
+        // 线位置
+        this._line.setAttribute("x2", `${mousePoint.x}`);
+        this._line.setAttribute("y2", `${mousePoint.y}`);
     }
 
     /**
@@ -716,22 +724,14 @@ class ControlPoint {
         return distance < this.size;
     }
 
-    /** 移动 */
-    private move(input: gui.InputInfo): void {
-        this._tempSvgPoint.x = input.x;
-        this._tempSvgPoint.y = input.y;
+    /** 开始拖动 */
+    public startDrag(): void {
+        this._draging = true;
+    }
 
-        // 输入点 -> svg 局部坐标
-        let mousePoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
-        // svg 局部坐标 -> 父级
-        mousePoint = mousePoint.matrixTransform(this._parent.getCTM().inverse());
-
-        // 矩形容器位置
-        this._group.setAttribute('transform', `translate(${mousePoint.x} ${mousePoint.y})`);
-
-        // 线位置
-        this._line.setAttribute("x2", `${mousePoint.x}`);
-        this._line.setAttribute("y2", `${mousePoint.y}`);
+    /** 停止拖动 */
+    public stopDrag(): void {
+        this._draging = false;
     }
 
     public onDestroy(): void {
