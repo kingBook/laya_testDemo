@@ -275,6 +275,8 @@ class CurveCanvas extends gui.EventDispatcher {
                 d += `M ${x} ${y}`;
             } else {
                 const prevKey = this._curveEditDialog.curveInput.keys[i - 1];
+                console.log("prevKey: ", "outTangent",prevKey.outTangent, "outWeight",prevKey.outWeight);
+                
                 // 控制点1
                 const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
                 // 控制点2

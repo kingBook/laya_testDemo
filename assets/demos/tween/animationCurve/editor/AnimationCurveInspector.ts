@@ -46,6 +46,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
     /** CurveInput 修改后提交 */
     private onCurveInputSubmit(): void {
+        console.log("onCurveInputSubmit();");
+        
         // 设置值到目标
         const value = this.target.getValue();
         const keys: any[] = value.keys;

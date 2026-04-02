@@ -108,6 +108,8 @@ export class CurveInput extends gui.Widget {
 
     /** 曲线编辑窗口修改提交事件回调 */
     private onCurveEditDialogSubmit(e: gui.Event): void {
+        console.log("CurveInput::onCurveEditDialogSubmit();");
+        
         // 应用修改
         this.applyChange();
     }
