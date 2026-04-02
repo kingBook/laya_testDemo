@@ -31,26 +31,20 @@ export default class AnimationCurveEditorUtil {
         const c1x = values[0], c1y = values[1];
         const c2x = values[2], c2y = values[3];
 
-        // inWeight 和 outWeight 的值不能为0 (否则在曲线编辑窗口会重置为0.333.., 并且在计算inTangent、outTangent 会无穷大)
-        const outWeight0 = Math.max(c1x, Number.MIN_VALUE);
-
-        // c1y等于c1x时直接1，纠正都为0时计算错误
-        const outTangent0 = (c1y === c1x) ? 1 : c1y / outWeight0;
-
-        const inWeight1 = Math.max(1 - c2x, Number.MIN_VALUE);
-        const inTangent1 = ((1 - c2y) === (1 - c2x)) ? 1 : (1 - c2y) / inWeight1;
+        const outKey = this.controlPointToOutKey(c1x, c1y);
+        const inKey = this.controlPointToInKey(c2x, c2y);
 
         const key0 = new FloatKey();
         key0.time = 0;
         key0.value = 0;
-        key0.outTangent = outTangent0;
-        key0.outWeight = outWeight0;
+        key0.outTangent = outKey.outTangent;
+        key0.outWeight = outKey.outWeight;
 
         const key1 = new FloatKey();
         key1.time = 1;
         key1.value = 1;
-        key1.inTangent = inTangent1;
-        key1.inWeight = inWeight1;
+        key1.inTangent = inKey.inTangent;
+        key1.inWeight = inKey.inWeight;
 
         console.log("cubicBezierValuesToKeys: values", values);
         console.log("cubicBezierValuesToKeys:", key0.outTangent, key0.outWeight, key1.inTangent, key1.inWeight);
@@ -71,8 +65,8 @@ export default class AnimationCurveEditorUtil {
 
     /**
      * 内切线、内权重 转 控制点
-     * @param inKey 内切线、内权重关键帧点
-     * @returns 返回转换后的控制点
+     * @param inKey 内切线、内权重
+     * @returns 控制点xy
      */
     public static inKeyToControlPoint(inKey: { inTangent: number, inWeight: number }): { x: number, y: number } {
         let x: number, y: number;
@@ -86,21 +80,10 @@ export default class AnimationCurveEditorUtil {
     }
 
     /**
-     * 控制点 转 内切线、内权重
-     * @param cx 单位化的控制点x
-     * @param cy 单位化的控制点y
-     * @returns 单位化的内切线、内权重
-     */
-    public static controlPointToInKey(cx: number, cy: number): { inTangent: number, inWeight: number } {
-        let inTangent: number, inWeight: number;
-        return { inTangent, inWeight };
-    }
-
-    /**
-     * 外切线、外权重 转 控制点
-     * @param outKey 外切线、外权重关键帧点
-     * @returns 返回转换后的控制点
-     */
+    * 外切线、外权重 转 控制点
+    * @param outKey 外切线、外权重
+    * @returns 控制点xy
+    */
     public static outKeyToControlPoint(outKey: { outTangent: number, outWeight: number }): { x: number, y: number } {
         let x: number, y: number;
         if (outKey.outTangent + outKey.outWeight === 0) {
@@ -113,14 +96,31 @@ export default class AnimationCurveEditorUtil {
     }
 
     /**
-     * 控制点 转 外切线、外权重
-     * @param cx 单位化的控制点x
-     * @param cy 单位化的控制点y
-     * @returns 单位化的外切线、外权重 
+     * 控制点 转 内切线、内权重
+     * @param cx 控制点x (单位化)
+     * @param cy 控制点y (单位化)
+     * @returns 内切线、内权重
      */
-    public static controlPointToOutKey(cx: number, cy: number): { inTangent: number, inWeight: number } {
+    public static controlPointToInKey(cx: number, cy: number): { inTangent: number, inWeight: number } {
+        let inTangent: number, inWeight: number;
+        inWeight = Math.max(1 - cx, Number.MIN_VALUE);
+        inTangent = ((1 - cy) === (1 - cx)) ? 1 : (1 - cy) / inWeight;
+        return { inTangent, inWeight };
+    }
+
+    /**
+    * 控制点 转 外切线、外权重
+    * @param cx 控制点x (单位化)
+    * @param cy 控制点y (单位化)
+    * @returns 外切线、外权重 
+    */
+    public static controlPointToOutKey(cx: number, cy: number): { outTangent: number, outWeight: number } {
         let outTangent: number, outWeight: number;
-        return { inTangent: outTangent, inWeight: outWeight };
+        // inWeight 和 outWeight 的值不能为0 (否则在曲线编辑窗口会重置为0.333.., 并且在计算inTangent、outTangent 会无穷大)
+        outWeight = Math.max(cx, Number.MIN_VALUE);
+        // c1y等于c1x时直接1，纠正都为0时计算错误
+        outTangent = (cy === cx) ? 1 : cy / outWeight;
+        return { outTangent, outWeight };
     }
 
     /**

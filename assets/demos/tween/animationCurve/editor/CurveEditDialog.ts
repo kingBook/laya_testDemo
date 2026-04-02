@@ -1,8 +1,12 @@
 import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
+import { CurveInput } from "./CurveInput";
 import { FloatKey } from "./FloatKey";
 
 /** svg 命名空间 URI */
 const svgNS = "http://www.w3.org/2000/svg";
+
+/** 修改后的提交事件 */
+export const EVENT_SUBMIT = "eventSubmit";
 
 /**
  * 曲线编辑窗口
@@ -10,8 +14,6 @@ const svgNS = "http://www.w3.org/2000/svg";
  */
 export class CurveEditDialog extends IEditor.Dialog {
 
-    /** 修改后的提交事件, 事件由 {@link contentPane} 派发, 回调函数格式: `(): void` */
-    public static readonly EVENT_SUBMIT = "eventSubmit";
     /** 对话框画布大小 */
     public static readonly dialogCanvasSize = { width: 350, height: 350 };
     /** 对话框顶部空白大小 */
@@ -21,12 +23,12 @@ export class CurveEditDialog extends IEditor.Dialog {
 
     /** 曲线画布 */
     private _curveCanvas: CurveCanvas;
-    /** 关键帧点数组 */
-    private _keys: FloatKey[] = [];
+    /** 曲线输入 */
+    private _curveInput: CurveInput;
 
-    /** 关键帧点数组 */
-    public get keys(): FloatKey[] {
-        return this._keys;
+    /** 曲线输入 */
+    public get curveInput(): CurveInput {
+        return this._curveInput;
     }
 
     async create() {
@@ -45,33 +47,41 @@ export class CurveEditDialog extends IEditor.Dialog {
 
         /** 曲线画布 */
         this._curveCanvas = new CurveCanvas(this);
+        this._curveCanvas.on(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
     }
 
     /** 展示窗口 */
     protected onShown(...args: any[]): void {
-        this._keys = args[0];
-        console.log("CurveEditDialog::onShown() _keys:", this._keys);
+        this._curveInput = args[0];
 
         // 曲线画布 onShown
-        this._curveCanvas.emit(CurveCanvas.EVENT_SHOWN, [this._groot]);
+        this._curveCanvas.onShown(this._groot);
     }
 
     /** 隐藏窗口 */
     protected onHide(): void {
         // 曲线画布 onHide
-        this._curveCanvas.emit(CurveCanvas.EVENT_HIDE);
+        this._curveCanvas.onHide();
+        // 移除曲线画布修改侦听
+        this._curveCanvas.off(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
     }
 
+    /** 曲线画布修改事件回调 */
+    private onCurveCanvasSubmit(e: gui.Event): void {
+        // 应用修改
+        this.applyChange();
+    }
+
+    /** 应用修改 */
+    private applyChange(): void {
+        // 修改提交事件
+        this.contentPane.emit(EVENT_SUBMIT);
+    }
 
 }
 
 /** 曲线画布 */
 class CurveCanvas extends gui.EventDispatcher {
-
-    /** 展示事件 */
-    public static readonly EVENT_SHOWN = "eventShown";
-    /** 隐藏事件 */
-    public static readonly EVENT_HIDE = "eventHide";
 
     private _canvas: gui.Shape;
     /** 曲线编辑对话框 */
@@ -131,100 +141,103 @@ class CurveCanvas extends gui.EventDispatcher {
 
         // 临时 DOMPoint
         this._tempSvgPoint ||= this._svg.createSVGPoint();
-
-
-        // 侦听展示事件
-        this.on(CurveCanvas.EVENT_SHOWN, (e: gui.Event) => {
-            this.onShown(e.data[0]);
-        });
-        // 侦听隐藏事件
-        this.on(CurveCanvas.EVENT_HIDE, (e: gui.Event) => {
-            this.onHide();
-        });
     }
 
     /** 展示窗口 */
-    private onShown(groot: gui.GRoot): void {
+    public onShown(groot: gui.GRoot): void {
         this._groot = groot;
 
         // 创建 KeyPoint
-        const keys = this._curveEditDialog.keys;
+        const keys = this._curveEditDialog.curveInput.keys;
         keys.forEach((k, i) => {
-            const keyPoint = new KeyPoint(this._groot, this._svg, k);
             const isFirst = i === 0;
             const isLast = i === keys.length - 1;
-            keyPoint.allowMovement = !isFirst && !isLast; // 非第一或最后一个才可移动
-            keyPoint.controlPoints[0].enabled = !isFirst; // 第一个关键帧点，内控制点不可用
-            keyPoint.controlPoints[1].enabled = !isLast; // 最后一个关键帧点，外控制点不可用
-            this._keyPoints.push(keyPoint);
+            const allowMovement = !isFirst && !isLast; // 非第一或最后一个才可移动
+            const isSelected = true; // 默认选中状态
+            const enabledControlPoint0 = !isFirst; // 第一个关键帧点，内控制点不可用
+            const enabledControlPoint1 = !isLast; // 最后一个关键帧点，外控制点不可用
+            this.createKeyPoint(k, allowMovement, isSelected, enabledControlPoint0, enabledControlPoint1);
         });
 
         // 应用修改
         this.applyChange();
 
-        // 添加鼠标侦听
+        // 添加侦听
         this.addListeners();
     }
 
     /** 隐藏窗口 */
-    private onHide(): void {
-        // 移除鼠标侦听
+    public onHide(): void {
+        // 移除侦听
         this.removeListeners();
         // 销毁所有 KeyPoint
         this.destroyAllKeyPoints();
     }
 
-    /** 添加鼠标侦听 */
+    /** 添加侦听 */
     private addListeners(): void {
         this._groot.on("pointer_down", this.onPointerDown, this);
         this._groot.on("pointer_move", this.onPointerMove, this);
         this._groot.on("pointer_up", this.onPointerUp, this);
     }
 
-    /** 移除鼠标侦听 */
+    /** 移除侦听 */
     private removeListeners(): void {
         this._groot.off("pointer_down", this.onPointerDown, this);
         this._groot.off("pointer_move", this.onPointerMove, this);
         this._groot.off("pointer_up", this.onPointerUp, this);
+
+        // 移除所有关键帧点侦听
+        this._keyPoints.forEach(kpt => {
+            kpt.off(EVENT_SUBMIT, this.onKeyPointSubmit, this);
+        });
     }
 
     /** 鼠标按下 */
     private onPointerDown(e: gui.Event): void {
-        let i = this._keyPoints.length;
-        let hasSelected = false;
-        while (--i >= 0) {
-            const kpt = this._keyPoints[i];
-
-            // 如果已经有已选关键帧点，其它设置成未选
-            if (hasSelected) {
+        // 已触碰的关键帧点，鼠标按下触碰关键帧点及其控制点都视为已触碰
+        const touchedKeyPoint = this._keyPoints.find(kpt => kpt.containsPoint(e.input) || (kpt.controlPoints.some(cpt => cpt.enabled && cpt.visible && cpt.containsPoint(e.input))));
+        if (touchedKeyPoint) {
+            touchedKeyPoint.isSelected = true; // 已触碰关键帧点设置为选中
+            const touchedControlPoint = touchedKeyPoint.controlPoints.find(cpt => cpt.enabled && cpt.visible && cpt.containsPoint(e.input)); // 已触碰的控制点
+            if (touchedControlPoint) {
+                touchedControlPoint.startDrag(); // 拖动控制点
+            } else {
+                touchedKeyPoint.allowMovement && touchedKeyPoint.startDrag(); // 拖动关键帧点
+            }
+        } else {
+            // 没有触碰的关键帧点和控制点，取消选中所有
+            this._keyPoints.forEach(kpt => {
                 kpt.isSelected = false;
-                continue;
-            }
-
-            // 是否选中，鼠标按下触碰关键帧点及其控制点都视为选中
-            const isTouchKeyPoint = kpt.containsPoint(e.input);
-            const touchedControlPoint = kpt.controlPoints.find(cpt => cpt.enabled && cpt.visible && cpt.containsPoint(e.input));
-            kpt.isSelected = Boolean(isTouchKeyPoint || touchedControlPoint);
-            if (kpt.isSelected) {
-                hasSelected = true;
-
-                if (isTouchKeyPoint) { // 鼠标按下触碰关键帧点，则拖动关键帧点
-                    kpt.allowMovement && kpt.startDrag();
-                } else { // 鼠标按下触碰控制点，则拖动控制点
-                    touchedControlPoint.startDrag();
-                }
-            }
+            });
         }
     }
 
     /** 鼠标移动 */
     private onPointerMove(e: gui.Event): void {
-
+        
     }
 
     /** 鼠标释放 */
     private onPointerUp(e: gui.Event): void {
 
+    }
+
+    /** 创建一个关键帧点 */
+    private createKeyPoint(k: FloatKey, allowMovement: boolean, isSelected: boolean, enabledControlPoint0: boolean, enabledControlPoint1: boolean): void {
+        const keyPoint = new KeyPoint(this._groot, this._svg, k);
+        keyPoint.allowMovement = allowMovement;
+        keyPoint.controlPoints[0].enabled = enabledControlPoint0;
+        keyPoint.controlPoints[1].enabled = enabledControlPoint1;
+        keyPoint.isSelected = isSelected;
+        keyPoint.on(EVENT_SUBMIT, this.onKeyPointSubmit, this);
+        this._keyPoints.push(keyPoint);
+    }
+
+    /** 关键帧点修改提交事件回调 */
+    private onKeyPointSubmit(e: gui.Event): void {
+        // 应用修改
+        this.applyChange();
     }
 
     /** 销毁所有 KeyPoint */
@@ -249,7 +262,7 @@ class CurveCanvas extends gui.EventDispatcher {
     /** 重画SVG */
     private redrawSVG(): void {
         let d = "";
-        this._curveEditDialog.keys.forEach((k, i) => {
+        this._curveEditDialog.curveInput.keys.forEach((k, i) => {
             if (i === 0) {
                 // 起点
                 let x = k.time;
@@ -261,7 +274,7 @@ class CurveCanvas extends gui.EventDispatcher {
 
                 d += `M ${x} ${y}`;
             } else {
-                const prevKey = this._curveEditDialog.keys[i - 1];
+                const prevKey = this._curveEditDialog.curveInput.keys[i - 1];
                 // 控制点1
                 const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
                 // 控制点2
@@ -294,12 +307,14 @@ class CurveCanvas extends gui.EventDispatcher {
         this.syncSize();
         // 重画SVG
         this.redrawSVG();
+        // 修改提交事件
+        this.emit(EVENT_SUBMIT);
     }
 
 }
 
 /** 曲线上的关键帧点 */
-class KeyPoint {
+class KeyPoint extends gui.EventDispatcher {
 
     /** 关键帧点大小 */
     public readonly size = 10;
@@ -370,9 +385,12 @@ class KeyPoint {
 
 
     constructor(groot: gui.GRoot, svg: SVGSVGElement, key: FloatKey) {
+        super();
+
         this._groot = groot;
         this._svg = svg;
         this._key = key;
+        this._tempSvgPoint ||= this._svg.createSVGPoint(); // 临时 SvgPoint
 
         // 矩形，旋转 45 度
         const rect = document.createElementNS(svgNS, "rect");
@@ -397,9 +415,6 @@ class KeyPoint {
         svg.appendChild(group);
         this._group = group;
 
-        // 临时 SvgPoint
-        this._tempSvgPoint ||= this._svg.createSVGPoint();
-
         // 创建控制点
         for (let i = 0; i < 2; i++) {
             const type = i === 0 ? ControlPointType.In : ControlPointType.Out;
@@ -407,22 +422,32 @@ class KeyPoint {
             this.controlPoints[i] = ctrlP;
         }
 
-        // 添加鼠标侦听
+        // 添加侦听
         this.addListeners();
     }
 
-    /** 添加鼠标侦听 */
+    /** 添加侦听 */
     private addListeners(): void {
         this._groot.on("pointer_down", this.onPointerDown, this);
         this._groot.on("pointer_move", this.onPointerMove, this);
         this._groot.on("pointer_up", this.onPointerUp, this);
+
+        // 控制点修改提交侦听
+        this.controlPoints.forEach(cpt => {
+            cpt.on(EVENT_SUBMIT, this.onControlPointSubmit, this);
+        });
     }
 
-    /** 移除鼠标侦听 */
+    /** 移除侦听 */
     private removeListeners(): void {
         this._groot.off("pointer_down", this.onPointerDown, this);
         this._groot.off("pointer_move", this.onPointerMove, this);
         this._groot.off("pointer_up", this.onPointerUp, this);
+
+        // 移除控制点修改提交侦听
+        this.controlPoints.forEach(cpt => {
+            cpt.off(EVENT_SUBMIT, this.onControlPointSubmit, this);
+        });
     }
 
     /**
@@ -472,7 +497,19 @@ class KeyPoint {
 
     /** 鼠标释放 */
     private onPointerUp(e: gui.Event): void {
+        // 应用修改
+        if (this.allowMovement && this._draging) {
+            this.applyChange();
+        }
+
+        // 停止拖动
         this.stopDrag();
+    }
+
+    /** 控制点修改提交回调 */
+    private onControlPointSubmit(e: gui.Event): void {
+        // 应用修改
+        this.applyChange();
     }
 
     /** 移动 */
@@ -498,11 +535,17 @@ class KeyPoint {
         this._key.value = mousePoint.y / ymax;
     }
 
+    /** 应用修改 */
+    private applyChange(): void {
+        // 修改提交事件
+        this.emit(EVENT_SUBMIT);
+    }
+
     public onDestroy(): void {
         // 停止拖动
         this.stopDrag();
 
-        // 移除鼠标侦听
+        // 移除侦听
         this.removeListeners();
 
         // 移除容器节点
@@ -523,7 +566,7 @@ enum ControlPointType {
 }
 
 /** 曲线关键帧点的控制点 */
-class ControlPoint {
+class ControlPoint extends gui.EventDispatcher {
 
     /** 控制点大小 */
     public readonly size = 8;
@@ -575,6 +618,8 @@ class ControlPoint {
      * @param type 控制点类型（内/外）
      */
     constructor(groot: gui.GRoot, svg: SVGSVGElement, keyPoint: KeyPoint, type: ControlPointType) {
+        super();
+
         this._groot = groot;
         this._svg = svg;
         this._keyPoint = keyPoint;
@@ -637,18 +682,18 @@ class ControlPoint {
         // 默认不显示
         this.visible = false;
 
-        // 添加鼠标侦听
+        // 添加侦听
         this.addListeners();
     }
 
-    /** 添加鼠标侦听 */
+    /** 添加侦听 */
     private addListeners(): void {
         this._groot.on("pointer_down", this.onPointerDown, this);
         this._groot.on("pointer_move", this.onPointerMove, this);
         this._groot.on("pointer_up", this.onPointerUp, this);
     }
 
-    /** 移除鼠标侦听 */
+    /** 移除侦听 */
     private removeListeners(): void {
         this._groot.off("pointer_down", this.onPointerDown, this);
         this._groot.off("pointer_move", this.onPointerMove, this);
@@ -672,17 +717,42 @@ class ControlPoint {
 
     /** 鼠标释放 */
     private onPointerUp(e: gui.Event): void {
-        this.stopDrag();
-
         // 应用修改
-        if (this.enabled && this.visible) {
+        if (this.enabled && this.visible && this._draging) {
             this.applyChange();
         }
+
+        // 停止拖动
+        this.stopDrag();
     }
 
     /** 应用修改 */
     private applyChange(): void {
+        // 计算控制点xy
+        this._tempSvgPoint.x = parseFloat(this._line.getAttribute("x2"));
+        this._tempSvgPoint.y = parseFloat(this._line.getAttribute("y2"));
+        // -- 父级 -> svg 局部坐标
+        this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._parent.getCTM());
+        // -- 单位化
+        const cx = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
+        const cy = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
+        console.log("cx", cx, "cy", cy);
 
+        switch (this._type) {
+            case ControlPointType.In:
+                const inKey = AnimationCurveEditorUtil.controlPointToInKey(cx, cy);
+                this._keyPoint.key.inTangent = inKey.inTangent;
+                this._keyPoint.key.inWeight = inKey.inWeight;
+                break;
+            case ControlPointType.Out:
+                const outKey = AnimationCurveEditorUtil.controlPointToOutKey(cx, cy);
+                this._keyPoint.key.outTangent = outKey.outTangent;
+                this._keyPoint.key.outWeight = outKey.outTangent;
+                break;
+        }
+
+        // 修改提交事件
+        this.emit(EVENT_SUBMIT);
     }
 
     /** 移动 */
@@ -735,7 +805,7 @@ class ControlPoint {
     }
 
     public onDestroy(): void {
-        // 移除鼠标侦听
+        // 移除侦听
         this.removeListeners();
         // 移除线节点
         this._line.remove();

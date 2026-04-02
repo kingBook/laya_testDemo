@@ -1,5 +1,5 @@
 import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
-import { CurveEditDialog } from "./CurveEditDialog";
+import { CurveEditDialog, EVENT_SUBMIT } from "./CurveEditDialog";
 import { FloatKey } from "./FloatKey";
 
 /**
@@ -92,7 +92,11 @@ export class CurveInput extends gui.Widget {
 
         // 点击事件侦听
         this.on("click", (e: gui.Event) => {
-            Editor.showDialog(CurveEditDialog, null, this._keys); // 显示曲线编辑窗口
+            // 显示曲线编辑窗口
+            Editor.showDialog(CurveEditDialog, null, this).then(curveEditDialog => {
+                // 侦听曲线编辑窗口修改提交
+                curveEditDialog.contentPane.on(EVENT_SUBMIT, this.onCurveEditDialogSubmit, this);
+            });
         });
 
         // 大小改变事件
@@ -100,6 +104,12 @@ export class CurveInput extends gui.Widget {
             this.syncSize();
             this.redrawSVG();
         });
+    }
+
+    /** 曲线编辑窗口修改提交事件回调 */
+    private onCurveEditDialogSubmit(e: gui.Event): void {
+        // 应用修改
+        this.applyChange();
     }
 
     /** 同步大小 */
