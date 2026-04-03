@@ -40,15 +40,37 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             this.createDefaultProperty();
         }
 
-        // 同步值到 CurveInput
-        this.syncValueToCurveInput();
+        // 目标值 -> CurveInput
+        const value = this.target.getValue();
+        const keys: any[] = value.keys;
+
+        //console.log("refresh();", keys[0].outWeight, keys[0].outTangent, keys[1].inWeight, keys[1].inTangent);
+        // 先清空，避免顶点数量比实际数量多
+        this._curveInput.clearKeys();
+
+        // 设置 CurveInput 的值，等于当前值
+        keys.forEach((key, i) => {
+            if (i >= this._curveInput.keys.length) {
+                this._curveInput.addKey();
+            }
+            const ikey = this._curveInput.keys[i];
+            //ikey.inTangentMode = 2;
+            //ikey.outTangentMode = 2;
+            ikey.time = key.time;
+            ikey.value = key.value;
+            ikey.inTangent = key.inTangent;
+            ikey.outTangent = key.outTangent;
+            ikey.inWeight = key.inWeight;
+            ikey.outWeight = key.outWeight;
+        });
+
+        this._curveInput.applyChange();
     }
 
     /** CurveInput 修改后提交 */
     private onCurveInputSubmit(): void {
         console.log("onCurveInputSubmit();");
-        
-        // 设置值到目标
+        // CurveInput -> 目标值
         const value = this.target.getValue();
         const keys: any[] = value.keys;
 
@@ -80,31 +102,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         this.target.setValue(value);
     }
 
-    /** 同步值到 CurveInput */
-    private syncValueToCurveInput(): void {
-        const value = this.target.getValue();
-        const keys: any[] = value.keys;
-
-        //console.log("refresh();", keys[0].outWeight, keys[0].outTangent, keys[1].inWeight, keys[1].inTangent);
-        // 先清空，避免顶点数量比实际数量多
-        this._curveInput.clearKeys();
-
-        // 设置 CurveInput 的值，等于当前值
-        keys.forEach((key, i) => {
-            if (i >= this._curveInput.keys.length) {
-                this._curveInput.addKey();
-            }
-            const ikey = this._curveInput.keys[i];
-            //ikey.inTangentMode = 2;
-            //ikey.outTangentMode = 2;
-            ikey.time = key.time;
-            ikey.value = key.value;
-            ikey.inTangent = key.inTangent;
-            ikey.outTangent = key.outTangent;
-            ikey.inWeight = key.inWeight;
-            ikey.outWeight = key.outWeight;
-        });
-    }
 
     /** 创建默认属性 */
     private createDefaultProperty(): void {

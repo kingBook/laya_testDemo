@@ -66,9 +66,11 @@ export default class AnimationCurveEditorUtil {
     /**
      * 内切线、内权重 转 控制点
      * @param inKey 内切线、内权重
+     * @param canvasWidth 控制点所在画布的宽
+     * @param canvasHeight 控制点所在画布的高
      * @returns 控制点xy
      */
-    public static inKeyToControlPoint(inKey: { inTangent: number, inWeight: number }): { x: number, y: number } {
+    public static inKeyToControlPoint(inKey: { inTangent: number, inWeight: number }, canvasWidth: number = 1, canvasHeight: number = 1): { x: number, y: number } {
         let x: number, y: number;
         if (inKey.inTangent + inKey.inWeight === 0) {
             x = y = 0; // 起点控制点
@@ -76,15 +78,19 @@ export default class AnimationCurveEditorUtil {
             x = -inKey.inWeight + 1; // inWeight = 1 - c2.x
             y = -(inKey.inTangent * inKey.inWeight) + 1; // inTangent = (1 - c2.y) / (1 - c2.x)
         }
+        x *= canvasWidth;
+        y *= canvasHeight;
         return { x, y };
     }
 
     /**
     * 外切线、外权重 转 控制点
     * @param outKey 外切线、外权重
+    * @param canvasWidth 控制点所在画布的宽
+    * @param canvasHeight 控制点所在画布的高
     * @returns 控制点xy
     */
-    public static outKeyToControlPoint(outKey: { outTangent: number, outWeight: number }): { x: number, y: number } {
+    public static outKeyToControlPoint(outKey: { outTangent: number, outWeight: number }, canvasWidth: number = 1, canvasHeight: number = 1): { x: number, y: number } {
         let x: number, y: number;
         if (outKey.outTangent + outKey.outWeight === 0) {
             x = y = 1; // 终点控制点
@@ -92,17 +98,23 @@ export default class AnimationCurveEditorUtil {
             x = outKey.outWeight; // outWeight = c1.x
             y = outKey.outTangent * outKey.outWeight; // outTangent = c1.y / c1.x
         }
+        x *= canvasWidth;
+        y *= canvasHeight;
         return { x, y };
     }
 
     /**
      * 控制点 转 内切线、内权重
-     * @param cx 控制点x (单位化)
-     * @param cy 控制点y (单位化)
+     * @param cx 控制点x
+     * @param cy 控制点y
+     * @param canvasWidth 控制点所在画布的宽
+     * @param canvasHeight 控制点所在画布的高
      * @returns 内切线、内权重
      */
-    public static controlPointToInKey(cx: number, cy: number): { inTangent: number, inWeight: number } {
+    public static controlPointToInKey(cx: number, cy: number, canvasWidth: number = 1, canvasHeight: number = 1): { inTangent: number, inWeight: number } {
         let inTangent: number, inWeight: number;
+        cx /= canvasWidth;
+        cy /= canvasHeight;
         inWeight = Math.max(1 - cx, Number.MIN_VALUE);
         inTangent = ((1 - cy) === (1 - cx)) ? 1 : (1 - cy) / inWeight;
         return { inTangent, inWeight };
@@ -110,13 +122,17 @@ export default class AnimationCurveEditorUtil {
 
     /**
     * 控制点 转 外切线、外权重
-    * @param cx 控制点x (单位化)
-    * @param cy 控制点y (单位化)
+    * @param cx 控制点x
+    * @param cy 控制点y
+    * @param canvasWidth 控制点所在画布的宽
+    * @param canvasHeight 控制点所在画布的高
     * @returns 外切线、外权重 
     */
-    public static controlPointToOutKey(cx: number, cy: number): { outTangent: number, outWeight: number } {
+    public static controlPointToOutKey(cx: number, cy: number, canvasWidth: number = 1, canvasHeight: number = 1): { outTangent: number, outWeight: number } {
         let outTangent: number, outWeight: number;
-        // inWeight 和 outWeight 的值不能为0 (否则在曲线编辑窗口会重置为0.333.., 并且在计算inTangent、outTangent 会无穷大)
+        cx /= canvasWidth;
+        cy /= canvasHeight;
+        // inWeight 和 outWeight 的值不能为0 (否则在计算inTangent、outTangent 会无穷大)
         outWeight = Math.max(cx, Number.MIN_VALUE);
         // c1y等于c1x时直接1，纠正都为0时计算错误
         outTangent = (cy === cx) ? 1 : cy / outWeight;

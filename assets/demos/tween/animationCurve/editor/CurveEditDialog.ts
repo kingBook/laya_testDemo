@@ -46,7 +46,7 @@ export class CurveEditDialog extends IEditor.Dialog {
         contentPane.addChild(comboBox);
 
         /** 曲线画布 */
-        this._curveCanvas = new CurveCanvas(this);
+        this._curveCanvas = new CurveCanvas(this.contentPane);
         this._curveCanvas.on(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
     }
 
@@ -55,7 +55,7 @@ export class CurveEditDialog extends IEditor.Dialog {
         this._curveInput = args[0];
 
         // 曲线画布 onShown
-        this._curveCanvas.onShown(this._groot);
+        this._curveCanvas.onShown(this._groot, this._curveInput.keys);
     }
 
     /** 隐藏窗口 */
@@ -68,14 +68,13 @@ export class CurveEditDialog extends IEditor.Dialog {
 
     /** 曲线画布修改事件回调 */
     private onCurveCanvasSubmit(e: gui.Event): void {
-        // 应用修改
-        this.applyChange();
+        // 修改提交事件
+        this.contentPane.emit(EVENT_SUBMIT);
     }
 
     /** 应用修改 */
-    private applyChange(): void {
-        // 修改提交事件
-        this.contentPane.emit(EVENT_SUBMIT);
+    public applyChange(): void {
+        this._curveCanvas.setKeys(this._curveInput.keys);
     }
 
 }
@@ -84,8 +83,8 @@ export class CurveEditDialog extends IEditor.Dialog {
 class CurveCanvas extends gui.EventDispatcher {
 
     private _canvas: gui.Shape;
-    /** 曲线编辑对话框 */
-    private _curveEditDialog: CurveEditDialog;
+    /** 关键帧点数组 */
+    private _keys: FloatKey[];
     /** 鼠标侦听的 GRoot */
     private _groot: gui.GRoot;
     /** svg 节点 */
@@ -98,11 +97,8 @@ class CurveCanvas extends gui.EventDispatcher {
     /** 曲线上的关键帧点 */
     private readonly _keyPoints: KeyPoint[] = [];
 
-    constructor(curveEditDialog: CurveEditDialog) {
+    constructor(parent: gui.Widget) {
         super();
-
-        // 曲线编辑对话框
-        this._curveEditDialog = curveEditDialog;
 
         // 画布
         const canvas = new gui.Shape();
@@ -111,7 +107,7 @@ class CurveCanvas extends gui.EventDispatcher {
         canvas.width = CurveEditDialog.dialogCanvasSize.width;
         canvas.height = CurveEditDialog.dialogCanvasSize.height;
         canvas.drawRect(0, gui.Color.BLACK, new gui.Color("#434343")); // 不要设置轮廓线宽，会导致位置偏差
-        curveEditDialog.contentPane.addChild(canvas);
+        parent.addChild(canvas);
         this._canvas = canvas;
 
         // svg 节点
@@ -143,13 +139,14 @@ class CurveCanvas extends gui.EventDispatcher {
         this._tempSvgPoint ||= this._svg.createSVGPoint();
     }
 
-    /** 展示窗口 */
-    public onShown(groot: gui.GRoot): void {
-        this._groot = groot;
+    public setKeys(keys: FloatKey[]): void {
+        this._keys = keys;
+
+        // 销毁所有 KeyPoint
+        this.destroyAllKeyPoints();
 
         // 创建 KeyPoint
-        const keys = this._curveEditDialog.curveInput.keys;
-        keys.forEach((k, i) => {
+        this._keys.forEach((k, i) => {
             const isFirst = i === 0;
             const isLast = i === keys.length - 1;
             const allowMovement = !isFirst && !isLast; // 非第一或最后一个才可移动
@@ -159,8 +156,16 @@ class CurveCanvas extends gui.EventDispatcher {
             this.createKeyPoint(k, allowMovement, isSelected, enabledControlPoint0, enabledControlPoint1);
         });
 
-        // 应用修改
-        this.applyChange();
+        // 同步大小
+        this.syncSize();
+        // 重画SVG
+        this.redrawSVG();
+    }
+
+    /** 展示窗口 */
+    public onShown(groot: gui.GRoot, keys: FloatKey[]): void {
+        this._groot = groot;
+        this.setKeys(keys);
 
         // 添加侦听
         this.addListeners();
@@ -215,7 +220,7 @@ class CurveCanvas extends gui.EventDispatcher {
 
     /** 鼠标移动 */
     private onPointerMove(e: gui.Event): void {
-        
+
     }
 
     /** 鼠标释放 */
@@ -236,8 +241,12 @@ class CurveCanvas extends gui.EventDispatcher {
 
     /** 关键帧点修改提交事件回调 */
     private onKeyPointSubmit(e: gui.Event): void {
-        // 应用修改
-        this.applyChange();
+        // 同步大小
+        this.syncSize();
+        // 重画SVG
+        this.redrawSVG();
+        // 修改提交事件
+        this.emit(EVENT_SUBMIT);
     }
 
     /** 销毁所有 KeyPoint */
@@ -262,7 +271,7 @@ class CurveCanvas extends gui.EventDispatcher {
     /** 重画SVG */
     private redrawSVG(): void {
         let d = "";
-        this._curveEditDialog.curveInput.keys.forEach((k, i) => {
+        this._keys.forEach((k, i) => {
             if (i === 0) {
                 // 起点
                 let x = k.time;
@@ -274,9 +283,9 @@ class CurveCanvas extends gui.EventDispatcher {
 
                 d += `M ${x} ${y}`;
             } else {
-                const prevKey = this._curveEditDialog.curveInput.keys[i - 1];
-                console.log("prevKey: ", "outTangent",prevKey.outTangent, "outWeight",prevKey.outWeight);
-                
+                const prevKey = this._keys[i - 1];
+                console.log("prevKey: ", "outTangent", prevKey.outTangent, "outWeight", prevKey.outWeight);
+
                 // 控制点1
                 const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
                 // 控制点2
@@ -303,15 +312,6 @@ class CurveCanvas extends gui.EventDispatcher {
         this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }
 
-    /** 应用修改 */
-    public applyChange(): void {
-        // 同步大小
-        this.syncSize();
-        // 重画SVG
-        this.redrawSVG();
-        // 修改提交事件
-        this.emit(EVENT_SUBMIT);
-    }
 
 }
 
@@ -501,7 +501,8 @@ class KeyPoint extends gui.EventDispatcher {
     private onPointerUp(e: gui.Event): void {
         // 应用修改
         if (this.allowMovement && this._draging) {
-            this.applyChange();
+            // 修改提交事件
+            this.emit(EVENT_SUBMIT);
         }
 
         // 停止拖动
@@ -510,8 +511,8 @@ class KeyPoint extends gui.EventDispatcher {
 
     /** 控制点修改提交回调 */
     private onControlPointSubmit(e: gui.Event): void {
-        // 应用修改
-        this.applyChange();
+        // 修改提交事件
+        this.emit(EVENT_SUBMIT);
     }
 
     /** 移动 */
@@ -535,12 +536,6 @@ class KeyPoint extends gui.EventDispatcher {
         // 更新
         this._key.time = mousePoint.x / xmax;
         this._key.value = mousePoint.y / ymax;
-    }
-
-    /** 应用修改 */
-    private applyChange(): void {
-        // 修改提交事件
-        this.emit(EVENT_SUBMIT);
     }
 
     public onDestroy(): void {
@@ -721,40 +716,35 @@ class ControlPoint extends gui.EventDispatcher {
     private onPointerUp(e: gui.Event): void {
         // 应用修改
         if (this.enabled && this.visible && this._draging) {
-            this.applyChange();
+            // 计算控制点xy
+            this._tempSvgPoint.x = parseFloat(this._line.getAttribute("x2"));
+            this._tempSvgPoint.y = parseFloat(this._line.getAttribute("y2"));
+            // -- 父级 -> svg 局部坐标
+            this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._parent.getCTM());
+            // -- 单位化
+            const cx = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
+            const cy = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
+            console.log("cx", cx, "cy", cy);
+
+            switch (this._type) {
+                case ControlPointType.In:
+                    const inKey = AnimationCurveEditorUtil.controlPointToInKey(cx, cy);
+                    this._keyPoint.key.inTangent = inKey.inTangent;
+                    this._keyPoint.key.inWeight = inKey.inWeight;
+                    break;
+                case ControlPointType.Out:
+                    const outKey = AnimationCurveEditorUtil.controlPointToOutKey(cx, cy);
+                    this._keyPoint.key.outTangent = outKey.outTangent;
+                    this._keyPoint.key.outWeight = outKey.outWeight;
+                    break;
+            }
+
+            // 修改提交事件
+            this.emit(EVENT_SUBMIT);
         }
 
         // 停止拖动
         this.stopDrag();
-    }
-
-    /** 应用修改 */
-    private applyChange(): void {
-        // 计算控制点xy
-        this._tempSvgPoint.x = parseFloat(this._line.getAttribute("x2"));
-        this._tempSvgPoint.y = parseFloat(this._line.getAttribute("y2"));
-        // -- 父级 -> svg 局部坐标
-        this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._parent.getCTM());
-        // -- 单位化
-        const cx = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
-        const cy = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
-        console.log("cx", cx, "cy", cy);
-
-        switch (this._type) {
-            case ControlPointType.In:
-                const inKey = AnimationCurveEditorUtil.controlPointToInKey(cx, cy);
-                this._keyPoint.key.inTangent = inKey.inTangent;
-                this._keyPoint.key.inWeight = inKey.inWeight;
-                break;
-            case ControlPointType.Out:
-                const outKey = AnimationCurveEditorUtil.controlPointToOutKey(cx, cy);
-                this._keyPoint.key.outTangent = outKey.outTangent;
-                this._keyPoint.key.outWeight = outKey.outTangent;
-                break;
-        }
-
-        // 修改提交事件
-        this.emit(EVENT_SUBMIT);
     }
 
     /** 移动 */

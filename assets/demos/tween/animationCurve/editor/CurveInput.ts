@@ -17,14 +17,17 @@ export class CurveInput extends gui.Widget {
     private _path: SVGPathElement;
     /** 关键帧点数组 */
     private _keys: FloatKey[];
+    /** 曲线编辑窗口 */
+    private _curveEditDialog: CurveEditDialog;
 
     /** 关键帧点数组 */
-    public get keys(): readonly FloatKey[] {
+    public get keys(): FloatKey[] {
         return this._keys;
     }
 
     constructor() {
         super();
+        console.log("执行 CurveInput 构造");
 
         // 画布
         const w = 87, h = 17;
@@ -94,8 +97,9 @@ export class CurveInput extends gui.Widget {
         this.on("click", (e: gui.Event) => {
             // 显示曲线编辑窗口
             Editor.showDialog(CurveEditDialog, null, this).then(curveEditDialog => {
+                this._curveEditDialog = curveEditDialog;
                 // 侦听曲线编辑窗口修改提交
-                curveEditDialog.contentPane.on(EVENT_SUBMIT, this.onCurveEditDialogSubmit, this);
+                this._curveEditDialog.contentPane.on(EVENT_SUBMIT, this.onCurveEditDialogSubmit, this);
             });
         });
 
@@ -108,10 +112,15 @@ export class CurveInput extends gui.Widget {
 
     /** 曲线编辑窗口修改提交事件回调 */
     private onCurveEditDialogSubmit(e: gui.Event): void {
-        console.log("CurveInput::onCurveEditDialogSubmit();");
-        
-        // 应用修改
-        this.applyChange();
+        console.log("onCurveEditDialogSubmit();");
+
+        // 修改提交事件
+        this.emit(CurveInput.EVENT_SUBMIT);
+
+        // 同步大小
+        this.syncSize();
+        // 重画SVG
+        this.redrawSVG();
     }
 
     /** 同步大小 */
@@ -182,8 +191,10 @@ export class CurveInput extends gui.Widget {
         this.syncSize();
         // 重画SVG
         this.redrawSVG();
-        // 修改提交事件
-        this.emit(CurveInput.EVENT_SUBMIT);
+
+        if (this._curveEditDialog) {
+            this._curveEditDialog.applyChange();
+        }
     }
 
 }

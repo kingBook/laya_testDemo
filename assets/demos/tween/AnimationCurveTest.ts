@@ -1,4 +1,5 @@
 import AnimationCurve from "./animationCurve/AnimationCurve";
+import { FloatKey } from "./animationCurve/editor/FloatKey";
 
 const { regClass, property } = Laya;
 
@@ -10,8 +11,8 @@ export class AnimationCurveTest extends Laya.Script {
     @property({ type: AnimationCurve, inspector: AnimationCurve.name })
     animationCurve: AnimationCurve;
 
-    @property({ type: AnimationCurve, inspector: "AnimationCurveOld" })
-    animationCurveOld: AnimationCurve;
+    // @property({ type: AnimationCurve, inspector: "AnimationCurveOld" })
+    // animationCurveOld: AnimationCurve;
 
     @property({ type: [Laya.FloatKeyframe], inspector: "curve" })
     public keys: Laya.FloatKeyframe[];
@@ -67,6 +68,17 @@ export class AnimationCurveTest extends Laya.Script {
         //     console.log(y);
 
         // }
+
+        const k=new FloatKey();
+        k.inTangent=1;
+        k.inWeight=2;
+        
+        const k2=new Laya.FloatKeyframe();
+
+        Object.assign(k2,k)
+        
+        console.log(k2);
+        
 
     }
 }
