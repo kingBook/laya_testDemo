@@ -46,7 +46,11 @@ export class CurveEditDialog extends IEditor.Dialog {
         contentPane.addChild(comboBox);
 
         /** 曲线画布 */
-        this._curveCanvas = new CurveCanvas(this.contentPane);
+        const canvasX = CurveEditDialog.margin.left;
+        const canvasY = CurveEditDialog.dialogTopSpace + CurveEditDialog.margin.top;
+        const canvasWidth = CurveEditDialog.dialogCanvasSize.width;
+        const canvasHeight = CurveEditDialog.dialogCanvasSize.height;
+        this._curveCanvas = new CurveCanvas(this.contentPane, canvasX, canvasY, canvasWidth, canvasHeight);
         this._curveCanvas.on(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
     }
 
@@ -80,9 +84,8 @@ export class CurveEditDialog extends IEditor.Dialog {
 }
 
 /** 曲线画布 */
-class CurveCanvas extends gui.EventDispatcher {
+class CurveCanvas extends gui.Shape {
 
-    private _canvas: gui.Shape;
     /** 关键帧点数组 */
     private _keys: FloatKey[];
     /** 鼠标侦听的 GRoot */
@@ -97,18 +100,16 @@ class CurveCanvas extends gui.EventDispatcher {
     /** 曲线上的关键帧点 */
     private readonly _keyPoints: KeyPoint[] = [];
 
-    constructor(parent: gui.Widget) {
+    constructor(parent: gui.Widget, x: number, y: number, width: number, height: number) {
         super();
 
-        // 画布
-        const canvas = new gui.Shape();
-        canvas.x = CurveEditDialog.margin.left;
-        canvas.y = CurveEditDialog.dialogTopSpace + CurveEditDialog.margin.top;
-        canvas.width = CurveEditDialog.dialogCanvasSize.width;
-        canvas.height = CurveEditDialog.dialogCanvasSize.height;
-        canvas.drawRect(0, gui.Color.BLACK, new gui.Color("#434343")); // 不要设置轮廓线宽，会导致位置偏差
-        parent.addChild(canvas);
-        this._canvas = canvas;
+        // 位置、宽高、颜色
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.drawRect(0, gui.Color.BLACK, new gui.Color("#434343")); // 不要设置轮廓线宽，会导致位置偏差
+        parent.addChild(this);
 
         // svg 节点
         const svg = document.createElementNS(svgNS, "svg") as SVGSVGElement;
@@ -124,7 +125,7 @@ class CurveCanvas extends gui.EventDispatcher {
         svg.style.bottom = "0";
         svg.style.pointerEvents = "auto"; // 鼠标指针事件
         svg.setAttribute("overflow", "visible"); // 溢出时显示
-        canvas.element.appendChild(svg);
+        this.element.appendChild(svg);
         this._svg = svg;
 
         // 创建 Path 节点（曲线）
@@ -259,8 +260,8 @@ class CurveCanvas extends gui.EventDispatcher {
 
     /** 同步大小 */
     private syncSize(): void {
-        const w = this._canvas.width;
-        const h = this._canvas.height;
+        const w = this.width;
+        const h = this.height;
         this._svg.setAttribute("width", `${w}`);
         this._svg.setAttribute("height", `${h}`);
         this._svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
