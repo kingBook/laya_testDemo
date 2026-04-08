@@ -117,6 +117,12 @@ export class CurveInput extends gui.Widget {
         // 修改提交事件
         this.emit(CurveInput.EVENT_SUBMIT);
 
+        // 重画曲线
+        this.redrawCurve();
+    }
+
+    /** 重画曲线 */
+    private redrawCurve(): void {
         // 同步大小
         this.syncSize();
         // 重画SVG
@@ -187,10 +193,8 @@ export class CurveInput extends gui.Widget {
 
     /** 应用修改 */
     public applyChange(): void {
-        // 同步大小
-        this.syncSize();
-        // 重画SVG
-        this.redrawSVG();
+        // 重画曲线
+        this.redrawCurve();
 
         if (this._curveEditDialog) {
             this._curveEditDialog.applyChange();
