@@ -19,75 +19,20 @@
           {
             "_$type": "FloatKeyframe",
             "inTangent": 0,
-            "outTangent": 0.4,
+            "outTangent": 0.33506490850553367,
             "value": 0,
             "inWeight": 0,
-            "outWeight": 0.25,
+            "outWeight": 0.7333333914620536,
             "weightedMode": 0,
             "time": 0
           },
           {
             "_$type": "FloatKeyframe",
-            "inTangent": 0,
+            "inTangent": 0.2799043164378013,
             "outTangent": 0,
             "value": 1,
-            "inWeight": 0.75,
+            "inWeight": 0.7961904471261161,
             "outWeight": 0,
-            "weightedMode": 0,
-            "time": 1
-          }
-        ]
-      },
-      "animationCurveOld": {
-        "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
-        "keys": [
-          {
-            "_$type": "FloatKeyframe",
-            "inTangent": 0,
-            "outTangent": 0.4000000000000001,
-            "value": 0,
-            "inWeight": 0.33333,
-            "outWeight": 0.25604610200867506,
-            "weightedMode": 0,
-            "time": 0
-          },
-          {
-            "_$type": "FloatKeyframe",
-            "inTangent": 0.9903759522057867,
-            "outTangent": 0.990375952205785,
-            "value": 0.27621031878396984,
-            "inWeight": 0.3821605711379863,
-            "outWeight": 0.3301875892876865,
-            "weightedMode": 0,
-            "time": 0.350609756097561
-          },
-          {
-            "_$type": "FloatKeyframe",
-            "inTangent": 1.2312969205059092,
-            "outTangent": 1.0715589239267274,
-            "value": 0.6923446269844102,
-            "inWeight": 0.5625,
-            "outWeight": 0.35826252507672995,
-            "weightedMode": 0,
-            "time": 0.4740853658536585
-          },
-          {
-            "_$type": "FloatKeyframe",
-            "inTangent": 1.163028808715929,
-            "outTangent": 1.1630288087159315,
-            "value": 0.7681164363948818,
-            "inWeight": 0.2916564701051945,
-            "outWeight": 0.45753355448152205,
-            "weightedMode": 0,
-            "time": 0.8003048780487806
-          },
-          {
-            "_$type": "FloatKeyframe",
-            "inTangent": 1.0939174033513632,
-            "outTangent": 0,
-            "value": 1,
-            "inWeight": 0.18054282118002174,
-            "outWeight": 0.33333,
             "weightedMode": 0,
             "time": 1
           }

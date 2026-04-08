@@ -11,7 +11,9 @@ export class CurveInput extends gui.Widget {
     /** 修改后的提交事件, 事件由 {@link this} 派发，回调函数格式: `(): void` */
     public static readonly EVENT_SUBMIT = "eventSubmit";
 
+    /** 曲线画布 */
     private _canvas: gui.Shape;
+    /** svg 节点 */
     private _svg: SVGSVGElement;
     /** svg 路径节点 */
     private _path: SVGPathElement;
@@ -62,14 +64,14 @@ export class CurveInput extends gui.Widget {
 
         // 创建 svg 节点
         const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg") as SVGSVGElement;
+        const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("xmlns", svgNS);
         svg.style.position = "absolute";
         svg.style.left = "0";
         svg.style.top = "0";
         svg.style.pointerEvents = "none";
         this._svg = svg;
-        this._canvas.element.appendChild(svg as any);
+        this._canvas.element.appendChild(svg);
 
         // 创建 Path 节点（曲线）
         const path = document.createElementNS(svgNS, "path");
@@ -96,7 +98,7 @@ export class CurveInput extends gui.Widget {
         // 点击事件侦听
         this.on("click", (e: gui.Event) => {
             // 显示曲线编辑窗口
-            Editor.showDialog(CurveEditDialog, null, this).then(curveEditDialog => {
+            Editor.showDialog(CurveEditDialog, this, this).then(curveEditDialog => {
                 this._curveEditDialog = curveEditDialog;
                 // 侦听曲线编辑窗口修改提交
                 this._curveEditDialog.contentPane.on(EVENT_SUBMIT, this.onCurveEditDialogSubmit, this);
@@ -196,9 +198,7 @@ export class CurveInput extends gui.Widget {
         // 重画曲线
         this.redrawCurve();
 
-        if (this._curveEditDialog) {
-            this._curveEditDialog.applyChange();
-        }
+        this._curveEditDialog?.applyChange();
     }
 
 }

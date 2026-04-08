@@ -5,8 +5,8 @@ import { CurveInput } from "./CurveInput";
 export default class AnimationCurveInspector extends IEditor.PropertyField {
 
     private readonly _easeComboBoxDatas = [
-        { name: "ease", index: 0, values: [.25, .1, .25, 1], isDefault: true },
-        { name: "linear", index: 1, values: [0, 0, 1, 1], isDefault: false },
+        { name: "ease", index: 0, values: [.25, .1, .25, 1], isDefault: false },
+        { name: "linear", index: 1, values: [0, 0, 1, 1], isDefault: true },
         { name: "ease-in", index: 2, values: [.42, 0, 1, 1], isDefault: false },
         { name: "ease-out", index: 3, values: [0, 0, .58, 1], isDefault: false },
         { name: "ease-in-out", index: 4, values: [.42, 0, .58, 1], isDefault: false },
