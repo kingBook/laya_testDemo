@@ -12,4 +12,8 @@ export class FloatKey {
     public time: number = 0;
     /** 值 */
     public value: number = 0;
+
+    public clone(): FloatKey {
+        return Object.assign(new FloatKey(), this);
+    }
 }

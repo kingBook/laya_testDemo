@@ -16,8 +16,6 @@ export class CurveEditDialog extends IEditor.Dialog {
 
     /** 对话框画布大小 */
     public static readonly dialogCanvasSize = { width: 350, height: 350 };
-    /** 对话框顶部空白大小 */
-    public static readonly dialogTopSpace = 20;
     /** 边距 */
     public static readonly margin = { top: 50, bottom: 50, left: 50, right: 50 };
 
@@ -35,19 +33,15 @@ export class CurveEditDialog extends IEditor.Dialog {
         // 窗口
         const contentPane = new gui.Widget();
         const w = CurveEditDialog.dialogCanvasSize.width + CurveEditDialog.margin.left + CurveEditDialog.margin.right;
-        const h = CurveEditDialog.dialogCanvasSize.height + CurveEditDialog.dialogTopSpace + CurveEditDialog.margin.top + CurveEditDialog.margin.bottom;
+        const h = CurveEditDialog.dialogCanvasSize.height + CurveEditDialog.margin.top + CurveEditDialog.margin.bottom;
         contentPane.setSize(w, h);
         this.contentPane = contentPane;
         this.title = "CurveEdit"; // 窗口标题
         this.resizable = false; // 窗口大小，是否可调节
 
-        // 下拉列表
-        const comboBox = await gui.UIPackage.createWidget<gui.ComboBox>("~/ui/basic/ComboBox/ComboBox.widget");
-        contentPane.addChild(comboBox);
-
         /** 曲线画布 */
         const canvasX = CurveEditDialog.margin.left;
-        const canvasY = CurveEditDialog.dialogTopSpace + CurveEditDialog.margin.top;
+        const canvasY = CurveEditDialog.margin.top;
         const canvasWidth = CurveEditDialog.dialogCanvasSize.width;
         const canvasHeight = CurveEditDialog.dialogCanvasSize.height;
         this._curveCanvas = new CurveCanvas(this.contentPane, canvasX, canvasY, canvasWidth, canvasHeight);
@@ -140,7 +134,10 @@ class CurveCanvas extends gui.Shape {
         this._tempSvgPoint ||= this._svg.createSVGPoint();
     }
 
+    /** 设置关键帧点数组 */
     public setKeys(keys: FloatKey[]): void {
+        console.log("setKeys();");
+
         this._keys = keys;
 
         // 销毁所有 KeyPoint
@@ -285,7 +282,7 @@ class CurveCanvas extends gui.Shape {
                 d += `M ${x} ${y}`;
             } else {
                 const prevKey = this._keys[i - 1];
-                console.log("prevKey: ", "outTangent", prevKey.outTangent, "outWeight", prevKey.outWeight);
+                //console.log("prevKey: ", "outTangent", prevKey.outTangent, "outWeight", prevKey.outWeight);
 
                 // 控制点1
                 const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
@@ -308,7 +305,7 @@ class CurveCanvas extends gui.Shape {
             }
         });
 
-        console.log("d:", d);
+       // console.log("d:", d);
 
         this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }
@@ -332,7 +329,7 @@ class KeyPoint extends gui.EventDispatcher {
     /** 旋转45度的矩形节点 */
     private _rect: SVGRectElement;
     /** 容器节点 */
-    private _group: SVGGElement;
+    private _shapeBox: SVGGElement;
     /** 被选中 */
     private _isSelected: boolean;
     /** 临时 SVgPoint，用于储存位置信息，放便矩阵运算 */
@@ -362,8 +359,8 @@ class KeyPoint extends gui.EventDispatcher {
     }
 
     /** 容器节点 */
-    public get group(): SVGGElement {
-        return this._group;
+    public get shapeBox(): SVGGElement {
+        return this._shapeBox;
     }
 
     /** 被选中 */
@@ -410,13 +407,13 @@ class KeyPoint extends gui.EventDispatcher {
         this._rect = rect;
 
         // 容器节点
-        const group = document.createElementNS(svgNS, "g");
+        const shapeBox = document.createElementNS(svgNS, "g");
         this.x = AnimationCurveEditorUtil.mapX(this._key.time, svg);
         this.y = AnimationCurveEditorUtil.mapY(this._key.value, svg);
-        group.setAttribute("transform", `translate(${this.x} ${this.y})`);
-        group.appendChild(rect);
-        svg.appendChild(group);
-        this._group = group;
+        shapeBox.setAttribute("transform", `translate(${this.x} ${this.y})`);
+        shapeBox.appendChild(rect);
+        svg.appendChild(shapeBox);
+        this._shapeBox = shapeBox;
 
         // 创建控制点
         for (let i = 0; i < 2; i++) {
@@ -465,7 +462,7 @@ class KeyPoint extends gui.EventDispatcher {
         const mousePoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
 
         // 计算矩形与输入点的距离
-        const groupMatrix = this._group.getCTM();
+        const groupMatrix = this._shapeBox.getCTM();
         const dx = mousePoint.x - groupMatrix.e;
         const dy = mousePoint.y - groupMatrix.f;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -532,7 +529,7 @@ class KeyPoint extends gui.EventDispatcher {
         // 赋值
         this.x = mousePoint.x;
         this.y = mousePoint.y;
-        this._group.setAttribute('transform', `translate(${mousePoint.x} ${mousePoint.y})`);
+        this._shapeBox.setAttribute('transform', `translate(${mousePoint.x} ${mousePoint.y})`);
 
         // 更新
         this._key.time = mousePoint.x / xmax;
@@ -547,7 +544,7 @@ class KeyPoint extends gui.EventDispatcher {
         this.removeListeners();
 
         // 移除容器节点
-        this._group.remove();
+        this._shapeBox.remove();
 
         // 销毁控制点
         this.controlPoints.forEach(cpt => {
@@ -573,22 +570,21 @@ class ControlPoint extends gui.EventDispatcher {
     private _groot: gui.GRoot;
     /** 曲线画布的 svg 节点 */
     private _svg: SVGSVGElement;
-    /** 旋转45度的矩形节点 */
-    private _rect: SVGRectElement;
     /** 线节点 */
     private _line: SVGLineElement;
-    /** 旋转45度矩形的容器 */
-    private _group: SVGGElement;
+    /** 矩形的容器 */
+    private _shapeBox: SVGGElement;
     /** 矩形容器、线的父级 */
     private _parent: SVGGElement;
-    /** 临时 SVgPoint，用于储存位置信息，放便矩阵运算 */
-    private _tempSvgPoint: SVGPoint;
     /** 控制点所属的关键帧点 */
     private _keyPoint: KeyPoint;
     /** 拖动中... */
     private _draging: boolean;
     /** 控制点类型 */
     private _type: ControlPointType;
+
+    private _tempSvgPoint: SVGPoint;
+    private _tempRangePoint: SVGPoint;
 
     /** 可用 */
     public enabled: boolean = true;
@@ -599,12 +595,12 @@ class ControlPoint extends gui.EventDispatcher {
     }
 
     public get visible(): boolean {
-        return this._group.style.visibility === "visible";
+        return this._shapeBox.style.visibility === "visible";
     }
 
     public set visible(v: boolean) {
         const visibility = v ? "visible" : "hidden";
-        this._group.style.visibility = visibility
+        this._shapeBox.style.visibility = visibility
         this._line.style.visibility = visibility;
     }
 
@@ -622,7 +618,8 @@ class ControlPoint extends gui.EventDispatcher {
         this._svg = svg;
         this._keyPoint = keyPoint;
         this._type = type;
-        this._tempSvgPoint ||= this._svg.createSVGPoint(); // 临时 DOMPoint
+        this._tempSvgPoint ||= this._svg.createSVGPoint();
+        this._tempRangePoint ||= this._svg.createSVGPoint();
 
         // 矩形，旋转 45 度
         const rect = document.createElementNS(svgNS, "rect");
@@ -636,10 +633,9 @@ class ControlPoint extends gui.EventDispatcher {
         rect.setAttribute("stroke", "#ffffff");
         rect.setAttribute("stroke-width", `${1}`);
         rect.setAttribute("transform", `rotate(45 ${0} ${0})`); // 旋转 45 度
-        this._rect = rect;
 
         // 矩形容器、线的父级
-        this._parent = keyPoint.group;
+        this._parent = keyPoint.shapeBox;
 
         // 初始位置
         let pt: { x: number, y: number };
@@ -648,7 +644,7 @@ class ControlPoint extends gui.EventDispatcher {
         } else {
             pt = AnimationCurveEditorUtil.outKeyToControlPoint(keyPoint.key);
         }
-        console.log(`ControlPoint: type:${this._type}`, pt.x, pt.y, `in:`, keyPoint.key.inWeight, keyPoint.key.inTangent, `out:`, keyPoint.key.outWeight, keyPoint.key.outTangent);
+        //console.log(`ControlPoint: type:${this._type}`, pt.x, pt.y, `in:`, keyPoint.key.inWeight, keyPoint.key.inTangent, `out:`, keyPoint.key.outWeight, keyPoint.key.outTangent);
         pt.x = AnimationCurveEditorUtil.mapX(pt.x, svg);
         pt.y = AnimationCurveEditorUtil.mapY(pt.y, svg);
 
@@ -668,14 +664,14 @@ class ControlPoint extends gui.EventDispatcher {
         line.setAttribute("stroke", "#ffffff");
         line.setAttribute("stroke-width", `${1}`);
         this._line = line;
-        this._parent.insertBefore(line, this._parent.firstChild);
+        this._parent.insertBefore(line, this._parent.firstChild); // 放置的最底层
 
         // 矩形容器
-        const group = document.createElementNS(svgNS, "g");
-        group.setAttribute("transform", `translate(${pt.x} ${pt.y})`);
-        group.appendChild(rect);
-        this._parent.appendChild(group);
-        this._group = group;
+        const shapeBox = document.createElementNS(svgNS, "g");
+        shapeBox.setAttribute("transform", `translate(${pt.x} ${pt.y})`);
+        shapeBox.appendChild(rect);
+        this._parent.appendChild(shapeBox);
+        this._shapeBox = shapeBox;
 
         // 默认不显示
         this.visible = false;
@@ -708,6 +704,7 @@ class ControlPoint extends gui.EventDispatcher {
         if (!this.enabled) return;
         if (!this.visible) return;
 
+        // 拖动
         if (this._draging) {
             this.move(e.input);
         }
@@ -720,12 +717,12 @@ class ControlPoint extends gui.EventDispatcher {
             // 计算控制点xy
             this._tempSvgPoint.x = parseFloat(this._line.getAttribute("x2"));
             this._tempSvgPoint.y = parseFloat(this._line.getAttribute("y2"));
-            // -- 父级 -> svg 局部坐标
+            // - 转换坐标，由 parent -> svg 
             this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._parent.getCTM());
-            // -- 单位化
+            // - 映射
             const cx = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
             const cy = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
-            console.log("cx", cx, "cy", cy);
+            //console.log("cx", cx, "cy", cy);
 
             switch (this._type) {
                 case ControlPointType.In:
@@ -752,18 +749,53 @@ class ControlPoint extends gui.EventDispatcher {
     private move(input: gui.InputInfo): void {
         this._tempSvgPoint.x = input.x;
         this._tempSvgPoint.y = input.y;
+        // 限制范围
+        this._tempRangePoint.x = parseFloat(this._svg.getAttribute("width"));
+        this._tempRangePoint = this._tempRangePoint.matrixTransform(this._svg.getScreenCTM());
+        const xmax = this._tempRangePoint.x;
 
-        // 输入点 -> svg 局部坐标
-        let mousePoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
-        // svg 局部坐标 -> 父级
-        mousePoint = mousePoint.matrixTransform(this._parent.getCTM().inverse());
+        this._tempRangePoint.x = 0;
+        this._tempRangePoint = this._tempRangePoint.matrixTransform(this._svg.getScreenCTM());
+        const xmin = this._tempRangePoint.x;
+
+        this._tempSvgPoint.x = Math.min(Math.max(this._tempSvgPoint.x, xmin), xmax);
+        this._tempSvgPoint.y = Math.min(Math.max(this._tempSvgPoint.y, 0), this._groot.height);
+
+        // groot -> parent
+        const mousePoint = this._tempSvgPoint.matrixTransform(this._parent.getScreenCTM().inverse());
 
         // 矩形容器位置
-        this._group.setAttribute('transform', `translate(${mousePoint.x} ${mousePoint.y})`);
+        this._shapeBox.setAttribute('transform', `translate(${mousePoint.x} ${mousePoint.y})`);
 
         // 线位置
         this._line.setAttribute("x2", `${mousePoint.x}`);
         this._line.setAttribute("y2", `${mousePoint.y}`);
+
+        // 计算控制点xy
+        this._tempSvgPoint.x = mousePoint.x;
+        this._tempSvgPoint.y = mousePoint.y;
+        // - 转换坐标，由 parent -> svg 
+        this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._parent.getCTM());
+
+        // - 映射
+        let cx = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
+        cx = Math.min(Math.max(cx, 0), 1); // 限制在 [0,1]
+        const cy = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
+
+        switch (this._type) {
+            case ControlPointType.In:
+                const inKey = AnimationCurveEditorUtil.controlPointToInKey(cx, cy);
+                this._keyPoint.key.inTangent = inKey.inTangent;
+                this._keyPoint.key.inWeight = inKey.inWeight;
+                break;
+            case ControlPointType.Out:
+                const outKey = AnimationCurveEditorUtil.controlPointToOutKey(cx, cy);
+                this._keyPoint.key.outTangent = outKey.outTangent;
+                this._keyPoint.key.outWeight = outKey.outWeight;
+                break;
+        }
+        // 修改提交事件
+        //this.emit(EVENT_SUBMIT);
     }
 
     /**
@@ -774,11 +806,11 @@ class ControlPoint extends gui.EventDispatcher {
         this._tempSvgPoint.x = input.x;
         this._tempSvgPoint.y = input.y;
 
-        // 输入点 ->  svg 局部坐标
+        // 坐标转换，由 groot ->  svg 
         const mousePoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
 
-        // 计算矩形与输入点的距离
-        const groupMatrix = this._group.getCTM();
+        // 计算矩形中心与输入点的距离
+        const groupMatrix = this._shapeBox.getCTM();
         const dx = mousePoint.x - groupMatrix.e;
         const dy = mousePoint.y - groupMatrix.f;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -803,7 +835,7 @@ class ControlPoint extends gui.EventDispatcher {
         // 移除线节点
         this._line.remove();
         // 移除矩形容器节点
-        this._group.remove();
+        this._shapeBox.remove();
 
     }
 

@@ -27,7 +27,7 @@ export class CurveInput extends gui.Widget {
 
     constructor() {
         super();
-        console.log("执行 CurveInput 构造");
+        console.log("CurveInput::constructor();");
 
         // 画布
         const w = 87, h = 17;
@@ -170,7 +170,7 @@ export class CurveInput extends gui.Widget {
                 d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;
             }
         });
-        console.log("d:", d);
+        //console.log("d:", d);
 
         this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }

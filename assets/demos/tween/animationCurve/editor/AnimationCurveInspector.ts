@@ -22,14 +22,17 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
     public override create(): IEditor.IPropertyFieldCreateResult {
         console.log("create();");
+        console.log("create getValue", this.target.getValue());
         this._curveInput = new CurveInput();
         // 侦听修改
         this._curveInput.on(CurveInput.EVENT_SUBMIT, e => {
             this.onCurveInputSubmit();
         });
+
         return { ui: this._curveInput };
     }
 
+    /** 当数据发生改变时，会调用这个方法 */
     public override refresh(): void {
         console.log("refresh();");
 
@@ -40,16 +43,16 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
             this.createDefaultProperty();
         }
 
-        // 目标值 -> CurveInput
         const value = this.target.getValue();
-        const keys: any[] = value.keys;
+        const valueKeys: any[] = value.keys;
 
         //console.log("refresh();", keys[0].outWeight, keys[0].outTangent, keys[1].inWeight, keys[1].inTangent);
-        // 先清空，避免顶点数量比实际数量多
+
+        // 清空 (避免顶点数量比实际数量多)
         this._curveInput.clearKeys();
 
-        // 设置 CurveInput 的值，等于当前值
-        keys.forEach((key, i) => {
+        // 目标值 -> CurveInput
+        valueKeys.forEach((key, i) => {
             if (i >= this._curveInput.keys.length) {
                 this._curveInput.addKey();
             }
@@ -72,13 +75,13 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         console.log("onCurveInputSubmit();");
         // CurveInput -> 目标值
         const value = this.target.getValue();
-        const keys: any[] = value.keys;
+        const valueKeys: any[] = value.keys;
 
         this._curveInput.keys.forEach((k, i) => {
-            if (i >= keys.length) {
-                keys.push(this.createFloatKeyframe());
+            if (i >= valueKeys.length) {
+                valueKeys.push(this.createFloatKeyframe());
             }
-            const key = keys[i];
+            const key = valueKeys[i];
             key.time = k.time;
             key.value = k.value;
             key.inTangent = k.inTangent;
@@ -88,8 +91,8 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         });
 
         // 删除多出的点
-        if (keys.length > this._curveInput.keys.length) {
-            keys.length = this._curveInput.keys.length;
+        if (valueKeys.length > this._curveInput.keys.length) {
+            valueKeys.length = this._curveInput.keys.length;
         }
 
         // // 第一个点永远为(0,0)
@@ -99,13 +102,15 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         // keys[keys.length - 1].time = 1;
         // keys[keys.length - 1].value = 1;
 
-        this.target.setValue(value);
+        //this.target.setValue(value);
     }
 
 
     /** 创建默认属性 */
     private createDefaultProperty(): void {
-        //console.log("createDefaultProperty();");
+        console.log("createDefaultProperty();");
+
+        // 类型描述
         const typeDescriptor: IEditor.FTypeDescriptor = Editor.typeRegistry.types[`${this.property.type}`];
 
         // 默认值
@@ -113,9 +118,10 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         initProp._$type = typeDescriptor.name;
 
         // _easeComboBoxDatas 中默认值项，转为 FloatKey 数组
-        const retKeys = AnimationCurveEditorUtil.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.isDefault).values);
+        const floatKeys = AnimationCurveEditorUtil.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.isDefault).values);
 
-        initProp.keys = retKeys.map(k => {
+        // FloatKey 数组，转为序列化后的 FloatKeyframe 数组
+        initProp.keys = floatKeys.map(k => {
             return this.createFloatKeyframe(k.time, k.value, k.inTangent, k.inWeight, k.outTangent, k.outWeight);
         });
 
