@@ -1,4 +1,4 @@
-import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
+import AnimationCurveUtil from "../AnimationCurveUtil";
 import { CurveInput } from "./CurveInput";
 import { FloatKey } from "./FloatKey";
 
@@ -157,6 +157,10 @@ class CurveCanvas extends gui.Shape {
         this.redrawCurve();
     }
 
+    public insertKey(key: FloatKey): void {
+
+    }
+
     /** 重画曲线 */
     public redrawCurve(): void {
         // 同步大小
@@ -273,34 +277,35 @@ class CurveCanvas extends gui.Shape {
                 let y = k.value;
 
                 // 坐标映射
-                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
-                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
+                x = AnimationCurveUtil.mapX(x, mapWidth);
+                y = AnimationCurveUtil.mapY(y, mapHeight);
 
                 d += `M ${x} ${y}`;
             } else {
                 const prevKey = this._keys[i - 1];
 
                 // 控制点1
-                const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
+                const c1 = AnimationCurveUtil.outKeyToControlPoint(prevKey);
                 // 控制点2
-                const c2 = AnimationCurveEditorUtil.inKeyToControlPoint(k);
+                const c2 = AnimationCurveUtil.inKeyToControlPoint(k);
                 // 终点
                 let x = k.time;
                 let y = k.value;
 
                 // 坐标映射
-                c1.x = AnimationCurveEditorUtil.mapX(c1.x, mapWidth);
-                c1.y = AnimationCurveEditorUtil.mapY(c1.y, mapHeight);
-                c2.x = AnimationCurveEditorUtil.mapX(c2.x, mapWidth);
-                c2.y = AnimationCurveEditorUtil.mapY(c2.y, mapHeight);
-                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
-                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
+                c1.x = AnimationCurveUtil.mapX(c1.x, mapWidth);
+                c1.y = AnimationCurveUtil.mapY(c1.y, mapHeight);
+                c2.x = AnimationCurveUtil.mapX(c2.x, mapWidth);
+                c2.y = AnimationCurveUtil.mapY(c2.y, mapHeight);
+                x = AnimationCurveUtil.mapX(x, mapWidth);
+                y = AnimationCurveUtil.mapY(y, mapHeight);
 
                 // C 控制点1, 控制点2, 终点
                 d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;
             }
         });
-
+        console.log(d);
+        
         this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }
 
@@ -403,8 +408,8 @@ class KeyPoint {
         const shapeBox = document.createElementNS(svgNS, "g");
         const mapWidth = parseFloat(this._curveCanvas.svg.getAttribute("width"));
         const mapHeight = parseFloat(this._curveCanvas.svg.getAttribute("height"));
-        this.x = AnimationCurveEditorUtil.mapX(this._key.time, mapWidth);
-        this.y = AnimationCurveEditorUtil.mapY(this._key.value, mapHeight);
+        this.x = AnimationCurveUtil.mapX(this._key.time, mapWidth);
+        this.y = AnimationCurveUtil.mapY(this._key.value, mapHeight);
         shapeBox.setAttribute("transform", `translate(${this.x} ${this.y})`);
         shapeBox.appendChild(rect);
         this._curveCanvas.svg.appendChild(shapeBox);
@@ -612,15 +617,15 @@ class ControlPoint {
         // 初始位置
         let pt: { x: number, y: number };
         if (this._type === ControlPointType.In) {
-            pt = AnimationCurveEditorUtil.inKeyToControlPoint(keyPoint.key);
+            pt = AnimationCurveUtil.inKeyToControlPoint(keyPoint.key);
         } else {
-            pt = AnimationCurveEditorUtil.outKeyToControlPoint(keyPoint.key);
+            pt = AnimationCurveUtil.outKeyToControlPoint(keyPoint.key);
         }
 
         const mapWidth = parseFloat(keyPoint.curveCanvas.svg.getAttribute("width"));
         const mapHeight = parseFloat(keyPoint.curveCanvas.svg.getAttribute("height"));
-        pt.x = AnimationCurveEditorUtil.mapX(pt.x, mapWidth);
-        pt.y = AnimationCurveEditorUtil.mapY(pt.y, mapHeight);
+        pt.x = AnimationCurveUtil.mapX(pt.x, mapWidth);
+        pt.y = AnimationCurveUtil.mapY(pt.y, mapHeight);
 
         // 转换初始位置，由 svg -> parent
         this._tempSvgPoint.x = pt.x;
@@ -638,7 +643,7 @@ class ControlPoint {
         line.setAttribute("stroke", "#ffffff");
         line.setAttribute("stroke-width", `${1}`);
         this._line = line;
-        this._parent.insertBefore(line, this._parent.firstChild); // 放置的最底层
+        this._parent.insertBefore(line, this._parent.firstChild); // 放置在最底层
 
         // 矩形容器
         const shapeBox = document.createElementNS(svgNS, "g");
@@ -736,12 +741,12 @@ class ControlPoint {
 
         switch (this._type) {
             case ControlPointType.In:
-                const inKey = AnimationCurveEditorUtil.controlPointToInKey(cx, cy);
+                const inKey = AnimationCurveUtil.controlPointToInKey(cx, cy, 1, 1, AnimationCurveUtil.tempInKey);
                 this._keyPoint.key.inTangent = inKey.inTangent;
                 this._keyPoint.key.inWeight = inKey.inWeight;
                 break;
             case ControlPointType.Out:
-                const outKey = AnimationCurveEditorUtil.controlPointToOutKey(cx, cy);
+                const outKey = AnimationCurveUtil.controlPointToOutKey(cx, cy, 1, 1, AnimationCurveUtil.tempOutKey);
                 this._keyPoint.key.outTangent = outKey.outTangent;
                 this._keyPoint.key.outWeight = outKey.outWeight;
                 break;

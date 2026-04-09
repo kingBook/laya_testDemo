@@ -1,4 +1,4 @@
-import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
+import AnimationCurveUtil from "../AnimationCurveUtil";
 import { CurveEditDialog, EVENT_SUBMIT } from "./CurveEditDialog";
 import { FloatKey } from "./FloatKey";
 
@@ -154,27 +154,27 @@ export class CurveInput extends gui.Widget {
                 let y = k.value;
 
                 // 坐标映射
-                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
-                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
+                x = AnimationCurveUtil.mapX(x, mapWidth);
+                y = AnimationCurveUtil.mapY(y, mapHeight);
 
                 d += `M ${x} ${y}`;
             } else {
                 const prevKey = this._keys[i - 1];
                 // 控制点1
-                const c1 = AnimationCurveEditorUtil.outKeyToControlPoint(prevKey);
+                const c1 = AnimationCurveUtil.outKeyToControlPoint(prevKey, 1, 1, AnimationCurveUtil.tempPoint);
                 // 控制点2
-                const c2 = AnimationCurveEditorUtil.inKeyToControlPoint(k);
+                const c2 = AnimationCurveUtil.inKeyToControlPoint(k, 1, 1, AnimationCurveUtil.tempPoint);
                 // 终点
                 let x = k.time;
                 let y = k.value;
 
                 // 坐标映射
-                c1.x = AnimationCurveEditorUtil.mapX(c1.x, mapWidth);
-                c1.y = AnimationCurveEditorUtil.mapY(c1.y, mapHeight);
-                c2.x = AnimationCurveEditorUtil.mapX(c2.x, mapWidth);
-                c2.y = AnimationCurveEditorUtil.mapY(c2.y, mapHeight);
-                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
-                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
+                c1.x = AnimationCurveUtil.mapX(c1.x, mapWidth);
+                c1.y = AnimationCurveUtil.mapY(c1.y, mapHeight);
+                c2.x = AnimationCurveUtil.mapX(c2.x, mapWidth);
+                c2.y = AnimationCurveUtil.mapY(c2.y, mapHeight);
+                x = AnimationCurveUtil.mapX(x, mapWidth);
+                y = AnimationCurveUtil.mapY(y, mapHeight);
 
                 // C 控制点1, 控制点2, 终点
                 d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;

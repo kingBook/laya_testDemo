@@ -1,0 +1,170 @@
+
+export default class AnimationCurveUtil {
+
+    public static readonly tempOutKey = { outTangent: 0, outWeight: 0 };
+    public static readonly tempInKey = { inTangent: 0, inWeight: 0 };
+    public static readonly tempPoint = { x: 0, y: 0 };
+
+    private static readonly s_minValue = 1e-8;
+
+    /**
+     * x坐标映射函数
+     * @param px [0,1]
+     * @param mapWidth 宽
+     * @returns 返回 x 的方向不变
+     */
+    public static mapX(px: number, mapWidth: number): number {
+        return px * mapWidth;
+    }
+
+    /**
+     * y坐标映射函数
+     * @param py [0,1]
+     * @param mapHeight 高
+     * @returns 返回 y 的原点相反
+     */
+    public static mapY(py: number, mapHeight: number): number {
+        return (1 - py) * mapHeight;
+    }
+
+    /**
+    * cubic-bezier.com 数据转为 FloatKey
+    * @param values cubic-bezier.com 数据（长度4，控制点1：c1:{x:[0], y:[1]}， 控制点2：c2:{x:[2], y:[3]}）
+    * @returns 长度为 2，weight=x, tangent=y/x, inTangent、inWeight 以右上角为原点(x向左，y向下)，outTangent、outWeight 以左下角为原点(x向右，y向上)
+    */
+    public static cubicBezierValuesToKeys(values: readonly number[]): { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[] {
+        const c1x = values[0], c1y = values[1];
+        const c2x = values[2], c2y = values[3];
+
+        const outKey = this.controlPointToOutKey(c1x, c1y, 1, 1, this.tempOutKey);
+        const inKey = this.controlPointToInKey(c2x, c2y, 1, 1, this.tempInKey);
+
+        const key0 = {
+            time: 0,
+            value: 0,
+            outTangent: outKey.outTangent,
+            outWeight: outKey.outWeight,
+            inTangent: 0,
+            inWeight: 0
+        };
+
+        const key1 = {
+            time: 1,
+            value: 1,
+            outTangent: 0,
+            outWeight: 0,
+            inTangent: inKey.inTangent,
+            inWeight: inKey.inWeight
+        };
+        return [key0, key1];
+    }
+
+    /**
+     * FloatKeyFrame 转为 cubic-bezier.com 数据
+     * @param keys 长度为 2，weight=x, tangent=y/x, inTangent 与 inWeight 以右上角为原点，x向左，y向下，outTangent 与 outWeight 以左下角为原点，x向右，y向上
+     * @returns 返回 cubic-bezier.com 数据（长度4，控制点1：c1:{x:[0], y:[1]}， 控制点2：c2:{x:[2], y:[3]}）
+     */
+    public static keysToCubicBezierValues(keys: readonly { inTangent: number, inWeight: number, outTangent: number, outWeight: number }[]): number[] {
+        const c1 = this.outKeyToControlPoint(keys[0], 1, 1, this.tempPoint);
+        const c2 = this.inKeyToControlPoint(keys[1], 1, 1, this.tempPoint);
+        return [c1.x, c1.y, c2.x, c2.y];
+    }
+
+    /**
+     * 内切线、内权重 转 控制点
+     * @param inKey 内切线、内权重
+     * @param mapWidth 控制点所在画布的宽
+     * @param mapHeight 控制点所在画布的高
+     * @param output
+     * @returns 控制点xy
+     */
+    public static inKeyToControlPoint(inKey: { inTangent: number, inWeight: number }, mapWidth: number = 1, mapHeight: number = 1, output?: { x: number, y: number }): { x: number, y: number } {
+        output ||= { x: 0, y: 0 };
+        if (inKey.inTangent + inKey.inWeight === 0) {
+            output.x = output.y = 0; // 起点控制点
+        } else {
+            output.x = -inKey.inWeight + 1; // inWeight = 1 - c2.x
+            output.y = -(inKey.inTangent * inKey.inWeight) + 1; // inTangent = (1 - c2.y) / (1 - c2.x)
+        }
+        output.x *= mapWidth;
+        output.y *= mapHeight;
+        return output;
+    }
+
+    /**
+    * 外切线、外权重 转 控制点
+    * @param outKey 外切线、外权重
+    * @param mapWidth 控制点所在画布的宽
+    * @param mapHeight 控制点所在画布的高
+    * @param output
+    * @returns 控制点xy
+    */
+    public static outKeyToControlPoint(outKey: { outTangent: number, outWeight: number }, mapWidth: number = 1, mapHeight: number = 1, output?: { x: number, y: number }): { x: number, y: number } {
+        output ||= { x: 0, y: 0 };
+        if (outKey.outTangent + outKey.outWeight === 0) {
+            output.x = output.y = 1; // 终点控制点
+        } else {
+            output.x = outKey.outWeight; // outWeight = c1.x
+            output.y = outKey.outTangent * outKey.outWeight; // outTangent = c1.y / c1.x
+        }
+        output.x *= mapWidth;
+        output.y *= mapHeight;
+        return output;
+    }
+
+    /**
+     * 控制点 转 内切线、内权重
+     * @param cx 控制点x
+     * @param cy 控制点y
+     * @param mapWidth 控制点所在画布的宽
+     * @param mapHeight 控制点所在画布的高
+     * @param output 
+     * @returns 内切线、内权重
+     */
+    public static controlPointToInKey(cx: number, cy: number, mapWidth: number = 1, mapHeight: number = 1, output?: { inTangent: number, inWeight: number }): { inTangent: number, inWeight: number } {
+        cx /= mapWidth;
+        cy /= mapHeight;
+        cx = Math.max(1 - cx, this.s_minValue);
+        cy = 1 - cy;
+        output ||= { inTangent: 0, inWeight: 0 };
+        output.inWeight = cx;
+        output.inTangent = (cy === cx) ? 1 : cy / output.inWeight;
+        return output;
+    }
+
+    /**
+    * 控制点 转 外切线、外权重
+    * @param cx 控制点x
+    * @param cy 控制点y
+    * @param mapWidth 控制点所在画布的宽
+    * @param mapHeight 控制点所在画布的高
+    * @param output 
+    * @returns 外切线、外权重 
+    */
+    public static controlPointToOutKey(cx: number, cy: number, mapWidth: number = 1, mapHeight: number = 1, output?: { outTangent: number, outWeight: number }): { outTangent: number, outWeight: number } {
+        cx /= mapWidth;
+        cy /= mapHeight;
+        output ||= { outTangent: 0, outWeight: 0 };
+        output.outWeight = Math.max(cx, this.s_minValue);
+        output.outTangent = (cy === cx) ? 1 : cy / output.outWeight;
+        return output;
+    }
+
+    // /**
+    //  * cubic-bezier.com 数据 转为字符串
+    //  * @param values 
+    //  */
+    // public static valuesToString(values: number[]): string {
+    //     const c1xStr = this.getFloatString(values[0]);
+    //     const c1yStr = this.getFloatString(values[1]);
+    //     const c2xStr = this.getFloatString(values[2]);
+    //     const c2yStr = this.getFloatString(values[3]);
+    //     return [c1xStr, c1yStr, c2xStr, c2yStr].toString();
+    // }
+
+    // /** 获取浮点数字符串 */
+    // public static getFloatString(n: number): string {
+    //     n = ((n * 100) | 0) / 100;
+    //     return n.toString().replace("0.", '.');
+    // }
+}

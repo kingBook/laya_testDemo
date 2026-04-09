@@ -1,5 +1,4 @@
 import AnimationCurve from "./animationCurve/AnimationCurve";
-import { FloatKey } from "./animationCurve/editor/FloatKey";
 
 const { regClass, property } = Laya;
 
@@ -58,26 +57,18 @@ export class AnimationCurveTest extends Laya.Script {
     }
 
     onStart(): void {
-        // console.log("onStart");
-        // console.log("this.animationCurve:", this.animationCurve);
+        console.log("onStart");
+        console.log("this.animationCurve:", this.animationCurve);
 
-        // for (let i = 0, len = 100; i <= len; i++) {
-        //     const t = i / len;
-        //     const y = this.animationCurve.getValue(t);
-        //     console.log(y);
+        for (let i = 0, len = 10; i <= len; i++) {
+            const t = i / len;
+            const y = this.animationCurve.getValue(t);
+            console.log("t:", t, y);
 
-        // }
+        }
 
-        const k=new FloatKey();
-        k.inTangent=1;
-        k.inWeight=2;
-        
-        const k2=new Laya.FloatKeyframe();
 
-        Object.assign(k2,k)
-        
-        console.log(k2);
-        
+
 
     }
 }

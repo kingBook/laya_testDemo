@@ -1,3 +1,5 @@
+import AnimationCurveUtil from "./AnimationCurveUtil";
+
 const { regClass, property } = Laya;
 
 /**
@@ -6,51 +8,42 @@ const { regClass, property } = Laya;
 @regClass()
 export default class AnimationCurve {
 
-    // @property({ type: Number })
-    // public precision: number = 8;
-
-    // @property({ type: [Number] })
-    // public data: number[];
-
     /** 动画曲线上的顶点数组 */
     @property({ type: [Laya.FloatKeyframe] })
     public keys: Laya.FloatKeyframe[];
 
     /**
-     * 获取曲线值
+     * 获取曲线值（曲线图中的y轴）
      * @param t 时间插值，区间：[0, 1]（曲线图中的x轴）。
      * @param precision 精度<正整数>，默认：8
      * @returns 曲线值，范围：[0, 1]（曲线图中的y轴）。
      */
     public getValue(t: number, precision: number = 8): number {
+        let result = NaN;
+        const len = this.keys.length;
+        if (len < 2) return result;
+
         t = Laya.MathUtil.clamp01(t);
 
-        let val = NaN;
+        for (let i = 0; i < len - 1; i++) {
+            const key0 = this.keys[i];
+            const key1 = this.keys[i + 1];
 
-        const len = this.keys.length;
-        if (len > 2) {
-            for (let i = 0; i < len - 1; i++) {
-                const key0 = this.keys[i];
-                const key1 = this.keys[i + 1];
-
-                if (t >= key0.time && t <= key1.time) {
-                    if (t === key0.time) {
-                        val = key0.value;
-                    } else if (t === key1.time) {
-                        val = key1.value;
-                    } else {
-                        const tb = (t - key0.time) / (key1.time - key0.time);
-                        const p1x = key0.outWeight; // outWeight: cubicBezierValues[0]
-                        const p1y = key0.outTangent * key0.outWeight; // outTangent: cubicBezierValues[1] / cubicBezierValues[0]
-                        const p2x = -key1.inWeight + 1; // inWeight: 1 - cubicBezierValues[2]
-                        const p2y = -(key1.inTangent * key1.inWeight) + 1; // inTangent: (1 - cubicBezierValues[3]) / (1 - cubicBezierValues[2])
-                        val = this.cubicBezierValue(tb, p1x, p1y, p2x, p2y, precision);
-                    }
-                    break;
+            if (t >= key0.time && t <= key1.time) {
+                if (t === key0.time) {
+                    result = key0.value;
+                } else if (t === key1.time) {
+                    result = key1.value;
+                } else {
+                    const c1 = AnimationCurveUtil.outKeyToControlPoint(key0, 1, 1, AnimationCurveUtil.tempPoint);
+                    const c2 = AnimationCurveUtil.inKeyToControlPoint(key1, 1, 1, AnimationCurveUtil.tempPoint);
+                    const tb = (t - key0.time) / (key1.time - key0.time);
+                    result = this.cubicBezierValue(tb, c1.x, c1.y, c2.x, c2.y, precision);
                 }
+                break;
             }
         }
-        return val;
+        return result;
     }
 
     /**

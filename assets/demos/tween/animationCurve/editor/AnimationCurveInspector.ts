@@ -1,4 +1,4 @@
-import AnimationCurveEditorUtil from "./AnimationCurveEditorUtil";
+import AnimationCurveUtil from "../AnimationCurveUtil";
 import { CurveInput } from "./CurveInput";
 
 @IEditor.inspectorField("AnimationCurve")
@@ -117,11 +117,11 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         const initProp = Editor.typeRegistry.getInitProps(typeDescriptor) || {};
         initProp._$type = typeDescriptor.name;
 
-        // _easeComboBoxDatas 中默认值项，转为 FloatKey 数组
-        const floatKeys = AnimationCurveEditorUtil.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.isDefault).values);
+        // _easeComboBoxDatas 中默认值项，转为关键帧点数组
+        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(this._easeComboBoxDatas.find(item => item.isDefault).values);
 
-        // FloatKey 数组，转为序列化后的 FloatKeyframe 数组
-        initProp.keys = floatKeys.map(k => {
+        // 关键帧点数组，转为序列化后的 FloatKeyframe 数组
+        initProp.keys = keys.map(k => {
             return this.createFloatKeyframe(k.time, k.value, k.inTangent, k.inWeight, k.outTangent, k.outWeight);
         });
 
