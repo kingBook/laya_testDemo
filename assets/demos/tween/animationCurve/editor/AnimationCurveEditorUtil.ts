@@ -2,30 +2,32 @@ import { FloatKey } from "./FloatKey";
 
 export default class AnimationCurveEditorUtil {
 
+    public static readonly MIN_VALUE = 1e-8;
+
     /**
      * x坐标映射函数
      * @param px [0,1]
-     * @param svg 父容器节点
+     * @param mapWidth 宽
      * @returns 返回 x 的方向不变
      */
-    public static mapX(px: number, svg: SVGSVGElement): number {
-        return px * parseFloat(svg.getAttribute("width"));
+    public static mapX(px: number, mapWidth: number): number {
+        return px * mapWidth;
     }
 
     /**
      * y坐标映射函数
      * @param py [0,1]
-     * @param svg 父容器节点
-     * @returns 返回 y 的方向相反
+     * @param mapHeight 高
+     * @returns 返回 y 的原点相反
      */
-    public static mapY(py: number, svg: SVGSVGElement): number {
-        return (1 - py) * parseFloat(svg.getAttribute("height"));
+    public static mapY(py: number, mapHeight: number): number {
+        return (1 - py) * mapHeight;
     }
 
     /**
     * cubic-bezier.com 数据转为 FloatKey
     * @param values cubic-bezier.com 数据（长度4，控制点1：c1:{x:[0], y:[1]}， 控制点2：c2:{x:[2], y:[3]}）
-    * @returns 长度为 2，weight=x, tangent=y/x, inTangent 与 inWeight 以右上角为原点，x向左，y向下，outTangent 与 outWeight 以左下角为原点，x向右，y向上
+    * @returns 长度为 2，weight=x, tangent=y/x, inTangent、inWeight 以右上角为原点(x向左，y向下)，outTangent、outWeight 以左下角为原点(x向右，y向上)
     */
     public static cubicBezierValuesToKeys(values: readonly number[]): FloatKey[] {
         const c1x = values[0], c1y = values[1];
@@ -115,8 +117,10 @@ export default class AnimationCurveEditorUtil {
         let inTangent: number, inWeight: number;
         cx /= mapWidth;
         cy /= mapHeight;
-        inWeight = Math.max(1 - cx, Number.MIN_VALUE);
-        inTangent = ((1 - cy) === (1 - cx)) ? 1 : (1 - cy) / inWeight;
+        cx = Math.max(1 - cx, this.MIN_VALUE);
+        cy = 1 - cy;
+        inWeight = cx;
+        inTangent = (cy === cx) ? 1 : cy / inWeight;
         return { inTangent, inWeight };
     }
 
@@ -132,9 +136,7 @@ export default class AnimationCurveEditorUtil {
         let outTangent: number, outWeight: number;
         cx /= mapWidth;
         cy /= mapHeight;
-        // inWeight 和 outWeight 的值不能为0 (否则在计算inTangent、outTangent 会无穷大)
-        outWeight = Math.max(cx, Number.MIN_VALUE);
-        // c1y等于c1x时直接1，纠正都为0时计算错误
+        outWeight = Math.max(cx, this.MIN_VALUE);
         outTangent = (cy === cx) ? 1 : cy / outWeight;
         return { outTangent, outWeight };
     }

@@ -144,6 +144,8 @@ export class CurveInput extends gui.Widget {
 
     /** 重画SVG */
     private redrawSVG(): void {
+        const mapWidth = parseFloat(this._svg.getAttribute("width"));
+        const mapHeight = parseFloat(this._svg.getAttribute("height"));
         let d = "";
         this._keys.forEach((k, i) => {
             if (i === 0) {
@@ -152,8 +154,8 @@ export class CurveInput extends gui.Widget {
                 let y = k.value;
 
                 // 坐标映射
-                x = AnimationCurveEditorUtil.mapX(x, this._svg);
-                y = AnimationCurveEditorUtil.mapY(y, this._svg);
+                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
+                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
 
                 d += `M ${x} ${y}`;
             } else {
@@ -167,12 +169,12 @@ export class CurveInput extends gui.Widget {
                 let y = k.value;
 
                 // 坐标映射
-                c1.x = AnimationCurveEditorUtil.mapX(c1.x, this._svg);
-                c1.y = AnimationCurveEditorUtil.mapY(c1.y, this._svg);
-                c2.x = AnimationCurveEditorUtil.mapX(c2.x, this._svg);
-                c2.y = AnimationCurveEditorUtil.mapY(c2.y, this._svg);
-                x = AnimationCurveEditorUtil.mapX(x, this._svg);
-                y = AnimationCurveEditorUtil.mapY(y, this._svg);
+                c1.x = AnimationCurveEditorUtil.mapX(c1.x, mapWidth);
+                c1.y = AnimationCurveEditorUtil.mapY(c1.y, mapHeight);
+                c2.x = AnimationCurveEditorUtil.mapX(c2.x, mapWidth);
+                c2.y = AnimationCurveEditorUtil.mapY(c2.y, mapHeight);
+                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
+                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
 
                 // C 控制点1, 控制点2, 终点
                 d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;

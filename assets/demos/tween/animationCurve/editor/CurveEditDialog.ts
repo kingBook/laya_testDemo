@@ -263,6 +263,8 @@ class CurveCanvas extends gui.Shape {
 
     /** 重画SVG */
     private redrawSVG(): void {
+        const mapWidth = parseFloat(this._svg.getAttribute("width"));
+        const mapHeight = parseFloat(this._svg.getAttribute("height"));
         let d = "";
         this._keys.forEach((k, i) => {
             if (i === 0) {
@@ -271,8 +273,8 @@ class CurveCanvas extends gui.Shape {
                 let y = k.value;
 
                 // 坐标映射
-                x = AnimationCurveEditorUtil.mapX(x, this._svg);
-                y = AnimationCurveEditorUtil.mapY(y, this._svg);
+                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
+                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
 
                 d += `M ${x} ${y}`;
             } else {
@@ -287,12 +289,12 @@ class CurveCanvas extends gui.Shape {
                 let y = k.value;
 
                 // 坐标映射
-                c1.x = AnimationCurveEditorUtil.mapX(c1.x, this._svg);
-                c1.y = AnimationCurveEditorUtil.mapY(c1.y, this._svg);
-                c2.x = AnimationCurveEditorUtil.mapX(c2.x, this._svg);
-                c2.y = AnimationCurveEditorUtil.mapY(c2.y, this._svg);
-                x = AnimationCurveEditorUtil.mapX(x, this._svg);
-                y = AnimationCurveEditorUtil.mapY(y, this._svg);
+                c1.x = AnimationCurveEditorUtil.mapX(c1.x, mapWidth);
+                c1.y = AnimationCurveEditorUtil.mapY(c1.y, mapHeight);
+                c2.x = AnimationCurveEditorUtil.mapX(c2.x, mapWidth);
+                c2.y = AnimationCurveEditorUtil.mapY(c2.y, mapHeight);
+                x = AnimationCurveEditorUtil.mapX(x, mapWidth);
+                y = AnimationCurveEditorUtil.mapY(y, mapHeight);
 
                 // C 控制点1, 控制点2, 终点
                 d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;
@@ -399,8 +401,10 @@ class KeyPoint {
 
         // 容器节点
         const shapeBox = document.createElementNS(svgNS, "g");
-        this.x = AnimationCurveEditorUtil.mapX(this._key.time, this._curveCanvas.svg);
-        this.y = AnimationCurveEditorUtil.mapY(this._key.value, this._curveCanvas.svg);
+        const mapWidth = parseFloat(this._curveCanvas.svg.getAttribute("width"));
+        const mapHeight = parseFloat(this._curveCanvas.svg.getAttribute("height"));
+        this.x = AnimationCurveEditorUtil.mapX(this._key.time, mapWidth);
+        this.y = AnimationCurveEditorUtil.mapY(this._key.value, mapHeight);
         shapeBox.setAttribute("transform", `translate(${this.x} ${this.y})`);
         shapeBox.appendChild(rect);
         this._curveCanvas.svg.appendChild(shapeBox);
@@ -613,8 +617,10 @@ class ControlPoint {
             pt = AnimationCurveEditorUtil.outKeyToControlPoint(keyPoint.key);
         }
 
-        pt.x = AnimationCurveEditorUtil.mapX(pt.x, keyPoint.curveCanvas.svg);
-        pt.y = AnimationCurveEditorUtil.mapY(pt.y, keyPoint.curveCanvas.svg);
+        const mapWidth = parseFloat(keyPoint.curveCanvas.svg.getAttribute("width"));
+        const mapHeight = parseFloat(keyPoint.curveCanvas.svg.getAttribute("height"));
+        pt.x = AnimationCurveEditorUtil.mapX(pt.x, mapWidth);
+        pt.y = AnimationCurveEditorUtil.mapY(pt.y, mapHeight);
 
         // 转换初始位置，由 svg -> parent
         this._tempSvgPoint.x = pt.x;
@@ -784,7 +790,6 @@ class ControlPoint {
         this._line.remove();
         // 移除矩形容器节点
         this._shapeBox.remove();
-
     }
 
 }

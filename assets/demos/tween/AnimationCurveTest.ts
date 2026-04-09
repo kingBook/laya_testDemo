@@ -55,7 +55,6 @@ export class AnimationCurveTest extends Laya.Script {
         }
 
         // this.owner.graphics.drawCurves(10, 58, [0, 0, 19, -100, 100, 0], "#ff0000", 3);
-
     }
 
     onStart(): void {
