@@ -36,8 +36,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
     public override refresh(): void {
         console.log("refresh();");
 
-        //console.log("target.getValue:", this.target.getValue());
-
         // 当字段为空时，创建默认属性
         if (!this.target.getValue()) {
             this.createDefaultProperty();
@@ -45,8 +43,6 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         const value = this.target.getValue();
         const valueKeys: any[] = value.keys;
-
-        //console.log("refresh();", keys[0].outWeight, keys[0].outTangent, keys[1].inWeight, keys[1].inTangent);
 
         // 清空 (避免顶点数量比实际数量多)
         this._curveInput.clearKeys();
@@ -70,7 +66,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         this._curveInput.applyChange();
     }
 
-    /** CurveInput 修改后提交 */
+    /** CurveInput 提交修改 */
     private onCurveInputSubmit(): void {
         console.log("onCurveInputSubmit();");
         // CurveInput -> 目标值
@@ -129,6 +125,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         this.parent.target.setPropertyValue(this.property.name, initProp);
     }
 
+    /** 创建序列化后的 Laya.FloatKeyframe */
     private createFloatKeyframe(time: number = 0, value: number = 0, inTangent: number = 0, inWeight: number = 0, outTangent: number = 0, outWeight: number = 0) {
         console.log("createFloatKeyframe();");
         return {

@@ -228,6 +228,16 @@ class CurveCanvas extends gui.Shape {
 
     /** 鼠标移动 */
     private onPointerMove(e: gui.Event): void {
+        // 计算鼠标与曲线距离
+        this._tempSvgPoint.x = e.input.x;
+        this._tempSvgPoint.y = e.input.y;
+
+        this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
+        const px = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
+        const py = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
+        const closestT = AnimationCurveUtil.getCubicBezierClosestT(px, py, this._keys);
+        console.log("p", px, py);
+
 
     }
 
@@ -285,9 +295,9 @@ class CurveCanvas extends gui.Shape {
                 const prevKey = this._keys[i - 1];
 
                 // 控制点1
-                const c1 = AnimationCurveUtil.outKeyToControlPoint(prevKey);
+                const c1 = AnimationCurveUtil.outKeyToControlPoint(prevKey, 1, 1, AnimationCurveUtil.tempPoint1);
                 // 控制点2
-                const c2 = AnimationCurveUtil.inKeyToControlPoint(k);
+                const c2 = AnimationCurveUtil.inKeyToControlPoint(k, 1, 1, AnimationCurveUtil.tempPoint2);
                 // 终点
                 let x = k.time;
                 let y = k.value;
@@ -304,12 +314,8 @@ class CurveCanvas extends gui.Shape {
                 d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;
             }
         });
-        console.log(d);
-        
         this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }
-
-
 }
 
 /** 曲线上的关键帧点 */
@@ -617,9 +623,9 @@ class ControlPoint {
         // 初始位置
         let pt: { x: number, y: number };
         if (this._type === ControlPointType.In) {
-            pt = AnimationCurveUtil.inKeyToControlPoint(keyPoint.key);
+            pt = AnimationCurveUtil.inKeyToControlPoint(keyPoint.key, 1, 1, AnimationCurveUtil.tempPoint1);
         } else {
-            pt = AnimationCurveUtil.outKeyToControlPoint(keyPoint.key);
+            pt = AnimationCurveUtil.outKeyToControlPoint(keyPoint.key, 1, 1, AnimationCurveUtil.tempPoint2);
         }
 
         const mapWidth = parseFloat(keyPoint.curveCanvas.svg.getAttribute("width"));

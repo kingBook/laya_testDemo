@@ -4,7 +4,7 @@ import { FloatKey } from "./FloatKey";
 
 /**
  * 
- * @event {@link EVENT_SUBMIT} 修改后的提交事件, 事件由 {@link this} 派发，回调函数格式: `(): void`
+ * @emit {@link EVENT_SUBMIT} 修改后的提交事件, 事件由 {@link this} 派发，回调函数格式: `(): void`
  */
 export class CurveInput extends gui.Widget {
 
@@ -161,9 +161,9 @@ export class CurveInput extends gui.Widget {
             } else {
                 const prevKey = this._keys[i - 1];
                 // 控制点1
-                const c1 = AnimationCurveUtil.outKeyToControlPoint(prevKey, 1, 1, AnimationCurveUtil.tempPoint);
+                const c1 = AnimationCurveUtil.outKeyToControlPoint(prevKey, 1, 1, AnimationCurveUtil.tempPoint1);
                 // 控制点2
-                const c2 = AnimationCurveUtil.inKeyToControlPoint(k, 1, 1, AnimationCurveUtil.tempPoint);
+                const c2 = AnimationCurveUtil.inKeyToControlPoint(k, 1, 1, AnimationCurveUtil.tempPoint2);
                 // 终点
                 let x = k.time;
                 let y = k.value;
