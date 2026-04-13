@@ -167,7 +167,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /** 额外添加的重复列表项数量 */
     private _extraItemNum: number;
     /** 动画的进度 [0, 1] */
-    private _normalizedT: number;
+    private _progress: number;
     /** 滚动速度(有方向) */
     private _speed: number;
     /** 布尔标记集合 */
@@ -212,7 +212,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /** 滚动速度(有方向) */
     public get speed(): number { return this._speed; }
     /** 动画的进度 [0, 1] */
-    public get normalizedT(): number { return this._normalizedT; }
+    public get progress(): number { return this._progress; }
 
 
     /**
@@ -254,7 +254,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
 
         this._aniTime = 0;
         this._speed = 0;
-        this._normalizedT = 0;
+        this._progress = 0;
         this._resultIndices ||= [];
         this._resultIndices.length = 0;
 
@@ -338,7 +338,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
         // 动画进度
         this._aniTime += Laya.timer.delta;
         const t = Laya.MathUtil.clamp01(Math.trunc(this._aniTime / this.aniTotalTime * 1000) / 1000); // 三位小数
-        this._normalizedT = t;
+        this._progress = t;
 
         // 贝塞尔曲线运动
         const tb = Utils.createBezierEase(t, this.bezierEaseData.data[0], this.bezierEaseData.data[1], this.bezierEaseData.data[2], this.bezierEaseData.data[3], this.bezierEaseData.precision);
@@ -447,7 +447,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
         }
         if (this._resultIndices.length === 0) throw new Error("未设置的结果，不能开始滚动");
 
-        this._normalizedT = 0;
+        this._progress = 0;
         this._aniTime = 0;
         this._totalDistance = this.getResultDistance(this._resultFocusT); // 当前位置到结果的距离
         this._distance = 0;
@@ -459,8 +459,8 @@ export class ScrollingLotteryListScript extends Laya.Script {
         this.onScrollStartHandler?.run();
 
         // 滚动进度事件
-        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_COMPLETE, this._normalizedT);
-        this.onScrollProgressHandler?.runWith(this._normalizedT);
+        this.owner.event(ScrollingLotteryListScript.EVENT_SCROLL_PROGRESS, this._progress);
+        this.onScrollProgressHandler?.runWith(this._progress);
 
         // 同步设置当前焦点下的索引
         this._currentFocusIndex = this.getIndexByScrollBarValue(this._scrollBar.value, true);
