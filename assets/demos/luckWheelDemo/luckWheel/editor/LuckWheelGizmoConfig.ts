@@ -17,5 +17,7 @@ export class LuckWheelGizmoConfig {
     public static readonly lineWidth: number = 1;
 
     /** 索引号数字的字体大小 */
-    public static readonly indexNumberFontSize:number = 11;
+    public static readonly indexNumberFontSize: number = 11;
+    /** 索引号数字显示在转盘内的半径，区间：[0, 1] */
+    public static readonly indexNumberRadius: number = 0.9;
 }

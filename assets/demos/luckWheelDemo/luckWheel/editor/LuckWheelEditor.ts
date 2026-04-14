@@ -123,14 +123,14 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
 
     /** 绘制外多边形的索引编号 */
     private drawOuterNumberTexts(): void {
-        const radius = (this._luckWheel as any)._gizmoOuterRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const radius = (this._luckWheel as any)._gizmoOuterRadius * LuckWheelGizmoConfig.indexNumberRadius; // 数字显示在圆内，半径不取全长
         const sectorPositions: number[] = this._luckWheel.getOuterSectorPositions(radius, false); // 外转盘各分块的中线点列表
         this.drawNumberTexts(sectorPositions, radius, LuckWheelGizmoConfig.outerLineColor, this._outerNumberTexts);
     }
 
     /** 绘制内多边形的索引编号 */
     private drawInnerNumberTexts(): void {
-        const radius = (this._luckWheel as any)._gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const radius = (this._luckWheel as any)._gizmoInnerRadius * LuckWheelGizmoConfig.indexNumberRadius; // 数字显示在圆内，半径不取全长
         const sectorPositions: number[] = this._luckWheel.getInnerSectorPositions(radius, false); // 内转盘各分块的中线点列表
         this.drawNumberTexts(sectorPositions, radius, LuckWheelGizmoConfig.innerLineColor, this._innerNumberTexts);
     }

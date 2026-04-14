@@ -108,7 +108,7 @@ export class SectorAnglesPropertyField extends IEditor.ArrayField {
         const outerChild = await this.createChild(parent, angleOffset, sectorAngles, luckWheel.props._gizmoOuterRadius, childName, LuckWheelGizmoConfig.outerLineColor, LuckWheelGizmoConfig.outerFillColor);
 
         // 分割的区块索引数字
-        const radius = luckWheel.props._gizmoOuterRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const radius = luckWheel.props._gizmoOuterRadius * LuckWheelGizmoConfig.indexNumberRadius; // 数字显示在圆内，半径不取全长
         const sectorPositions: number[] = LuckWheelUtil.getSectorPositions(angleOffset, sectorAngles, radius);
         this.createNumberTexts(outerChild, sectorPositions, radius, LuckWheelGizmoConfig.outerLineColor);
         return outerChild;
@@ -122,7 +122,7 @@ export class SectorAnglesPropertyField extends IEditor.ArrayField {
         const innerChild = await this.createChild(parent, angleOffset, sectorAngles, luckWheel.props._gizmoInnerRadius, childName, LuckWheelGizmoConfig.innerLineColor, LuckWheelGizmoConfig.innerFillColor);
 
         // 分割的区块索引数字
-        const radius = luckWheel.props._gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const radius = luckWheel.props._gizmoInnerRadius * LuckWheelGizmoConfig.indexNumberRadius; // 数字显示在圆内，半径不取全长
         const sectorPositions: number[] = LuckWheelUtil.getSectorPositions(angleOffset, sectorAngles, radius);
         this.createNumberTexts(innerChild, sectorPositions, radius, LuckWheelGizmoConfig.innerLineColor);
         return innerChild;
