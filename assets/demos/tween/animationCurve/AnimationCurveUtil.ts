@@ -15,7 +15,11 @@ export default class AnimationCurveUtil {
      * @param precision 精度<正整数>，默认：8
      * @returns 曲线值，范围：[0, 1]（曲线图中的y轴）。
      */
-    public static getCurveValue(keys: { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[], t: number, precision: number = 8): number {
+    public static getCurveValue(
+        keys: { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[],
+        t: number,
+        precision: number = 8
+    ): number {
         let result = NaN;
         const len = keys.length;
         if (len < 2) return result;
@@ -44,27 +48,41 @@ export default class AnimationCurveUtil {
     }
 
     /**
-     * 点p 距离贝塞尔曲线上最近点的 t
+     * 获取点(p)到贝塞尔曲线上距离最近点的 t 和距离
+     * * 注意: 此函数很耗性能
      * @param px 点p的x
      * @param py 点p的y
      * @param keys 曲线上的关键帧点数组
-     * @param stepCount 迭代次数<正整数>，把 t 分成 {@link stepCount} 份来计算
-     * @returns 最近点的 t，区间：[0, 1]
+     * @param stepCount [默认：10]，迭代次数<大于0的整数>，把 t 分成 {@link stepCount} 份来计算
+     * @param recursionCount [默认：2]，递归次数
+     * @returns t: 最近点的 t ，区间：[0, 1]; distance: 最近点的距离
      */
-    public static getCubicBezierClosestT(px: number, py: number, keys: { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[], stepCount: number = 10): number {
-        let result: number;
+    public static getClosestPointOnCubicBezierCurve(
+        px: number,
+        py: number,
+        keys: { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[],
+        stepCount: number = 10,
+        recursionCount: number = 2
+    ): { t: number, distance: number } {
 
-        const dt = 1 / stepCount;
-        const minD = Number.MAX_VALUE;
-        for (let t = 0; t <= 1; t += dt) {
-            t = Math.min(t, 1);
-            const v = this.getCurveValue(keys, t);
-            const d = Math.pow(px - t, 2) + Math.pow(py - v, 2);
-            if (d < minD) {
-                result = t;
+        let retT: number, val: number, d: number, i: number;
+        let t = 0, maxT = 1, dt = (maxT - t) / stepCount, minD = Number.MAX_VALUE;
+
+        for (i = 0; i < recursionCount; i++) {
+            for (t; t <= maxT; t += dt) {
+                t = Math.min(t, maxT); // 曲线图x
+                val = this.getCurveValue(keys, t); // 曲线图y
+                d = Math.pow(px - t, 2) + Math.pow(py - val, 2); // 距离平方
+                if (d < minD) {
+                    minD = d;
+                    retT = t;
+                }
             }
+            t = Math.max(retT - dt, 0);
+            maxT = Math.min(t + dt, 1);
+            dt = dt = (maxT - t) / stepCount;
         }
-        return result;
+        return { t: retT, distance: Math.sqrt(minD) };
     }
 
     /**

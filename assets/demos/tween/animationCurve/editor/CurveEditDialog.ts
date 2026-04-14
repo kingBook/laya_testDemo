@@ -235,8 +235,8 @@ class CurveCanvas extends gui.Shape {
         this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
         const px = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
         const py = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
-        const closestT = AnimationCurveUtil.getCubicBezierClosestT(px, py, this._keys);
-        console.log("p", px, py);
+        const { t, distance } = AnimationCurveUtil.getClosestPointOnCubicBezierCurve(px, py, this._keys);
+        console.log("p:", px, py, "closestT:", t, "distance:", distance);
 
 
     }

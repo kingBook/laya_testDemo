@@ -14,9 +14,9 @@ export default class AnimationCurve {
 
     /**
      * 获取曲线值（曲线图中的y轴）
-     * @param t 时间插值，区间：[0, 1]（曲线图中的x轴）。
+     * @param t 时间插值（曲线图中的x轴），区间：[0, 1]。
      * @param precision 精度<正整数>，默认：8
-     * @returns 曲线值，范围：[0, 1]（曲线图中的y轴）。
+     * @returns 曲线值（曲线图中的y轴），范围：[0, 1]。
      */
     public getValue(t: number, precision: number = 8): number {
         return AnimationCurveUtil.getCurveValue(this.keys, t, precision);
