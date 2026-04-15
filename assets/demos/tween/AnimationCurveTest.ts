@@ -1,22 +1,22 @@
 import AnimationCurve from "./animationCurve/AnimationCurve";
 
-const { regClass, property } = Laya;
+//const { regClass, property } = Laya;
 
-@regClass()
+@Laya.regClass()
 export class AnimationCurveTest extends Laya.Script {
 
     declare owner: Laya.Sprite;
 
-    @property({ type: AnimationCurve, inspector: AnimationCurve.name })
+    @Laya.property({ type: AnimationCurve, inspector: AnimationCurve.name })
     animationCurve: AnimationCurve;
 
     // @property({ type: AnimationCurve, inspector: "AnimationCurveOld" })
     // animationCurveOld: AnimationCurve;
 
-    @property({ type: [Laya.FloatKeyframe], inspector: "curve" })
+    @Laya.property({ type: [Laya.FloatKeyframe], inspector: "curve" })
     public keys: Laya.FloatKeyframe[];
 
-    @property({ type: Laya.TextArea })
+    @Laya.property({ type: Laya.TextArea })
     text: Laya.TextArea;
 
     onAwake(): void {

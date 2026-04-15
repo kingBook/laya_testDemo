@@ -1,9 +1,7 @@
 import AnimationCurveUtil from "../AnimationCurveUtil";
 import { CurveInput } from "./CurveInput";
+import { CurveShape, svgNS } from "./CurveShape";
 import { FloatKey } from "./FloatKey";
-
-/** svg 命名空间 URI */
-const svgNS = "http://www.w3.org/2000/svg";
 
 /** 提交修改事件 */
 export const EVENT_SUBMIT = "eventSubmit";
@@ -15,10 +13,12 @@ export const EVENT_SUBMIT = "eventSubmit";
 export class CurveEditDialog extends IEditor.Dialog {
 
     /** 曲线画布大小 */
-    public static readonly curveCanvasSize = { width: 350, height: 350 };
+    private static readonly curveCanvasSize = { width: 350, height: 350 };
     /** 边距 */
-    public static readonly margin = { top: 50, bottom: 50, left: 50, right: 50 };
+    private static readonly margin = { top: 50, bottom: 50, left: 50, right: 50 };
 
+    /** 预设列表 */
+    private _presetList: gui.List;
     /** 曲线画布 */
     private _curveCanvas: CurveCanvas;
     /** 曲线输入 */
@@ -33,8 +33,33 @@ export class CurveEditDialog extends IEditor.Dialog {
         this.contentPane = contentPane;
 
         this.title = "CurveEdit"; // 窗口标题
-        this.resizable = false; // 窗口大小，是否可调节
-        this.showType = "popup"; // 点击窗口外时，关闭（必须，否则在未关闭窗口的情况下不保存场景打开其他场景调节曲线无法侦测修改）
+        this.resizable = false; // 是否可调节窗口大小
+        this.showType = "popup"; // 点击窗口外时关闭（必须，否则在未关闭窗口的情况下不保存场景打开其他场景调节曲线无法侦测修改）
+
+        // // 预设列表
+        // this._presetList = new gui.List();
+
+        // // 创建列表项模板容器
+        // const itemContainer = new gui.Widget();
+        // itemContainer.setSize(50, 50);
+
+        // // 在容器中添加Box作为背景
+        // const sgraphics = new gui.SGraphics();
+        // sgraphics.setColor(0xff0000);
+        // const bgBox = new gui.Box();
+        // bgBox.setSize(50, 50);
+        // bgBox.background = sgraphics;
+        // itemContainer.addChild(bgBox);
+
+        // // 创建Prefab并设置为itemTemplate
+        // const prefab = new gui.Prefab(itemContainer as any);
+        // this._presetList.itemTemplate = prefab;
+        // this._presetList.layout.type = gui.LayoutType.SingleRow; // 水平方向
+        // this._presetList.setSize(300, 60); // 列表大小
+        // this._presetList.x = 0;
+        // this._presetList.y = 0;
+        // this._presetList.numItems = 5;
+        // this.contentPane.addChild(this._presetList);
 
         // 曲线画布
         const canvasX = CurveEditDialog.margin.left;
@@ -71,16 +96,10 @@ export class CurveEditDialog extends IEditor.Dialog {
 }
 
 /** 曲线画布 */
-class CurveCanvas extends gui.Shape {
+class CurveCanvas extends CurveShape {
 
-    /** 关键帧点数组 */
-    private _keys: FloatKey[];
     /** 鼠标侦听的 GRoot */
     private _groot: gui.GRoot;
-    /** svg 节点 */
-    private _svg: SVGSVGElement;
-    /** svg 路径节点 */
-    private _path: SVGPathElement;
     /** 临时 SVgPoint */
     private _tempSvgPoint: SVGPoint;
 
@@ -89,61 +108,25 @@ class CurveCanvas extends gui.Shape {
 
     /** 鼠标侦听的 GRoot */
     public get groot(): gui.GRoot { return this._groot; }
-    /** svg 节点 */
-    public get svg(): SVGSVGElement { return this._svg; }
 
 
     constructor(parent: gui.Widget, x: number, y: number, width: number, height: number) {
-        super();
-
-        // 位置、宽高、颜色
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.drawRect(0, gui.Color.BLACK, new gui.Color("#434343")); // 不要设置轮廓线宽，会导致位置偏差
-        parent.addChild(this);
-
-        // svg 节点
-        const svg = document.createElementNS(svgNS, "svg");
-        svg.setAttribute("xmlns", svgNS);
-        svg.setAttribute("x", "0");
-        svg.setAttribute("y", "0");
-        svg.setAttribute("width", CurveEditDialog.curveCanvasSize.width.toString());
-        svg.setAttribute("height", CurveEditDialog.curveCanvasSize.height.toString());
-        svg.style.position = "absolute";
-        svg.style.left = "0";
-        svg.style.right = "0";
-        svg.style.top = "0";
-        svg.style.bottom = "0";
-        svg.style.pointerEvents = "auto"; // 鼠标指针事件
-        svg.setAttribute("overflow", "visible"); // 溢出时显示
-        this.element.appendChild(svg);
-        this._svg = svg;
-
-        // 创建 Path 节点（曲线）
-        const path = document.createElementNS(svgNS, "path");
-        path.setAttribute("fill", "none");
-        path.setAttribute("stroke", "#ff0000");
-        path.setAttribute("stroke-width", "1");
-        this._path = path;
-        this._svg.appendChild(path);
-
+        super(parent, x, y, width, height, "#434343", "#ff0000");
         // 临时 DOMPoint
         this._tempSvgPoint ||= this._svg.createSVGPoint();
     }
 
     /** 设置关键帧点数组 */
     public setKeys(keys: FloatKey[]): void {
-        console.log("setKeys();");
+        //console.log("setKeys();");
 
-        this._keys = keys;
+        this.keys = keys;
 
         // 销毁所有 KeyPoint
         this.destroyAllKeyPoints();
 
         // 创建 KeyPoint
-        this._keys.forEach((k, i) => {
+        this.keys.forEach((k, i) => {
             const isFirst = i === 0;
             const isLast = i === keys.length - 1;
             const allowMovement = !isFirst && !isLast; // 非第一或最后一个才可移动
@@ -152,22 +135,9 @@ class CurveCanvas extends gui.Shape {
             const enabledControlPoint1 = !isLast; // 最后一个关键帧点，外控制点不可用
             this.createKeyPoint(k, allowMovement, isSelected, enabledControlPoint0, enabledControlPoint1);
         });
-
-        // 重画曲线
-        this.redrawCurve();
     }
 
-    public insertKey(key: FloatKey): void {
-
-    }
-
-    /** 重画曲线 */
-    public redrawCurve(): void {
-        // 同步大小
-        this.syncSize();
-        // 重画SVG
-        this.redrawSVG();
-    }
+    // public insertKey(key: FloatKey): void { }
 
     /** 提交修改 */
     public submit(): void {
@@ -228,17 +198,15 @@ class CurveCanvas extends gui.Shape {
 
     /** 鼠标移动 */
     private onPointerMove(e: gui.Event): void {
-        // 计算鼠标与曲线距离
-        this._tempSvgPoint.x = e.input.x;
-        this._tempSvgPoint.y = e.input.y;
+        // // 计算鼠标与曲线距离
+        // this._tempSvgPoint.x = e.input.x;
+        // this._tempSvgPoint.y = e.input.y;
 
-        this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
-        const px = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
-        const py = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
-        const { t, distance } = AnimationCurveUtil.getClosestPointOnCubicBezierCurve(px, py, this._keys);
-        console.log("p:", px, py, "closestT:", t, "distance:", distance);
-
-
+        // this._tempSvgPoint = this._tempSvgPoint.matrixTransform(this._svg.getScreenCTM().inverse());
+        // const px = this._tempSvgPoint.x / parseFloat(this._svg.getAttribute("width"));
+        // const py = 1 - this._tempSvgPoint.y / parseFloat(this._svg.getAttribute("height"));
+        // const { t, distance } = AnimationCurveUtil.getClosestPointOnCubicBezierCurve(px, py, this.keys);
+        // //console.log("p:", px, py, "closestT:", t, "distance:", distance);
     }
 
     /** 鼠标释放 */
@@ -262,59 +230,6 @@ class CurveCanvas extends gui.Shape {
             keyPoint.onDestroy();
         });
         this._keyPoints.length = 0;
-    }
-
-    /** 同步大小 */
-    private syncSize(): void {
-        const w = this.width;
-        const h = this.height;
-        this._svg.setAttribute("width", `${w}`);
-        this._svg.setAttribute("height", `${h}`);
-        this._svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-        this._svg.style.width = `${w}px`;
-        this._svg.style.height = `${h}px`;
-    }
-
-    /** 重画SVG */
-    private redrawSVG(): void {
-        const mapWidth = parseFloat(this._svg.getAttribute("width"));
-        const mapHeight = parseFloat(this._svg.getAttribute("height"));
-        let d = "";
-        this._keys.forEach((k, i) => {
-            if (i === 0) {
-                // 起点
-                let x = k.time;
-                let y = k.value;
-
-                // 坐标映射
-                x = AnimationCurveUtil.mapX(x, mapWidth);
-                y = AnimationCurveUtil.mapY(y, mapHeight);
-
-                d += `M ${x} ${y}`;
-            } else {
-                const prevKey = this._keys[i - 1];
-
-                // 控制点1
-                const c1 = AnimationCurveUtil.outKeyToControlPoint(prevKey, 1, 1, AnimationCurveUtil.tempPoint1);
-                // 控制点2
-                const c2 = AnimationCurveUtil.inKeyToControlPoint(k, 1, 1, AnimationCurveUtil.tempPoint2);
-                // 终点
-                let x = k.time;
-                let y = k.value;
-
-                // 坐标映射
-                c1.x = AnimationCurveUtil.mapX(c1.x, mapWidth);
-                c1.y = AnimationCurveUtil.mapY(c1.y, mapHeight);
-                c2.x = AnimationCurveUtil.mapX(c2.x, mapWidth);
-                c2.y = AnimationCurveUtil.mapY(c2.y, mapHeight);
-                x = AnimationCurveUtil.mapX(x, mapWidth);
-                y = AnimationCurveUtil.mapY(y, mapHeight);
-
-                // C 控制点1, 控制点2, 终点
-                d += ` C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${x} ${y}`;
-            }
-        });
-        this._path.setAttribute('d', d); // M 起点 C 控制点1 控制点2 终点
     }
 }
 
@@ -802,5 +717,6 @@ class ControlPoint {
         // 移除矩形容器节点
         this._shapeBox.remove();
     }
+
 
 }
