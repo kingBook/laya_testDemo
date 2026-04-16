@@ -50,9 +50,16 @@ export class CurveEditDialog extends IEditor.Dialog {
         // // 预设列表
         // this._presetList = new gui.List();
 
-        // // 创建列表项模板容器
-        // const itemContainer = new gui.Widget();
-        // itemContainer.setSize(50, 50);
+        // 创建列表项模板容器
+        const itemContainer = new gui.Widget();
+        itemContainer.setSize(50, 50);
+        const typeDescriptor: IEditor.FTypeDescriptor = Editor.typeRegistry.types[`GUI.Widget`];
+        const data=IEditor.SerializeUtil.encodeObj(itemContainer, typeDescriptor);
+        console.log(data);
+        const prefab = new gui.Prefab(data);
+        console.log(prefab);
+        
+        
 
         // // 在容器中添加Box作为背景
         // const bgBox = new gui.Box();
