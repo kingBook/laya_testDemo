@@ -36,6 +36,17 @@ export class CurveEditDialog extends IEditor.Dialog {
         this.resizable = false; // 是否可调节窗口大小
         this.showType = "popup"; // 点击窗口外时关闭（必须，否则在未关闭窗口的情况下不保存场景打开其他场景调节曲线无法侦测修改）
 
+
+
+        // 曲线画布
+        const canvasX = CurveEditDialog.margin.left;
+        const canvasY = CurveEditDialog.margin.top;
+        const canvasWidth = CurveEditDialog.curveCanvasSize.width;
+        const canvasHeight = CurveEditDialog.curveCanvasSize.height;
+        this._curveCanvas = new CurveCanvas(this.contentPane, canvasX, canvasY, canvasWidth, canvasHeight);
+
+
+
         // // 预设列表
         // this._presetList = new gui.List();
 
@@ -44,29 +55,24 @@ export class CurveEditDialog extends IEditor.Dialog {
         // itemContainer.setSize(50, 50);
 
         // // 在容器中添加Box作为背景
-        // const sgraphics = new gui.SGraphics();
-        // sgraphics.setColor(0xff0000);
         // const bgBox = new gui.Box();
         // bgBox.setSize(50, 50);
-        // bgBox.background = sgraphics;
+        // bgBox.background = new gui.SRect(0, gui.Color.GRAY, gui.Color.GRAY);
         // itemContainer.addChild(bgBox);
+        // this._presetList.addChild(itemContainer);
 
         // // 创建Prefab并设置为itemTemplate
         // const prefab = new gui.Prefab(itemContainer as any);
         // this._presetList.itemTemplate = prefab;
         // this._presetList.layout.type = gui.LayoutType.SingleRow; // 水平方向
         // this._presetList.setSize(300, 60); // 列表大小
-        // this._presetList.x = 0;
-        // this._presetList.y = 0;
-        // this._presetList.numItems = 5;
-        // this.contentPane.addChild(this._presetList);
+        // this._presetList.x = CurveEditDialog.margin.left;
+        // this._presetList.y = CurveEditDialog.margin.top - 40;
+        // this._presetList.itemRenderer = (index: number, item: any) => {
 
-        // 曲线画布
-        const canvasX = CurveEditDialog.margin.left;
-        const canvasY = CurveEditDialog.margin.top;
-        const canvasWidth = CurveEditDialog.curveCanvasSize.width;
-        const canvasHeight = CurveEditDialog.curveCanvasSize.height;
-        this._curveCanvas = new CurveCanvas(this.contentPane, canvasX, canvasY, canvasWidth, canvasHeight);
+        // };
+        // this.contentPane.addChild(this._presetList);
+        // this._presetList.numItems = 5; // 生成5个项
     }
 
     /** 展示 */
