@@ -2,6 +2,7 @@ import AnimationCurveUtil from "../AnimationCurveUtil";
 import { CurveInput } from "./CurveInput";
 import { CurveShape, svgNS } from "./CurveShape";
 import { FloatKey } from "./FloatKey";
+import Presets from "./Presets";
 
 /** 提交修改事件 */
 export const EVENT_SUBMIT = "eventSubmit";
@@ -17,8 +18,8 @@ export class CurveEditDialog extends IEditor.Dialog {
     /** 边距 */
     private static readonly margin = { top: 50, bottom: 50, left: 50, right: 50 };
 
-    /** 预设列表 */
-    private _presetList: gui.List;
+    /** 预设面板 */
+    private _presetPanel: gui.Panel;
     /** 曲线画布 */
     private _curveCanvas: CurveCanvas;
     /** 曲线输入 */
@@ -36,7 +37,68 @@ export class CurveEditDialog extends IEditor.Dialog {
         this.resizable = false; // 是否可调节窗口大小
         this.showType = "popup"; // 点击窗口外时关闭（必须，否则在未关闭窗口的情况下不保存场景打开其他场景调节曲线无法侦测修改）
 
+        // 预设列表
+        {
+            this._presetPanel = new gui.Panel();
+            this._presetPanel.width = CurveEditDialog.margin.left;
+            this._presetPanel.height = CurveEditDialog.curveCanvasSize.height;
+            this._presetPanel.x = CurveEditDialog.margin.left - this._presetPanel.width;
+            this._presetPanel.y = CurveEditDialog.margin.top;
+            this._presetPanel.touchable = true;
+            this._presetPanel.touchThrough = false;
+            // 布局
+            this._presetPanel.layout.type = gui.LayoutType.SingleColumn;
+            this._presetPanel.layout.align = gui.AlignType.Left;
+            this._presetPanel.layout.valign = gui.VAlignType.Top;
+            this._presetPanel.layout.rowGap = 10;
+            // 滚动条
+            const scroller = new gui.Scroller();
+            scroller.direction = gui.ScrollDirection.Vertical;
+            scroller.barDisplay = gui.ScrollBarDisplay.Hidden;
+            this._presetPanel.scroller = scroller;
+            // 背景
+            this._presetPanel.background = new gui.SRect(0, gui.Color.BLACK, new gui.Color("#504848"));
+            // 显示
+            this.contentPane.addChild(this._presetPanel);
 
+            Presets.easeDatas.forEach((item, index) => {
+                // 容器
+                const box = new gui.Box();
+                box.width = this._presetPanel.width;
+                box.height = box.width + 20;
+                box.layout.type = gui.LayoutType.SingleColumn;
+                box.layout.align = gui.AlignType.Center;
+                box.layout.valign = gui.VAlignType.Middle;
+                this._presetPanel.addChild(box);
+
+                // 按钮
+                const btn = new gui.Button();
+                btn.width = btn.height = box.width;
+                btn.mode = gui.ButtonMode.Common;
+                btn.downEffect = gui.ButtonDownEffect.Dark;
+                btn.background = new gui.SRect(0, gui.Color.BLACK, new gui.Color("#723232"));
+                btn.onClick(e => {
+                    console.log(index);
+                }, this);
+                box.addChild(btn);
+
+                // 曲线图
+                const curveShape = new CurveShape(btn, 0, 0, btn.width, btn.height, "#342f63", "#00ff00");
+                curveShape.keys = AnimationCurveUtil.cubicBezierValuesToKeys(item.values[0], item.values[1], item.values[2], item.values[3]);
+
+                // 标题
+                const txt = new gui.TextField();
+                txt.width = btn.width;
+                txt.height = 10;
+                txt.style.color = 0xffffff;
+                txt.style.fontSize = 9;
+                txt.style.align = gui.AlignType.Center;
+                txt.style.valign = gui.VAlignType.Middle;
+                txt.autoSize = gui.TextAutoSize.Both;
+                txt.text = item.name;
+                box.addChild(txt);
+            });
+        }
 
         // 曲线画布
         const canvasX = CurveEditDialog.margin.left;
@@ -44,42 +106,6 @@ export class CurveEditDialog extends IEditor.Dialog {
         const canvasWidth = CurveEditDialog.curveCanvasSize.width;
         const canvasHeight = CurveEditDialog.curveCanvasSize.height;
         this._curveCanvas = new CurveCanvas(this.contentPane, canvasX, canvasY, canvasWidth, canvasHeight);
-
-
-
-        // // 预设列表
-        // this._presetList = new gui.List();
-
-        // 创建列表项模板容器
-        const itemContainer = new gui.Widget();
-        itemContainer.setSize(50, 50);
-        const typeDescriptor: IEditor.FTypeDescriptor = Editor.typeRegistry.types[`GUI.Widget`];
-        const data=IEditor.SerializeUtil.encodeObj(itemContainer, typeDescriptor);
-        console.log(data);
-        const prefab = new gui.Prefab(data);
-        console.log(prefab);
-        
-        
-
-        // // 在容器中添加Box作为背景
-        // const bgBox = new gui.Box();
-        // bgBox.setSize(50, 50);
-        // bgBox.background = new gui.SRect(0, gui.Color.GRAY, gui.Color.GRAY);
-        // itemContainer.addChild(bgBox);
-        // this._presetList.addChild(itemContainer);
-
-        // // 创建Prefab并设置为itemTemplate
-        // const prefab = new gui.Prefab(itemContainer as any);
-        // this._presetList.itemTemplate = prefab;
-        // this._presetList.layout.type = gui.LayoutType.SingleRow; // 水平方向
-        // this._presetList.setSize(300, 60); // 列表大小
-        // this._presetList.x = CurveEditDialog.margin.left;
-        // this._presetList.y = CurveEditDialog.margin.top - 40;
-        // this._presetList.itemRenderer = (index: number, item: any) => {
-
-        // };
-        // this.contentPane.addChild(this._presetList);
-        // this._presetList.numItems = 5; // 生成5个项
     }
 
     /** 展示 */
