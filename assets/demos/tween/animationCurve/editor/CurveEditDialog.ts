@@ -13,13 +13,17 @@ export const EVENT_SUBMIT = "eventSubmit";
  */
 export class CurveEditDialog extends IEditor.Dialog {
 
+    /** 预设面板大小 */
+    private static readonly presetPanelSize = { width: 50, height: 350 };
     /** 曲线画布大小 */
     private static readonly curveCanvasSize = { width: 350, height: 350 };
     /** 边距 */
-    private static readonly margin = { top: 50, bottom: 50, left: 50, right: 50 };
+    private static readonly margin = { top: 50, bottom: 50, left: 30, right: 30 };
+    /** 间距 */
+    private static readonly space = 10;
 
     /** 预设面板 */
-    private _presetPanel: gui.Panel;
+    private _presetPanel: PresetPanel;
     /** 曲线画布 */
     private _curveCanvas: CurveCanvas;
     /** 曲线输入 */
@@ -28,8 +32,8 @@ export class CurveEditDialog extends IEditor.Dialog {
     async create() {
         // 窗口
         const contentPane = new gui.Widget();
-        const contentWidth = CurveEditDialog.curveCanvasSize.width + CurveEditDialog.margin.left + CurveEditDialog.margin.right;
-        const contentHeight = CurveEditDialog.curveCanvasSize.height + CurveEditDialog.margin.top + CurveEditDialog.margin.bottom;
+        const contentWidth = CurveEditDialog.margin.left + CurveEditDialog.presetPanelSize.width + CurveEditDialog.space + CurveEditDialog.curveCanvasSize.width + + CurveEditDialog.margin.right;
+        const contentHeight = CurveEditDialog.margin.top + CurveEditDialog.curveCanvasSize.height + CurveEditDialog.margin.bottom;
         contentPane.setSize(contentWidth, contentHeight);
         this.contentPane = contentPane;
 
@@ -38,74 +42,24 @@ export class CurveEditDialog extends IEditor.Dialog {
         this.showType = "popup"; // 点击窗口外时关闭（必须，否则在未关闭窗口的情况下不保存场景打开其他场景调节曲线无法侦测修改）
 
         // 预设列表
-        {
-            this._presetPanel = new gui.Panel();
-            this._presetPanel.width = CurveEditDialog.margin.left;
-            this._presetPanel.height = CurveEditDialog.curveCanvasSize.height;
-            this._presetPanel.x = CurveEditDialog.margin.left - this._presetPanel.width;
-            this._presetPanel.y = CurveEditDialog.margin.top;
-            this._presetPanel.touchable = true;
-            this._presetPanel.touchThrough = false;
-            // 布局
-            this._presetPanel.layout.type = gui.LayoutType.SingleColumn;
-            this._presetPanel.layout.align = gui.AlignType.Left;
-            this._presetPanel.layout.valign = gui.VAlignType.Top;
-            this._presetPanel.layout.rowGap = 10;
-            // 滚动条
-            const scroller = new gui.Scroller();
-            scroller.direction = gui.ScrollDirection.Vertical;
-            scroller.barDisplay = gui.ScrollBarDisplay.Hidden;
-            this._presetPanel.scroller = scroller;
-            // 背景
-            this._presetPanel.background = new gui.SRect(0, gui.Color.BLACK, new gui.Color("#504848"));
-            // 显示
-            this.contentPane.addChild(this._presetPanel);
-
-            Presets.easeDatas.forEach((item, index) => {
-                // 容器
-                const box = new gui.Box();
-                box.width = this._presetPanel.width;
-                box.height = box.width + 20;
-                box.layout.type = gui.LayoutType.SingleColumn;
-                box.layout.align = gui.AlignType.Center;
-                box.layout.valign = gui.VAlignType.Middle;
-                this._presetPanel.addChild(box);
-
-                // 按钮
-                const btn = new gui.Button();
-                btn.width = btn.height = box.width;
-                btn.mode = gui.ButtonMode.Common;
-                btn.downEffect = gui.ButtonDownEffect.Dark;
-                btn.background = new gui.SRect(0, gui.Color.BLACK, new gui.Color("#723232"));
-                btn.onClick(e => {
-                    console.log(index);
-                }, this);
-                box.addChild(btn);
-
-                // 曲线图
-                const curveShape = new CurveShape(btn, 0, 0, btn.width, btn.height, "#342f63", "#00ff00");
-                curveShape.keys = AnimationCurveUtil.cubicBezierValuesToKeys(item.values[0], item.values[1], item.values[2], item.values[3]);
-
-                // 标题
-                const txt = new gui.TextField();
-                txt.width = btn.width;
-                txt.height = 10;
-                txt.style.color = 0xffffff;
-                txt.style.fontSize = 9;
-                txt.style.align = gui.AlignType.Center;
-                txt.style.valign = gui.VAlignType.Middle;
-                txt.autoSize = gui.TextAutoSize.Both;
-                txt.text = item.name;
-                box.addChild(txt);
-            });
-        }
+        const params = {
+            parent: this.contentPane,
+            x: CurveEditDialog.margin.left,
+            y: CurveEditDialog.margin.top,
+            width: CurveEditDialog.presetPanelSize.width,
+            height: CurveEditDialog.presetPanelSize.height
+        };
+        this._presetPanel = new PresetPanel(params.parent, params.x, params.y, params.width, params.height);
 
         // 曲线画布
-        const canvasX = CurveEditDialog.margin.left;
-        const canvasY = CurveEditDialog.margin.top;
-        const canvasWidth = CurveEditDialog.curveCanvasSize.width;
-        const canvasHeight = CurveEditDialog.curveCanvasSize.height;
-        this._curveCanvas = new CurveCanvas(this.contentPane, canvasX, canvasY, canvasWidth, canvasHeight);
+        const args = {
+            parent: this.contentPane,
+            x: CurveEditDialog.margin.left + CurveEditDialog.presetPanelSize.width + CurveEditDialog.space,
+            y: CurveEditDialog.margin.top,
+            width: CurveEditDialog.curveCanvasSize.width,
+            height: CurveEditDialog.curveCanvasSize.height
+        };
+        this._curveCanvas = new CurveCanvas(args.parent, args.x, args.y, args.width, args.height);
     }
 
     /** 展示 */
@@ -130,6 +84,124 @@ export class CurveEditDialog extends IEditor.Dialog {
     /** 应用修改 */
     public applyChange(): void {
         this._curveCanvas.setKeys(this._curveInput.keys);
+    }
+
+}
+
+/** 预设面板 */
+class PresetPanel extends gui.Panel {
+
+    private _groot: gui.GRoot;
+    private _draging: boolean;
+    private _lastY: number;
+
+    constructor(parent: gui.Widget, x: number, y: number, width: number, height: number, layoutClass?: gui.Constructor<gui.ILayout>, selectionClass?: gui.Constructor<gui.ISelection>) {
+        super(layoutClass, selectionClass);
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        parent.addChild(this);
+
+        // 布局
+        this.layout.type = gui.LayoutType.SingleColumn;
+        this.layout.align = gui.AlignType.Left;
+        this.layout.valign = gui.VAlignType.Top;
+        this.layout.rowGap = 0;
+        // 滚动条
+        const scroller = new gui.Scroller();
+        scroller.direction = gui.ScrollDirection.Vertical;
+        scroller.barDisplay = gui.ScrollBarDisplay.Hidden;
+        this.scroller = scroller;
+        // 背景
+        //this.background = new gui.SRect(0, gui.Color.BLACK, new gui.Color("#434343"));
+
+        Presets.easeDatas.forEach((item, index) => {
+            // 容器
+            const box = new gui.Box();
+            box.width = this.width;
+            box.height = box.width + 20;
+            box.layout.type = gui.LayoutType.SingleColumn;
+            box.layout.align = gui.AlignType.Center;
+            box.layout.valign = gui.VAlignType.Middle;
+            this.addChild(box);
+
+            // 按钮
+            const btn = new gui.Button();
+            btn.width = btn.height = box.width;
+            btn.mode = gui.ButtonMode.Common;
+            btn.downEffect = gui.ButtonDownEffect.Dark;
+            btn.background = new gui.SRect(0, gui.Color.BLACK, new gui.Color("#434343"));
+            btn.onClick(e => {
+                console.log(index);
+            }, this);
+            box.addChild(btn);
+
+            // 曲线图
+            const curveShape = new CurveShape(btn, 0, 0, btn.width, btn.height, "#666666", "#00ffff");
+            curveShape.keys = AnimationCurveUtil.cubicBezierValuesToKeys(item.values[0], item.values[1], item.values[2], item.values[3]);
+
+            // 标题
+            const txt = new gui.TextField();
+            txt.width = btn.width;
+            txt.height = 10;
+            txt.style.color = 0xcacaca;// #cacaca
+            txt.style.fontSize = 9;
+            txt.style.align = gui.AlignType.Center;
+            txt.style.valign = gui.VAlignType.Middle;
+            txt.autoSize = gui.TextAutoSize.None;
+            txt.text = item.name;
+            box.addChild(txt);
+        });
+    }
+
+    protected onEnable(): void {
+        super.onEnable();
+        this._groot = this.findRoot();
+        this.addListeners();
+
+    }
+
+    protected onDisable(): void {
+        super.onDisable();
+        this.removeListeners();
+    }
+
+    /** 添加侦听 */
+    private addListeners(): void {
+        this._groot.on("pointer_down", this.onPointerDown, this);
+        this._groot.on("pointer_move", this.onPointerMove, this);
+        this._groot.on("pointer_up", this.onPointerUp, this);
+    }
+
+    /** 移除侦听 */
+    private removeListeners(): void {
+        this._groot.off("pointer_down", this.onPointerDown, this);
+        this._groot.off("pointer_move", this.onPointerMove, this);
+        this._groot.off("pointer_up", this.onPointerUp, this);
+    }
+
+    /** 鼠标按下 */
+    private onPointerDown(e: gui.Event): void {
+        if (this.hitTest(e.input.x, e.input.y)) {
+            this._draging = true;
+            this._lastY = e.input.y;
+        }
+    }
+
+    /** 鼠标移动 */
+    private onPointerMove(e: gui.Event): void {
+        if (this._draging) {
+            const dy = e.input.y - this._lastY;
+            this._lastY = e.input.y;
+
+            this.scroller.setPosY(this.scroller.posY - dy);
+        }
+    }
+
+    /** 鼠标释放 */
+    private onPointerUp(e: gui.Event): void {
+        this._draging = false;
     }
 
 }
