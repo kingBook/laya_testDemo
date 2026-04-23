@@ -19,19 +19,19 @@
           {
             "_$type": "FloatKeyframe",
             "inTangent": 0,
-            "outTangent": 0.33506490850553367,
+            "outTangent": 0.4,
             "value": 0,
             "inWeight": 0,
-            "outWeight": 0.7333333914620536,
+            "outWeight": 0.25,
             "weightedMode": 0,
             "time": 0
           },
           {
             "_$type": "FloatKeyframe",
-            "inTangent": 0.2799043164378013,
+            "inTangent": 0,
             "outTangent": 0,
             "value": 1,
-            "inWeight": 0.7961904471261161,
+            "inWeight": 0.75,
             "outWeight": 0,
             "weightedMode": 0,
             "time": 1
@@ -46,7 +46,10 @@
           "weightedMode": 0
         }
       ],
-      "text": null
+      "text": null,
+      "box": {
+        "_$ref": "kbuilyqp"
+      }
     }
   ],
   "_$child": [
@@ -306,6 +309,18 @@
           ]
         }
       ]
+    },
+    {
+      "_$id": "kbuilyqp",
+      "_$type": "Box",
+      "name": "Box",
+      "x": 375,
+      "y": 120,
+      "width": 200,
+      "height": 200,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "bgColor": "#ffffff"
     }
   ]
 }

@@ -92,9 +92,9 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
         const initProp = Editor.typeRegistry.getInitProps(typeDescriptor) || {};
         initProp._$type = typeDescriptor.name;
 
-        // 预设中的默认值项，转为关键帧点数组
-        const values = Presets.easeDatas.find(item => item.isDefault).values;
-        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(values[0], values[1], values[2], values[3]);
+        // 默认值项，转为关键帧点数组
+        const defaultValues = Presets.easeDatas[0].values;
+        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(defaultValues[0], defaultValues[1], defaultValues[2], defaultValues[3]);
 
         // 关键帧点数组，转为序列化后的 FloatKeyframe 数组
         initProp.keys = keys.map(k => {

@@ -9,7 +9,7 @@ export const EVENT_SUBMIT = "eventSubmit";
 
 /**
  * 曲线编辑窗口
- * @emit {@link EVENT_SUBMIT } 修改后的提交事件, 事件由 {@link contentPane} 派发, 回调函数格式: `(): void`
+ * @emit {@link EVENT_SUBMIT } 修改后的提交事件, 事件由 {@link contentPane} 派发, 回调函数格式: `(e: gui.Event): void`
  */
 export class CurveEditDialog extends IEditor.Dialog {
 
@@ -66,6 +66,8 @@ export class CurveEditDialog extends IEditor.Dialog {
     protected onShown(...args: any[]): void {
         this._curveInput = args[0];
 
+        this._presetPanel.on(EVENT_SUBMIT, this.onPresetPanelSubmit, this);
+
         this._curveCanvas.on(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
         this._curveCanvas.onShown(this._groot, this._curveInput.keys);
     }
@@ -74,6 +76,34 @@ export class CurveEditDialog extends IEditor.Dialog {
     protected onHide(): void {
         this._curveCanvas.onHide();
         this._curveCanvas.off(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
+    }
+
+    /** 预设面板提交事件回调 */
+    private onPresetPanelSubmit(e: gui.Event): void {
+        const values: number[] = e.data.values;
+        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(values[0], values[1], values[2], values[3]);
+
+        // 清空 (避免顶点数量比实际数量多)
+        this._curveInput.clearKeys();
+
+        keys.forEach((key, i) => {
+            if (i >= this._curveInput.keys.length) {
+                this._curveInput.addKey();
+            }
+            const ikey = this._curveInput.keys[i];
+            //ikey.inTangentMode = 2;
+            //ikey.outTangentMode = 2;
+            ikey.time = key.time;
+            ikey.value = key.value;
+            ikey.inTangent = key.inTangent;
+            ikey.outTangent = key.outTangent;
+            ikey.inWeight = key.inWeight;
+            ikey.outWeight = key.outWeight;
+        });
+
+        this._curveCanvas.setKeys(this._curveInput.keys);
+
+        this.contentPane.emit(EVENT_SUBMIT);
     }
 
     /** 曲线画布修改事件回调 */
@@ -88,7 +118,10 @@ export class CurveEditDialog extends IEditor.Dialog {
 
 }
 
-/** 预设面板 */
+/**
+ * 预设面板
+ * @emits {@link EVENT_SUBMIT } 修改后的提交事件, 事件由 {@link this} 派发, 回调函数格式: `(e:gui.Event): void`
+ */
 class PresetPanel extends gui.Panel {
 
     private _groot: gui.GRoot;
@@ -133,7 +166,7 @@ class PresetPanel extends gui.Panel {
             btn.downEffect = gui.ButtonDownEffect.Dark;
             btn.background = new gui.SRect(0, gui.Color.BLACK, new gui.Color("#434343"));
             btn.onClick(e => {
-                console.log(index);
+                this.emit(EVENT_SUBMIT, Presets.easeDatas[index]);
             }, this);
             box.addChild(btn);
 
@@ -211,7 +244,7 @@ class CurveCanvas extends CurveShape {
 
     /** 鼠标侦听的 GRoot */
     private _groot: gui.GRoot;
-    /** 临时 SVgPoint */
+    /** 临时 SVGPoint */
     private _tempSvgPoint: SVGPoint;
 
     /** 曲线上的关键帧点 */

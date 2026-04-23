@@ -19,6 +19,11 @@ export class AnimationCurveTest extends Laya.Script {
     @Laya.property({ type: Laya.TextArea })
     text: Laya.TextArea;
 
+
+    @Laya.property({ type: Laya.Box })
+    box: Laya.Box;
+
+
     onAwake(): void {
         //console.log("animationCurve:", this.animationCurve);
         //console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
@@ -70,5 +75,13 @@ export class AnimationCurveTest extends Laya.Script {
 
 
 
+    }
+
+    onKeyDown(evt: Laya.Event): void {
+        if (evt.key === 'j') {
+            Laya.Tween.killAll(this.box);
+            this.box.pos(375, 120);
+            Laya.Tween.create(this.box).to('y', 800).duration(2000).ease(this.animationCurve.toEaseFn);
+        }
     }
 }
