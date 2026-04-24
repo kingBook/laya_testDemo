@@ -13,6 +13,8 @@ export const EVENT_SUBMIT = "eventSubmit";
  */
 export class CurveEditDialog extends IEditor.Dialog {
 
+    /** 输入文本盒大小 */
+    private static readonly inputTextBoxSize = { width: 100, height: 20 };
     /** 预设面板大小 */
     private static readonly presetPanelSize = { width: 50, height: 350 };
     /** 曲线画布大小 */
@@ -22,6 +24,8 @@ export class CurveEditDialog extends IEditor.Dialog {
     /** 间距 */
     private static readonly space = 10;
 
+    /** 输入文本盒 */
+    private _inputTextBox: InputTextBox;
     /** 预设面板 */
     private _presetPanel: PresetPanel;
     /** 曲线画布 */
@@ -33,7 +37,7 @@ export class CurveEditDialog extends IEditor.Dialog {
         // 窗口
         const contentPane = new gui.Widget();
         const contentWidth = CurveEditDialog.margin.left + CurveEditDialog.presetPanelSize.width + CurveEditDialog.space + CurveEditDialog.curveCanvasSize.width + + CurveEditDialog.margin.right;
-        const contentHeight = CurveEditDialog.margin.top + CurveEditDialog.curveCanvasSize.height + CurveEditDialog.margin.bottom;
+        const contentHeight = CurveEditDialog.margin.top + CurveEditDialog.inputTextBoxSize.height + CurveEditDialog.space + CurveEditDialog.curveCanvasSize.height + CurveEditDialog.margin.bottom;
         contentPane.setSize(contentWidth, contentHeight);
         this.contentPane = contentPane;
 
@@ -41,21 +45,31 @@ export class CurveEditDialog extends IEditor.Dialog {
         this.resizable = false; // 是否可调节窗口大小
         this.showType = "popup"; // 点击窗口外时关闭（必须，否则在未关闭窗口的情况下不保存场景打开其他场景调节曲线无法侦测修改）
 
-        // 预设列表
-        const params = {
+        // 输入文本盒
+        let args = {
             parent: this.contentPane,
             x: CurveEditDialog.margin.left,
             y: CurveEditDialog.margin.top,
+            width: CurveEditDialog.inputTextBoxSize.width,
+            height: CurveEditDialog.inputTextBoxSize.height
+        };
+        this._inputTextBox = new InputTextBox(args.parent, args.x, args.y, args.width, args.height);
+
+        // 预设列表
+        args = {
+            parent: this.contentPane,
+            x: CurveEditDialog.margin.left,
+            y: CurveEditDialog.margin.top + CurveEditDialog.inputTextBoxSize.height + CurveEditDialog.space,
             width: CurveEditDialog.presetPanelSize.width,
             height: CurveEditDialog.presetPanelSize.height
         };
-        this._presetPanel = new PresetPanel(params.parent, params.x, params.y, params.width, params.height);
+        this._presetPanel = new PresetPanel(args.parent, args.x, args.y, args.width, args.height);
 
         // 曲线画布
-        const args = {
+        args = {
             parent: this.contentPane,
             x: CurveEditDialog.margin.left + CurveEditDialog.presetPanelSize.width + CurveEditDialog.space,
-            y: CurveEditDialog.margin.top,
+            y: CurveEditDialog.margin.top + CurveEditDialog.inputTextBoxSize.height + CurveEditDialog.space,
             width: CurveEditDialog.curveCanvasSize.width,
             height: CurveEditDialog.curveCanvasSize.height
         };
@@ -66,6 +80,9 @@ export class CurveEditDialog extends IEditor.Dialog {
     protected onShown(...args: any[]): void {
         this._curveInput = args[0];
 
+        this._inputTextBox.updateText(this._curveInput.keys);
+        this._inputTextBox.on(EVENT_SUBMIT, this.onInputTextBoxSubmit, this);
+
         this._presetPanel.on(EVENT_SUBMIT, this.onPresetPanelSubmit, this);
 
         this._curveCanvas.on(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
@@ -74,11 +91,21 @@ export class CurveEditDialog extends IEditor.Dialog {
 
     /** 隐藏 */
     protected onHide(): void {
-        this._curveCanvas.onHide();
+        this._inputTextBox.off(EVENT_SUBMIT, this.onInputTextBoxSubmit, this);
+
+        this._presetPanel.off(EVENT_SUBMIT, this.onPresetPanelSubmit, this);
+
         this._curveCanvas.off(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
+        this._curveCanvas.onHide();
     }
 
-    /** 预设面板提交事件回调 */
+    /** 输入文本盒提交 */
+    private onInputTextBoxSubmit(e: gui.Event): void {
+        const inputValues: number[] = e.data;
+        console.log(inputValues);
+    }
+
+    /** 预设面板提交 */
     private onPresetPanelSubmit(e: gui.Event): void {
         const values: number[] = e.data.values;
         const keys = AnimationCurveUtil.cubicBezierValuesToKeys(values[0], values[1], values[2], values[3]);
@@ -106,7 +133,7 @@ export class CurveEditDialog extends IEditor.Dialog {
         this.contentPane.emit(EVENT_SUBMIT);
     }
 
-    /** 曲线画布修改事件回调 */
+    /** 曲线画布提交 */
     private onCurveCanvasSubmit(e: gui.Event): void {
         this.contentPane.emit(EVENT_SUBMIT);
     }
@@ -119,8 +146,92 @@ export class CurveEditDialog extends IEditor.Dialog {
 }
 
 /**
+ * 输入文本盒
+ * @emits {@link EVENT_SUBMIT } 输入正确后的提交事件, 事件由 {@link this} 派发, 回调函数格式: `(e:gui.Event): void`
+ */
+class InputTextBox extends gui.Widget {
+
+    private _textInput: IEditor.TextInput;
+
+    constructor(parent: gui.Widget, x: number, y: number, width: number, height: number) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        parent.addChild(this);
+
+        // 输入文本
+        this._textInput = IEditor.GUIUtils.createTextInput();
+        this._textInput.width = this.width;
+        this._textInput.height = this.height;
+        this._textInput.text = "-";
+        this._textInput.titleFontSize = (this._textInput.height * 0.6) | 0;
+        this._textInput.titleColor = 0xffff00;
+        this._textInput.getChild("n0", gui.Shape).graphics.setColor(0x666666); // "#666666"
+        this.addChild(this._textInput);
+        this._textInput.on("submit", this.onTextInputSubmit, this);
+    }
+
+    /** 更新文本 */
+    public updateText(keys: FloatKey[]) {
+        if (!keys) {
+            this._textInput.text = "-";
+        } else if (keys.length !== 2) {
+            this._textInput.text = "vertices is not 2";
+        } else {
+            const values = AnimationCurveUtil.keysToCubicBezierValues(keys);
+            this._textInput.text = this.valuesToString(values);
+        }
+    }
+
+    /** 输入完成提交 */
+    private onTextInputSubmit(e: gui.Event): void {
+        const inputValues = this.getInputValues();
+        if (inputValues) {
+            this.emit(EVENT_SUBMIT, inputValues);
+        }
+    }
+
+    /** 获取输入的值，输入格式错误时，返回 null */
+    private getInputValues(): number[] | null {
+        let values: number[];
+        const strings = this._textInput.text.split(',');
+
+        if (strings.length !== 4) return null;
+
+        // 判断格式是否输入正确
+        values = strings.map(str => Number.parseFloat(str));
+        for (let i = 0; i < 4; i++) {
+            const val = values[i];
+            if (isNaN(val) || val < 0 || val > 1) return null;
+        }
+        return values;
+    }
+
+    /**
+     * {@link https://cubic-bezier.com} 数据 -> 字符串
+     * @param values 
+     */
+    private valuesToString(values: number[]): string {
+        const c1xStr = this.getFloatString(values[0]);
+        const c1yStr = this.getFloatString(values[1]);
+        const c2xStr = this.getFloatString(values[2]);
+        const c2yStr = this.getFloatString(values[3]);
+        return [c1xStr, c1yStr, c2xStr, c2yStr].toString();
+    }
+
+    /** 获取浮点数字符串，保留两位小数，去掉左边的0 */
+    private getFloatString(n: number): string {
+        n = ((n * 100) | 0) / 100;
+        return n.toString().replace("0.", '.');
+    }
+
+}
+
+/**
  * 预设面板
- * @emits {@link EVENT_SUBMIT } 修改后的提交事件, 事件由 {@link this} 派发, 回调函数格式: `(e:gui.Event): void`
+ * @emits {@link EVENT_SUBMIT } 单击选择后的提交事件, 事件由 {@link this} 派发, 回调函数格式: `(e:gui.Event): void`
  */
 class PresetPanel extends gui.Panel {
 

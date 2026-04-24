@@ -293,22 +293,4 @@ export default class AnimationCurveUtil {
         output.outTangent = (cy === cx) ? 1 : cy / output.outWeight;
         return output;
     }
-
-    // /**
-    //  * cubic-bezier.com 数据 转为字符串
-    //  * @param values 
-    //  */
-    // public static valuesToString(values: number[]): string {
-    //     const c1xStr = this.getFloatString(values[0]);
-    //     const c1yStr = this.getFloatString(values[1]);
-    //     const c2xStr = this.getFloatString(values[2]);
-    //     const c2yStr = this.getFloatString(values[3]);
-    //     return [c1xStr, c1yStr, c2xStr, c2yStr].toString();
-    // }
-
-    // /** 获取浮点数字符串 */
-    // public static getFloatString(n: number): string {
-    //     n = ((n * 100) | 0) / 100;
-    //     return n.toString().replace("0.", '.');
-    // }
 }

@@ -19,10 +19,10 @@
           {
             "_$type": "FloatKeyframe",
             "inTangent": 0,
-            "outTangent": 0.4,
+            "outTangent": 0,
             "value": 0,
             "inWeight": 0,
-            "outWeight": 0.25,
+            "outWeight": 0.42,
             "weightedMode": 0,
             "time": 0
           },
@@ -31,285 +31,22 @@
             "inTangent": 0,
             "outTangent": 0,
             "value": 1,
-            "inWeight": 0.75,
+            "inWeight": 0.42000000000000004,
             "outWeight": 0,
             "weightedMode": 0,
             "time": 1
           }
         ]
       },
-      "keys": [
-        {
-          "_$type": "FloatKeyframe",
-          "inWeight": 0.33333,
-          "outWeight": 0.33333,
-          "weightedMode": 0
-        }
-      ],
-      "text": null,
       "box": {
         "_$ref": "kbuilyqp"
+      },
+      "box2": {
+        "_$ref": "mt72uuha"
       }
     }
   ],
   "_$child": [
-    {
-      "_$id": "pwymxaa7",
-      "_$type": "Sprite",
-      "name": "canvas",
-      "width": 100,
-      "height": 100,
-      "_$child": [
-        {
-          "_$id": "5w2cdzx0",
-          "_$type": "Sprite",
-          "name": "p1",
-          "x": 325,
-          "y": 32,
-          "width": 20,
-          "height": 20,
-          "anchorX": 0.5,
-          "anchorY": 0.5,
-          "_gcmds": [
-            {
-              "_$type": "DrawRectCmd",
-              "fillColor": "#ffffff"
-            }
-          ],
-          "_$child": [
-            {
-              "_$id": "1w4hwb6b",
-              "_$type": "Sprite",
-              "name": "c1",
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            },
-            {
-              "_$id": "47npl1ck",
-              "_$type": "Sprite",
-              "name": "c2",
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "_$id": "ze26u5j6",
-          "_$type": "Sprite",
-          "name": "p2",
-          "x": 389,
-          "y": 334,
-          "width": 20,
-          "height": 20,
-          "anchorX": 0.5,
-          "anchorY": 0.5,
-          "_gcmds": [
-            {
-              "_$type": "DrawRectCmd",
-              "fillColor": "#ffffff"
-            }
-          ],
-          "_$child": [
-            {
-              "_$id": "p797xxig",
-              "_$type": "Sprite",
-              "name": "c1",
-              "x": 72,
-              "y": -133,
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            },
-            {
-              "_$id": "sxg1zawb",
-              "_$type": "Sprite",
-              "name": "c2",
-              "x": -124,
-              "y": 78,
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "_$id": "nvf7sgf9",
-          "_$type": "Sprite",
-          "name": "p3",
-          "x": 99,
-          "y": 422,
-          "width": 20,
-          "height": 20,
-          "anchorX": 0.5,
-          "anchorY": 0.5,
-          "_gcmds": [
-            {
-              "_$type": "DrawRectCmd",
-              "fillColor": "#ffffff"
-            }
-          ],
-          "_$child": [
-            {
-              "_$id": "h2e92zxw",
-              "_$type": "Sprite",
-              "name": "c1",
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            },
-            {
-              "_$id": "fu42v98u",
-              "_$type": "Sprite",
-              "name": "c2",
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "_$id": "mhlyr1gr",
-          "_$type": "Sprite",
-          "name": "p4",
-          "x": 370,
-          "y": 574,
-          "width": 20,
-          "height": 20,
-          "anchorX": 0.5,
-          "anchorY": 0.5,
-          "_gcmds": [
-            {
-              "_$type": "DrawRectCmd",
-              "fillColor": "#ffffff"
-            }
-          ],
-          "_$child": [
-            {
-              "_$id": "81ntk81e",
-              "_$type": "Sprite",
-              "name": "c1",
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            },
-            {
-              "_$id": "nwgm44p7",
-              "_$type": "Sprite",
-              "name": "c2",
-              "width": 20,
-              "height": 20,
-              "anchorX": 0.5,
-              "anchorY": 0.5,
-              "_gcmds": [
-                {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0.5,
-                  "y": 0.5,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#00f717"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
     {
       "_$id": "kbuilyqp",
       "_$type": "Box",
@@ -321,6 +58,18 @@
       "anchorX": 0.5,
       "anchorY": 0.5,
       "bgColor": "#ffffff"
+    },
+    {
+      "_$id": "mt72uuha",
+      "_$type": "Box",
+      "name": "Box2",
+      "x": 615,
+      "y": 120,
+      "width": 200,
+      "height": 200,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "bgColor": "#a0e7b4"
     }
   ]
 }

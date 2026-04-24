@@ -24,20 +24,23 @@ export class CurveInput extends gui.Widget {
 
     constructor() {
         super();
+        const margin = 3; // 边距
+        const size = { width: 90, height: 20 }; // 大小
+
         // 宽高
-        this.width = 93;
-        this.height = 23;
+        this.width = size.width + margin;
+        this.height = size.height + margin;
 
         // 背景
         const bg = new gui.Image();
         bg.name = "bg";
         bg.src = "~/ui/images/input_bg.png";
         bg.width = this.width;
-        bg.height = this.width;
+        bg.height = this.height;
         this.addChild(bg);
 
         // 曲线图形
-        this._curveShape = new CurveShape(this, 3, 3, 87, 17, "#666666", "#00ff00");
+        this._curveShape = new CurveShape(this, margin, margin, size.width - margin, size.height - margin, "#666666", "#00ff00");
 
         // 适配
         this._curveShape.addRelation(this, gui.RelationType.Size);

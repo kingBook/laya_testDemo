@@ -1,87 +1,56 @@
 import AnimationCurve from "./animationCurve/AnimationCurve";
 
-//const { regClass, property } = Laya;
+const { regClass, property } = Laya;
 
-@Laya.regClass()
+@regClass()
 export class AnimationCurveTest extends Laya.Script {
 
-    declare owner: Laya.Sprite;
-
-    @Laya.property({ type: AnimationCurve, inspector: AnimationCurve.name })
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name })
     animationCurve: AnimationCurve;
 
-    // @property({ type: AnimationCurve, inspector: "AnimationCurveOld" })
-    // animationCurveOld: AnimationCurve;
-
-    @Laya.property({ type: [Laya.FloatKeyframe], inspector: "curve" })
-    public keys: Laya.FloatKeyframe[];
-
-    @Laya.property({ type: Laya.TextArea })
-    text: Laya.TextArea;
-
-
-    @Laya.property({ type: Laya.Box })
+    @property({ type: Laya.Box })
     box: Laya.Box;
 
+    @property({ type: Laya.Box })
+    box2: Laya.Box;
 
-    onAwake(): void {
-        //console.log("animationCurve:", this.animationCurve);
-        //console.log(this.owner.getComponent(Laya.Trail2DRender).widthCurve);
+    private _time: number;
+    private _totalTime: number;
+    private _startY: number;
+    private _targetY: number;
+    private _isMoveing: boolean;
 
-        const canvas: Laya.Sprite = this.owner.getChild("canvas");
+    onUpdate(): void {
+        if (!this._isMoveing) return;
 
-        const pts: Laya.PathPoint[] = [];
-        canvas.children.forEach((child: any) => {
-            const c1 = child.getChild("c1", Laya.Sprite);
-            const c2 = child.getChild("c2", Laya.Sprite);
+        this._time = Math.min(this._time + Laya.timer.delta, this._totalTime);
+        const t = Laya.MathUtil.clamp01(Math.trunc(this._time / this._totalTime * 1000) / 1000); // [0,1]三位小数
 
-            const pathPt = Laya.PathPoint.create(child.x, child.y, 0);
+        const tb = this.animationCurve.getValue(t);
+        this.box2.y = Laya.MathUtil.lerp(this._startY, this._targetY, tb);
 
-            pathPt.c1.x = c1.x;
-            pathPt.c1.y = c1.y;
-
-            pathPt.c2.x = c2.x;
-            pathPt.c2.y = c2.y;
-
-            pts.push(pathPt);
-        });
-
-
-        let path = new Laya.CurvePath();
-        path.create(...pts);
-
-        for (let i = 0, c = 40; i <= c; i++) {
-            const t = i / c;
-            const p = path.getPointAt(t);
-            console.log(`t:${t}, x:${p.x}, y:${p.y}`);
-
-            canvas.graphics.drawCircle(p.x, p.y, 10, "#ff0000", "#ffffff", 3);
+        if (t >= 1) {
+            this._isMoveing = false;
         }
-
-        // this.owner.graphics.drawCurves(10, 58, [0, 0, 19, -100, 100, 0], "#ff0000", 3);
-    }
-
-    onStart(): void {
-        console.log("onStart");
-        console.log("this.animationCurve:", this.animationCurve);
-
-        for (let i = 0, len = 10; i <= len; i++) {
-            const t = i / len;
-            const y = this.animationCurve.getValue(t);
-            console.log("t:", t, y);
-
-        }
-
-
-
-
     }
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'j') {
+            this._totalTime = 2000;
+            this._targetY = 800;
+            this._startY = 120;
+
+            // 两个 box 起始 y 一致
+            this.box.pos(375, this._startY);
+            this.box2.pos(615, this._startY);
+
+            // 示例1： tween 
             Laya.Tween.killAll(this.box);
-            this.box.pos(375, 120);
-            Laya.Tween.create(this.box).to('y', 800).duration(2000).ease(this.animationCurve.toEaseFn);
+            Laya.Tween.create(this.box).to('y', this._targetY).duration(this._totalTime).ease(this.animationCurve.easeFn);
+
+            // 示例2：
+            this._time = 0;
+            this._isMoveing = true;
         }
     }
 }

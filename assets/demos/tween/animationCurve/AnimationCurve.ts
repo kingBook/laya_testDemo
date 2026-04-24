@@ -4,6 +4,65 @@ const { regClass, property } = Laya;
 
 /**
  * 动画曲线
+ * @example
+```ts
+import AnimationCurve from "./animationCurve/AnimationCurve";
+
+const { regClass, property } = Laya;
+
+@regClass()
+export class AnimationCurveTest extends Laya.Script {
+
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name })
+    animationCurve: AnimationCurve;
+
+    @property({ type: Laya.Box })
+    box: Laya.Box;
+
+    @property({ type: Laya.Box })
+    box2: Laya.Box;
+
+    private _time: number;
+    private _totalTime: number;
+    private _startY: number;
+    private _targetY: number;
+    private _isMoveing: boolean;
+
+    onUpdate(): void {
+        if (!this._isMoveing) return;
+
+        this._time = Math.min(this._time + Laya.timer.delta, this._totalTime);
+        const t = Laya.MathUtil.clamp01(Math.trunc(this._time / this._totalTime * 1000) / 1000); // [0,1]三位小数
+
+        const tb = this.animationCurve.getValue(t);
+        this.box2.y = Laya.MathUtil.lerp(this._startY, this._targetY, tb);
+
+        if (t >= 1) {
+            this._isMoveing = false;
+        }
+    }
+
+    onKeyDown(evt: Laya.Event): void {
+        if (evt.key === 'j') {
+            this._totalTime = 2000;
+            this._targetY = 800;
+            this._startY = 120;
+
+            // 两个 box 起始 y 一致
+            this.box.pos(375, this._startY);
+            this.box2.pos(615, this._startY);
+
+            // 示例1： tween 
+            Laya.Tween.killAll(this.box);
+            Laya.Tween.create(this.box).to('y', this._targetY).duration(this._totalTime).ease(this.animationCurve.easeFn);
+
+            // 示例2：
+            this._time = 0;
+            this._isMoveing = true;
+        }
+    }
+}
+```
  */
 @regClass()
 export default class AnimationCurve {
@@ -16,15 +75,6 @@ export default class AnimationCurve {
     public precision: number = 16;
 
     /**
-     * 获取曲线值（曲线图中的y轴）
-     * @param t 时间插值（曲线图中的x轴），区间：[0, 1]。
-     * @returns 曲线值（曲线图中的y轴），区间：[0, 1]。
-     */
-    public getValue(t: number): number {
-        return AnimationCurveUtil.getCurveValue(this.keys, t, this.precision);
-    }
-
-    /**
      * 转换为 {@link Laya.Tween} 使用的缓动函数
      * @param t 当前时间，取值范围是0到持续时间（包括持续时间）。
      * @param b 属性的初始值。
@@ -33,13 +83,22 @@ export default class AnimationCurve {
      * @returns 
      * @example
      *  animationCurve: AnimationCurve;
-     *  Laya.Tween.create(target).to('x', 100).duration(1000).ease(animationCurve.toEaseFn);
+     *  Laya.Tween.create(target).to('x', 100).duration(1000).ease(animationCurve.easeFn);
      */
-    public toEaseFn(t: number, b: number, c: number, d: number): number {
+    public easeFn = (t: number, b: number, c: number, d: number): number => {
         // 转换成 0~1
         const hT = t / d;
         const t2 = this.getValue(hT) * d;
         return Laya.Ease.linear(t2, b, c, d);
+    }
+
+    /**
+     * 获取曲线值（曲线图中的y轴）
+     * @param t 时间插值（曲线图中的x轴），区间：[0, 1]。
+     * @returns 曲线值（曲线图中的y轴），区间：[0, 1]。
+     */
+    public getValue(t: number): number {
+        return AnimationCurveUtil.getCurveValue(this.keys, t, this.precision);
     }
 
     /**
