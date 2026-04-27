@@ -358,7 +358,9 @@ export class LuckWheel extends Laya.Script {
         // 计算指针半径
         this._pointerRadius = this._center.distance(this.pointer.x, this.pointer.y);
         // 指针角度
-        this.setPointerAngle(Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x)));
+        const dy = this.pointer.y - this._center.y;
+        const dx = this.pointer.x - this._center.x;
+        this.setPointerAngle((Math.sqrt(dx * dx + dy * dy) < 1) ? -this.pointerAngleOffset : Laya.Utils.toAngle(Math.atan2(dy, dx))); // 指针位置与旋转的中心重叠时，保持在指针默认的偏移位置
 
         // 创建旋转的对象
         this._pointerRotationObj = new RotationObject();
