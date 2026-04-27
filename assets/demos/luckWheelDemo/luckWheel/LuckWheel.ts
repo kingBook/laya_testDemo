@@ -3,7 +3,7 @@ import { BezierEaseData } from "./BezierEaseData";
 import LuckWheelUtil from "./LuckWheelUtil";
 import { SectorData } from "./SectorData";
 
-const { regClass, property } = Laya;
+const { regClass, property, allowMultiple } = Laya;
 
 /** 转盘的模式 */
 export enum LuckWheelMode {
@@ -77,11 +77,11 @@ luckWheel.setPause(true);
 // 停止旋转
 luckWheel.stopRotation();
 // 侦听指针触碰
-luckWheel.owner.on(LuckWheel.EVENT_POINTER_TOUCH, this, (type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number, isRotating: boolean)=>{
+luckWheel.owner.on(LuckWheel.EVENT_POINTER_TOUCH, this, (luckWheel: LuckWheel, type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number, isRotating: boolean)=>{
     console.log(`指针触碰类型：${type}, 上一次触碰的扇区索引: ${preSectorIndex}, 当前触碰的扇区索引: ${curSectorIndex}, 正在旋转: ${isRotating}`);
 });
 // 侦听旋转完成
-luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, ()=>{
+luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, (luckWheel: LuckWheel)=>{
     // 旋转完成
 });
 
@@ -96,19 +96,20 @@ luckWheel.getInnerIndexByAngle(innerAngle);
 ```
  */
 @regClass()
+@allowMultiple
 export class LuckWheel extends Laya.Script {
 
-    /** 旋转开始事件，由 {@link owner} 派发，回调函数格式：`(): void` */
+    /** 旋转开始事件，由 {@link owner} 派发，回调函数格式：`(luckWheel: LuckWheel): void` */
     public static readonly EVENT_ROTATION_START = "eventRotationStart";
     /**
-     * 指针触碰事件，由 {@link owner} 派发，回调函数格式：`(type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number, isRotating: boolean): void`
+     * 指针触碰事件，由 {@link owner} 派发，回调函数格式：`(luckWheel: LuckWheel, type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number, isRotating: boolean): void`
      * @param type 触碰类型，内转盘或外转盘
      * @param preSectorIndex 上一次触碰的扇区索引
      * @param curSectorIndex 当前触碰的扇区索引
      * @param isRotating 旋转中...
     */
     public static readonly EVENT_POINTER_TOUCH = "eventPointerTouch";
-    /** 旋转完成事件，由 {@link owner} 派发，回调函数格式：`(): void` */
+    /** 旋转完成事件，由 {@link owner} 派发，回调函数格式：`(luckWheel: LuckWheel): void` */
     public static readonly EVENT_ROTATION_COMPLETE = "eventRotationComplete";
 
     declare owner: Laya.Sprite;
@@ -241,17 +242,17 @@ export class LuckWheel extends Laya.Script {
     // =====================  Inner end   =========================
 
 
-    /** 旋转开始处理器，格式：`(): void` */
+    /** 旋转开始处理器，格式：`(luckWheel: LuckWheel): void` */
     public onRotationStartHandler: Laya.Handler;
     /**
-     * 指针触碰处理器，格式：`(type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number, isRotating: boolean): void`
+     * 指针触碰处理器，格式：`(luckWheel: LuckWheel, type: RotationObjectType.Outer | RotationObjectType.Inner, preSectorIndex: number, curSectorIndex: number, isRotating: boolean): void`
      * @param type 触碰类型，内转盘或外转盘
      * @param preSectorIndex 上一次触碰的扇区索引
      * @param curSectorIndex 当前触碰的扇区索引
      * @param isRotating 旋转中...
     */
     public onPointerTouchHandler: Laya.Handler;
-    /** 旋转完成处理器，格式：`(): void` */
+    /** 旋转完成处理器，格式：`(luckWheel: LuckWheel): void` */
     public onRotationCompleteHandler: Laya.Handler;
 
 
@@ -481,8 +482,10 @@ export class LuckWheel extends Laya.Script {
         }
 
         // 旋转开始事件
-        this.owner.event(LuckWheel.EVENT_ROTATION_START);
-        this.onRotationStartHandler?.run();
+        this._tempParams.length = 0;
+        this._tempParams.push(this);
+        this.owner.event(LuckWheel.EVENT_ROTATION_START, this._tempParams);
+        this.onRotationStartHandler?.runWith(this._tempParams);
     }
 
     /** 停止旋转 */
@@ -703,23 +706,27 @@ export class LuckWheel extends Laya.Script {
     private detectPointerTouch(type: RotationObjectType.Outer | RotationObjectType.Inner, isRotating: boolean): void {
         if (type === RotationObjectType.Outer) {
             // 检测指针触碰(外)
-            const sectorIndex = this.getOuterIndexByAngle(this.pointerAngle - this.currentOuterSectorData.angleOffset - this.outerDisc.rotation);
-            if (sectorIndex != this._pointerTouchOuterIndex) {
-                this._tempParams.length = 0;
-                this._tempParams.push(type, this._pointerTouchOuterIndex, sectorIndex, isRotating);
-                this.owner.event(LuckWheel.EVENT_POINTER_TOUCH, this._tempParams);
-                this.onPointerTouchHandler?.runWith(this._tempParams);
-                this._pointerTouchOuterIndex = sectorIndex;
+            if (this.currentOuterSectorData) {
+                const sectorIndex = this.getOuterIndexByAngle(this.pointerAngle - this.currentOuterSectorData.angleOffset - this.outerDisc.rotation);
+                if (sectorIndex != this._pointerTouchOuterIndex) {
+                    this._tempParams.length = 0;
+                    this._tempParams.push(this, type, this._pointerTouchOuterIndex, sectorIndex, isRotating);
+                    this.owner.event(LuckWheel.EVENT_POINTER_TOUCH, this._tempParams);
+                    this.onPointerTouchHandler?.runWith(this._tempParams);
+                    this._pointerTouchOuterIndex = sectorIndex;
+                }
             }
         } else if (type === RotationObjectType.Inner) {
             // 检测指针触碰(内)
-            const sectorIndex = this.getInnerIndexByAngle(this.pointerAngle - this.currentInnerSectorData.angleOffset - this.innerDisc.rotation);
-            if (sectorIndex != this._pointerTouchInnerIndex) {
-                this._tempParams.length = 0;
-                this._tempParams.push(type, this._pointerTouchInnerIndex, sectorIndex, isRotating);
-                this.owner.event(LuckWheel.EVENT_POINTER_TOUCH, this._tempParams);
-                this.onPointerTouchHandler?.runWith(this._tempParams);
-                this._pointerTouchInnerIndex = sectorIndex;
+            if (this.currentInnerSectorData) {
+                const sectorIndex = this.getInnerIndexByAngle(this.pointerAngle - this.currentInnerSectorData.angleOffset - this.innerDisc.rotation);
+                if (sectorIndex != this._pointerTouchInnerIndex) {
+                    this._tempParams.length = 0;
+                    this._tempParams.push(this, type, this._pointerTouchInnerIndex, sectorIndex, isRotating);
+                    this.owner.event(LuckWheel.EVENT_POINTER_TOUCH, this._tempParams);
+                    this.onPointerTouchHandler?.runWith(this._tempParams);
+                    this._pointerTouchInnerIndex = sectorIndex;
+                }
             }
         }
     }
@@ -768,25 +775,28 @@ export class LuckWheel extends Laya.Script {
 
     /** 旋转完成时 */
     private onRotateComplete(rotationObj: RotationObject): void {
+        this._tempParams.length = 0;
+        this._tempParams.push(this);
+
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
             case LuckWheelMode.SingleFixedPointer:
                 this._flags &= ~Flag.Rotating;
-                this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE);
-                this.onRotationCompleteHandler?.run();
+                this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE, this._tempParams);
+                this.onRotationCompleteHandler?.runWith(this._tempParams);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
                 if (this._outerRotationObj.isRotationComplete && this._innerRotationObj.isRotationComplete) {
                     this._flags &= ~Flag.Rotating;
-                    this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE);
-                    this.onRotationCompleteHandler?.run();
+                    this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE, this._tempParams);
+                    this.onRotationCompleteHandler?.runWith(this._tempParams);
                 }
                 break;
             case LuckWheelMode.DoubleOnlyFixedInner:
                 if (this._pointerRotationObj.isRotationComplete && this._outerRotationObj.isRotationComplete) {
                     this._flags &= ~Flag.Rotating;
-                    this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE);
-                    this.onRotationCompleteHandler?.run();
+                    this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE, this._tempParams);
+                    this.onRotationCompleteHandler?.runWith(this._tempParams);
                 }
                 break;
         }
