@@ -67,6 +67,9 @@ luckWheel.innerDisc = xxx;
 luckWheel.isInnerClockwise = false; // 内转盘的旋转方向，是否为顺时针（仅旋转指针的模式，无须设置）
 luckWheel.innerSectorDatas = [sectorData,...]; // 切分区块的分割线角度值，[0-359] 小 -> 大
 
+// 初始化（必要数据赋值后，手动初始化）
+luckWheel.init();
+
 // ================ 其他接口 ======================================
 // 设置奖励的索引
 luckWheel.setRewardIndex(outerRewardIndex, innerRewardIndex);
@@ -346,8 +349,8 @@ export class LuckWheel extends Laya.Script {
         });
     }
 
-
-    public onAwake(): void {
+    /** 初始化 */
+    public init(): void {
         // 指针、外转盘、内转盘为空时，赋值一个 sprite 避免报错
         this.pointer ||= new Laya.Sprite();
         this.outerDisc ||= new Laya.Sprite();
@@ -357,6 +360,7 @@ export class LuckWheel extends Laya.Script {
         this._center = new Laya.Point(this.owner.pivotX, this.owner.pivotY);
         // 计算指针半径
         this._pointerRadius = this._center.distance(this.pointer.x, this.pointer.y);
+
         // 指针角度
         const dy = this.pointer.y - this._center.y;
         const dx = this.pointer.x - this._center.x;
@@ -370,15 +374,6 @@ export class LuckWheel extends Laya.Script {
         this._outerRotationObj.on(RotationObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
         this._innerRotationObj.on(RotationObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
 
-        // 初始化
-        this.init();
-
-        // 根据模式检测指针触碰
-        this.detectPointerTouchByMode(false);
-    }
-
-    /** 初始化 */
-    public init(): void {
         // 调用 setter 方法, 初始显示或隐藏转盘
         this.mode = this._mode;
         // 调用 setter 方法，初始显示或隐藏物品容器
@@ -404,6 +399,9 @@ export class LuckWheel extends Laya.Script {
                 this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.outerRotationSign, this.outerAniTotalTime, this.outerAniCircles);
                 break;
         }
+
+        // 根据模式检测指针触碰
+        this.detectPointerTouchByMode(false);
     }
 
     public onUpdate(): void {
