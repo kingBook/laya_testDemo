@@ -656,7 +656,7 @@ export class LuckWheel extends Laya.Script {
      * @example
      * ```
      * // 指针触碰的外转盘扇区索引
-     * const sectorIndex2 = this.luckWheel.getOuterIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentInnerSectorData.angleOffset - this.luckWheel.outerDisc.rotation);
+     * const outerSectorIndex = this.luckWheel.getOuterIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentOuterSectorData.angleOffset - this.luckWheel.outerDisc.rotation);
      * ```
      */
     public getOuterIndexByAngle(outerAngle: number): number {
@@ -669,7 +669,7 @@ export class LuckWheel extends Laya.Script {
      * @example
      * ```
      * // 指针触碰的内转盘扇区索引
-     * const sectorIndex = this.luckWheel.getInnerIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentInnerSectorData.angleOffset - this.luckWheel.innerDisc.rotation);
+     * const innerSectorIndex = this.luckWheel.getInnerIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentInnerSectorData.angleOffset - this.luckWheel.innerDisc.rotation);
      * ```
      */
     public getInnerIndexByAngle(innerAngle: number): number {
@@ -971,7 +971,7 @@ export class RotationObject extends Laya.EventDispatcher {
      */
     public static readonly EVENT_ROTATION_START = "eventRotationStart";
     /** 
-     * 旋转进度事件，旋转开始后，由 {@link this} 每帧派发，回调函数格式：`(rotationObj: RotationObject, progress: number): void`
+     * 旋转进度事件，旋转开始后，由 {@link this} 每帧派发，回调函数格式：`(rotationObj: RotationObject, progress: number, progressBezier:number): void`
      * @param rotationObj this
      * @param progress 旋转进度，范围：[0, 1]
      */
@@ -998,6 +998,8 @@ export class RotationObject extends Laya.EventDispatcher {
     private _aniTime: number;
     /** 动画的进度 [0, 1] */
     private _progress: number;
+    /** 贝塞尔动画进度 [0, 1]（当需要精确计算当前角度时，使用此值）*/
+    private _progressBezier: number;
     /** 布尔集合 */
     private _flags: RotationObjectFlag;
 
@@ -1022,12 +1024,16 @@ export class RotationObject extends Laya.EventDispatcher {
     public get rewardAngle(): number { return this._rewardAngle; }
     /** 奖励角度[0,360] */
     public get rewardAngle360(): number { return Laya.MathUtil.repeat(this._rewardAngle, 360); }
+    /** 旋转起始角 */
+    public get angleStart(): number { return this._angleStart; }
     /** 旋转最终角 */
     public get angleEnd(): number { return this._angleEnd; }
     /** 是否旋转结束 */
     public get isRotationComplete(): boolean { return (this._flags & RotationObjectFlag.RotationComplete) > 0; }
     /** 动画的进度 [0, 1] */
     public get progress(): number { return this._progress; }
+    /** 贝塞尔动画进度 [0, 1]（当需要精确计算当前角度时，使用此值） */
+    public get progressBezier(): number { return this._progressBezier; }
 
 
 
@@ -1051,6 +1057,7 @@ export class RotationObject extends Laya.EventDispatcher {
         this._angleEnd = NaN;
         this._aniTime = 0;
         this._progress = 0;
+        this._progressBezier = 0;
         this._flags = RotationObjectFlag.Inited;
 
         bezierEaseData && (this.bezierEaseData = bezierEaseData);
@@ -1071,10 +1078,11 @@ export class RotationObject extends Laya.EventDispatcher {
         const newAngle = Math.trunc(Laya.MathUtil.lerp(this._angleStart, this._angleEnd, tb) * 100) / 100;
         this.isShowLogMsg && console.log(`动画进度：${t}, tb:${tb}, newAngle:${newAngle}`);
         this.setAngle(newAngle);
+        this._progressBezier = tb;
 
         // 旋转进度事件
         this._tempParams.length = 0;
-        this._tempParams.push(this, this._progress);
+        this._tempParams.push(this, this._progress, this._progressBezier);
         this.event(RotationObject.EVENT_ROTATION_PROGRESS, this._tempParams);
 
         // 旋转完成
@@ -1113,6 +1121,7 @@ export class RotationObject extends Laya.EventDispatcher {
 
         this._aniTime = 0;
         this._progress = 0;
+        this._progressBezier = 0;
         this._flags &= ~RotationObjectFlag.RotationComplete;
 
         // 旋转开始事件
@@ -1135,7 +1144,7 @@ export class RotationObject extends Laya.EventDispatcher {
     }
 
     /** 获取距离奖励角的度数，根据旋转的方向计算，此值始终为正数 */
-    private getDeltaAngle(rewardAngle360: number): number {
+    public getDeltaAngle(rewardAngle360: number): number {
         const targetAngle = this.rotationSign >= 0
             ? rewardAngle360
             : (360 - rewardAngle360);
