@@ -301,9 +301,9 @@ export class LuckWheel extends Laya.Script {
     /** 内转盘旋转对象 */
     public get innerRotationObject(): RotationObject { return this._innerRotationObj; }
     /** 当前选择的外转盘索引指定的分割数据 */
-    public get currentOuterSectorData() { return this.outerSectorDatas[this._outerSelectIndex]; }
+    public get currentOuterSectorData(): SectorData { return this.outerSectorDatas[this._outerSelectIndex]; }
     /** 当前选择的内转盘索引指定的分割数据 */
-    public get currentInnerSectorData() { return this.innerSectorDatas[this._innerSelectIndex]; }
+    public get currentInnerSectorData(): SectorData { return this.innerSectorDatas[this._innerSelectIndex]; }
 
     /** 设置转盘的模式 */
     public set mode(value: LuckWheelMode) {
@@ -531,7 +531,7 @@ export class LuckWheel extends Laya.Script {
         }
         this._outerRewardIndex = outerRewardIndex;
         // 获取外奖励角
-        outerRewardAngle = this.getRewardAngleByIndex(this._outerRewardIndex, outerSectorData);
+        outerRewardAngle = this.getSectorAngleByIndex(this._outerRewardIndex, outerSectorData);
 
         // 设置内奖励索引
         let innerSectorData: SectorData = null;
@@ -542,7 +542,7 @@ export class LuckWheel extends Laya.Script {
             }
             this._innerRewardIndex = innerRewardIndex;
             // 获取内奖励角
-            innerRewardAngle = this.getRewardAngleByIndex(this._innerRewardIndex, innerSectorData);
+            innerRewardAngle = this.getSectorAngleByIndex(this._innerRewardIndex, innerSectorData);
         }
         // 设置奖励角
         this.setRewardAngle(outerRewardAngle, innerRewardAngle);
@@ -657,6 +657,8 @@ export class LuckWheel extends Laya.Script {
      * ```
      * // 指针触碰的外转盘扇区索引
      * const outerSectorIndex = this.luckWheel.getOuterIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentOuterSectorData.angleOffset - this.luckWheel.outerDisc.rotation);
+     * // 或
+     * const outerSectorIndex = this.luckWheel.getOuterIndexByAngle(this._luckWheel.pointer.rotation - this._luckWheel.pointerAngleOffset - this._luckWheel.currentOuterSectorData.angleOffset - this._luckWheel.outerDisc.rotation);
      * ```
      */
     public getOuterIndexByAngle(outerAngle: number): number {
@@ -670,6 +672,8 @@ export class LuckWheel extends Laya.Script {
      * ```
      * // 指针触碰的内转盘扇区索引
      * const innerSectorIndex = this.luckWheel.getInnerIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentInnerSectorData.angleOffset - this.luckWheel.innerDisc.rotation);
+     * // 或
+     * const innerSectorIndex = this.luckWheel.getInnerIndexByAngle(this._luckWheel.pointer.rotation - this._luckWheel.pointerAngleOffset - this.luckWheel.currentInnerSectorData.angleOffset - this.luckWheel.innerDisc.rotation);
      * ```
      */
     public getInnerIndexByAngle(innerAngle: number): number {
@@ -803,17 +807,17 @@ export class LuckWheel extends Laya.Script {
     }
 
     /**
-     * 根据奖励索引返回奖励的角度
-     * @param rewardIndex 转盘奖励索引
-     * @param sectorData 转盘分割数据
-     * @returns 返回角度 [0, 360],（角度分割线的第一条线为0度, 顺时针）
+     * 获取扇区中间的角度
+     * @param sectorIndex 转盘扇区索引
+     * @param sectorData 转盘分割的扇区数据
+     * @returns 返回扇区中间的角度 [0, 360],（角度分割线的第一条线为0度, 顺时针）
      */
-    private getRewardAngleByIndex(rewardIndex: number, sectorData: SectorData): number {
+    public getSectorAngleByIndex(sectorIndex: number, sectorData: SectorData): number {
         const sectorAngles = sectorData.sectorAngles;
         // 区块的下限角
-        const min = sectorAngles[rewardIndex];
+        const min = sectorAngles[sectorIndex];
         // 区块的上限角，到达分割线数组最大索引时取 (360+sectorAngles[0])
-        const max = rewardIndex >= sectorAngles.length - 1 ? (360 + sectorAngles[0]) : sectorAngles[rewardIndex + 1];
+        const max = sectorIndex >= sectorAngles.length - 1 ? (360 + sectorAngles[0]) : sectorAngles[sectorIndex + 1];
 
         const t = 0.5; // 取扇形中间
         let rewardAngle = Laya.MathUtil.lerp(min, max, t); // sectorAngles[0]>0 时，此值可能大于 360
@@ -901,14 +905,14 @@ export class LuckWheel extends Laya.Script {
         let outerRotation: number = NaN;
         let innerRotation: number = NaN;
 
-        outerRotation = this.getRewardAngleByIndex(outerIndex, this.currentOuterSectorData);
+        outerRotation = this.getSectorAngleByIndex(outerIndex, this.currentOuterSectorData);
         // 加上偏移量
         outerRotation += this.currentOuterSectorData.angleOffset + this.currentOuterSectorData.sectorAngles[0];
         // 转为 [0, 360]
         outerRotation = Laya.MathUtil.repeat(outerRotation, 360);
 
         if (!isNaN(innerIndex)) {
-            innerRotation = this.getRewardAngleByIndex(innerIndex, this.currentInnerSectorData);
+            innerRotation = this.getSectorAngleByIndex(innerIndex, this.currentInnerSectorData);
             // 加上偏移量
             innerRotation += this.currentInnerSectorData.angleOffset + this.currentInnerSectorData.sectorAngles[0];
             // 转为 [0, 360]
