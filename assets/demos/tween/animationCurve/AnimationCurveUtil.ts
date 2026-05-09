@@ -6,7 +6,7 @@ export default class AnimationCurveUtil {
     public static readonly tempPoint1 = { x: 0, y: 0 };
     public static readonly tempPoint2 = { x: 0, y: 0 };
 
-    private static readonly s_minValue = 1e-8;
+    public static readonly minValue = 1e-8;
 
     /**
      * 获取曲线值（曲线图中的y轴）
@@ -209,8 +209,12 @@ export default class AnimationCurveUtil {
      * @returns 返回 cubic-bezier.com 数据（长度4，控制点1：c1:{x:[0], y:[1]}， 控制点2：c2:{x:[2], y:[3]}）
      */
     public static keysToCubicBezierValues(keys: readonly { inTangent: number, inWeight: number, outTangent: number, outWeight: number }[]): number[] {
+        console.log("keys", keys);
+        
         const c1 = this.outKeyToControlPoint(keys[0], 1, 1, this.tempPoint1);
-        const c2 = this.inKeyToControlPoint(keys[1], 1, 1, this.tempPoint1);
+        const c2 = this.inKeyToControlPoint(keys[1], 1, 1, this.tempPoint2);
+        console.log("c1",c1, "c2",c2);
+        
         return [c1.x, c1.y, c2.x, c2.y];
     }
 
@@ -268,7 +272,7 @@ export default class AnimationCurveUtil {
     public static controlPointToInKey(cx: number, cy: number, mapWidth: number = 1, mapHeight: number = 1, output?: { inTangent: number, inWeight: number }): { inTangent: number, inWeight: number } {
         cx /= mapWidth;
         cy /= mapHeight;
-        cx = Math.max(1 - cx, this.s_minValue);
+        cx = Math.max(1 - cx, this.minValue);
         cy = 1 - cy;
         output ||= { inTangent: 0, inWeight: 0 };
         output.inWeight = cx;
@@ -289,7 +293,7 @@ export default class AnimationCurveUtil {
         cx /= mapWidth;
         cy /= mapHeight;
         output ||= { outTangent: 0, outWeight: 0 };
-        output.outWeight = Math.max(cx, this.s_minValue);
+        output.outWeight = Math.max(cx, this.minValue);
         output.outTangent = (cy === cx) ? 1 : cy / output.outWeight;
         return output;
     }

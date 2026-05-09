@@ -214,6 +214,15 @@ class InputTextBox extends gui.Widget {
      * @param values 
      */
     private valuesToString(values: number[]): string {
+        // 首控制点
+        console.log("values", values);
+
+        const d0 = Math.pow(values[0], 2) + Math.pow(values[1], 2);
+        console.log("d0", d0);
+        if (d0 <= AnimationCurveUtil.minValue) {
+            values[0] = values[1] = 0;
+        }
+
         const c1xStr = this.getFloatString(values[0]);
         const c1yStr = this.getFloatString(values[1]);
         const c2xStr = this.getFloatString(values[2]);
