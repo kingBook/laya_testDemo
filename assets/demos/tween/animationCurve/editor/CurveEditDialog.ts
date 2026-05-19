@@ -80,11 +80,14 @@ export class CurveEditDialog extends IEditor.Dialog {
     protected onShown(...args: any[]): void {
         this._curveInput = args[0];
 
-        this._inputTextBox.updateText(this._curveInput.keys);
+        // 输入文本盒
+        this._inputTextBox.updateText(this._curveInput.keys); // 更新文本
         this._inputTextBox.on(EVENT_SUBMIT, this.onInputTextBoxSubmit, this);
 
+        // 预设面板
         this._presetPanel.on(EVENT_SUBMIT, this.onPresetPanelSubmit, this);
 
+        // 曲线画布
         this._curveCanvas.on(EVENT_SUBMIT, this.onCurveCanvasSubmit, this);
         this._curveCanvas.onShown(this._groot, this._curveInput.keys);
     }
@@ -101,8 +104,33 @@ export class CurveEditDialog extends IEditor.Dialog {
 
     /** 输入文本盒提交 */
     private onInputTextBoxSubmit(e: gui.Event): void {
-        const inputValues: number[] = e.data;
-        console.log(inputValues);
+        const values: number[] = e.data.values;
+        // console.log("输入盒提交", values);
+        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(values[0], values[1], values[2], values[3]);
+
+        // 清空 (避免顶点数量比实际数量多)
+        this._curveInput.clearKeys();
+
+        keys.forEach((key, i) => {
+            if (i >= this._curveInput.keys.length) {
+                this._curveInput.addKey();
+            }
+            const ikey = this._curveInput.keys[i];
+            //ikey.inTangentMode = 2;
+            //ikey.outTangentMode = 2;
+            ikey.time = key.time;
+            ikey.value = key.value;
+            ikey.inTangent = key.inTangent;
+            ikey.outTangent = key.outTangent;
+            ikey.inWeight = key.inWeight;
+            ikey.outWeight = key.outWeight;
+        });
+
+        // 曲线画布
+        this._curveCanvas.setKeys(this._curveInput.keys);
+
+        // 曲线编辑窗口-提交
+        this.contentPane.emit(EVENT_SUBMIT);
     }
 
     /** 预设面板提交 */
@@ -128,14 +156,22 @@ export class CurveEditDialog extends IEditor.Dialog {
             ikey.outWeight = key.outWeight;
         });
 
+        // 曲线画布
         this._curveCanvas.setKeys(this._curveInput.keys);
 
+        // 曲线编辑窗口-提交
         this.contentPane.emit(EVENT_SUBMIT);
+
+        // 输入文本盒
+        this._inputTextBox.updateText(this._curveInput.keys); // 更新文本
     }
 
     /** 曲线画布提交 */
     private onCurveCanvasSubmit(e: gui.Event): void {
         this.contentPane.emit(EVENT_SUBMIT);
+
+        // 输入文本盒-更新文本
+        this._inputTextBox.updateText(this._curveInput.keys);
     }
 
     /** 应用修改 */
@@ -152,6 +188,8 @@ export class CurveEditDialog extends IEditor.Dialog {
 class InputTextBox extends gui.Widget {
 
     private _textInput: IEditor.TextInput;
+    /** 旧文本 */
+    private _oldText: string;
 
     constructor(parent: gui.Widget, x: number, y: number, width: number, height: number) {
         super();
@@ -171,6 +209,9 @@ class InputTextBox extends gui.Widget {
         this._textInput.getChild("n0", gui.Shape).graphics.setColor(0x666666); // "#666666"
         this.addChild(this._textInput);
         this._textInput.on("submit", this.onTextInputSubmit, this);
+
+        // 记录旧文本
+        this._oldText = this._textInput.text;
     }
 
     /** 更新文本 */
@@ -182,14 +223,27 @@ class InputTextBox extends gui.Widget {
         } else {
             const values = AnimationCurveUtil.keysToCubicBezierValues(keys);
             this._textInput.text = this.valuesToString(values);
+            // 记录旧文本
+            this._oldText = this._textInput.text;
         }
     }
 
     /** 输入完成提交 */
     private onTextInputSubmit(e: gui.Event): void {
-        const inputValues = this.getInputValues();
+        let inputValues = this.getInputValues();
         if (inputValues) {
-            this.emit(EVENT_SUBMIT, inputValues);
+            // 长小数，截断（保留两位）
+            this._textInput.text = this.valuesToString(inputValues);
+            inputValues = this.getInputValues();
+            // 记录旧文本
+            this._oldText = this._textInput.text;
+
+            this.emit(EVENT_SUBMIT, { values: inputValues });
+        } else {
+            //Editor.alert("输入错误");
+            console.warn("输入错误");
+            // 还原到旧文本
+            this._textInput.text = this._oldText;
         }
     }
 
@@ -214,13 +268,19 @@ class InputTextBox extends gui.Widget {
      * @param values 
      */
     private valuesToString(values: number[]): string {
-        // 首控制点
-        console.log("values", values);
+        // console.log("valuesToString", values);
 
+        // 首控制点，距离端点很近，直接等于0
         const d0 = Math.pow(values[0], 2) + Math.pow(values[1], 2);
-        console.log("d0", d0);
-        if (d0 <= AnimationCurveUtil.minValue) {
+        if (d0 <= Number.EPSILON) {
             values[0] = values[1] = 0;
+        }
+
+        // 末控制点，距离端点很近，直接等于1
+        const len = values.length;
+        const de = Math.pow(values[len - 2] - 1, 2) + Math.pow(values[len - 1] - 1, 2);
+        if (de <= Number.EPSILON) {
+            values[len - 2] = values[len - 1] = 1;
         }
 
         const c1xStr = this.getFloatString(values[0]);
@@ -232,7 +292,7 @@ class InputTextBox extends gui.Widget {
 
     /** 获取浮点数字符串，保留两位小数，去掉左边的0 */
     private getFloatString(n: number): string {
-        n = ((n * 100) | 0) / 100;
+        n = parseFloat(n.toFixed(2));
         return n.toString().replace("0.", '.');
     }
 

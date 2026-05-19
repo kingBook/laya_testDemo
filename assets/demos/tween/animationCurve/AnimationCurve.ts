@@ -94,6 +94,7 @@ export default class AnimationCurve {
 
     /**
      * 获取曲线值（曲线图中的y轴）
+     * * 注意：如何精度不够，请先设置 {@link precision} 提高精度后，再调用这个方法
      * @param t 时间插值（曲线图中的x轴），区间：[0, 1]。
      * @returns 曲线值（曲线图中的y轴），区间：[0, 1]。
      */

@@ -4,7 +4,7 @@ import { CurveShape } from "./CurveShape";
 import { FloatKey } from "./FloatKey";
 
 /**
- * 
+ * 曲线输入
  * @emit {@link EVENT_SUBMIT} 修改后的提交事件, 事件由 {@link this} 派发，回调函数格式: `(e: gui.Event): void`
  */
 export class CurveInput extends gui.Widget {
