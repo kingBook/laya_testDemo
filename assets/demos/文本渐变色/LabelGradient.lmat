@@ -1,0 +1,39 @@
+{
+  "version": "LAYAMATERIAL:04",
+  "props": {
+    "textures": [],
+    "type": "文本渐变色/LabelGradient",
+    "renderQueue": 2000,
+    "materialRenderMode": 0,
+    "s_Cull": 2,
+    "s_Blend": 0,
+    "s_BlendSrc": 0,
+    "s_BlendDst": 0,
+    "s_BlendSrcRGB": 0,
+    "s_BlendDstRGB": 0,
+    "s_BlendSrcAlpha": 0,
+    "s_BlendDstAlpha": 0,
+    "s_BlendEquation": 0,
+    "s_BlendEquationRGB": 0,
+    "s_BlendEquationAlpha": 0,
+    "s_DepthTest": 1,
+    "s_DepthWrite": true,
+    "u_topColor": [
+      1,
+      0.11627906976744184,
+      0.44767441860464946,
+      1
+    ],
+    "u_bottomColor": [
+      0,
+      1,
+      0,
+      1
+    ],
+    "u_direction": true,
+    "u_colorOffset": 0.5,
+    "defines": [
+      "TEXTUREVS"
+    ]
+  }
+}
