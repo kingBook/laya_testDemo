@@ -1,4 +1,3 @@
-import AnimationCurveUtil from "../AnimationCurveUtil";
 import { CurveEditDialog, EVENT_SUBMIT } from "./CurveEditDialog";
 import { CurveShape } from "./CurveShape";
 import { FloatKey } from "./FloatKey";
