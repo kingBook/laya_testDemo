@@ -1,4 +1,4 @@
-import AnimationCurve from "./animationCurve/AnimationCurve";
+import AnimationCurve from "views/prefabs/animationCurve/AnimationCurve";
 
 
 const { regClass, property } = Laya;
