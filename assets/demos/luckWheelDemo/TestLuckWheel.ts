@@ -11,6 +11,7 @@ export class TestLuckWheel extends Laya.Script {
     public onAwake(): void {
         this._luckWheel = this.owner.getChild("LuckWheel").getComponent(LuckWheel);
         this._luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onRotationComplete);
+        this._luckWheel.init();
     }
 
     public onKeyDown(evt: Laya.Event): void {

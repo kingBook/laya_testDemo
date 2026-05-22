@@ -10,6 +10,7 @@ export class TestCustomBezier extends Laya.Script {
 
     public onAwake(): void {
         this._luckWheel = this.owner.getChild("LuckWheel").getComponent(LuckWheel);
+        this._luckWheel.init();
     }
 
     public onStart(): void {

@@ -11,9 +11,12 @@ export class TestDoubleRotate extends Laya.Script {
 
     public onAwake(): void {
         this._luckWheelOutside = this.owner.getChildByPath("WheelGroup.LuckWheelOuter").getComponent(LuckWheel);
+        this._luckWheelOutside.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onOutsideWheelRotationComplete);
+        this._luckWheelOutside.init();
+
         this._luckWheelInner = this.owner.getChildByPath("WheelGroup.LuckWheelInner").getComponent(LuckWheel);
         this._luckWheelInner.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onInnerWheelRotationComplete);
-        this._luckWheelOutside.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onOutsideWheelRotationComplete);
+        this._luckWheelInner.init();
     }
 
     public onKeyDown(evt: Laya.Event): void {
