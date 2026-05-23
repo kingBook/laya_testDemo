@@ -49,7 +49,10 @@ luckWheel.mode = LuckWheelMode.SingleRotatePointer;
 // 设置指针
 luckWheel.pointer = xxx;
 luckWheel.pointerAngleOffset = 90; // 指针素材的角度修正值
-luckWheel.isPointerClockwise = true; // 指针的旋转方向，是否为顺时针（固定指针模式时，无须设置）
+luckWheel.pointerRotationSign = 1; // 旋转方向
+luckWheel.pointerAniTotalTime = 4300; // 旋转时间
+luckWheel.pointerAniCircles = 4; // 旋转圈数
+luckWheel.pointerAniCurve.setTo(.25, .1, .25, 1); // 动画曲线
 
 // 角度分割数据
 const sectorData = new SectorData();
@@ -58,12 +61,18 @@ sectorData.sectorAngles = [0, 90, 182, 270]; // 切分区块的分割线角度�
 
 // 设置外转盘
 luckWheel.outerDisc = xxx;
-luckWheel.isOuterClockwise = true; // 外转盘的旋转方向，是否为顺时针（仅旋转指针的模式，无须设置）
+luckWheel.outerRotationSign = 1; // 旋转方向
+luckWheel.outerAniTotalTime = 4300; // 旋转时间
+luckWheel.outerAniCircles = 4; // 旋转圈数
+luckWheel.outerAniCurve.setTo(.25, .1, .25, 1); // 动画曲线
 luckWheel.outerSectorDatas = [sectorData,...];
 
 // 设置内转盘（单转盘的模式，无须设置）
 luckWheel.innerDisc = xxx;
-luckWheel.isInnerClockwise = false; // 内转盘的旋转方向，是否为顺时针（仅旋转指针的模式，无须设置）
+luckWheel.innerRotationSign = 1; // 旋转方向
+luckWheel.innerAniTotalTime = 4300; // 旋转时间
+luckWheel.innerAniCircles = 4; // 旋转圈数
+luckWheel.innerAniCurve.setTo(.25, .1, .25, 1); // 动画曲线
 luckWheel.innerSectorDatas = [sectorData,...]; // 切分区块的分割线角度值，[0-359] 小 -> 大
 
 // 初始化（必要数据赋值后，手动初始化）
