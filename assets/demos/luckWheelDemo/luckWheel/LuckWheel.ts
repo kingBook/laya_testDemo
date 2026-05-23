@@ -1000,7 +1000,7 @@ export class RotationObject extends Laya.EventDispatcher {
     private _flags: RotationObjectFlag;
 
     /** 动画属性 */
-    private _aniProperties: { rotationSign: number, aniTotalTime: number, aniCircles: number, aniCurve: AnimationCurve };
+    private _aniProperties: { rotationSign: () => number, aniTotalTime: () => number, aniCircles: () => number, aniCurve: () => AnimationCurve };
     /** 是否显示 log */
     public isShowLogMsg: boolean = false;
 
@@ -1045,26 +1045,26 @@ export class RotationObject extends Laya.EventDispatcher {
         switch (rotationObjType) {
             case RotationObjectType.Pointer:
                 this._aniProperties = {
-                    rotationSign: this._luckWheel.pointerRotationSign,
-                    aniTotalTime: this._luckWheel.pointerAniTotalTime,
-                    aniCircles: this._luckWheel.pointerAniCircles,
-                    aniCurve: this._luckWheel.pointerAniCurve
+                    rotationSign: () => this._luckWheel.pointerRotationSign,
+                    aniTotalTime: () => this._luckWheel.pointerAniTotalTime,
+                    aniCircles: () => this._luckWheel.pointerAniCircles,
+                    aniCurve: () => this._luckWheel.pointerAniCurve
                 };
                 break;
             case RotationObjectType.Outer:
                 this._aniProperties = {
-                    rotationSign: this._luckWheel.outerRotationSign,
-                    aniTotalTime: this._luckWheel.outerAniTotalTime,
-                    aniCircles: this._luckWheel.outerAniCircles,
-                    aniCurve: this._luckWheel.outerAniCurve
+                    rotationSign: () => this._luckWheel.outerRotationSign,
+                    aniTotalTime: () => this._luckWheel.outerAniTotalTime,
+                    aniCircles: () => this._luckWheel.outerAniCircles,
+                    aniCurve: () => this._luckWheel.outerAniCurve
                 };
                 break;
             case RotationObjectType.Inner:
                 this._aniProperties = {
-                    rotationSign: this._luckWheel.innerRotationSign,
-                    aniTotalTime: this._luckWheel.innerAniTotalTime,
-                    aniCircles: this._luckWheel.innerAniCircles,
-                    aniCurve: this._luckWheel.innerAniCurve
+                    rotationSign: () => this._luckWheel.innerRotationSign,
+                    aniTotalTime: () => this._luckWheel.innerAniTotalTime,
+                    aniCircles: () => this._luckWheel.innerAniCircles,
+                    aniCurve: () => this._luckWheel.innerAniCurve
                 };
                 break;
         }
@@ -1085,11 +1085,11 @@ export class RotationObject extends Laya.EventDispatcher {
 
         // 时间，进度
         this._aniTime += Laya.timer.delta;
-        const t = Laya.MathUtil.clamp01(Math.trunc(this._aniTime / this._aniProperties.aniTotalTime * 1000) / 1000);
+        const t = Laya.MathUtil.clamp01(Math.trunc(this._aniTime / this._aniProperties.aniTotalTime() * 1000) / 1000);
         this._progress = t;
 
         // 贝塞尔曲线运动
-        const tb = this._aniProperties.aniCurve.getValue(t);
+        const tb = this._aniProperties.aniCurve().getValue(t);
         const newAngle = Math.trunc(Laya.MathUtil.lerp(this._angleStart, this._angleEnd, tb) * 100) / 100;
         this.isShowLogMsg && console.log(`动画进度：${t}, tb:${tb}, newAngle:${newAngle}`);
         this.setAngle(newAngle);
@@ -1160,10 +1160,11 @@ export class RotationObject extends Laya.EventDispatcher {
 
     /** 获取距离奖励角的度数，根据旋转的方向计算，此值始终为正数 */
     public getDeltaAngle(rewardAngle360: number): number {
-        const targetAngle = this._aniProperties.rotationSign >= 0
+        const rotationSign = this._aniProperties.rotationSign();
+        const targetAngle = rotationSign >= 0
             ? rewardAngle360
             : (360 - rewardAngle360);
-        const currentAngle = this._aniProperties.rotationSign >= 0
+        const currentAngle = rotationSign >= 0
             ? this._angle
             : 360 - this._angle;
         return Laya.MathUtil.repeat(targetAngle - currentAngle, 360);
@@ -1179,7 +1180,7 @@ export class RotationObject extends Laya.EventDispatcher {
         // 旋转的最终角
         const rewardAngle360 = Laya.MathUtil.repeat(this._rewardAngle, 360); // 转为: [0, 360]
         const deltaAngle = this.getDeltaAngle(rewardAngle360);
-        this._angleEnd = this._angleStart + this._aniProperties.rotationSign * (deltaAngle + this._aniProperties.aniCircles * 360);
+        this._angleEnd = this._angleStart + this._aniProperties.rotationSign() * (deltaAngle + this._aniProperties.aniCircles() * 360);
     }
 
 }
