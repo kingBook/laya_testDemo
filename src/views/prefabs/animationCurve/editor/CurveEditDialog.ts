@@ -268,21 +268,6 @@ class InputTextBox extends gui.Widget {
      * @param values 
      */
     private valuesToString(values: number[]): string {
-        // console.log("valuesToString", values);
-
-        // 首控制点，距离端点很近，直接等于0
-        const d0 = Math.pow(values[0], 2) + Math.pow(values[1], 2);
-        if (d0 <= Number.EPSILON) {
-            values[0] = values[1] = 0;
-        }
-
-        // 末控制点，距离端点很近，直接等于1
-        const len = values.length;
-        const de = Math.pow(values[len - 2] - 1, 2) + Math.pow(values[len - 1] - 1, 2);
-        if (de <= Number.EPSILON) {
-            values[len - 2] = values[len - 1] = 1;
-        }
-
         const c1xStr = this.getFloatString(values[0]);
         const c1yStr = this.getFloatString(values[1]);
         const c2xStr = this.getFloatString(values[2]);

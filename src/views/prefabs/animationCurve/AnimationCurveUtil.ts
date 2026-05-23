@@ -208,8 +208,22 @@ export default class AnimationCurveUtil {
      * @returns 返回 cubic-bezier.com 数据（长度4，控制点1：c1:{x:[0], y:[1]}， 控制点2：c2:{x:[2], y:[3]}）
      */
     public static keysToCubicBezierValues(keys: readonly { inTangent: number, inWeight: number, outTangent: number, outWeight: number }[]): number[] {
+        if (keys.length !== 2) throw new Error("keys 的长度非 2, 不能调用此方法");
+
         const c1 = this.outKeyToControlPoint(keys[0], 1, 1, this.tempPoint1);
         const c2 = this.inKeyToControlPoint(keys[1], 1, 1, this.tempPoint2);
+
+        // 首控制点，距离端点很近，直接等于0
+        const d0 = Math.pow(c1.x, 2) + Math.pow(c1.y, 2);
+        if (d0 <= Number.EPSILON) {
+            c1.x = c1.y = 0;
+        }
+
+        // 末控制点，距离端点很近，直接等于1
+        const de = Math.pow(c2.x - 1, 2) + Math.pow(c2.y - 1, 2);
+        if (de <= Number.EPSILON) {
+            c2.x = c2.y = 1;
+        }
         return [c1.x, c1.y, c2.x, c2.y];
     }
 

@@ -45,7 +45,7 @@
       "centerY": 0,
       "_$comp": [
         {
-          "_$id": "u5su",
+          "_$id": "4x3j",
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "demos/luckWheelDemo/luckWheel/LuckWheel.ts",
           "_mode": 8,
@@ -59,12 +59,62 @@
           "pointerRotationSign": 1,
           "pointerAniTotalTime": 7000,
           "pointerAniCircles": 5,
+          "pointerAniCurve": {
+            "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
+            "keys": [
+              {
+                "_$type": "FloatKeyframe",
+                "inTangent": 0,
+                "outTangent": 0.4,
+                "value": 0,
+                "inWeight": 0,
+                "outWeight": 0.25,
+                "weightedMode": 0,
+                "time": 0
+              },
+              {
+                "_$type": "FloatKeyframe",
+                "inTangent": 0,
+                "outTangent": 0,
+                "value": 1,
+                "inWeight": 0.75,
+                "outWeight": 0,
+                "weightedMode": 0,
+                "time": 1
+              }
+            ]
+          },
           "outerDisc": {
             "_$ref": "4mj7wmn8"
           },
           "outerRotationSign": -1,
           "outerAniTotalTime": 7000,
           "outerAniCircles": 5,
+          "outerAniCurve": {
+            "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
+            "keys": [
+              {
+                "_$type": "FloatKeyframe",
+                "inTangent": 0,
+                "outTangent": 0.4,
+                "value": 0,
+                "inWeight": 0,
+                "outWeight": 0.25,
+                "weightedMode": 0,
+                "time": 0
+              },
+              {
+                "_$type": "FloatKeyframe",
+                "inTangent": 0,
+                "outTangent": 0,
+                "value": 1,
+                "inWeight": 0.75,
+                "outWeight": 0,
+                "weightedMode": 0,
+                "time": 1
+              }
+            ]
+          },
           "_outerSelectIndex": 0,
           "outerSectorDatas": [
             {
@@ -114,6 +164,31 @@
           "innerRotationSign": 1,
           "innerAniTotalTime": 7000,
           "innerAniCircles": 5,
+          "innerAniCurve": {
+            "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
+            "keys": [
+              {
+                "_$type": "FloatKeyframe",
+                "inTangent": 0,
+                "outTangent": 1,
+                "value": 0,
+                "inWeight": 0,
+                "outWeight": 2.220446049250313e-16,
+                "weightedMode": 0,
+                "time": 0
+              },
+              {
+                "_$type": "FloatKeyframe",
+                "inTangent": 0,
+                "outTangent": 0,
+                "value": 1,
+                "inWeight": 2.220446049250313e-16,
+                "outWeight": 0,
+                "weightedMode": 0,
+                "time": 1
+              }
+            ]
+          },
           "_innerSelectIndex": 0,
           "innerSectorDatas": [
             {

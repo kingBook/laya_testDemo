@@ -1,5 +1,4 @@
-import Utils from "utils/Utils";
-import { BezierEaseData } from "./BezierEaseData";
+import AnimationCurve from "views/prefabs/animationCurve/AnimationCurve";
 import LuckWheelUtil from "./LuckWheelUtil";
 import { SectorData } from "./SectorData";
 
@@ -156,6 +155,9 @@ export class LuckWheel extends Laya.Script {
     /** 指针旋转圈数<大于0的整数> */
     @property({ type: Number, catalog: "Pointer", readonly: "data.mode==2||data.mode==4", min: 1, step: 1, tips: "指针旋转圈数<大于0的整数>" })
     public pointerAniCircles: number = 5;
+    /** 指针动画曲线 */
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name, catalog: "Pointer", readonly: "data.mode==2||data.mode==4", min: 1, step: 1, tips: "指针动画曲线" })
+    public pointerAniCurve: AnimationCurve;
     // =====================  Pointer end  ========================
 
 
@@ -172,6 +174,9 @@ export class LuckWheel extends Laya.Script {
     /** 外转盘旋转圈数<大于0的整数> */
     @property({ type: Number, catalog: "Outer", readonly: "data.mode==1", min: 1, step: 1, tips: "外转盘旋转圈数<大于0的整数>" })
     public outerAniCircles: number = 5;
+    /** 外转盘动画曲线 */
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name, catalog: "Outer", readonly: "data.mode==1", tips: "外转盘动画曲线" })
+    public outerAniCurve: AnimationCurve;
 
     @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _outerSelectIndex: number = 0;
@@ -215,6 +220,9 @@ export class LuckWheel extends Laya.Script {
     /** 内转盘旋转圈数<大于0的整数> */
     @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2||data.mode==8", min: 1, step: 1, tips: "内转盘旋转圈数<大于0的整数>" })
     public innerAniCircles: number = 5;
+    /** 内转盘动画曲线 */
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name, catalog: "Inner", readonly: "data.mode==1||data.mode==2||data.mode==8", tips: "内转盘动画曲线" })
+    public innerAniCurve: AnimationCurve;
 
     @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _innerSelectIndex: number = 0;
@@ -385,18 +393,18 @@ export class LuckWheel extends Laya.Script {
         // 根据模式初始化
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
-                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.pointerRotationSign, this.pointerAniTotalTime, this.pointerAniCircles);
+                this._pointerRotationObj.init(this, RotationObjectType.Pointer, this._pointerAngle);
                 break;
             case LuckWheelMode.SingleFixedPointer:
-                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.outerRotationSign, this.outerAniTotalTime, this.outerAniCircles);
+                this._outerRotationObj.init(this, RotationObjectType.Outer, this.outerDisc.rotation);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
-                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.outerRotationSign, this.outerAniTotalTime, this.outerAniCircles);
-                this._innerRotationObj.init(RotationObjectType.Inner, this.innerDisc.rotation, this.innerRotationSign, this.innerAniTotalTime, this.innerAniCircles);
+                this._outerRotationObj.init(this, RotationObjectType.Outer, this.outerDisc.rotation);
+                this._innerRotationObj.init(this, RotationObjectType.Inner, this.innerDisc.rotation);
                 break;
             case LuckWheelMode.DoubleOnlyFixedInner:
-                this._pointerRotationObj.init(RotationObjectType.Pointer, this._pointerAngle, this.pointerRotationSign, this.pointerAniTotalTime, this.pointerAniCircles);
-                this._outerRotationObj.init(RotationObjectType.Outer, this.outerDisc.rotation, this.outerRotationSign, this.outerAniTotalTime, this.outerAniCircles);
+                this._pointerRotationObj.init(this, RotationObjectType.Pointer, this._pointerAngle);
+                this._outerRotationObj.init(this, RotationObjectType.Outer, this.outerDisc.rotation);
                 break;
         }
 
@@ -446,37 +454,19 @@ export class LuckWheel extends Laya.Script {
 
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
-                this._pointerRotationObj.rotationSign = this.pointerRotationSign;
-                this._pointerRotationObj.aniTotalTime = this.pointerAniTotalTime;
-                this._pointerRotationObj.circles = this.pointerAniCircles;
                 this._pointerRotationObj.startRotation();
                 break;
             case LuckWheelMode.SingleFixedPointer:
-                this._outerRotationObj.rotationSign = this.outerRotationSign;
-                this._outerRotationObj.aniTotalTime = this.outerAniTotalTime;
-                this._outerRotationObj.circles = this.outerAniCircles;
                 this._outerRotationObj.startRotation();
                 break;
             case LuckWheelMode.DoubleFixedPointer:
-                this._outerRotationObj.rotationSign = this.outerRotationSign;
-                this._outerRotationObj.aniTotalTime = this.outerAniTotalTime;
-                this._outerRotationObj.circles = this.outerAniCircles;
                 this._outerRotationObj.startRotation();
 
-                this._innerRotationObj.rotationSign = this.innerRotationSign;
-                this._innerRotationObj.aniTotalTime = this.innerAniTotalTime;
-                this._innerRotationObj.circles = this.innerAniCircles;
                 this._innerRotationObj.startRotation();
                 break;
             case LuckWheelMode.DoubleOnlyFixedInner:
-                this._pointerRotationObj.rotationSign = this.pointerRotationSign;
-                this._pointerRotationObj.aniTotalTime = this.pointerAniTotalTime;
-                this._pointerRotationObj.circles = this.pointerAniCircles;
                 this._pointerRotationObj.startRotation();
 
-                this._outerRotationObj.rotationSign = this.outerRotationSign;
-                this._outerRotationObj.aniTotalTime = this.outerAniTotalTime;
-                this._outerRotationObj.circles = this.outerAniCircles;
                 this._outerRotationObj.startRotation();
                 break;
         }
@@ -988,6 +978,8 @@ export class RotationObject extends Laya.EventDispatcher {
 
     private readonly _tempParams: any[] = [];
 
+    /** 所属幸运轮组件 */
+    private _luckWheel: LuckWheel;
     /** 旋转对象类型 */
     private _rotationObjType: RotationObjectType;
     /** 当前所在的角 */
@@ -1007,14 +999,8 @@ export class RotationObject extends Laya.EventDispatcher {
     /** 布尔集合 */
     private _flags: RotationObjectFlag;
 
-    /** 旋转方向，1或-1 */
-    public rotationSign: number;
-    /** 动画总时长<毫秒，大于0的整数>*/
-    public aniTotalTime: number;
-    /** 旋转圈数<大于0的整数>*/
-    public circles: number;
-    /** 贝塞尔缓动数据，https://cubic-bezier.com/ */
-    public bezierEaseData: BezierEaseData = { precision: 8, data: [.42, 0, .58, 1] };
+    /** 动画属性 */
+    private _aniProperties: { rotationSign: number, aniTotalTime: number, aniCircles: number, aniCurve: AnimationCurve };
     /** 是否显示 log */
     public isShowLogMsg: boolean = false;
 
@@ -1048,14 +1034,41 @@ export class RotationObject extends Laya.EventDispatcher {
      * @param rotationSign 旋转方向, 1或-1
      * @param aniTotalTime 旋转总时长<毫秒，大于0的整数>
      * @param circles 旋转圈数<大于0的整数>
-     * @param bezierEaseData 贝塞尔缓动数据
+     * @param aniCurve 动画曲线
      */
-    public init(rotationObjType: RotationObjectType, angle: number, rotationSign: number, aniTotalTime: number, circles: number, bezierEaseData: BezierEaseData = null): void {
+    public init(luckWheel: LuckWheel, rotationObjType: RotationObjectType, angle: number): void {
+        this._luckWheel = luckWheel;
         this._rotationObjType = rotationObjType;
         this.setAngle(Laya.MathUtil.repeat(angle, 360));
-        this.rotationSign = rotationSign;
-        this.aniTotalTime = aniTotalTime;
-        this.circles = circles;
+
+        // 动画属性
+        switch (rotationObjType) {
+            case RotationObjectType.Pointer:
+                this._aniProperties = {
+                    rotationSign: this._luckWheel.pointerRotationSign,
+                    aniTotalTime: this._luckWheel.pointerAniTotalTime,
+                    aniCircles: this._luckWheel.pointerAniCircles,
+                    aniCurve: this._luckWheel.pointerAniCurve
+                };
+                break;
+            case RotationObjectType.Outer:
+                this._aniProperties = {
+                    rotationSign: this._luckWheel.outerRotationSign,
+                    aniTotalTime: this._luckWheel.outerAniTotalTime,
+                    aniCircles: this._luckWheel.outerAniCircles,
+                    aniCurve: this._luckWheel.outerAniCurve
+                };
+                break;
+            case RotationObjectType.Inner:
+                this._aniProperties = {
+                    rotationSign: this._luckWheel.innerRotationSign,
+                    aniTotalTime: this._luckWheel.innerAniTotalTime,
+                    aniCircles: this._luckWheel.innerAniCircles,
+                    aniCurve: this._luckWheel.innerAniCurve
+                };
+                break;
+        }
+
         this._rewardAngle = NaN;
         this._angleStart = NaN;
         this._angleEnd = NaN;
@@ -1063,8 +1076,6 @@ export class RotationObject extends Laya.EventDispatcher {
         this._progress = 0;
         this._progressBezier = 0;
         this._flags = RotationObjectFlag.Inited;
-
-        bezierEaseData && (this.bezierEaseData = bezierEaseData);
     }
 
     public update(): void {
@@ -1074,11 +1085,11 @@ export class RotationObject extends Laya.EventDispatcher {
 
         // 时间，进度
         this._aniTime += Laya.timer.delta;
-        const t = Laya.MathUtil.clamp01(Math.trunc(this._aniTime / this.aniTotalTime * 1000) / 1000);
+        const t = Laya.MathUtil.clamp01(Math.trunc(this._aniTime / this._aniProperties.aniTotalTime * 1000) / 1000);
         this._progress = t;
 
         // 贝塞尔曲线运动
-        const tb = Utils.createBezierEase(t, this.bezierEaseData.data[0], this.bezierEaseData.data[1], this.bezierEaseData.data[2], this.bezierEaseData.data[3], this.bezierEaseData.precision);
+        const tb = this._aniProperties.aniCurve.getValue(t);
         const newAngle = Math.trunc(Laya.MathUtil.lerp(this._angleStart, this._angleEnd, tb) * 100) / 100;
         this.isShowLogMsg && console.log(`动画进度：${t}, tb:${tb}, newAngle:${newAngle}`);
         this.setAngle(newAngle);
@@ -1149,10 +1160,10 @@ export class RotationObject extends Laya.EventDispatcher {
 
     /** 获取距离奖励角的度数，根据旋转的方向计算，此值始终为正数 */
     public getDeltaAngle(rewardAngle360: number): number {
-        const targetAngle = this.rotationSign >= 0
+        const targetAngle = this._aniProperties.rotationSign >= 0
             ? rewardAngle360
             : (360 - rewardAngle360);
-        const currentAngle = this.rotationSign >= 0
+        const currentAngle = this._aniProperties.rotationSign >= 0
             ? this._angle
             : 360 - this._angle;
         return Laya.MathUtil.repeat(targetAngle - currentAngle, 360);
@@ -1168,6 +1179,7 @@ export class RotationObject extends Laya.EventDispatcher {
         // 旋转的最终角
         const rewardAngle360 = Laya.MathUtil.repeat(this._rewardAngle, 360); // 转为: [0, 360]
         const deltaAngle = this.getDeltaAngle(rewardAngle360);
-        this._angleEnd = this._angleStart + this.rotationSign * (deltaAngle + this.circles * 360);
+        this._angleEnd = this._angleStart + this._aniProperties.rotationSign * (deltaAngle + this._aniProperties.aniCircles * 360);
     }
+
 }

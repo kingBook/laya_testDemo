@@ -23,16 +23,16 @@ export class TestDoubleRotate extends Laya.Script {
         if (evt.keyCode === Laya.Keyboard.J) {
             // 内幸运轮，设置奖励索引
             const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheelInner.currentOuterSectorData.sectorAngles.length);
-            this._luckWheelInner.pointerRotationObject.aniTotalTime = 7000;
-            this._luckWheelInner.pointerRotationObject.circles = 5;
+            this._luckWheelInner.innerAniTotalTime = 7000;
+            this._luckWheelInner.pointerAniCircles = 5;
             this._luckWheelInner.setRewardIndex(innerRewardIndex);
             const innerRewardAngle = this._luckWheelInner.pointerRotationObject.rewardAngle360;
             console.log("内幸运轮，设置奖励索引：", innerRewardIndex, "奖励角:", innerRewardAngle);
 
             // 外幸运轮，设置奖励索引
             this._luckWheelOutside.setPointerAngle(innerRewardAngle);
-            this._luckWheelOutside.outerRotationObject.aniTotalTime = 8000;
-            this._luckWheelOutside.outerRotationObject.circles = 6;
+            this._luckWheelOutside.outerAniTotalTime = 8000;
+            this._luckWheelOutside.outerAniCircles = 6;
             const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheelOutside.currentOuterSectorData.sectorAngles.length);
             this._luckWheelOutside.setRewardIndex(outsideRewardIndex);
             console.log("外幸运轮，设置奖励索引：", outsideRewardIndex, "pointerAngle:", this._luckWheelOutside.pointerAngle);

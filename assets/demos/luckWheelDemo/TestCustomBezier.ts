@@ -21,8 +21,7 @@ export class TestCustomBezier extends Laya.Script {
     private delaySetReward(): void {
         Laya.timer.once(Math.random() * 2000 + 1000, this, () => {
             // 自定义贝塞尔曲线数据, https://cubic-bezier.com/
-            // 根据旋转模式，选择对应的 RotationalObject 进行设置
-            this._luckWheel.outerRotationObject.bezierEaseData = { precision: 8, data: [0, 0, 1, 1] };
+            this._luckWheel.outerAniCurve.setTo(0, 0, 1, 1);
 
             // 用索引设置开奖结果
             // const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitData.splitAngles.length);
