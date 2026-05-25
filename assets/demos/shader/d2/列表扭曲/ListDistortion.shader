@@ -7,7 +7,8 @@ Shader3D Start
     shaderType:3,
     uniformMap:{
         u_Radius: { type: Float, default: 0.5, tips: "圆柱半径，控制扭曲强度" },
-        u_Offset: { type: Float, default: 0, tips: "列表滚动偏移，用于同步圆柱旋转" },
+        u_Squeeze: { type: Float, default: 0.2, tips: "对称挤压系数（正值扩张，负值收缩）" },
+        u_SqueezeRange: { type: Float, default: 1.0, tips: "挤压衰减范围（基于 angle，单位为弧度），越小衰减越集中" },
     },
     attributeMap: {
         a_posuv: Vector4,
@@ -45,13 +46,18 @@ GLSL Start
 	    vec4 pos;
 	    getPosition(pos);
 
-	    float angle = atan(pos.y / u_Radius) + u_Offset;
-	    
-	    float sinA = sin(angle);
-	    float cosA = cos(angle);
-	    
-	    pos.x = pos.x + u_Radius * cosA * 0.3;  // 0.3用于调节水平挤压程度
-	    pos.y = u_Radius * sinA;
+        float angle = atan(pos.y / u_Radius);
+    
+            float sinA = sin(angle);
+            float cosA = cos(angle);
+
+            // 计算挤压随距离的衰减系数：基于 angle 的绝对值平滑衰减
+            // att = 1 当靠近中心 (angle -> 0)，att -> 0 当远离中心 (abs(angle) >= u_SqueezeRange)
+            float att = 1.0 - smoothstep(0.0, u_SqueezeRange, abs(angle));
+
+            // 对称挤压并随距离衰减：靠近中心挤压明显，远离中心逐渐减弱
+            pos.x = pos.x * (1.0 + u_Squeeze * cosA * att); // 对称挤压
+            pos.y = u_Radius * sinA;
 
 	    gl_Position = pos;
 

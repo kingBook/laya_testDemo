@@ -24,22 +24,6 @@
   ],
   "_$child": [
     {
-      "_$id": "d23dqjp1",
-      "_$type": "Image",
-      "name": "Image",
-      "x": -253,
-      "y": 643,
-      "width": 512,
-      "height": 313,
-      "material": {
-        "_$uuid": "b75e36b9-9285-47eb-a1e0-84776ff59393",
-        "_$type": "Material"
-      },
-      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
-      "useSourceSize": true,
-      "color": "#ffffff"
-    },
-    {
       "_$id": "c8u0es93",
       "_$type": "List",
       "name": "list",
