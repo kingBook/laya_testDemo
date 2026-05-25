@@ -6,10 +6,8 @@ Shader3D Start
     supportReflectionProbe:true,
     shaderType:3,
     uniformMap:{
-        u_Time: { type: Float, default: 0, tips: "时间，用于动画驱动" },
-        u_Amplitude: { type: Float, default: 0.06, tips: "扭曲幅度" },
-        u_Frequency: { type: Float, default: 10.0, tips: "扭曲频率" },
-        u_Offset: { type: Float, default: 0.0, tips: "列表滚动偏移，用于同步滚动效果" },
+        u_Radius: { type: Float, default: 300.0, tips: "圆柱半径，控制扭曲强度" },
+        u_Offset: { type: Float, default: 0.0, tips: "列表滚动偏移，用于同步圆柱旋转" },
     },
     attributeMap: {
         a_posuv: Vector4,
@@ -47,9 +45,20 @@ GLSL Start
 	    vec4 pos;
 	    getPosition(pos);
 
-	    // 列表扭曲：根据 Y 轴位置产生水平波动
-	    float wave = sin((pos.y + u_Offset) * u_Frequency + u_Time) * u_Amplitude;
-	    pos.x += wave;
+	    // 水平圆柱扭曲：顶点围绕水平圆柱轴（X轴）旋转
+	    // angle = 纵向距离 / 圆柱半径
+	    float angle = (pos.y + u_Offset) / u_Radius;
+        //float angle = (u_Offset) / u_Radius;
+	    
+	    // 在圆柱表面上，X坐标保持（沿圆柱轴），Y变为圆柱面的垂直位移
+	    // 新的 Y = Radius * (1 - cos(angle))
+	    // 新的 X = Radius * sin(angle)（如果需要水平挤压效果）
+	    float cosA = cos(angle);
+	    //float sinA = sin(angle);
+	    
+	    // 圆柱扭曲变换
+	    //pos.x = pos.x + u_Radius * sinA * 0.3;  // 0.3用于调节水平挤压程度
+	    pos.y = u_Radius * (1.0 - cosA);
 
 	    gl_Position = pos;
 

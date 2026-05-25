@@ -18,6 +18,8 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
+    "u_Offset": -4.771,
+    "u_Radius": 0.25,
     "defines": [
       "TEXTUREVS"
     ]
