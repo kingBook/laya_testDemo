@@ -37,6 +37,7 @@
     "laya.device": true,
     "laya.d3": true
   },
+  "spineVersion": "4.2",
   "splash": {
     "fit": "center"
   },
