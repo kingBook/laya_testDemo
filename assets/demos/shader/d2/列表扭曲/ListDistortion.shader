@@ -46,7 +46,7 @@ GLSL Start
 	    vec4 pos;
 	    getPosition(pos);
 
-        float angle = atan(pos.y / u_Radius);
+            float angle = pos.y / u_Radius;
     
             float sinA = sin(angle);
             float cosA = cos(angle);
@@ -56,7 +56,7 @@ GLSL Start
             float att = 1.0 - smoothstep(0.0, u_SqueezeRange, abs(angle));
 
             // 对称挤压并随距离衰减：靠近中心挤压明显，远离中心逐渐减弱
-            pos.x = pos.x * (1.0 + u_Squeeze * cosA * att); // 对称挤压
+            //pos.x = pos.x * (1.0 + u_Squeeze * cosA * att); // 对称挤压
             pos.y = u_Radius * sinA;
 
 	    gl_Position = pos;
