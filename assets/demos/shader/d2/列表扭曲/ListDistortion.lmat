@@ -18,7 +18,7 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
-    "u_Radius": 0.18,
+    "u_Radius": 8,
     "u_Squeeze": 0,
     "u_SqueezeRange": 1,
     "defines": [
