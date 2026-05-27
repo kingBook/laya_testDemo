@@ -1,4 +1,5 @@
 import Utils from "utils/Utils";
+import AnimationCurve from "views/prefabs/animationCurve/AnimationCurve";
 
 const { regClass, property } = Laya;
 
@@ -31,14 +32,6 @@ export type FixedLenCfg = {
         /** 品质权重 */
         qualityWeights?: Record<string | number, number>;
     };
-}
-
-/** 贝塞尔缓动数据 */
-export interface BezierEaseData {
-    /** 精度<正整数> */
-    precision: number;
-    /** 贝塞尔曲线数据(长度为 4): https://cubic-bezier.com/ */
-    data: number[];
 }
 
 /**
@@ -79,7 +72,7 @@ lotteryScript.init(fixedLenCfg); // 初始化, 需在 list.array 赋值后调用
 lotteryScript.speedSign = -1; // 滚动方向, 1 或 -1
 lotteryScript.aniTotalTime = 5000; // 滚动时间<毫秒>
 lotteryScript.circles = 5; // 滚动圈数
-lotteryScript.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
+lotteryScript.aniCurve.setTo(.25, .1, .25, 1); // 动画曲线
 
 //lotteryScript.owner.on(ScrollingLotteryListScript.EVENT_SCROLL_START, () => {
 lotteryScript.onScrollStartHandler = new Laya.Handler(this, () => {
@@ -141,9 +134,10 @@ export class ScrollingLotteryListScript extends Laya.Script {
     /** 滚动的圈数<大于0的整数>, 默认:5 */
     @property({ type: Number, min: 1, step: 1, tips: "滚动的圈数<大于0的整数>, 默认:5" })
     public circles: number = 5;
+    /** 动画曲线 */
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "动画曲线" })
+    public aniCurve: AnimationCurve = new AnimationCurve();
 
-    /** 贝塞尔缓动数据，https://cubic-bezier.com/ */
-    public bezierEaseData: BezierEaseData = { precision: 16, data: [.25, .1, .25, 1] };
     /** 滚动开始处理器，格式： `(): void` */
     public onScrollStartHandler: Laya.Handler;
     /** 滚动中处理器，聚焦索引发生改变时触发，格式： `(curFocusIdx: number): void` */
@@ -341,7 +335,7 @@ export class ScrollingLotteryListScript extends Laya.Script {
         this._progress = t;
 
         // 贝塞尔曲线运动
-        const tb = Utils.createBezierEase(t, this.bezierEaseData.data[0], this.bezierEaseData.data[1], this.bezierEaseData.data[2], this.bezierEaseData.data[3], this.bezierEaseData.precision);
+        const tb = this.aniCurve.getValue(t);
 
         const curDistance = Laya.MathUtil.lerp(0, this._totalDistance, tb);
         this._speed = (curDistance - this._distance) * this.speedSign; // 计算速度

@@ -166,7 +166,7 @@ export class LuckWheel extends Laya.Script {
     public pointerAniCircles: number = 5;
     /** 指针动画曲线 */
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, catalog: "Pointer", readonly: "data.mode==2||data.mode==4", min: 1, step: 1, tips: "指针动画曲线" })
-    public pointerAniCurve: AnimationCurve;
+    public pointerAniCurve: AnimationCurve = new AnimationCurve();
     // =====================  Pointer end  ========================
 
 
@@ -185,7 +185,7 @@ export class LuckWheel extends Laya.Script {
     public outerAniCircles: number = 5;
     /** 外转盘动画曲线 */
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, catalog: "Outer", readonly: "data.mode==1", tips: "外转盘动画曲线" })
-    public outerAniCurve: AnimationCurve;
+    public outerAniCurve: AnimationCurve = new AnimationCurve();
 
     @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _outerSelectIndex: number = 0;
@@ -231,7 +231,7 @@ export class LuckWheel extends Laya.Script {
     public innerAniCircles: number = 5;
     /** 内转盘动画曲线 */
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, catalog: "Inner", readonly: "data.mode==1||data.mode==2||data.mode==8", tips: "内转盘动画曲线" })
-    public innerAniCurve: AnimationCurve;
+    public innerAniCurve: AnimationCurve = new AnimationCurve();
 
     @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _innerSelectIndex: number = 0;

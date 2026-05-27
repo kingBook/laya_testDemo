@@ -8,7 +8,17 @@ const { regClass, property } = Laya;
 export class AnimationCurveTest extends Laya.Script {
 
     @property({ type: AnimationCurve, inspector: AnimationCurve.name })
-    animationCurve: AnimationCurve;
+    aniCurve: AnimationCurve = new AnimationCurve();
+
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name })
+    aniCurve2: AnimationCurve = new AnimationCurve();
+
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name, readonly:false })
+    aniCurve3: AnimationCurve = new AnimationCurve();
+
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name, readonly:true })
+    aniCurve4: AnimationCurve = new AnimationCurve();
+
 
     @property({ type: Laya.Box })
     box: Laya.Box;
@@ -23,6 +33,8 @@ export class AnimationCurveTest extends Laya.Script {
     private _isMoveing: boolean;
 
     onAwake(): void {
+        console.log("AnimationCurveTest::onAwake();", this.aniCurve.toControlPointValues());
+
         this.owner.addComponent(Comp);
     }
 
@@ -32,7 +44,7 @@ export class AnimationCurveTest extends Laya.Script {
         this._time = Math.min(this._time + Laya.timer.delta, this._totalTime);
         const t = Laya.MathUtil.clamp01(Math.trunc(this._time / this._totalTime * 1000) / 1000); // [0,1]三位小数
 
-        const tb = this.animationCurve.getValue(t);
+        const tb = this.aniCurve.getValue(t);
         this.box2.y = Laya.MathUtil.lerp(this._startY, this._targetY, tb);
 
         if (t >= 1) {
@@ -52,7 +64,7 @@ export class AnimationCurveTest extends Laya.Script {
 
             // 示例1： tween 
             Laya.Tween.killAll(this.box);
-            Laya.Tween.create(this.box).to('y', this._targetY).duration(this._totalTime).ease(this.animationCurve.easeFn);
+            Laya.Tween.create(this.box).to('y', this._targetY).duration(this._totalTime).ease(this.aniCurve.easeFn);
 
             // 示例2：
             this._time = 0;

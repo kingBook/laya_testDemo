@@ -36,7 +36,7 @@ export class CurveEditDialog extends IEditor.Dialog {
     async create() {
         // 窗口
         const contentPane = new gui.Widget();
-        const contentWidth = CurveEditDialog.margin.left + CurveEditDialog.presetPanelSize.width + CurveEditDialog.space + CurveEditDialog.curveCanvasSize.width + + CurveEditDialog.margin.right;
+        const contentWidth = CurveEditDialog.margin.left + CurveEditDialog.presetPanelSize.width + CurveEditDialog.space + CurveEditDialog.curveCanvasSize.width + CurveEditDialog.margin.right;
         const contentHeight = CurveEditDialog.margin.top + CurveEditDialog.inputTextBoxSize.height + CurveEditDialog.space + CurveEditDialog.curveCanvasSize.height + CurveEditDialog.margin.bottom;
         contentPane.setSize(contentWidth, contentHeight);
         this.contentPane = contentPane;
@@ -106,7 +106,7 @@ export class CurveEditDialog extends IEditor.Dialog {
     private onInputTextBoxSubmit(e: gui.Event): void {
         const values: number[] = e.data.values;
         // console.log("输入盒提交", values);
-        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(values[0], values[1], values[2], values[3]);
+        const keys = AnimationCurveUtil.controlPointValuesToKeys(values[0], values[1], values[2], values[3]);
 
         // 清空 (避免顶点数量比实际数量多)
         this._curveInput.clearKeys();
@@ -136,7 +136,7 @@ export class CurveEditDialog extends IEditor.Dialog {
     /** 预设面板提交 */
     private onPresetPanelSubmit(e: gui.Event): void {
         const values: number[] = e.data.values;
-        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(values[0], values[1], values[2], values[3]);
+        const keys = AnimationCurveUtil.controlPointValuesToKeys(values[0], values[1], values[2], values[3]);
 
         // 清空 (避免顶点数量比实际数量多)
         this._curveInput.clearKeys();
@@ -221,7 +221,7 @@ class InputTextBox extends gui.Widget {
         } else if (keys.length !== 2) {
             this._textInput.text = "vertices is not 2";
         } else {
-            const values = AnimationCurveUtil.keysToCubicBezierValues(keys);
+            const values = AnimationCurveUtil.keysToControlPointValues(keys);
             this._textInput.text = this.valuesToString(values);
             // 记录旧文本
             this._oldText = this._textInput.text;
@@ -337,7 +337,7 @@ class PresetPanel extends gui.Panel {
 
             // 曲线图
             const curveShape = new CurveShape(btn, 0, 0, btn.width, btn.height, "#666666", "#00ffff");
-            curveShape.keys = AnimationCurveUtil.cubicBezierValuesToKeys(item.values[0], item.values[1], item.values[2], item.values[3]);
+            curveShape.keys = AnimationCurveUtil.controlPointValuesToKeys(item.values[0], item.values[1], item.values[2], item.values[3]);
 
             // 标题
             const txt = new gui.TextField();

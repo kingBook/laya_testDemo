@@ -1,5 +1,6 @@
 import Utils from "utils/Utils";
-import { BezierEaseData, FixedLenCfg, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
+import { FixedLenCfg, ScrollingLotteryListScript } from "./ScrollingLotteryListScript";
+import AnimationCurve from "views/prefabs/animationCurve/AnimationCurve";
 
 const { regClass, property, classInfo } = Laya;
 
@@ -107,17 +108,17 @@ let fixedSubLenCfg: FixedSubLenCfg = null;
 // };
 multipleLottry.init(fixedSubLenCfg); // 初始化
 
-multipleLottry.speedSign = 1; // 子列表滚动方向, 1 或 -1
-multipleLottry.aniTotalTime = 5000; // 子列表动画总时长<毫秒>
-multipleLottry.circles = 5; // 子列表滚动的圈数
-multipleLottry.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 子列表动画曲线数据
+multipleLottry.speedSign = 1; // 各子列表滚动方向, 1 或 -1
+multipleLottry.aniTotalTime = 5000; // 各子列表动画总时长<毫秒>
+multipleLottry.circles = 5; // 各子列表滚动的圈数
+multipleLottry.aniCurve.setTo(.25, .1, .25, 1); // 各子列表动画曲线
 
 // 如果要求子列表动画数据不一样，在 init() 初始化后遍历以下数组进行设置
 multipleLottry.subLotteries.forEach((element, index) => {
     element.speedSign = 1; // 滚动方向, 1 或 -1
     element.aniTotalTime = 5000; // 滚动时间<毫秒>
     element.circles = 5; // 滚动圈数
-    element.bezierEaseData = { precision: 16, data: [.25, .1, .25, 1] }; // 动画曲线
+    element.aniCurve.setTo(.25, .1, .25, 1); // 动画曲线
 });
 
 //multipleLottry.owner.on(ScrollingLotteryMultipleListScript.EVENT_SCROLL_START, (subLottery: ScrollingLotteryListScript, subListIdx: number) => {
@@ -170,15 +171,18 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
 
     @property({ type: Laya.List, private: false, tips: "子列表模板" })
     private _subListTemplate: Laya.List;
-    /** 子列表滚动方向, 1 或 -1 */
+    /** 各子列表滚动方向, 1 或 -1 */
     @property({ type: Number, enumSource: [{ name: "1", value: 1 }, { name: "-1", value: -1 }], tips: "子列表滚动方向, 1 或 -1" })
     public speedSign: number = 1;
-    /** 子列表动画总时长<毫秒, 大于0的整数>, 默认: 5000 */
+    /** 各子列表动画总时长<毫秒, 大于0的整数>, 默认: 5000 */
     @property({ type: Number, min: 1, step: 1, tips: "子列表动画总时长<毫秒, 大于0的整数>, 默认: 5000" })
     public aniTotalTime: number = 5000;
-    /** 子列表滚动的圈数<大于0的整数>, 默认:5 */
+    /** 各子列表滚动的圈数<大于0的整数>, 默认:5 */
     @property({ type: Number, min: 1, step: 1, tips: "子列表滚动的圈数<大于0的整数>, 默认:5" })
     public circles: number = 5;
+    /** 各子列表动画曲线 */
+    @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "动画曲线" })
+    public aniCurve: AnimationCurve = new AnimationCurve();
 
     /** 是否启用父列表滚动到已出结果子列表（缓动）*/
     @property({ type: Boolean, catalog: "ScrollToSubResult", tips: "是否启用父列表滚动到已出结果子列表（缓动）" })
@@ -189,9 +193,6 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
     /** 父列表滚动到已出结果子列表缓动的时间 */
     @property({ type: Number, min: 1, step: 1, catalog: "ScrollToSubResult", readonly: "data.enableScrollToSubResult!=true", tips: "父列表滚动到已出结果子列表缓动的时间" })
     public scrollToSubResultDuration: number = 500;
-
-    /** 子列表动画曲线数据，https://cubic-bezier.com/ */
-    public bezierEaseData: BezierEaseData; // = { precision: 16, data: [.25, .1, .25, 1] };
 
     /** 列表数据源 */
     public array: any[][] = [
@@ -345,7 +346,7 @@ export class ScrollingLotteryMultipleListScript extends Laya.Script {
             subLottery.speedSign = this.speedSign;
             subLottery.aniTotalTime = this.aniTotalTime;
             subLottery.circles = this.circles;
-            if (this.bezierEaseData) subLottery.bezierEaseData = this.bezierEaseData;
+            subLottery.aniCurve.setTo(this.aniCurve);
 
             // 子列表滚动开始
             subLottery.onScrollStartHandler = new Laya.Handler(this, () => {

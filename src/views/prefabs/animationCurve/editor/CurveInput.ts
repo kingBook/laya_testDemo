@@ -11,6 +11,7 @@ export class CurveInput extends gui.Widget {
     /** 修改后的提交事件, 事件由 {@link this} 派发，回调函数格式: `(e: gui.Event): void` */
     public static readonly EVENT_SUBMIT = "eventSubmit";
 
+
     /** 曲线图形 */
     private _curveShape: CurveShape;
     /** 曲线编辑窗口 */
@@ -21,7 +22,7 @@ export class CurveInput extends gui.Widget {
         return this._curveShape.keys;
     }
 
-    constructor() {
+    constructor(inspectingTarget:IEditor.IInspectingTarget) {
         super();
         const margin = 3; // 边距
         const size = { width: 90, height: 20 }; // 大小
@@ -56,12 +57,15 @@ export class CurveInput extends gui.Widget {
 
         // 点击侦听
         this.on("click", (e: gui.Event) => {
-            // 显示曲线编辑窗口
-            Editor.showDialog(CurveEditDialog, this, this).then(curveEditDialog => {
-                this._curveEditDialog = curveEditDialog;
-                // 侦听曲线编辑窗口修改提交
-                this._curveEditDialog.contentPane.on(EVENT_SUBMIT, this.onCurveEditDialogSubmit, this);
-            });
+            const isReadonly = inspectingTarget.owner["readonlyTest"]; // 只读
+            if(!isReadonly){
+                // 显示曲线编辑窗口
+                Editor.showDialog(CurveEditDialog, this, this).then(curveEditDialog => {
+                    this._curveEditDialog = curveEditDialog;
+                    // 侦听曲线编辑窗口修改提交
+                    this._curveEditDialog.contentPane.on(EVENT_SUBMIT, this.onCurveEditDialogSubmit, this);
+                });
+            }
         });
 
         // 大小改变侦听

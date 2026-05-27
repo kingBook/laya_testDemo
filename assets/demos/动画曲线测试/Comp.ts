@@ -9,7 +9,9 @@ export class Comp extends Laya.Script {
     animCurve:AnimationCurve=new AnimationCurve();
 
     onAwake(): void {
-        console.log("Comp:", this.animCurve.getValue(0));
+        console.log("Comp1:", this.animCurve.toControlPointValues());
+        this.animCurve.setTo(.25, .1, .25, 1);
+        console.log("Comp2:", this.animCurve.toControlPointValues());
         
     }
 

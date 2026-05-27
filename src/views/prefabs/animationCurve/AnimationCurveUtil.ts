@@ -174,11 +174,21 @@ export default class AnimationCurveUtil {
     }
 
     /**
-    * cubic-bezier.com 数据转为 FloatKey
-    * @param values cubic-bezier.com 数据
-    * @returns 长度为 2，weight=x, tangent=y/x, inTangent、inWeight 以右上角为原点(x向左，y向下)，outTangent、outWeight 以左下角为原点(x向右，y向上)
-    */
-    public static cubicBezierValuesToKeys(c1x: number, c1y: number, c2x: number, c2y: number): { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[] {
+     * cubic-bezier.com 数据（如：[.25, .1, .25, 1]）转为 {@link Laya.FloatKeyframe}
+     * @param c1x 控制点1.x
+     * @param c1y 控制点1.y
+     * @param c2x 控制点2.x
+     * @param c2y 控制点2.y
+     * @param output [可选] 存储输出的数组
+     * @returns 
+     */
+    public static controlPointValuesToKeys(
+        c1x: number,
+        c1y: number,
+        c2x: number,
+        c2y: number,
+        output?: { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[]
+    ): { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[] {
         const outKey = this.controlPointToOutKey(c1x, c1y, 1, 1, this.tempOutKey);
         const inKey = this.controlPointToInKey(c2x, c2y, 1, 1, this.tempInKey);
 
@@ -199,15 +209,23 @@ export default class AnimationCurveUtil {
             inTangent: inKey.inTangent,
             inWeight: inKey.inWeight
         };
-        return [key0, key1];
+
+        output ||= [];
+        output.length = 0;
+        output.push(key0, key1);
+        return output;
     }
 
     /**
-     * FloatKeyFrame 转为 cubic-bezier.com 数据
-     * @param keys 长度为 2，weight=x, tangent=y/x, inTangent 与 inWeight 以右上角为原点，x向左，y向下，outTangent 与 outWeight 以左下角为原点，x向右，y向上
-     * @returns 返回 cubic-bezier.com 数据（长度4，控制点1：c1:{x:[0], y:[1]}， 控制点2：c2:{x:[2], y:[3]}）
+     * {@link Laya.FloatKeyframe} 转为 cubic-bezier.com 数据
+     * @param keys 长度为 2 (weight=x, tangent=y/x, inTangent 与 inWeight 以右上角为原点，x向左，y向下，outTangent 与 outWeight 以左下角为原点，x向右，y向上)
+     * @param output [可选] 存储输出的数组
+     * @returns 返回 cubic-bezier.com 数据，如: [.25, .1, .25, 1]
      */
-    public static keysToCubicBezierValues(keys: readonly { inTangent: number, inWeight: number, outTangent: number, outWeight: number }[]): number[] {
+    public static keysToControlPointValues(
+        keys: readonly { inTangent: number, inWeight: number, outTangent: number, outWeight: number }[],
+        output?: number[]
+    ): number[] {
         if (keys.length !== 2) throw new Error("keys 的长度非 2, 不能调用此方法");
 
         const c1 = this.outKeyToControlPoint(keys[0], 1, 1, this.tempPoint1);
@@ -224,7 +242,11 @@ export default class AnimationCurveUtil {
         if (de <= Number.EPSILON) {
             c2.x = c2.y = 1;
         }
-        return [c1.x, c1.y, c2.x, c2.y];
+
+        output ||= [];
+        output.length = 0;
+        output.push(c1.x, c1.y, c2.x, c2.y);
+        return output;
     }
 
     /**

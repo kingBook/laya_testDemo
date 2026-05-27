@@ -9,7 +9,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
     public override create(): IEditor.IPropertyFieldCreateResult {
         //console.log("create(); getValue", this.target.getValue());
-        this._curveInput = new CurveInput();
+        this._curveInput = new CurveInput(this.target);
         // 侦听修改
         this._curveInput.on(CurveInput.EVENT_SUBMIT, e => {
             this.onCurveInputSubmit();
@@ -94,7 +94,7 @@ export default class AnimationCurveInspector extends IEditor.PropertyField {
 
         // 默认值项，转为关键帧点数组
         const defaultValues = Presets.easeDatas[0].values;
-        const keys = AnimationCurveUtil.cubicBezierValuesToKeys(defaultValues[0], defaultValues[1], defaultValues[2], defaultValues[3]);
+        const keys = AnimationCurveUtil.controlPointValuesToKeys(defaultValues[0], defaultValues[1], defaultValues[2], defaultValues[3]);
 
         // 关键帧点数组，转为序列化后的 FloatKeyframe 数组
         initProp.keys = keys.map(k => {
