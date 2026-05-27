@@ -1,4 +1,5 @@
 import AnimationCurve from "views/prefabs/animationCurve/AnimationCurve";
+import { Comp } from "./Comp";
 
 
 const { regClass, property } = Laya;
@@ -20,6 +21,10 @@ export class AnimationCurveTest extends Laya.Script {
     private _startY: number;
     private _targetY: number;
     private _isMoveing: boolean;
+
+    onAwake(): void {
+        this.owner.addComponent(Comp);
+    }
 
     onUpdate(): void {
         if (!this._isMoveing) return;

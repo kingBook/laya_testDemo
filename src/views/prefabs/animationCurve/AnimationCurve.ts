@@ -82,7 +82,7 @@ export default class AnimationCurve {
      * @param d 动画的持续时间。
      * @returns 
      * @example
-     *  animationCurve: AnimationCurve;
+     *  const animationCurve: AnimationCurve;
      *  Laya.Tween.create(target).to('x', 100).duration(1000).ease(animationCurve.easeFn);
      */
     public easeFn = (t: number, b: number, c: number, d: number): number => {
@@ -99,6 +99,9 @@ export default class AnimationCurve {
      * @returns 曲线值（曲线图中的y轴），区间：[0, 1]。
      */
     public getValue(t: number): number {
+        if (!this.keys || this.keys.length <= 0) {
+            this.setTo(0, 0, 1, 1);
+        }
         return AnimationCurveUtil.getCurveValue(this.keys, t, this.precision);
     }
 
@@ -110,9 +113,10 @@ export default class AnimationCurve {
      * @param c2y 控制点2.y
      */
     public setTo(c1x: number, c1y: number, c2x: number, c2y: number): AnimationCurve {
+        this.keys ||= [new Laya.FloatKeyframe(), new Laya.FloatKeyframe()];
         this.keys.length = 2;
         AnimationCurveUtil.cubicBezierValuesToKeys(c1x, c1y, c2x, c2y).forEach((k, i) => {
-            const keyFrame = this.keys[i];
+            let keyFrame = this.keys[i];
             keyFrame.inTangent = k.inTangent;
             keyFrame.inWeight = k.inWeight;
             keyFrame.outTangent = k.outTangent;
