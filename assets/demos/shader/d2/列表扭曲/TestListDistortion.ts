@@ -9,9 +9,12 @@ export class TestListDistortion extends Laya.Script {
     @property({ type: Laya.List, private: false })
     private _list: Laya.List;
 
-
-
-    onStart(): void {
-        this._list.array = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}];
+    onAwake(): void {
+        this._list.itemRender.data.material =  {
+            "_$uuid": `${this._mat.uuid}`,
+            "_$type": "Material"
+        }
+        
+        this._list.array = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
     }
 }

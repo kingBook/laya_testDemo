@@ -70,10 +70,6 @@
               "width": 160,
               "height": 128,
               "cacheAs": "bitmap",
-              "material": {
-                "_$uuid": "b75e36b9-9285-47eb-a1e0-84776ff59393",
-                "_$type": "Material"
-              },
               "_$child": [
                 {
                   "_$id": "n5mmwyc5",
@@ -158,6 +154,22 @@
           "color": "#ffffff"
         }
       ]
+    },
+    {
+      "_$id": "rj6rd5g7",
+      "_$type": "Image",
+      "name": "Image",
+      "x": 236,
+      "y": 1007,
+      "width": 512,
+      "height": 313,
+      "material": {
+        "_$uuid": "b75e36b9-9285-47eb-a1e0-84776ff59393",
+        "_$type": "Material"
+      },
+      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
+      "useSourceSize": true,
+      "color": "#ffffff"
     }
   ]
 }
