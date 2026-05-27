@@ -60,7 +60,7 @@ GLSL Start
             v_att = pos.y / u_Radius;
 
             // 对称挤压并随距离衰减：靠近中心挤压明显，远离中心逐渐减弱
-            // pos.x = pos.x * (1.0 + u_Squeeze * cosA * att); // 对称挤压
+            pos.x = pos.x * (1.0 + u_Squeeze * cosA * att); // 对称挤压
             pos.y = u_Radius * sinA;
 
 	    gl_Position = pos;
@@ -86,7 +86,7 @@ GLSL Start
     {
         clip();
         vec4 color = getSpriteTextureColor();
-        color = vec4(v_att, 0.0, 0.0, 1.0);
+        //color = vec4(v_att, 0.0, 0.0, 1.0);
         setglColor(color);
     }
     
