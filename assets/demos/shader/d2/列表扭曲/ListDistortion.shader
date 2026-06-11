@@ -47,20 +47,20 @@ GLSL Start
 	    v_color = info.color;
 
 	    vec4 pos;
-	    getPosition(pos);
+        getPosition(pos);
+        v_att = pos.x;
 
             float angle = atan(pos.y / u_Radius);
-    
+
             float sinA = sin(angle);
             float cosA = cos(angle);
 
             // 计算挤压随距离的衰减系数：基于 angle 的绝对值平滑衰减
             // att = 1 当靠近中心 (angle -> 0)，att -> 0 当远离中心 (abs(angle) >= u_SqueezeRange)
             float att = 1.0 - smoothstep(0.0, 1.0, abs(angle));
-            v_att = pos.y / u_Radius;
-
+            
             // 对称挤压并随距离衰减：靠近中心挤压明显，远离中心逐渐减弱
-            pos.x = pos.x * (1.0 + u_Squeeze * cosA * att); // 对称挤压
+            pos.x = pos.x * (1.0 + u_Squeeze * sinA * att); // 对称挤压
             pos.y = u_Radius * sinA;
 
 	    gl_Position = pos;
@@ -86,9 +86,11 @@ GLSL Start
     {
         clip();
         vec4 color = getSpriteTextureColor();
-        //color = vec4(v_att, 0.0, 0.0, 1.0);
+        color = vec4(v_att, 0.0, 0.0, 1.0);
         setglColor(color);
     }
+
+    
     
 #endGLSL
 GLSL End

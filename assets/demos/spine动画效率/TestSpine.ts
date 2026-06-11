@@ -1,5 +1,10 @@
 const { regClass, property } = Laya;
 
+Laya.addAfterInitCallback(() => {
+    // Laya..registerProvider(BaseRender2DType.spineSimple, SpineInstanceBatch);
+    // BatchManager.registerProvider(BaseRender2DType.spinenormal, SpineNormalBatch);
+});
+
 @regClass()
 export class TestSpine extends Laya.Script {
 
@@ -35,19 +40,19 @@ export class TestSpine extends Laya.Script {
         //     //console.log(skeleton);
 
         // });
-        
-        
-        
+
+
+
 
     }
 
     canvasBitmap = Laya.Stat.canvasBitmap;
     onUpdate(): void {
         // console.log(this.spineNodes[0]._materials);
-        console.log(Laya.Stat.canvasBitmap-this.canvasBitmap);
+        console.log(Laya.Stat.canvasBitmap - this.canvasBitmap);
         this.canvasBitmap = Laya.Stat.canvasBitmap;
 
-        
+
     }
 
 
