@@ -1,7 +1,7 @@
 const { regClass, property } = Laya;
 
 Laya.addBeforeInitCallback(stageCfg => {
-    console.log("TestDefaultFont-> Laya.addBeforeInitCallback();");
+    console.log("TestDefaultFont::Laya.addBeforeInitCallback();");
     
     switch (Laya.Browser.platform) {
         case Laya.Browser.PLATFORM_ANDROID:
