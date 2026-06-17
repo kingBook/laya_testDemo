@@ -12,7 +12,7 @@
   "_$comp": [
     {
       "_$type": "e84d41d3-7e24-47ea-9c7e-dcc26cb99b0d",
-      "scriptPath": "demos/shader/twoD/TestVertexWater.ts",
+      "scriptPath": "demos/shader/d2/顶点/TestVertexWater.ts",
       "image": {
         "_$ref": "nbd579fx"
       }
@@ -33,6 +33,18 @@
       },
       "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
       "useSourceSize": true,
+      "color": "#ffffff"
+    },
+    {
+      "_$id": "yd8yv4gn",
+      "_$type": "Label",
+      "name": "Label",
+      "x": 373,
+      "y": 775,
+      "width": 120,
+      "height": 28,
+      "text": "Label",
+      "fontSize": 20,
       "color": "#ffffff"
     }
   ]

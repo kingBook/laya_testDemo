@@ -1,7 +1,7 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:baseRender2D,
+    name:"d2/baseRender2D",
     enableInstancing:true,
     supportReflectionProbe:true,
     shaderType:4,

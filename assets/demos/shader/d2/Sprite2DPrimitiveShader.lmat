@@ -2,7 +2,7 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "d2/baseRender2D",
+    "type": "d2/Sprite2DPrimitiveShader",
     "renderQueue": 2000,
     "materialRenderMode": 0,
     "s_Cull": 2,
@@ -19,7 +19,7 @@
     "s_DepthTest": 1,
     "s_DepthWrite": true,
     "defines": [
-      "BASERENDER2D"
+      "PRIMITIVEMESH"
     ]
   }
 }

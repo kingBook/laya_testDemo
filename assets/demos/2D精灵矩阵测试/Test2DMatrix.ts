@@ -18,7 +18,7 @@ export class Test2DMatrix extends Laya.Script {
         this._angle = Laya.MathUtil.repeat(this._angle + 1, 360);
         console.log("_angle",this._angle);
         
-
+        
         const mat = MatrixUtil.getMatrix(this._img);
         mat.d = Math.cos(this._angle * Math.PI / 180);
         this._img.transform = mat;
