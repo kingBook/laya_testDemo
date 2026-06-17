@@ -36,7 +36,7 @@
           "layer": 1,
           "useFastRender": false,
           "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
-          "animationName": "jump",
+          "animationName": "idle",
           "preview": true,
           "physicsUpdate": 2
         }
