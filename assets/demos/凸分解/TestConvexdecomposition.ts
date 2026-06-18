@@ -25,6 +25,56 @@ export class TestConvexdecomposition extends Laya.Script {
     /** 当前绘制的孔洞索引 */
     private _holeIndex: number = 0;
 
+    private _testVertices: V2[] = [
+        {
+            "x": 202,
+            "y": 412
+        },
+        {
+            "x": 677,
+            "y": 412
+        },
+        {
+            "x": 457,
+            "y": 972
+        },
+        {
+            "x": 209,
+            "y": 876
+        }
+    ];
+
+    private _testHolePoints: V2[][] = [
+        [
+            {
+                "x": 309,
+                "y": 495
+            },
+            {
+                "x": 448,
+                "y": 501
+            },
+            {
+                "x": 348,
+                "y": 595
+            }
+        ],
+        [
+            {
+                "x": 425,
+                "y": 653
+            },
+            {
+                "x": 469,
+                "y": 797
+            },
+            {
+                "x": 349,
+                "y": 799
+            }
+        ]
+    ];
+
     onAwake(): void {
         // 用于显示鼠标点击绘制的凹多边形
         this._polOriginPointsSprite = new Laya.Sprite();
@@ -42,11 +92,20 @@ export class TestConvexdecomposition extends Laya.Script {
 
     onKeyDown(evt: Laya.Event): void {
         if (evt.key === 'h') {
+            // 绘制孔洞开启 或 绘制孔洞结束
             this._isBeginDrawHole = !this._isBeginDrawHole;
             console.log(this._isBeginDrawHole ? "绘制孔洞开启" : "绘制孔洞结束");
         } else if (evt.key === ' ') {
             this._holeIndex++;
             console.log("完成一个孔洞绘制");
+        } else if (evt.key === 'f') {
+            this._polOriginPoints.length = 0;
+            this._polOriginPoints.push(...this._testVertices);
+            console.log("从指定的顶点数组画一个凹多边形");
+        } else if (evt.key === 'd') {
+            this._holePoints.length = 0;
+            this._holePoints.push(...this._testHolePoints);
+            console.log("从指定的顶点数组画孔洞");
         } else if (evt.key === 'c') {
             // 清空鼠标绘制的凹多边形
             this._polOriginPoints && (this._polOriginPoints.length = 0);
@@ -60,18 +119,22 @@ export class TestConvexdecomposition extends Laya.Script {
         } else if (evt.key === 'v') {
             console.log("凸分解检验：", Separator.validate(this._polOriginPoints).msg);
         } else if (evt.key === 'b') {
+            console.log("凸分解 开始 -----------------");
             console.time("separate");
+            console.log("即将被分解的原凹多边形顶点", this._polOriginPoints);
+            console.log("即将被合并的原孔洞顶点", this._holePoints);
+
             const merged: V2[] = [];
-            try{
+            try {
                 this._polygonPoints = Separator.separate(this._polOriginPoints, this._holePoints, 30, merged);
-            }catch(err){
-                this._polygonPoints||=[];
+            } catch (err) {
+                this._polygonPoints ||= [];
                 this._polygonPoints.push(merged);
-                console.log("this._polygonPoints:",this._polygonPoints);
+                console.log("this._polygonPoints:", this._polygonPoints);
                 console.error(err);
             }
             console.timeEnd("separate");
-            console.log("凸分解-----------------", "凸多形数量:", this._polygonPoints.length);
+            console.log("凸分解 结束 -----------------", "凸多形数量:", this._polygonPoints.length, "凸多边形数组:", this._polygonPoints);
         }
     }
 

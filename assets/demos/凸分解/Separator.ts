@@ -26,7 +26,7 @@ export class Separator {
         n = verticesVec.length;
         for (i = 0; i < n; i++) vec[i] = { x: verticesVec[i].x * scale, y: verticesVec[i].y * scale };
 
-        if (holeVecs) {
+        if (holeVecs && holeVecs.length > 0) {
             // 缩放孔洞顶点，使用新的数组储存
             n = holeVecs.length;
             for (i = 0; i < n; i++) {
@@ -42,6 +42,8 @@ export class Separator {
 
             // 输出合并孔洞后的顶点数组
             mergedHoleVertices.push(...vec);
+
+            console.log("合并孔洞后凸分解前检验：", this.validate(vec).msg, "顶点数组：", vec);
         }
 
         // 凸分解
@@ -303,8 +305,8 @@ export class Separator {
                                     minLen = t;
                                 }
                             }
-                            console.log("i:",i,"inetse:",!v);
-                            
+                            console.log("i:", i, "inetse:", !v);
+
                         }
                     }
 
