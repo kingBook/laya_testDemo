@@ -1,4 +1,4 @@
-import { Separator, V2 } from "./Separator";
+import { Convexdecomposition } from "./Convexdecomposition";
 
 const { regClass, property } = Laya;
 
@@ -12,20 +12,20 @@ export class TestConvexdecomposition extends Laya.Script {
     /** 已开始画多边形 */
     private _isBeginDrawPol: boolean = true;
     /** 鼠标点击绘制的凹多边形顶点*/
-    private _polOriginPoints: V2[] = [];
+    private _polOriginPoints: Laya.IV2[] = [];
     /** 凸分解后的多边形顶点 */
-    private _polygonPoints: V2[][];
+    private _polygonPoints: Laya.IV2[][];
 
     /** 用于显示孔洞的sprite */
     private _holePointsSpirte: Laya.Sprite;
     /** 已开始画孔洞 */
     private _isBeginDrawHole: boolean;
     /** 孔洞顶点列表 */
-    private _holePoints: V2[][] = [];
+    private _holePoints: Laya.IV2[][] = [];
     /** 当前绘制的孔洞索引 */
     private _holeIndex: number = 0;
 
-    private _testVertices: V2[] = [
+    private _testVertices: Laya.IV2[] = [
         {
             "x": 202,
             "y": 412
@@ -44,7 +44,7 @@ export class TestConvexdecomposition extends Laya.Script {
         }
     ];
 
-    private _testHolePoints: V2[][] = [
+    private _testHolePoints: Laya.IV2[][] = [
         [
             {
                 "x": 309,
@@ -117,19 +117,24 @@ export class TestConvexdecomposition extends Laya.Script {
 
             console.log("已清空");
         } else if (evt.key === 'v') {
-            console.log("凸分解检验：", Separator.validate(this._polOriginPoints).msg);
+            console.log("凸分解检验："/*, Separator.validate(this._polOriginPoints).msg*/);
         } else if (evt.key === 'b') {
             console.log("凸分解 开始 -----------------");
             console.time("separate");
             console.log("即将被分解的原凹多边形顶点", this._polOriginPoints);
             console.log("即将被合并的原孔洞顶点", this._holePoints);
 
-            const merged: V2[] = [];
             try {
-                this._polygonPoints = Separator.separate(this._polOriginPoints, this._holePoints, 30, merged);
+                this._polygonPoints = Convexdecomposition.separate(this._polOriginPoints, this._holePoints, 30);
+                this._polOriginPoints.length = 0;
+                this._holePoints.length = 0;
             } catch (err) {
+                this._polOriginPoints.length = 0;
+                this._holePoints.length = 0;
+
                 this._polygonPoints ||= [];
-                this._polygonPoints.push(merged);
+                this._polygonPoints.length = 0;
+                this._polygonPoints.push(Convexdecomposition.testMergedHoleVertices);
                 console.log("this._polygonPoints:", this._polygonPoints);
                 console.error(err);
             }
@@ -151,7 +156,7 @@ export class TestConvexdecomposition extends Laya.Script {
 
     onUpdate(): void {
         // 画鼠标绘制的凹多边形
-        this.drawPoints(this._polOriginPointsSprite, this._polOriginPoints, true, false, "#FFFFFF", 4);
+        this.drawPoints(this._polOriginPointsSprite, this._polOriginPoints, true, false, "#FFFFFF", 4, false);
 
         // 画凸分解后的多边形
         this.drawPolygonPoints();
@@ -160,12 +165,41 @@ export class TestConvexdecomposition extends Laya.Script {
         this.drawHolePoints();
     }
 
-    private drawPoints(sprite: Laya.Sprite, pts: V2[], clearOnBegin: boolean, close: boolean, lineColor: string = "#FFFFFF", lineWidth: number = 2): void {
-        clearOnBegin && sprite.graphics.clear();
+    /**
+     * 画多边形
+     * @param sprite 用于 graphics 的 Sprite
+     * @param pts 顶点数组
+     * @param clearOnStart 画之前清除内容
+     * @param close 闭合
+     * @param lineColor 线颜色
+     * @param lineWidth 线宽
+     * @param isDisplayNo 是否显示顶点编号
+     * @returns 
+     */
+    private drawPoints(sprite: Laya.Sprite, pts: Laya.IV2[], clearOnStart: boolean, close: boolean, lineColor: string = "#FFFFFF", lineWidth: number = 2, isDisplayNo: boolean = false): void {
+        if (clearOnStart) {
+            sprite.graphics.clear();
+            sprite.removeChildren();
+        }
         if (pts.length <= 0) return;
 
         const xys: number[] = [];
-        pts.forEach(p => {
+        pts.forEach((p, i) => {
+            // 顶点编号
+            const somePosOtherTxt = sprite.children.findLast(node => {
+                const txt = node as Laya.Text;
+                if (!txt) return false;
+                const d = Math.sqrt(Math.pow(txt.x - p.x, 2) + Math.pow(txt.y - p.y, 2));
+                return d <= 1;
+            }) as Laya.Text;
+            if ((!somePosOtherTxt || parseInt(somePosOtherTxt.text) !== i) && isDisplayNo) {
+                const noTxt = new Laya.Text();
+                noTxt.color = "#ffffff";
+                noTxt.text = `${i}`;
+                noTxt.pos(p.x, somePosOtherTxt ? p.y + noTxt.height : p.y);
+                sprite.addChild(noTxt);
+            }
+            // 添加顶点
             xys.push(p.x, p.y);
         });
 
@@ -185,7 +219,7 @@ export class TestConvexdecomposition extends Laya.Script {
         if (!this._polygonPoints || this._polygonPoints.length <= 0) return;
 
         this._polygonPoints.forEach(pts => {
-            this.drawPoints(this._polygonPointsSprite, pts, false, true, "#00FF00", 2);
+            this.drawPoints(this._polygonPointsSprite, pts, false, true, "#00FF00", 2, true);
         });
     }
 
@@ -196,7 +230,7 @@ export class TestConvexdecomposition extends Laya.Script {
         if (!this._holePoints || this._holePoints.length <= 0) return;
 
         this._holePoints.forEach(pts => {
-            this.drawPoints(this._holePointsSpirte, pts, false, false, "#00FFFF", 2);
+            this.drawPoints(this._holePointsSpirte, pts, false, false, "#00FFFF", 2, false);
         });
     }
 

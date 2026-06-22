@@ -1,9 +1,7 @@
-export interface V2 {
-    x: number,
-    y: number
-}
+
 
 export class Separator {
+
 
     /**
      * 将非凸多边形分割成凸多边形
@@ -14,44 +12,22 @@ export class Separator {
      * * 没有三个相邻的点位于同一线段上
      * * 不得有重叠部分和“洞”
      * @param verticesVec 非凸多边形的顶点，按顺时针顺序
-     * @param holeVecs 孔洞数组，默认 null
      * @param scale [可选] 原用于在Box2D中绘制形状的比例。越大，精度越好。默认值为30。
      * @return 返回凸分解多边形顶点
      * */
-    public static separate(verticesVec: V2[], holeVecs: V2[][] = null, scale: number = 30, mergedHoleVertices: V2[] = null): V2[][] {
+    public static separate(verticesVec: Laya.IV2[], scale: number = 30): Laya.IV2[][] {
         let i: number, n: number, j: number = 0, m: number = 0;
-        let vec: V2[] = [], vec1: V2[], vec2: V2[], holeVecs2: V2[][] = [], figs: V2[][];
+        let vec: Laya.IV2[] = [], figs: Laya.IV2[][];
 
         // 缩放多边形顶点，使用新的数组储存
         n = verticesVec.length;
         for (i = 0; i < n; i++) vec[i] = { x: verticesVec[i].x * scale, y: verticesVec[i].y * scale };
 
-        if (holeVecs && holeVecs.length > 0) {
-            // 缩放孔洞顶点，使用新的数组储存
-            n = holeVecs.length;
-            for (i = 0; i < n; i++) {
-                vec1 = holeVecs[i];
-                m = vec1.length;
-                vec2 = [];
-                for (j = 0; j < m; j++)  vec2[j] = { x: vec1[j].x * scale, y: vec1[j].y * scale };
-                holeVecs2[i] = vec2;
-            }
-
-            // 合并孔洞
-            vec = this.mergeHoles(vec, holeVecs2).map(v => { return { x: v.x / scale, y: v.y / scale } });
-
-            // 输出合并孔洞后的顶点数组
-            mergedHoleVertices.push(...vec);
-
-            console.log("合并孔洞后凸分解前检验：", this.validate(vec).msg, "顶点数组：", vec);
-        }
-
         // 凸分解
         figs = this.calcShapes(vec);
 
         // 新数组储存凸分解后的多边形
-        n = figs.length;
-        for (i = 0; i < n; i++) {
+        for (i = 0, n = figs.length; i < n; i++) {
             vec = figs[i];
             m = vec.length;
             for (j = 0; j < m; j++) {
@@ -66,126 +42,6 @@ export class Separator {
     }
 
     /**
-     * 合并孔洞
-     * @param verticesVec 合并孔洞的多边形顶点数组引用
-     * @param holeVecs 孔洞
-     * @param output 【可选】输出合并孔洞后的多边形顶点
-     */
-    public static mergeHoles(verticesVec: V2[], holeVecs: V2[][], output?: V2[]): V2[] {
-        let i: number, j: number, k: number, h: number, n: number, m: number, u: number;
-        let j1: number, k1: number;
-        let h1: number, h2: number;
-        let vec: V2[], v: V2, p: V2, v1: V2, v2: V2;
-        let isIntersect: boolean;
-
-        output ||= [];
-        output.length = 0;
-        u = verticesVec.length;
-        for (k = 0; k < u; k++) output[k] = { x: verticesVec[k].x, y: verticesVec[k].y };
-
-        n = holeVecs.length;
-        for (i = 0; i < n; i++) {
-            vec = holeVecs[i];
-
-            m = vec.length;
-
-            // j1,k1 孔洞与多边形分割线顶点索引
-            j1 = k1 = -1;
-
-            // 孔洞顶点遍历
-            for (j = 0; j < m; j++) {
-                v = vec[j];
-
-                // 多边形顶点遍历
-                u = output.length;
-                for (k = 0; k < u; k++) {
-                    p = output[k];
-
-                    // 与孔洞相交检测
-                    isIntersect = false;
-                    for (h = 0; h < m; h++) {
-                        h1 = h;
-                        h2 = (h < m - 1 ? h + 1 : h + 1 - m);
-
-                        // 与当前孔洞顶点相邻的边，不检测
-                        if (h1 == j || h2 == j) continue;
-
-                        v1 = vec[h1];
-                        v2 = vec[h2];
-
-                        console.log("与孔洞相交", "h:", h, "j:", j, "k:", k, "hitSegment:", this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y));
-                        // 与孔洞相交
-                        if (this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y)) {
-                            isIntersect = true;
-                            break;
-                        }
-                    }
-
-                    // 与孔洞相交，当前多边形顶点与孔洞顶点不适合
-                    if (isIntersect) continue;
-
-                    // 与多边形相交检测
-                    for (h = 0; h < u; h++) {
-                        h1 = h;
-                        h2 = (h < u - 1 ? h + 1 : h + 1 - u);
-
-                        // 与当前多边形顶点相邻的边，不检测
-                        if (h1 == k || h2 == k) continue;
-
-                        v1 = output[h1];
-                        v2 = output[h2];
-
-                        console.log("与多边形相交检测：", "h:", h, "j:", j, "k:", k, "hitSegment:", this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y));
-                        // 与多边形相交
-                        if (this.hitSegment(v.x, v.y, p.x, p.y, v1.x, v1.y, v2.x, v2.y)) {
-                            isIntersect = true;
-                            break;
-                        }
-                    }
-
-                    // 与多边形相交，当前多边形顶点与孔洞顶点不适合
-                    if (isIntersect) continue;
-
-                    if (!isIntersect) {
-                        // j1,k1 孔洞与多边形分割线顶点索引
-                        j1 = j; // 孔洞索引
-                        k1 = k; // 多边形索引
-                        break;
-                    }
-                }
-                // 找到合适的分割线，打断孔洞遍历循环
-                if (j1 > -1 && k1 > -1) break;
-            }
-            console.log("i:", i);
-            console.log("k1:", k1, "j1:", j1,);
-            output.forEach((item, id) => { console.log(`output1 id:${id}, x:${item.x}, y:${item.y}`) });
-            console.log("m:", m);
-
-            // 找到合适的分割线，合并孔洞
-            if (j1 > -1 && k1 > -1) {
-                j = j1;
-                k = 0;
-                while (true) {
-                    k++;
-                    console.log(`j:${j}, x:${vec[j].x}, y:${vec[j].y}`);
-
-                    output.splice(k1 + k, 0, { x: vec[j].x, y: vec[j].y });
-                    if (k > m) {
-                        output.splice(k1 + k + 1, 0, { x: output[k1].x, y: output[k1].y });
-                        break;
-                    }
-                    if (j - 1 < 0) j = m - 1;
-                    else j--;
-                }
-            } else {
-                console.error("合并孔洞时，未能找到合适的分割线");
-            }
-            output.forEach((item, id) => { console.log(`output2 id:${id}, x:${item.x}, y:${item.y}`) });
-        }
-        return output;
-    }
-
-    /**
      * 检查{@link verticesVec}中的顶点确保没有重叠的线段，并且顶点按顺时针方向排列
      * * 建议您仅将此方法用于调试，因为它可能会消耗更多的CPU资源
      * 
@@ -196,7 +52,7 @@ export class Separator {
      * * 2 这些点不是按顺时针顺序排列的
      * * 3 有重叠的线，并且点不是按顺时针顺序排列的
      * */
-    public static validate(verticesVec: V2[]): { value: number, msg: string } {
+    public static validate(verticesVec: Laya.IV2[]): { value: number, msg: string } {
         let i: number = 0, n: number = verticesVec.length, j: number = 0, j2: number = 0, i2: number = 0, i3: number = 0, d: number, ret: number = 0;
         let fl: boolean, fl2: boolean = false;
 
@@ -248,19 +104,19 @@ export class Separator {
 
     /**
      * 计算分解形状
-     * @param vertices 待分解的凹多边形顶点（顺时针排序）
+     * @param verticesVec 待分解的凹多边形顶点（顺时针排序）
      * @returns 返回一个二维数组，每一个子列表表示一个凸多边形
      */
-    private static calcShapes(verticesVec: V2[]): V2[][] {
-        let vec: V2[];
+    private static calcShapes(verticesVec: Laya.IV2[]): Laya.IV2[][] {
+        let vec: Laya.IV2[];
         let i: number = 0, n: number = 0, j: number = 0;
         let d: number, t: number, dx: number, dy: number, minLen: number;
-        let i1: number = 0, i2: number = 0, i3: number = 0, p1: V2, p2: V2, p3: V2;
-        let j1: number = 0, j2: number = 0, v1: V2, v2: V2, k: number = 0, h: number = 0;
-        let vec1: V2[], vec2: V2[];
-        let v: V2, hitV: V2;
+        let i1: number = 0, i2: number = 0, i3: number = 0, p1: Laya.IV2, p2: Laya.IV2, p3: Laya.IV2;
+        let j1: number = 0, j2: number = 0, v1: Laya.IV2, v2: Laya.IV2, k: number = 0, h: number = 0;
+        let vec1: Laya.IV2[], vec2: Laya.IV2[];
+        let v: Laya.IV2, hitV: Laya.IV2;
         let isConvex: boolean;
-        let figsVec: V2[][] = [], queue: V2[][] = [];
+        let figsVec: Laya.IV2[][] = [], queue: Laya.IV2[][] = [];
 
         queue.push(verticesVec);
 
@@ -369,7 +225,7 @@ export class Separator {
     }
 
     /** 射线p1,p2与线段p3,p4的交点，交点必须在射线p1,p2外 */
-    private static hitRay(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): V2 {
+    private static hitRay(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): Laya.IV2 {
         let t1: number = x3 - x1, t2: number = y3 - y1, t3: number = x2 - x1, t4: number = y2 - y1,
             t5: number = x4 - x3, t6: number = y4 - y3, t7: number = t4 * t5 - t3 * t6, a: number;
 
@@ -386,7 +242,7 @@ export class Separator {
     }
 
     /** 两线段的交点 */
-    public static hitSegment(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): V2 {
+    public static hitSegment(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): Laya.IV2 {
         let t1: number = x3 - x1, t2: number = y3 - y1, t3: number = x2 - x1, t4: number = y2 - y1,
             t5: number = x4 - x3, t6: number = y4 - y3, t7: number = t4 * t5 - t3 * t6, a: number;
 
@@ -436,7 +292,7 @@ export class Separator {
         return x1 * y2 + x2 * y3 + x3 * y1 - y1 * x2 - y2 * x3 - y3 * x1;
     }
 
-    private static err(verticesVec: V2[]): void {
+    private static err(verticesVec: Laya.IV2[]): void {
         const ret = this.validate(verticesVec);
         throw new Error(`出现了一个问题,${ret.msg}`);
     }
