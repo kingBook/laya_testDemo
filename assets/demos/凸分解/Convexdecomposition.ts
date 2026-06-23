@@ -21,10 +21,10 @@ export class Convexdecomposition {
             };
         }
 
-        // 孔洞处理
+
+        const scaleHoleVertices: Laya.IV2[][] = [];
         if (holeVertices) {
             // 缩放孔洞顶点
-            const scaleHoleVertices: Laya.IV2[][] = [];
             for (let i = 0, n = holeVertices.length; i < n; i++) {
                 const vec1 = holeVertices[i];
                 const vec2 = [];
@@ -49,7 +49,7 @@ export class Convexdecomposition {
         }
 
         // 凸分解
-        const figs: Laya.IV2[][] = this.calcShapes(scaleVertices);
+        const figs: Laya.IV2[][] = this.calcShapes(scaleVertices, scaleHoleVertices);
         // 还原缩放
         for (let i = 0, n = figs.length; i < n; i++) {
             const fig = figs[i];
@@ -189,42 +189,86 @@ export class Convexdecomposition {
     /**
      * 计算分解形状
      * @param vertices 待分解的凹多边形顶点（顺时针排序）
+     * @param holeVertices 孔洞顶点（顺时针顺序）
      * @returns 返回一个二维数组，每一个子列表表示一个凸多边形
      */
-    private static calcShapes(vertices: Laya.IV2[]): Laya.IV2[][] {
+    private static calcShapes(vertices: Laya.IV2[], holeVertices: Laya.IV2[][]): Laya.IV2[][] {
         let vec: Laya.IV2[];
-        let i: number, n: number;
+        let i: number, j: number, k: number, k1: number, n: number;
+        let c: number, c2: number;
         let i1: number, i2: number, i3: number, p1: Laya.IV2, p2: Laya.IV2, p3: Laya.IV2;
         let d: number;
         let isConvex: boolean;
+        let isIntersect: boolean;
+        let isHolePoint: boolean;
         let figsVec: Laya.IV2[][] = [], queue: Laya.IV2[][] = [];
+        let v: Laya.IV2, v1: Laya.IV2, v2: Laya.IV2;
+        let holeVec: Laya.IV2[];
 
         queue.push(vertices);
 
         while (queue.length) {
             vec = queue[0];
-            n = vec.length;
+            c = vec.length;
             isConvex = true;
 
-            for (i = 0; i < n; i++) {
-                i1 = (i - 1 + n) % n;
+            for (i = 0; i < c; i++) {
+                i1 = (i - 1 + c) % c;
                 i2 = i;
-                i3 = (i + 1) % n;
+                i3 = (i + 1) % c;
 
-                p1 = vec[i1];
-                p2 = vec[i2];
-                p3 = vec[i3];
+                p1 = vec[i1]; // 上个点
+                p2 = vec[i2]; // 当前点
+                p3 = vec[i3]; // 下个点
 
-                d = this.det(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+                d = this.det(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y); // 叉积 axb (a=p2-p1, b=p3-p1)
                 console.log(i, d);
 
                 if (d < 0) {
                     isConvex = false; // 凹点
-                    
 
+                    // 找与凹点相连不相交且在内部的顶点
+                    for (j = 0; j < c; j++) {
+                        if (j == i1 || j == i2 || j == i3) continue; // 跳过相邻、相同点
+                        v = vec[j];
+
+                        // 是否为孔洞点检测
+                        isHolePoint = false;
+                        for (k = 0, c = holeVertices.length; k < c; k++) {
+                            holeVec = holeVertices[k];
+                            for (n = 0, c2 = holeVec.length; n < c2; n++) {
+                                v1 = holeVec[n];
+                                if (this.pointsMatch(v.x, v.y, v1.x, v1.y)) {
+                                    isHolePoint = true;
+                                    break;
+                                }
+                            }
+                            if (isHolePoint) break;
+                        }
+                        if (isHolePoint) continue; // 跳过孔洞点
+
+                        // 凹点与顶点连线，是否在多边形内部
+                        
+
+                        // 相交检测
+                        isIntersect = false;
+                        for (k = 0; k < c; k++) {
+                            k1 = (i + 1) % c;
+                            v1 = vec[k];
+                            v2 = vec[k1];
+                            if (this.hitSegment(p2.x, p2.y, v.x, v.y, v1.x, v1.y, v2.x, v2.y)) {
+                                isIntersect = true; // 相交
+                                break;
+                            }
+                            if (isIntersect) break;
+                        }
+                        if (isIntersect) continue; // 跳过相交点
+
+                    }
                 }
             }
-            break;
+
+            queue.shift(); // 移除首个
         }
         return figsVec;
     }
@@ -292,7 +336,7 @@ export class Convexdecomposition {
         return (px - x1 < 0.1 || x1 - px < 0.1);
     }
 
-    /** p2在向量p1,p3的哪一侧，计算 axb 叉积, a=p2-p1, b=p3-p1 */
+    /** p2在向量p1,p3的哪一侧，计算叉积 axb (a=p2-p1, b=p3-p1) */
     private static det(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): number {
         return x1 * y2 + x2 * y3 + x3 * y1 - y1 * x2 - y2 * x3 - y3 * x1;
     }
