@@ -219,7 +219,8 @@ export class Convexdecomposition {
                 console.log(i, d);
 
                 if (d < 0) {
-                    isConvex = false;
+                    isConvex = false; // 凹点
+                    
 
                 }
             }
