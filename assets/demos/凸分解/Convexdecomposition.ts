@@ -197,13 +197,15 @@ export class Convexdecomposition {
         let i: number, j: number, k: number, k1: number, n: number;
         let c: number, c2: number;
         let i1: number, i2: number, i3: number, p1: Laya.IV2, p2: Laya.IV2, p3: Laya.IV2;
-        let d: number;
+        let d: number, d1: number, d2: number;
         let isConvex: boolean;
         let isIntersect: boolean;
         let isHolePoint: boolean;
+        let isInside: boolean;
         let figsVec: Laya.IV2[][] = [], queue: Laya.IV2[][] = [];
         let v: Laya.IV2, v1: Laya.IV2, v2: Laya.IV2;
         let holeVec: Laya.IV2[];
+        let hit: Laya.IV2;
 
         queue.push(vertices);
 
@@ -229,10 +231,11 @@ export class Convexdecomposition {
 
                     // 找与凹点相连不相交且在内部的顶点
                     for (j = 0; j < c; j++) {
+                        console.log(j);
                         if (j == i1 || j == i2 || j == i3) continue; // 跳过相邻、相同点
                         v = vec[j];
 
-                        // 是否为孔洞点检测
+                        // 孔洞点检测
                         isHolePoint = false;
                         for (k = 0, c = holeVertices.length; k < c; k++) {
                             holeVec = holeVertices[k];
@@ -245,10 +248,22 @@ export class Convexdecomposition {
                             }
                             if (isHolePoint) break;
                         }
-                        if (isHolePoint) continue; // 跳过孔洞点
+                        if (isHolePoint) {
+                            console.warn("跳过孔洞点", i2, j);
+                            continue; // 跳过孔洞点
+                        }
 
                         // 凹点与顶点连线，是否在多边形内部
-                        
+                        isInside = true;
+                        d1 = this.det(p1.x, p1.y, v.x, v.y, p2.x, p2.y);
+                        d2 = this.det(p2.x, p2.y, v.x, v.y, p3.x, p3.y);
+                        if (d1 > 0 && d2 > 0) {
+                            isInside = false;
+                        }
+                        if (!isInside) {
+                            console.warn("跳过不在多边形内部的点", i2, j, d1, d2);
+                            continue; // 跳过不在多边形内部的点
+                        }
 
                         // 相交检测
                         isIntersect = false;
@@ -256,14 +271,22 @@ export class Convexdecomposition {
                             k1 = (i + 1) % c;
                             v1 = vec[k];
                             v2 = vec[k1];
-                            if (this.hitSegment(p2.x, p2.y, v.x, v.y, v1.x, v1.y, v2.x, v2.y)) {
+                            hit = this.hitSegment(p2.x, p2.y, v.x, v.y, v1.x, v1.y, v2.x, v2.y);
+                            if (hit && !this.pointsMatch(hit.x, hit.y, v1.x, v1.y) && !this.pointsMatch(hit.x, hit.y, v2.x, v2.y)) {
                                 isIntersect = true; // 相交
                                 break;
                             }
                             if (isIntersect) break;
                         }
-                        if (isIntersect) continue; // 跳过相交点
+                        if (isIntersect) {
+                            console.warn("跳过相交点", i2, j, k, k1);
+                            continue; // 跳过相交点
+                        }
 
+                        // 找到与凹点相连不相交且在内部的顶点
+                        console.log("找到与凹点相连不相交且在内部的顶点", i2, j);
+
+                        break;
                     }
                 }
             }
