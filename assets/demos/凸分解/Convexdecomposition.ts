@@ -235,6 +235,24 @@ export class Convexdecomposition {
                         if (j == i1 || j == i2 || j == i3) continue; // 跳过相邻、相同点
                         v = vec[j];
 
+                        // 相交检测
+                        isIntersect = false;
+                        for (k = 0; k < c; k++) {
+                            k1 = (i + 1) % c;
+                            v1 = vec[k];
+                            v2 = vec[k1];
+                            hit = this.hitSegment(p2.x, p2.y, v.x, v.y, v1.x, v1.y, v2.x, v2.y);
+                            if (hit && !this.pointsMatch(hit.x, hit.y, v1.x, v1.y) && !this.pointsMatch(hit.x, hit.y, v2.x, v2.y)) {
+                                isIntersect = true; // 相交
+                                break;
+                            }
+                            if (isIntersect) break;
+                        }
+                        if (isIntersect) {
+                            console.warn("跳过相交点", i2, j, k, k1);
+                            continue; // 跳过相交点
+                        }
+
                         // 孔洞点检测
                         isHolePoint = false;
                         for (k = 0, c = holeVertices.length; k < c; k++) {
@@ -263,24 +281,6 @@ export class Convexdecomposition {
                         if (!isInside) {
                             console.warn("跳过不在多边形内部的点", i2, j, d1, d2);
                             continue; // 跳过不在多边形内部的点
-                        }
-
-                        // 相交检测
-                        isIntersect = false;
-                        for (k = 0; k < c; k++) {
-                            k1 = (i + 1) % c;
-                            v1 = vec[k];
-                            v2 = vec[k1];
-                            hit = this.hitSegment(p2.x, p2.y, v.x, v.y, v1.x, v1.y, v2.x, v2.y);
-                            if (hit && !this.pointsMatch(hit.x, hit.y, v1.x, v1.y) && !this.pointsMatch(hit.x, hit.y, v2.x, v2.y)) {
-                                isIntersect = true; // 相交
-                                break;
-                            }
-                            if (isIntersect) break;
-                        }
-                        if (isIntersect) {
-                            console.warn("跳过相交点", i2, j, k, k1);
-                            continue; // 跳过相交点
                         }
 
                         // 找到与凹点相连不相交且在内部的顶点
