@@ -10,7 +10,11 @@ export class TestMouseJoint extends Laya.Script {
 
     }
 
-    onUpdate(): void {
-        
+
+
+    onDisable(): void {
+
     }
+
+
 }

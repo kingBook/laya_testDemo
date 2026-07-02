@@ -192,36 +192,62 @@ export class Convexdecomposition {
      * @param holeVertices 孔洞顶点（顺时针顺序）
      * @returns 返回一个二维数组，每一个子列表表示一个凸多边形
      */
-    private static calcShapes(vertices: Laya.IV2[], holeVertices: Laya.IV2[][]): Laya.IV2[][] {
-        let vec: Laya.IV2[];
+    private static calcShapes(vertices: Laya.IV2[], holeVertices?: Laya.IV2[][]): Laya.IV2[][] {
+        let polIndices: number[], holeIndices: number[];
         let i: number, j: number, k: number, k1: number, n: number;
-        let c: number, c2: number;
+        let c: number, c1: number, c2: number;
         let i1: number, i2: number, i3: number, p1: Laya.IV2, p2: Laya.IV2, p3: Laya.IV2;
         let d: number, d1: number, d2: number;
         let isConvex: boolean;
         let isIntersect: boolean;
         let isHolePoint: boolean;
         let isInside: boolean;
-        let figsVec: Laya.IV2[][] = [], queue: Laya.IV2[][] = [];
+        let figsVec: Laya.IV2[][] = [], queue: number[][] = [];
         let v: Laya.IV2, v1: Laya.IV2, v2: Laya.IV2;
         let holeVec: Laya.IV2[];
         let hit: Laya.IV2;
 
-        queue.push(vertices);
+        // 查找孔洞点索引
+        holeIndices = [];
+        for (i = 0, c = vertices.length; i < c; i++) {
+            v = vertices[i];
+
+            isHolePoint = false;
+            for (j = 0, c1 = holeVertices.length; j < c1; j++) {
+                holeVec = holeVertices[j];
+                for (k = 0, c2 = holeVec.length; k < c2; k++) {
+                    v2 = holeVec[k];
+                    if (this.pointsMatch(v.x, v.y, v2.x, v2.y)) {
+                        isHolePoint = true;
+                        break;
+                    }
+                }
+                if (isHolePoint) break;
+            }
+
+            if (isHolePoint) {
+                holeIndices.push(i);
+            }
+        }
+
+        // 顶点转索引加入队列
+        polIndices = [];
+        for (i = 0, c = vertices.length; i < c; i++)  polIndices[i] = i;
+        queue.push(polIndices);
 
         while (queue.length) {
-            vec = queue[0];
-            c = vec.length;
-            isConvex = true;
 
-            for (i = 0; i < c; i++) {
+            polIndices = queue[0];
+            isConvex = true;
+            
+            for (i = 0, c = polIndices.length; i < c; i++) {
                 i1 = (i - 1 + c) % c;
                 i2 = i;
                 i3 = (i + 1) % c;
 
-                p1 = vec[i1]; // 上个点
-                p2 = vec[i2]; // 当前点
-                p3 = vec[i3]; // 下个点
+                p1 = vertices[polIndices[i1]]; // 上个点
+                p2 = vertices[polIndices[i2]]; // 当前点
+                p3 = vertices[polIndices[i3]]; // 下个点
 
                 d = this.det(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y); // 叉积 axb (a=p2-p1, b=p3-p1)
                 console.log(i, d);
@@ -233,14 +259,15 @@ export class Convexdecomposition {
                     for (j = 0; j < c; j++) {
                         console.log(j);
                         if (j == i1 || j == i2 || j == i3) continue; // 跳过相邻、相同点
-                        v = vec[j];
 
-                        // 相交检测
+                        v = vertices[polIndices[j]];
+
+                        // 线段(p2,v)相交检测
                         isIntersect = false;
                         for (k = 0; k < c; k++) {
                             k1 = (i + 1) % c;
-                            v1 = vec[k];
-                            v2 = vec[k1];
+                            v1 = vertices[polIndices[k]];
+                            v2 = vertices[polIndices[k1]];
                             hit = this.hitSegment(p2.x, p2.y, v.x, v.y, v1.x, v1.y, v2.x, v2.y);
                             if (hit && !this.pointsMatch(hit.x, hit.y, v1.x, v1.y) && !this.pointsMatch(hit.x, hit.y, v2.x, v2.y)) {
                                 isIntersect = true; // 相交
@@ -249,23 +276,12 @@ export class Convexdecomposition {
                             if (isIntersect) break;
                         }
                         if (isIntersect) {
-                            console.warn("跳过相交点", i2, j, k, k1);
+                            console.warn("跳过相交点", `lineA(${polIndices[i2]}, ${polIndices[j]}) i2:${i2} j:${j}`, `lineB(${polIndices[k]}, ${polIndices[k1]}) k:${k} k1:${k1}`);
                             continue; // 跳过相交点
                         }
 
                         // 孔洞点检测
-                        isHolePoint = false;
-                        for (k = 0, c = holeVertices.length; k < c; k++) {
-                            holeVec = holeVertices[k];
-                            for (n = 0, c2 = holeVec.length; n < c2; n++) {
-                                v1 = holeVec[n];
-                                if (this.pointsMatch(v.x, v.y, v1.x, v1.y)) {
-                                    isHolePoint = true;
-                                    break;
-                                }
-                            }
-                            if (isHolePoint) break;
-                        }
+                        isHolePoint = holeIndices.indexOf(polIndices[j]) > -1;
                         if (isHolePoint) {
                             console.warn("跳过孔洞点", i2, j);
                             continue; // 跳过孔洞点
