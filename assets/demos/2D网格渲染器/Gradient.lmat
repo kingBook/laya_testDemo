@@ -2,7 +2,7 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "文本渐变色/LabelGradient",
+    "type": "2D网格渲染器/Gradient",
     "renderQueue": 2000,
     "materialRenderMode": 0,
     "s_Cull": 2,
@@ -18,22 +18,24 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
-    "u_topColor": [
+    "u_gradientDirection": [
       1,
-      0.11627906976744184,
-      0.44767441860464946,
-      1
+      0
     ],
-    "u_bottomColor": [
-      0,
+    "u_gradientStartColor": [
       1,
+      0,
       0,
       1
     ],
-    "u_direction": true,
-    "u_colorOffset": 0.589,
+    "u_gradientEndColor": [
+      1,
+      1,
+      1,
+      0
+    ],
     "defines": [
-      "TEXTUREVS"
+      "BASERENDER2D"
     ]
   }
 }
