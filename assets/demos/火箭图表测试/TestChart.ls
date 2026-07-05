@@ -12,8 +12,7 @@
   "_$comp": [
     {
       "_$type": "53ff027d-3d78-489c-818b-d61ccdbbb14a",
-      "scriptPath": "demos/火箭图表测试/TestChart.ts",
-      "text": ""
+      "scriptPath": "demos/火箭图表测试/TestChart.ts"
     }
   ],
   "_$child": [
@@ -93,22 +92,14 @@
       "_$id": "sxo8xc3c",
       "_$type": "Sprite",
       "name": "Sprite",
-      "x": 246,
-      "y": 139,
+      "x": 79,
+      "y": 443,
       "width": 100,
       "height": 100,
       "_$comp": [
         {
-          "_$type": "Mesh2DRender",
-          "layer": 0,
-          "color": {
-            "_$type": "Color"
-          },
-          "textureRange": {
-            "_$type": "Vector4",
-            "z": 1,
-            "w": 1
-          }
+          "_$type": "03fab6c1-9262-46bb-a21d-81a2a9cdac59",
+          "scriptPath": "demos/火箭图表测试/Mesh2dGraphics.ts"
         }
       ]
     }

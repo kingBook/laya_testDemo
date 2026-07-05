@@ -24,13 +24,12 @@
       "y": 48,
       "width": 100,
       "height": 100,
-      "_filters": [],
       "_$comp": [
         {
           "_$type": "Mesh2DRender",
           "layer": 0,
           "sharedMaterial": {
-            "_$uuid": "c3f7bdee-545c-4ea3-a37f-4755bca2e113",
+            "_$uuid": "8de6f44a-68cc-4706-bf9f-6422ecd7b447",
             "_$type": "Material"
           },
           "sharedMesh": {
@@ -39,11 +38,6 @@
           },
           "color": {
             "_$type": "Color"
-          },
-          "textureRange": {
-            "_$type": "Vector4",
-            "z": 1,
-            "w": 1
           }
         }
       ]
