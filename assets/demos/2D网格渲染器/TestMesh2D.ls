@@ -29,6 +29,10 @@
         {
           "_$type": "Mesh2DRender",
           "layer": 0,
+          "sharedMaterial": {
+            "_$uuid": "c3f7bdee-545c-4ea3-a37f-4755bca2e113",
+            "_$type": "Material"
+          },
           "sharedMesh": {
             "_$uuid": "501fba72-4c9e-4477-aaee-115ff10b58cc",
             "_$type": "Mesh2D"

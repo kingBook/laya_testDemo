@@ -28,6 +28,7 @@ export class Chart extends Laya.Script {
         this._lineSprite.addComponent(Laya.Mesh2DRender);
         this._lineSprite.pos(0, this._canvas.height);
         this._canvas.addChild(this._lineSprite);
+
     }
 
     /**

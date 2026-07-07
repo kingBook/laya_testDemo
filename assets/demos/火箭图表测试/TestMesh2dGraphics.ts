@@ -5,7 +5,7 @@ const { regClass, property } = Laya;
 @regClass()
 export class TestMesh2dGraphics extends Laya.Script {
 
-    @property({ type: Mesh2dGraphics, private: false, tips: "" })
+    @property({ type: Mesh2dGraphics, private: false })
     private _meshGraphics: Mesh2dGraphics;
 
     onAwake(): void {
