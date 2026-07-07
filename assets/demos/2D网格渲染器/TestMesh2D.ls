@@ -22,23 +22,98 @@
       "name": "bearSprite",
       "x": 192,
       "y": 48,
-      "width": 100,
-      "height": 100,
+      "width": 422,
+      "height": 540,
+      "_filters": [],
       "_$comp": [
         {
           "_$type": "Mesh2DRender",
           "layer": 0,
-          "sharedMaterial": {
-            "_$uuid": "8de6f44a-68cc-4706-bf9f-6422ecd7b447",
-            "_$type": "Material"
-          },
           "sharedMesh": {
             "_$uuid": "501fba72-4c9e-4477-aaee-115ff10b58cc",
             "_$type": "Mesh2D"
           },
           "color": {
             "_$type": "Color"
+          },
+          "textureRange": {
+            "_$type": "Vector4",
+            "z": 1,
+            "w": 1
           }
+        }
+      ]
+    },
+    {
+      "_$id": "bxw6u5xb",
+      "_$type": "Sprite",
+      "name": "fillTexture",
+      "x": 270,
+      "y": 484,
+      "width": 422,
+      "height": 540,
+      "_gcmds": [
+        {
+          "_$type": "FillTextureCmd",
+          "texture": {
+            "_$uuid": "c13c1b8e-c516-4a0f-98ad-e356f45f0365",
+            "_$type": "Texture"
+          },
+          "y": -0.076,
+          "height": 1.384,
+          "type": "repeat-y",
+          "offset": {
+            "_$type": "Point",
+            "y": -29
+          }
+        }
+      ],
+      "mask": {
+        "_$ref": "imhsaqbi"
+      },
+      "_filters": [],
+      "_$child": [
+        {
+          "_$id": "imhsaqbi",
+          "_$type": "Sprite",
+          "name": "mask",
+          "width": 422,
+          "height": 540,
+          "_gcmds": [
+            {
+              "_$type": "DrawLineCmd",
+              "fromX": 0,
+              "fromY": 0,
+              "toX": 1,
+              "toY": 1,
+              "percent": true,
+              "lineWidth": 44,
+              "lineColor": "#c33131"
+            },
+            {
+              "_$type": "DrawPolyCmd",
+              "x": 0,
+              "y": 0,
+              "points": [
+                192.44887178363967,
+                315.5535365878416,
+                123.93869955697366,
+                243.6108854385194,
+                67.00733402130246,
+                107.12054021893692,
+                0,
+                0,
+                314,
+                261,
+                192,
+                565
+              ],
+              "lineWidth": 1,
+              "lineColor": "#000000",
+              "fillColor": "#ffffff"
+            }
+          ],
+          "_filters": []
         }
       ]
     }

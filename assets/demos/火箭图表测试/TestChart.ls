@@ -28,7 +28,7 @@
       "_$comp": [
         {
           "_$type": "a49eb932-cb92-4e35-9b5b-b1eebd1fdef7",
-          "scriptPath": "demos/火箭图表测试/Chart.ts",
+          "scriptPath": "demos/火箭图表测试/chart/Chart.ts",
           "_canvas": {
             "_$ref": "oxyf25e9"
           },
@@ -85,21 +85,6 @@
               ]
             }
           ]
-        }
-      ]
-    },
-    {
-      "_$id": "sxo8xc3c",
-      "_$type": "Sprite",
-      "name": "Sprite",
-      "x": 79,
-      "y": 443,
-      "width": 100,
-      "height": 100,
-      "_$comp": [
-        {
-          "_$type": "03fab6c1-9262-46bb-a21d-81a2a9cdac59",
-          "scriptPath": "demos/火箭图表测试/Mesh2dGraphics.ts"
         }
       ]
     }
