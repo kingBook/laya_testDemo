@@ -6,9 +6,19 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "Scene2D",
+  "name": "TestChartGradient",
   "width": 750,
   "height": 1600,
+  "_$comp": [
+    {
+      "_$type": "1f10917f-f156-4b7a-90e5-df0cbcc8c15e",
+      "scriptPath": "demos/火箭图表测试/TestChartGradient.ts",
+      "_mesh2dRender": {
+        "_$ref": "t8attvq1",
+        "_$type": "Mesh2DRender"
+      }
+    }
+  ],
   "_$child": [
     {
       "_$id": "t8attvq1",

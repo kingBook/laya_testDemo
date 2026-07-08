@@ -96,7 +96,7 @@ export class Mesh2dGraphics extends Laya.Script {
      * @param cmd 画直线命令
      */
     private drawLine(cmd: Mesh2dDrawLineCmd): void {
-        const halfW = cmd.lineWidth / 2;
+        const halfW = cmd.lineWidth / 2; // 线半宽
 
         const dy = cmd.toY - cmd.fromY;
         const dx = cmd.toX - cmd.fromX;
@@ -111,30 +111,31 @@ export class Mesh2dGraphics extends Laya.Script {
         const indices = new Uint16Array(2 * 3);
 
         // 顺序为: 顶点(x,y,z)、 UV
+        // 顶点排列顺序为：左下角开始，逆时针
         let index = 0;
-        vertices[index++] = cmd.fromX + halfW * Math.cos(radN2);
-        vertices[index++] = cmd.fromY + halfW * Math.sin(radN2);
-        vertices[index++] = 0;
-        vertices[index++] = 0;
-        vertices[index++] = 0;
+        vertices[index++] = cmd.fromX + halfW * Math.cos(radN2); // vertex.x
+        vertices[index++] = cmd.fromY + halfW * Math.sin(radN2); // vertex.y
+        vertices[index++] = 0; // vertex.z
+        vertices[index++] = 0; // uv.x
+        vertices[index++] = 0; // uv.y
 
-        vertices[index++] = cmd.toX + halfW * Math.cos(radN2);
-        vertices[index++] = cmd.toY + halfW * Math.sin(radN2);
-        vertices[index++] = 0;
-        vertices[index++] = 1;
-        vertices[index++] = 0;
+        vertices[index++] = cmd.toX + halfW * Math.cos(radN2); // vertex.x
+        vertices[index++] = cmd.toY + halfW * Math.sin(radN2); // vertex.y
+        vertices[index++] = 0; // vertex.z
+        vertices[index++] = 1; // uv.x
+        vertices[index++] = 0; // uv.y
 
-        vertices[index++] = cmd.toX + halfW * Math.cos(radN);
-        vertices[index++] = cmd.toY + halfW * Math.sin(radN);
-        vertices[index++] = 0;
-        vertices[index++] = 1;
-        vertices[index++] = 1;
+        vertices[index++] = cmd.toX + halfW * Math.cos(radN); // vertex.x
+        vertices[index++] = cmd.toY + halfW * Math.sin(radN); // vertex.y
+        vertices[index++] = 0; // vertex.z
+        vertices[index++] = 1; // uv.x
+        vertices[index++] = 1; // uv.y
 
-        vertices[index++] = cmd.fromX + halfW * Math.cos(radN);
-        vertices[index++] = cmd.fromY + halfW * Math.sin(radN);
-        vertices[index++] = 0;
-        vertices[index++] = 0;
-        vertices[index++] = 1;
+        vertices[index++] = cmd.fromX + halfW * Math.cos(radN); // vertex.x
+        vertices[index++] = cmd.fromY + halfW * Math.sin(radN); // vertex.y
+        vertices[index++] = 0; // vertex.z
+        vertices[index++] = 0; // uv.x
+        vertices[index++] = 1; // uv.y
 
         // 三角形
         let triangleIndex = 0;
@@ -156,7 +157,7 @@ export class Mesh2dGraphics extends Laya.Script {
      * @param cmd 画折线命令
      */
     private drawLines(cmd: Mesh2dDrawLinesCmd): void {
-        const halfW = cmd.lineWidth / 2;
+        const halfW = cmd.lineWidth / 2; // 线半宽
 
         const segmentCount = cmd.points.length / 2 - 1; // 段数
         const vertices = new Float32Array(segmentCount * 4 * 5);
@@ -164,17 +165,16 @@ export class Mesh2dGraphics extends Laya.Script {
 
         let index = 0, triangleIndex = 0;
 
-        for (let i = 0, len = cmd.points.length - 2; i < len; i += 2) {
-            console.log("i", i);
+        console.log("points", cmd.points);
 
-            let tempI = i;
+        for (let i = 0, len = cmd.points.length / 2 - 1; i < len; i++) {
+            let tempI = i * 2;
             const fromX = cmd.points[tempI++];
             const fromY = cmd.points[tempI++];
             const toX = cmd.points[tempI++];
             const toY = cmd.points[tempI++];
 
-            console.log("from", fromX, fromY);
-            console.log("to", toX, toY);
+            console.log("i", i, "from", fromX, fromY, "to", toX, toY);
 
             const dy = toY - fromY;
             const dx = toX - fromX;
@@ -186,33 +186,53 @@ export class Mesh2dGraphics extends Laya.Script {
             const radN2 = radN + Math.PI; // 反向法线弧度
 
             // 顺序为: 顶点(x,y,z)、 UV
-            index = ((i / 2) * 4 * 5) - 1;
-            vertices[index++] = fromX + halfW * Math.cos(radN2);
-            vertices[index++] = fromY + halfW * Math.sin(radN2);
-            vertices[index++] = 0;
-            vertices[index++] = 0;
-            vertices[index++] = 0;
+            // 顶点排列顺序为：左下角开始，逆时针
+            index = i * (4 - 2) * 5; // 从索引1开始，每一矩形减少两个顶点，共用前一段的
 
-            vertices[index++] = toX + halfW * Math.cos(radN2);
-            vertices[index++] = toY + halfW * Math.sin(radN2);
-            vertices[index++] = 0;
-            vertices[index++] = 1;
-            vertices[index++] = 0;
+            // 矩形首顶点
+            if (i > 0) {
+                //vertices[index++] = vertices[((i - 1) * (4 - 2) * 5) + (1 * 5)]; // vertex.x 共用上一矩形的[1]顶点
+                //vertices[index++] = vertices[((i - 1) * (4 - 2) * 5) + (1 * 5) + 1]; // vertex.y 共用上一矩形的[1]顶点
+                //vertices[index++] = 0; // vertex.z
+                //vertices[index++] = 0; // uv.x
+                //vertices[index++] = 0; // uv.y
+            } else {
+                vertices[index++] = fromX + halfW * Math.cos(radN2); // vertex.x
+                vertices[index++] = fromY + halfW * Math.sin(radN2); // vertex.y
+                vertices[index++] = 0; // vertex.z
+                vertices[index++] = 0; // uv.x
+                vertices[index++] = 0; // uv.y
+            }
 
-            vertices[index++] = toX + halfW * Math.cos(radN);
-            vertices[index++] = toY + halfW * Math.sin(radN);
-            vertices[index++] = 0;
-            vertices[index++] = 1;
-            vertices[index++] = 1;
+            vertices[index++] = toX + halfW * Math.cos(radN2); // vertex.x
+            vertices[index++] = toY + halfW * Math.sin(radN2); // vertex.y
+            vertices[index++] = 0; // vertex.z
+            vertices[index++] = 0; // uv.x
+            vertices[index++] = 0; // uv.y
 
-            vertices[index++] = fromX + halfW * Math.cos(radN);
-            vertices[index++] = fromY + halfW * Math.sin(radN);
-            vertices[index++] = 0;
-            vertices[index++] = 0;
-            vertices[index++] = 1;
+            vertices[index++] = toX + halfW * Math.cos(radN); // vertex.x
+            vertices[index++] = toY + halfW * Math.sin(radN); // vertex.y
+            vertices[index++] = 0; // vertex.z
+            vertices[index++] = 0; // uv.x
+            vertices[index++] = 0; // uv.y
+
+            // 矩形末顶点
+            if (i > 0) {
+                // vertices[index++] = vertices[]; // vertex.x
+                // vertices[index++] = vertices[]; // vertex.y
+                // vertices[index++] = 0; // vertex.z
+                // vertices[index++] = 0; // uv.x
+                // vertices[index++] = 0; // uv.y
+            } else {
+                vertices[index++] = fromX + halfW * Math.cos(radN); // vertex.x
+                vertices[index++] = fromY + halfW * Math.sin(radN); // vertex.y
+                vertices[index++] = 0; // vertex.z
+                vertices[index++] = 0; // uv.x
+                vertices[index++] = 0; // uv.y
+            }
 
             // 三角形
-            triangleIndex = ((i / 2) * 2 * 3) - 1;
+            triangleIndex = i * 2 * 3;
             indices[triangleIndex++] = 0;
             indices[triangleIndex++] = 1;
             indices[triangleIndex++] = 3;
