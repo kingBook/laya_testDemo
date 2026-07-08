@@ -2,7 +2,7 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "2D网格渲染器/Gradient",
+    "type": "ChartGradient",
     "renderQueue": 3000,
     "materialRenderMode": 2,
     "s_Cull": 2,
@@ -22,18 +22,33 @@
       0,
       1
     ],
-    "u_gradientStartColor": [
+    "u_gradientStartColorA": [
+      0,
       1,
-      0,
-      0,
+      1,
       1
     ],
-    "u_gradientEndColor": [
+    "u_gradientEndColorA": [
+      0,
       1,
       1,
-      1,
-      0
+      1
     ],
+    "u_gradientStartColorB": [
+      1,
+      0,
+      1,
+      1
+    ],
+    "u_gradientEndColorB": [
+      1,
+      0,
+      1,
+      1
+    ],
+    "u_mixFactor": 0.47,
+    "u_startAlpha": 1,
+    "u_endAlpha": 0,
     "defines": [
       "BASERENDER2D"
     ]
