@@ -9,7 +9,11 @@ export class Chart extends Laya.Script {
     @property({ type: Laya.Sprite, private: false, tips: "线头" })
     private _lineHead: Laya.Sprite;
 
+   // @property({ type: Laya.Sprite, private: false, tips: "线" })
     private _lineSprite: Laya.Sprite;
+
+    @property({type:Laya.Material, private:false, tips:"渐变材质"})
+    private _gradientMaterial:Laya.Material;
 
     onAwake(): void {
 
@@ -21,6 +25,7 @@ export class Chart extends Laya.Script {
             400, 200
         ]);
 
+
     }
 
     private createLineSprite(): void {
@@ -28,6 +33,8 @@ export class Chart extends Laya.Script {
         this._lineSprite.addComponent(Laya.Mesh2DRender);
         this._lineSprite.pos(0, this._canvas.height);
         this._canvas.addChild(this._lineSprite);
+
+        this._lineSprite.getComponent(Laya.Mesh2DRender).sharedMaterial = this._gradientMaterial;
 
     }
 

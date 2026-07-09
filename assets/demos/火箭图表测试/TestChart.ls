@@ -34,6 +34,10 @@
           },
           "_lineHead": {
             "_$ref": "xd0dxqjx"
+          },
+          "_gradientMaterial": {
+            "_$uuid": "ed54ef60-b7f3-4baf-b22f-f945242e8028",
+            "_$type": "Material"
           }
         }
       ],
@@ -56,7 +60,7 @@
               "_$type": "Sprite",
               "name": "lineHead",
               "x": 7,
-              "y": 345,
+              "y": 349,
               "width": 30,
               "height": 30,
               "anchorX": 0.5,

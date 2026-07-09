@@ -35,9 +35,11 @@
     "laya.trail2D": true,
     "laya.particle": true,
     "laya.device": true,
-    "laya.d3": true
+    "laya.d3": true,
+    "laya.line2D": true
   },
   "splash": {
     "fit": "center"
-  }
+  },
+  "stat": true
 }

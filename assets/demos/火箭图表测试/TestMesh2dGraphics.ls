@@ -24,36 +24,19 @@
       "_$id": "82xsw9ie",
       "_$type": "Sprite",
       "name": "mesh2dGraphics",
-      "x": 100,
-      "y": 100,
+      "x": 200,
+      "y": 200,
       "width": 100,
       "height": 100,
-      "_gcmds": [
-        {
-          "_$type": "DrawRectCmd",
-          "lineWidth": 1,
-          "lineColor": "#19ff46"
-        },
-        {
-          "_$type": "DrawLinesCmd",
-          "x": 0,
-          "y": 0,
-          "points": [
-            0,
-            0,
-            100,
-            50,
-            200,
-            0
-          ],
-          "lineWidth": 1,
-          "lineColor": "#ffff00"
-        }
-      ],
+      "_gcmds": [],
       "_$comp": [
         {
           "_$type": "03fab6c1-9262-46bb-a21d-81a2a9cdac59",
-          "scriptPath": "demos/火箭图表测试/chart/Mesh2dGraphics.ts"
+          "scriptPath": "demos/火箭图表测试/chart/Mesh2dGraphics.ts",
+          "sharedMaterial": {
+            "_$uuid": "ed54ef60-b7f3-4baf-b22f-f945242e8028",
+            "_$type": "Material"
+          }
         }
       ]
     }
