@@ -219,6 +219,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
     private _tempRectVertices: number[] = [];
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
+        console.log("Mesh2dDrawLinesCmd::run();");
         const halfW = this.lineWidth / 2; // 线半宽
 
         const segmentCount = this.points.length / 2 - 1; // 段数
@@ -263,8 +264,8 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
             // 计算包围盒
             for (let j = 0; j < 4; j++) {
-                const vx = this._tempRectVertices[i * 2];
-                const vy = this._tempRectVertices[i * 2 + 1];
+                const vx = this._tempRectVertices[j * 2];
+                const vy = this._tempRectVertices[j * 2 + 1];
 
                 // 计算包围盒
                 minX = Math.min(vx, minX);
@@ -277,8 +278,8 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             // 顶点排列顺序为：右上角开始，水平向右，垂直向下，顺时针
             index = i * 4 * 5;
             for (let j = 0; j < 4; j++) {
-                const vx = this._tempRectVertices[i * 2];
-                const vy = this._tempRectVertices[i * 2 + 1];
+                const vx = this._tempRectVertices[j * 2];
+                const vy = this._tempRectVertices[j * 2 + 1];
 
                 // 顶点、UV
                 vertices[index++] = vx; // vertex.x
@@ -331,6 +332,8 @@ export class Mesh2dPolygonCmd implements IMesh2dGraphicsCmd {
     ];
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
+        console.log("Mesh2dPolygonCmd::run();");
+
         const halfW = this.lineWidth / 2; // 线半宽
 
         const segmentCount = this.points.length / 2 - 1; // 段数

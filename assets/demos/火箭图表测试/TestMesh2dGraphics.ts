@@ -1,4 +1,4 @@
-import { Mesh2dDrawLineCmd, Mesh2dDrawLinesCmd, Mesh2dGraphics } from "./chart/Mesh2dGraphics";
+import { Mesh2dDrawLineCmd, Mesh2dDrawLinesCmd, Mesh2dGraphics, Mesh2dPolygonCmd } from "./chart/Mesh2dGraphics";
 
 const { regClass, property } = Laya;
 
@@ -20,6 +20,7 @@ export class TestMesh2dGraphics extends Laya.Script {
 
         // 折线
         const drawLinesCmd = new Mesh2dDrawLinesCmd();
+        
         drawLinesCmd.lineWidth = 40;
         drawLinesCmd.points = [
             0, 0,
@@ -28,6 +29,9 @@ export class TestMesh2dGraphics extends Laya.Script {
             300, 100,
         ];
         this._meshGraphics.addCmd(drawLinesCmd);
+
+        // 多边形
+        const drawPolygonCmd = new Mesh2dPolygonCmd();
 
 
     }
