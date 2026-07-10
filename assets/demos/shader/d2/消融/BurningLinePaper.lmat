@@ -1,0 +1,58 @@
+{
+  "version": "LAYAMATERIAL:04",
+  "props": {
+    "textures": [
+      {
+        "path": "res://fdb69578-396f-436f-a09a-7c804a099ead",
+        "constructParams": [
+          256,
+          256,
+          1,
+          false,
+          false,
+          false
+        ],
+        "propertyParams": {
+          "filterMode": 1,
+          "wrapModeU": 1,
+          "wrapModeV": 1,
+          "anisoLevel": 4
+        },
+        "name": "u_NoiseTex"
+      }
+    ],
+    "type": "消融/BurningLinePaper",
+    "renderQueue": 2000,
+    "materialRenderMode": 0,
+    "s_Cull": 2,
+    "s_Blend": 0,
+    "s_BlendSrc": 6,
+    "s_BlendDst": 7,
+    "s_BlendSrcRGB": 0,
+    "s_BlendDstRGB": 0,
+    "s_BlendSrcAlpha": 0,
+    "s_BlendDstAlpha": 0,
+    "s_BlendEquation": 0,
+    "s_BlendEquationRGB": 0,
+    "s_BlendEquationAlpha": 0,
+    "s_DepthTest": 1,
+    "s_DepthWrite": true,
+    "u_BurnAmount": 0.39,
+    "u_EdgeWidth": 0.05,
+    "u_EdgeColor1": [
+      1,
+      0.6,
+      0,
+      1
+    ],
+    "u_EdgeColor2": [
+      1,
+      0.2,
+      0,
+      1
+    ],
+    "defines": [
+      "TEXTUREVS"
+    ]
+  }
+}

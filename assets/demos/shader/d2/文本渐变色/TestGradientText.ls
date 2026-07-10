@@ -64,6 +64,24 @@
       "fitContent": "yes",
       "align": "center",
       "underlineColor": "#ffffff"
+    },
+    {
+      "_$id": "f21y0rm4",
+      "_$type": "Image",
+      "name": "Image",
+      "x": 119,
+      "y": 436,
+      "width": 512,
+      "height": 256,
+      "material": {
+        "_$uuid": "20c83ab9-8388-4a43-b796-b7a4aec2eaa7",
+        "_$type": "Material"
+      },
+      "centerX": 0,
+      "centerY": -236,
+      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
+      "useSourceSize": true,
+      "color": "#ffffff"
     }
   ]
 }
