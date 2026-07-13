@@ -1,5 +1,9 @@
 import { Convexdecomposition } from "./Convexdecomposition";
 
+import * as poly2tri from "./poly2tri/poly2tri"
+
+
+
 const { regClass, property } = Laya;
 
 @regClass()
@@ -88,6 +92,8 @@ export class TestConvexdecomposition extends Laya.Script {
         this._holePointsSpirte = new Laya.Sprite();
         this.owner.addChild(this._holePointsSpirte);
 
+        
+
     }
 
     onKeyDown(evt: Laya.Event): void {
@@ -124,20 +130,28 @@ export class TestConvexdecomposition extends Laya.Script {
             console.log("即将被分解的原凹多边形顶点", this._polOriginPoints);
             console.log("即将被合并的原孔洞顶点", this._holePoints);
 
-            try {
-                this._polygonPoints = Convexdecomposition.separate(this._polOriginPoints, this._holePoints, 30);
-                this._polOriginPoints.length = 0;
-                this._holePoints.length = 0;
-            } catch (err) {
-                this._polOriginPoints.length = 0;
-                this._holePoints.length = 0;
+            // try {
+            //     this._polygonPoints = Convexdecomposition.separate(this._polOriginPoints, this._holePoints, 30);
+            //     this._polOriginPoints.length = 0;
+            //     this._holePoints.length = 0;
+            // } catch (err) {
+            //     this._polOriginPoints.length = 0;
+            //     this._holePoints.length = 0;
 
-                this._polygonPoints ||= [];
-                this._polygonPoints.length = 0;
-                this._polygonPoints.push(Convexdecomposition.testMergedHoleVertices);
-                console.log("this._polygonPoints:", this._polygonPoints);
-                console.error(err);
-            }
+            //     this._polygonPoints ||= [];
+            //     this._polygonPoints.length = 0;
+            //     this._polygonPoints.push(Convexdecomposition.testMergedHoleVertices);
+            //     console.log("this._polygonPoints:", this._polygonPoints);
+            //     console.error(err);
+            // }
+             const swctx = new poly2tri.SweepContext(this._polOriginPoints);
+            // swctx.addHoles(this._holePoints);
+            // swctx.triangulate();
+            // const triangles = swctx.getTriangles();
+            // this._polygonPoints = triangles.map(t=>{
+            //     return t.getPoints();
+            // });
+
             console.timeEnd("separate");
             console.log("凸分解 结束 -----------------", "凸多形数量:", this._polygonPoints.length, "凸多边形数组:", this._polygonPoints);
         }
