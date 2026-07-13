@@ -92,7 +92,7 @@ export class TestConvexdecomposition extends Laya.Script {
         this._holePointsSpirte = new Laya.Sprite();
         this.owner.addChild(this._holePointsSpirte);
 
-        
+
 
     }
 
@@ -144,7 +144,25 @@ export class TestConvexdecomposition extends Laya.Script {
             //     console.log("this._polygonPoints:", this._polygonPoints);
             //     console.error(err);
             // }
-             const swctx = new poly2tri.CDT(this._polOriginPoints);
+
+            const pts = new poly2tri.std_vector(this._polOriginPoints.map(item => new poly2tri.Point(item.x, item.y)));
+            const swctx = new poly2tri.CDT(pts);
+
+            this._holePoints.forEach(pts => {
+                const holePoints = new poly2tri.std_vector(pts.map(item => new poly2tri.Point(item.x, item.y)));
+                swctx.AddHole(holePoints)
+            });
+
+            swctx.Triangulate();
+
+
+            this._polygonPoints = [];
+            const triangles = swctx.GetTriangles();
+            for (let i = 0; i < triangles.size(); i++) {
+                const t = triangles.at(i);
+                this._polygonPoints.push([t.GetPoint(0), t.GetPoint(1), t.GetPoint(2)]);
+            }
+
             // swctx.addHoles(this._holePoints);
             // swctx.triangulate();
             // const triangles = swctx.getTriangles();
