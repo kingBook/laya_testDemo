@@ -144,7 +144,7 @@ export class TestConvexdecomposition extends Laya.Script {
             //     console.log("this._polygonPoints:", this._polygonPoints);
             //     console.error(err);
             // }
-             const swctx = new poly2tri.SweepContext(this._polOriginPoints);
+             const swctx = new poly2tri.CDT(this._polOriginPoints);
             // swctx.addHoles(this._holePoints);
             // swctx.triangulate();
             // const triangles = swctx.getTriangles();
