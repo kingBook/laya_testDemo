@@ -1,0 +1,56 @@
+{
+  "version": "LAYAMATERIAL:04",
+  "props": {
+    "textures": [],
+    "type": "ChartGradient",
+    "renderQueue": 3000,
+    "materialRenderMode": 2,
+    "s_Cull": 0,
+    "s_Blend": 1,
+    "s_BlendSrc": 6,
+    "s_BlendDst": 7,
+    "s_BlendSrcRGB": 0,
+    "s_BlendDstRGB": 0,
+    "s_BlendSrcAlpha": 0,
+    "s_BlendDstAlpha": 0,
+    "s_BlendEquation": 0,
+    "s_BlendEquationRGB": 0,
+    "s_BlendEquationAlpha": 0,
+    "s_DepthTest": 1,
+    "s_DepthWrite": false,
+    "u_mixFactor": 0.5,
+    "u_gradientDirection": [
+      0,
+      1
+    ],
+    "u_startAlpha": 1,
+    "u_endAlpha": 0,
+    "u_gradientStartColorA": [
+      0,
+      1,
+      1,
+      1
+    ],
+    "u_gradientEndColorA": [
+      0,
+      1,
+      1,
+      1
+    ],
+    "u_gradientStartColorB": [
+      1,
+      0,
+      1,
+      1
+    ],
+    "u_gradientEndColorB": [
+      1,
+      0,
+      1,
+      1
+    ],
+    "defines": [
+      "BASERENDER2D"
+    ]
+  }
+}

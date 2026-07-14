@@ -15,7 +15,7 @@ export class Mesh2dGraphics extends Laya.Script {
     private _mesh2dRender: Laya.Mesh2DRender;
 
     public onAwake(): void {
-        this._mesh2dRender = this.owner.getComponent(Laya.Mesh2DRender);
+        this._mesh2dRender ||= this.owner.getComponent(Laya.Mesh2DRender);
         this._mesh2dRender ||= this.owner.addComponent(Laya.Mesh2DRender);
         this._mesh2dRender.sharedMaterial = this.sharedMaterial;
     }
