@@ -1,3 +1,5 @@
+import * as poly2tri from "./poly2tri/poly2tri";
+
 const { regClass, property, classInfo } = Laya;
 
 @regClass()
@@ -208,7 +210,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
      * @en Collection of points for the line segments. Format: [x1,y1,x2,y2,x3,y3...]
      * @zh 线段的点集合。格式：[x1,y1,x2,y2,x3,y3...]
      */
-    public points: number[] | null;
+    public points: number[];
 
     /**
      * @en (Optional) Line width
@@ -310,75 +312,102 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 /**
  * Mesh2d 画多边形命令
  */
-export class Mesh2dPolygonCmd implements IMesh2dGraphicsCmd {
+export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
+
+    /**
+     * @en The X-axis position to start drawing.
+     * @zh 开始绘制的 X 轴位置。
+     */
+    public offsetX: number = 0;
+
+    /**
+     * @en The Y-axis position to start drawing.
+     * @zh 开始绘制的 Y 轴位置。
+     */
+    public offsetY: number = 0;
 
     /**
      * @en Collection of points for the line segments. Format: [x1,y1,x2,y2,x3,y3...]
-     * @zh 线段的点集合。格式：[x1,y1,x2,y2,x3,y3...]
+     * @zh 多边形的点集合。格式：[x1,y1,x2,y2,x3,y3...]
      */
-    public points: number[] | null;
+    public points: number[];
 
     /**
-     * @en (Optional) Line width
-     * @zh （可选）线段宽度
+     * 多边形孔洞顶点集合
      */
-    public lineWidth: number;
+    public holePoints?: number[][];
 
-    private _tempRectVertices: Laya.Point[] = [
-        new Laya.Point(),
-        new Laya.Point(),
-        new Laya.Point(),
-        new Laya.Point()
-    ];
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
         console.log("Mesh2dPolygonCmd::run();");
+        // 多边形点偏移
+        for (let i = 0, len = this.points.length / 2; i < len; i++) {
+            this.points[i * 2] += this.offsetX;
+            this.points[i * 2 + 1] += this.offsetY;
+        }
 
-        const halfW = this.lineWidth / 2; // 线半宽
+        // 多边形点转换数据结构
+        const polygonVertices: poly2tri.Point[] = [];
+        for (let i = 0, len = this.points.length / 2; i < len; i++) {
+            const px = this.points[i * 2];
+            const py = this.points[i * 2 + 1];
+            polygonVertices.push(new poly2tri.Point(px, py));
+        }
 
-        const segmentCount = this.points.length / 2 - 1; // 段数
-        const vertices = new Float32Array(segmentCount * 4 * 5);
-        const indices = new Uint16Array(segmentCount * 2 * 3);
+        let holeVertices: poly2tri.Point[][];
+        if (this.holePoints && this.holePoints.length > 0) {
+            // 孔洞点偏移
+            for (let i = 0, len = this.holePoints.length; i < len; i++) {
+                const hole: number[] = this.holePoints[i];
+                for (let j = 0, c = hole.length / 2; j < c; j++) {
+                    hole[j * 2] += this.offsetX;
+                    hole[j * 2 + 1] += this.offsetY;
+                }
+            }
 
-        let index = 0, triangleIndex = 0;
+            // 孔洞点转换数据结构
+            holeVertices = []
+            for (let i = 0, len = this.holePoints.length; i < len; i++) {
+                const hole: number[] = this.holePoints[i];
+                const holePts: poly2tri.Point[] = [];
+                for (let j = 0, c = hole.length / 2; j < c; j++) {
+                    const px = hole[j * 2];
+                    const py = hole[j * 2 + 1];
+                    holePts.push(new poly2tri.Point(px, py));
+                }
+                holeVertices[i] = holePts;
+            }
+        }
+
+
+        // 三角化 -----------------------------------------------------
+        const pointsVec = new poly2tri.std_vector(polygonVertices);
+        const swctx = new poly2tri.CDT(pointsVec);
+
+        // - 添加孔洞点
+        if (holeVertices) {
+            for (let i = 0, len = holeVertices.length; i < len; i++) {
+                swctx.AddHole(new poly2tri.std_vector(holeVertices[i]));
+            }
+        }
+
+        // - 执行三角化
+        swctx.Triangulate();
+
+        // - 三角化结果
+        const triangles = swctx.GetTriangles();
+        // for (let i = 0; i < triangles.size(); i++) {
+        //     const t = triangles.at(i);
+        //     console.log([t.GetPoint(0), t.GetPoint(1), t.GetPoint(2)]);
+        // }
+        // -------------------------------------------------------------
+
+        // 计算包围盒
         let minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE; // 包围盒
-
-        console.log("points", this.points);
-
-        for (let i = 0, len = this.points.length / 2 - 1; i < len; i++) {
-            let tempI = i * 2;
-            const fromX = this.points[tempI++];
-            const fromY = this.points[tempI++];
-            const toX = this.points[tempI++];
-            const toY = this.points[tempI++];
-
-            console.log("i", i, "from", fromX, fromY, "to", toX, toY);
-
-            const dy = toY - fromY;
-            const dx = toX - fromX;
-
-            const k = dy / dx; // 线斜率, 即: tanA, A=线与x的夹角
-            const kn = -1 / k; // 垂直于线的法线斜率
-
-            const radN = Math.atan(kn); // 法线弧度
-            const radN2 = radN + Math.PI; // 反向法线弧度
-
-            // 矩形顶点数组
-            this._tempRectVertices[0].x = fromX + halfW * Math.cos(radN);
-            this._tempRectVertices[0].y = fromY + halfW * Math.sin(radN);
-
-            this._tempRectVertices[1].x = toX + halfW * Math.cos(radN);
-            this._tempRectVertices[1].y = toY + halfW * Math.sin(radN);
-
-            this._tempRectVertices[2].x = toX + halfW * Math.cos(radN2);
-            this._tempRectVertices[2].y = toY + halfW * Math.sin(radN2);
-
-            this._tempRectVertices[3].x = fromX + halfW * Math.cos(radN2);
-            this._tempRectVertices[3].y = fromY + halfW * Math.sin(radN2);
-
-            // 计算包围盒
-            for (let j = 0, c = this._tempRectVertices.length; j < c; j++) {
-                const v = this._tempRectVertices[j];
+        for (let i = 0; i < triangles.size(); i++) {
+            const t = triangles.at(i);
+            for (let j = 0; j < 3; j++) {
+                const v = t.GetPoint(j);
 
                 // 计算包围盒
                 minX = Math.min(v.x, minX);
@@ -386,12 +415,20 @@ export class Mesh2dPolygonCmd implements IMesh2dGraphicsCmd {
                 maxX = Math.max(v.x, maxX);
                 maxY = Math.max(v.y, maxY);
             }
+        }
 
-            // 计算顶点、UV
-            // 顶点排列顺序为：右上角开始，水平向右，垂直向下，顺时针
-            index = i * 4 * 5;
-            for (let j = 0, c = this._tempRectVertices.length; j < c; j++) {
-                const v = this._tempRectVertices[j];
+        const vertices = new Float32Array(triangles.size() * 3 * 5);
+        const indices = new Uint16Array(triangles.size() * 3);
+        let index = 0, triangleIndex = 0;
+
+        for (let i = 0, len = triangles.size(); i < len; i++) {
+            const t = triangles.at(i);
+
+            index = i * 3 * 5;
+            triangleIndex = i * 3;
+
+            for (let j = 0; j < 3; j++) {
+                const v = t.GetPoint(j);
 
                 // 顶点、UV
                 vertices[index++] = v.x; // vertex.x
@@ -402,14 +439,9 @@ export class Mesh2dPolygonCmd implements IMesh2dGraphicsCmd {
             }
 
             // 三角形
-            triangleIndex = i * 2 * 3;
-            indices[triangleIndex++] = i * 4 + 0;
-            indices[triangleIndex++] = i * 4 + 1;
-            indices[triangleIndex++] = i * 4 + 3;
-
-            indices[triangleIndex++] = i * 4 + 1;
-            indices[triangleIndex++] = i * 4 + 2;
-            indices[triangleIndex++] = i * 4 + 3;
+            indices[triangleIndex++] = i * 3 + 0;
+            indices[triangleIndex++] = i * 3 + 1;
+            indices[triangleIndex++] = i * 3 + 2;
         }
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];

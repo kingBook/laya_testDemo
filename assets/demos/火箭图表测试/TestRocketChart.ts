@@ -1,7 +1,7 @@
 const { regClass, property } = Laya;
 
 @regClass()
-export class TestChart extends Laya.Script {
+export class TestRocketChart extends Laya.Script {
     
     
 

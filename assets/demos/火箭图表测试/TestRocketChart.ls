@@ -6,20 +6,20 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "TestChart",
+  "name": "TestRocketChart",
   "width": 750,
   "height": 1600,
   "_$comp": [
     {
       "_$type": "53ff027d-3d78-489c-818b-d61ccdbbb14a",
-      "scriptPath": "demos/火箭图表测试/TestChart.ts"
+      "scriptPath": "demos/火箭图表测试/TestRocketChart.ts"
     }
   ],
   "_$child": [
     {
       "_$id": "xu5la9vr",
       "_$type": "Box",
-      "name": "Chart",
+      "name": "RocketChart",
       "x": 72,
       "y": 19,
       "width": 600,
@@ -28,7 +28,7 @@
       "_$comp": [
         {
           "_$type": "a49eb932-cb92-4e35-9b5b-b1eebd1fdef7",
-          "scriptPath": "demos/火箭图表测试/chart/Chart.ts",
+          "scriptPath": "demos/火箭图表测试/rocketChart/RocketChart.ts",
           "_canvas": {
             "_$ref": "oxyf25e9"
           },
