@@ -18,7 +18,7 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
-    "u_mixFactor": 0.5,
+    "u_mixFactor": 0,
     "u_gradientDirection": [
       0,
       1

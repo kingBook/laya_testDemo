@@ -41,7 +41,7 @@
           "_lineHead": {
             "_$ref": "xd0dxqjx"
           },
-          "animCurve1": {
+          "curve1": {
             "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
             "keys": [
               {
@@ -66,7 +66,8 @@
               }
             ]
           },
-          "animCurve2": {
+          "curve1SpeedX": 5,
+          "curve2": {
             "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
             "keys": [
               {
@@ -150,9 +151,11 @@
               "_$id": "xd0dxqjx",
               "_$type": "Sprite",
               "name": "lineHead",
+              "active": false,
               "y": 350,
               "width": 30,
               "height": 30,
+              "visible": false,
               "_gcmds": [
                 {
                   "_$type": "DrawCircleCmd",

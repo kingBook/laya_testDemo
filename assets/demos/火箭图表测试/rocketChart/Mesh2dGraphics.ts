@@ -20,19 +20,15 @@ export class Mesh2dGraphics extends Laya.Script {
         this._mesh2dRender.sharedMaterial = this.sharedMaterial;
     }
 
-    public onStart(): void {
-        // 重绘
-        this.repaint();
-    }
-
     /**
-     * 清空绘制命令
+     * 清空绘制
+     * @param isRemoveAllCmd [默认: false] 是否移除所有绘制命令
      */
-    public clear(): void {
-        this._cmds.length = 0;
-
-        // 重绘
-        this.repaint();
+    public clear(isRemoveAllCmd: boolean = false): void {
+        if (isRemoveAllCmd) {
+            this._cmds.length = 0;
+        }
+        this._mesh2dRender.sharedMesh = null;;
     }
 
     /**
@@ -41,16 +37,13 @@ export class Mesh2dGraphics extends Laya.Script {
      * @param index 可选）插入的索引
      * @returns 
      */
-    public addCmd(cmd: IMesh2dGraphicsCmd, index?: number): any {
+    public addCmd(cmd: IMesh2dGraphicsCmd, index?: number): void {
         if (index === undefined) {
             this._cmds.push(cmd);
             return;
         }
 
         this._cmds[index] = cmd;
-
-        // 重绘
-        this.repaint();
     }
 
     /**
@@ -63,9 +56,6 @@ export class Mesh2dGraphics extends Laya.Script {
         if (index === -1) throw new Error("未找到旧的命令");
 
         this._cmds.splice(index, 1);
-
-        // 重绘
-        this.repaint();
     }
 
     /**
@@ -73,15 +63,12 @@ export class Mesh2dGraphics extends Laya.Script {
      * @param oldCmd 旧的命令
      * @param newCmd 新的命令
      */
-    public replaceCmd(oldCmd: IMesh2dGraphicsCmd, newCmd: IMesh2dGraphicsCmd): any {
+    public replaceCmd(oldCmd: IMesh2dGraphicsCmd, newCmd: IMesh2dGraphicsCmd): void {
         const index = this._cmds.indexOf(oldCmd);
 
         if (index === -1) throw new Error("未找到旧的命令");
 
         this._cmds[index] = newCmd;
-
-        // 重绘
-        this.repaint();
     }
 
     /**
