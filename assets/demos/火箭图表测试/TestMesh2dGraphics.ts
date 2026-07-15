@@ -22,16 +22,21 @@ export class TestMesh2dGraphics extends Laya.Script {
         drawLineCmd.fromY = 0;
         drawLineCmd.toX = 100;
         drawLineCmd.toY = -100;
-        this._meshGraphics0?.addCmd(drawLineCmd);
+        //this._meshGraphics0?.addCmd(drawLineCmd);
 
         // 折线
         const drawLinesCmd = new Mesh2dDrawLinesCmd();
         drawLinesCmd.lineWidth = 40;
+        // drawLinesCmd.points = [
+        //     0, 0,
+        //     100, 50,
+        //     200, 0,
+        //     300, 100
+        // ];
         drawLinesCmd.points = [
             0, 0,
-            100, 50,
-            200, 0,
-            300, 100,
+            100, -100,
+            200, -200
         ];
         this._meshGraphics1?.addCmd(drawLinesCmd);
 
@@ -45,7 +50,7 @@ export class TestMesh2dGraphics extends Laya.Script {
             100, 700,
             200, 500
         ];
-        this._meshGraphics2?.addCmd(drawPolygonCmd);
+        //this._meshGraphics2?.addCmd(drawPolygonCmd);
     }
 
     private _distance = 0;

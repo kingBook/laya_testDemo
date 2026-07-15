@@ -16,15 +16,41 @@ export class RocketChart extends Laya.Script {
     private _lineHead: Laya.Sprite;
 
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, private: false, tips: "动画曲线1" })
-    private _animCurve1: AnimationCurve = new AnimationCurve();
+    public animCurve1: AnimationCurve = new AnimationCurve();
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, private: false, tips: "动画曲线2" })
-    private _animCurve2: AnimationCurve = new AnimationCurve();
+    public animCurve2: AnimationCurve = new AnimationCurve();
+
+    @property({ 
+        type: [Number], 
+        nullable: false, 
+        fixedLength: 2, 
+        elementProps: { step: 0.01, fractionDigits: 2, range: [0, 1] }, 
+        onChange: "onChangeRangeNormalMapY", 
+        tips: "定义曲线右上角Y轴的填充范围 (1:表示填满)" 
+    })
+    public rangeNormalMapY: number[] = [0.7, 1.0];
 
     private _lineGraphics: Mesh2dGraphics;
     private _triangleGraphics: Mesh2dGraphics;
 
     private _tempLinePoints: number[] = [];
     private _tempTrianglePoints: number[] = [];
+
+    //#region Editor
+    /** 在编辑器中改变 {@link rangeNormalMapY} 属性时的回调 (仅用于编辑器) */
+    private onChangeRangeNormalMapY(key?: string): void {
+        if (!key) return;
+        const i = parseInt(key);
+        if (i <= 0) return;
+
+        let current = this.rangeNormalMapY[i];
+
+        // 限制大于上一个
+        let prev = this.rangeNormalMapY[i - 1];
+        current = Math.max(prev, current);
+        this.rangeNormalMapY[i] = current;
+    }
+    //#endregion
 
     onAwake(): void {
         this._lineGraphics = this._line.getComponent(Mesh2dGraphics);
@@ -38,7 +64,7 @@ export class RocketChart extends Laya.Script {
         this._lineHead.pos(0, this._canvas.height);
 
         {
-            // 画线
+            // 画线 ---------------------------------------------------
             const targetT = 1.0; // 区间: [0,1]
             const segmentCount = 50;
             const step = targetT / segmentCount;
@@ -49,7 +75,7 @@ export class RocketChart extends Laya.Script {
 
             while (true) {
                 nx = Math.min(nx + step, targetT);
-                ny = this._animCurve1.getValue(nx);
+                ny = this.animCurve1.getValue(nx);
                 mx = this.mapX(nx);
                 my = this.mapY(ny);
                 this._tempLinePoints.push(mx, my);
@@ -57,11 +83,11 @@ export class RocketChart extends Laya.Script {
             }
 
             const drawLinesCmd = new Mesh2dDrawLinesCmd();
-            drawLinesCmd.lineWidth = 10;
+            drawLinesCmd.lineWidth = 5;
             drawLinesCmd.points = this._tempLinePoints;
             this._lineGraphics.addCmd(drawLinesCmd);
 
-            // 画三角形
+            // 画三角形 -------------------------------------------------
             this._tempTrianglePoints.length = 0;
             this._tempTrianglePoints = this._tempLinePoints.concat();
             this._tempTrianglePoints.push(this._canvas.width, 0);

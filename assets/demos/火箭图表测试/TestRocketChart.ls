@@ -41,7 +41,7 @@
           "_lineHead": {
             "_$ref": "xd0dxqjx"
           },
-          "_animCurve1": {
+          "animCurve1": {
             "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
             "keys": [
               {
@@ -66,7 +66,7 @@
               }
             ]
           },
-          "_animCurve2": {
+          "animCurve2": {
             "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
             "keys": [
               {
@@ -90,7 +90,11 @@
                 "time": 1
               }
             ]
-          }
+          },
+          "rangeNormalMapY": [
+            0.7,
+            1
+          ]
         }
       ],
       "_$child": [

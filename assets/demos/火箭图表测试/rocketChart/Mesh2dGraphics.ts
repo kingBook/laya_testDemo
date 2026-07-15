@@ -221,7 +221,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
     private _tempRectVertices: number[] = [];
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
-        console.log("Mesh2dDrawLinesCmd::run();");
+        //console.log("Mesh2dDrawLinesCmd::run();");
         const halfW = this.lineWidth / 2; // 线半宽
 
         const segmentCount = this.points.length / 2 - 1; // 段数
@@ -231,7 +231,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
         let index = 0, triangleIndex = 0;
         let minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE; // 包围盒
 
-        console.log("points", this.points);
+        //console.log("points", this.points);
 
         for (let i = 0, len = this.points.length / 2 - 1; i < len; i++) {
             let tempI = i * 2;
@@ -240,7 +240,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             const toX = this.points[tempI++];
             const toY = this.points[tempI++];
 
-            console.log("i", i, "from", fromX, fromY, "to", toX, toY);
+            //console.log("i", i, "from", fromX, fromY, "to", toX, toY);
 
             const dy = toY - fromY;
             const dx = toX - fromX;
@@ -276,8 +276,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
                 maxY = Math.max(vy, maxY);
             }
 
-            // 计算顶点、UV
-            // 顶点排列顺序为：右上角开始，水平向右，垂直向下，顺时针
+            // 计算顶点（顶点排列顺序为：右上角开始，X轴向右，Y轴向下，顺时针）
             index = i * 4 * 5;
             for (let j = 0; j < 4; j++) {
                 const vx = this._tempRectVertices[j * 2];
@@ -287,8 +286,8 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
                 vertices[index++] = vx; // vertex.x
                 vertices[index++] = vy; // vertex.y
                 vertices[index++] = 0;  // vertex.z
-                vertices[index++] = (vx - minX) / (maxX - minX); // uv.x 顶点x映射到包围盒
-                vertices[index++] = (vy - minY) / (maxY - minY); // uv.y 顶点y映射到包围盒
+                vertices[index++] = 0;  // uv.x 顶点x映射到包围盒
+                vertices[index++] = 0;  // uv.y 顶点y映射到包围盒
             }
 
             // 三角形
@@ -300,6 +299,16 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             indices[triangleIndex++] = i * 4 + 1;
             indices[triangleIndex++] = i * 4 + 2;
             indices[triangleIndex++] = i * 4 + 3;
+        }
+        this._tempRectVertices.length = 0;
+
+        // 计算UV
+        for (let i = 0, len = vertices.length / 5; i < len; i++) {
+            const vx = vertices[i * 5 + 0]; // vertex.x
+            const vy = vertices[i * 5 + 1]; // vertex.y
+
+            vertices[i * 5 + 3] = (vx - minX) / (maxX - minX); // uv.x
+            vertices[i * 5 + 4] = (vy - minY) / (maxY - minY); // uv.y
         }
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];
@@ -339,7 +348,7 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
 
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
-        console.log("Mesh2dPolygonCmd::run();");
+        //console.log("Mesh2dPolygonCmd::run();");
         // 多边形点偏移
         for (let i = 0, len = this.points.length / 2; i < len; i++) {
             this.points[i * 2] += this.offsetX;
@@ -424,13 +433,10 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
         for (let i = 0, len = triangles.size(); i < len; i++) {
             const t = triangles.at(i);
 
+            // 顶点、UV
             index = i * 3 * 5;
-            triangleIndex = i * 3;
-
             for (let j = 0; j < 3; j++) {
                 const v = t.GetPoint(j);
-
-                // 顶点、UV
                 vertices[index++] = v.x; // vertex.x
                 vertices[index++] = v.y; // vertex.y
                 vertices[index++] = 0; // vertex.z
@@ -439,6 +445,7 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
             }
 
             // 三角形
+            triangleIndex = i * 3;
             indices[triangleIndex++] = i * 3 + 0;
             indices[triangleIndex++] = i * 3 + 1;
             indices[triangleIndex++] = i * 3 + 2;
