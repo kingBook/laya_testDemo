@@ -47,10 +47,10 @@
               {
                 "_$type": "FloatKeyframe",
                 "inTangent": 0,
-                "outTangent": 0,
+                "outTangent": 0.34183673469387743,
                 "value": 0,
                 "inWeight": 0,
-                "outWeight": 0.42,
+                "outWeight": 0.56,
                 "weightedMode": 0,
                 "time": 0
               },
@@ -82,10 +82,10 @@
               },
               {
                 "_$type": "FloatKeyframe",
-                "inTangent": 0,
+                "inTangent": 98.99999999999991,
                 "outTangent": 0,
                 "value": 1,
-                "inWeight": 2.220446049250313e-16,
+                "inWeight": 0.010000000000000009,
                 "outWeight": 0,
                 "weightedMode": 0,
                 "time": 1
@@ -93,7 +93,7 @@
             ]
           },
           "rangeNormalMapY": [
-            0.7,
+            0.75,
             1
           ]
         }
