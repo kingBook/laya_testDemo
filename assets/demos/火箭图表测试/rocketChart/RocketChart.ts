@@ -146,7 +146,7 @@ export class RocketChart extends Laya.Script {
             const c1x = Laya.MathUtil.lerp(this._tempCtrlPts1[0], this._tempCtrlPts2[0], this._curveSpeedUpChangeT1);
             const c1y = Laya.MathUtil.lerp(this._tempCtrlPts1[1], this._tempCtrlPts2[1], this._curveSpeedUpChangeT1);
             const c2x = Laya.MathUtil.lerp(this._tempCtrlPts1[2], this._tempCtrlPts2[2], this._curveSpeedUpChangeT2);
-            const c2y = Laya.MathUtil.lerp(this._tempCtrlPts1[3], this._tempCtrlPts2[3], this._curveSpeedUpChangeT2)
+            const c2y = Laya.MathUtil.lerp(this._tempCtrlPts1[3], this._tempCtrlPts2[3], this._curveSpeedUpChangeT2);
             this._curve.setTo(c1x, c1y, c2x, c2y);
             // this._curve.precision = 32;
         }
