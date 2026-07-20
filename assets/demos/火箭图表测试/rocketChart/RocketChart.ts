@@ -58,7 +58,6 @@ export class RocketChart extends Laya.Script {
 
     private _tempLinePoints: number[] = [];
     private _tempTrianglePoints: number[] = [];
-    private _tempV3 = new Laya.Vector3();
     private _tempCtrlPts1: number[] = [];
     private _tempCtrlPts2: number[] = [];
 
