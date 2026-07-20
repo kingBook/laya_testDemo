@@ -35,6 +35,11 @@ export class RocketChart extends Laya.Script {
     })
     public rangeNormalMapY: number[] = [0.75, 1.0];
 
+    /** 时间标尺 sprite */
+    private _timeRuler: Laya.Sprite;
+    /** 倍数标尺 */
+    private _multiplierRuler: Laya.Sprite;
+
 
     /** 跟随加速变化的曲线 */
     private _curve: AnimationCurve;
@@ -81,6 +86,16 @@ export class RocketChart extends Laya.Script {
     //#endregion
 
     onAwake(): void {
+        // 时间标尺
+        this._timeRuler = new Laya.Sprite();
+        this._timeRuler.pos(this._canvas.x, this._canvas.y + this._canvas.height);
+        this.owner.addChild(this._timeRuler);
+
+        // 倍数标尺
+        this._multiplierRuler = new Laya.Sprite();
+        this._multiplierRuler.pos(this._canvas.x, this._canvas.y + this._canvas.height);
+        this.owner.addChild(this._multiplierRuler);
+
         // 线
         this._lineGraphics = this._line.getComponent(Mesh2dGraphics);
         this._drawLinesCmd = new Mesh2dDrawLinesCmd();
@@ -115,7 +130,7 @@ export class RocketChart extends Laya.Script {
         console.time("draw");
 
         // 阶段1
-        const speedT = this.curve1SpeedX / 10000;
+        const speedT = this.curve1SpeedX / 5000;
         this._curveT = Math.min(this._curveT + speedT, 1);
 
         // '画布高度百分比插值' 增长
@@ -176,6 +191,14 @@ export class RocketChart extends Laya.Script {
         this._lineGraphics.clear();
         this._lineGraphics.repaint();
 
+        // 线头 -------------------------------------------------
+        const lastAx = this._tempLinePoints.at(-6);
+        const lastAy = this._tempLinePoints.at(-5) + this._canvas.height;
+        const lastBx = this._tempLinePoints.at(-2);
+        const lastBy = this._tempLinePoints.at(-1) + this._canvas.height;
+        this._lineHead.rotation = Laya.MathUtil.getRotation(lastAx, lastAy, lastBx, lastBy);
+        this._lineHead.pos(lastBx, lastBy);
+
         // 画三角形 -------------------------------------------------
         this._tempTrianglePoints.length = 0;
 
@@ -206,6 +229,7 @@ export class RocketChart extends Laya.Script {
     }
 
     onDisable(): void {
+        // 清空绘制，并移除所有绘制命令
         this._lineGraphics.clear(true);
         this._triangleGraphics.clear(true);
     }

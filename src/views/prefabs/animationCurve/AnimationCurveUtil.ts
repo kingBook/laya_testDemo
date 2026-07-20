@@ -47,6 +47,48 @@ export default class AnimationCurveUtil {
     }
 
     /**
+    * 获取曲线在 {@link t} 位置的导数（斜率）
+    * * 三次贝塞尔曲线公式：B(t) = P0·(1−t)³ + 3·P1·t·(1−t)² + 3·P2·t²·(1−t) + P3·t³
+    * * 一阶导数公式：B′(t) = 3(1−t)²(P1−P0) + 6(1−t)t(P2−P1) + 3t²(P3−P2)
+    * @param keys 曲线上的关键帧点数组
+    * @param t 时间插值，区间：[0, 1]（曲线图中的x轴）。
+    * @param precision 精度<正整数>，默认：8
+    * @returns 
+    */
+    public static getCurveDerivative(
+        keys: { inTangent: number, inWeight: number, outTangent: number, outWeight: number, time: number, value: number }[],
+        t: number,
+        precision: number = 8
+    ): number {
+        let result = NaN;
+        const len = keys.length;
+        if (len < 2) return result;
+
+        t = Math.min(Math.max(t, 0), 1);
+
+        for (let i = 0; i < len - 1; i++) {
+            const key1 = keys[i];
+            const key2 = keys[i + 1];
+
+            if (t >= key1.time && t <= key2.time) {
+                const c1 = this.outKeyToControlPoint(key1, 1, 1, this.tempPoint1);
+                const c2 = this.inKeyToControlPoint(key2, 1, 1, this.tempPoint2);
+                const tb = (t - key1.time) / (key2.time - key1.time);
+                //result = this.cubicBezierValue(tb, c1.x, c1.y, c2.x, c2.y, precision);
+
+                const u = 1 - t;
+                const uu = u * u;
+                const tt = t * t;
+
+                const dy = 3 * uu * (c1.y - key1.value) + 6 * u * t * (c2.y - c1.y) + 3 * tt * (key2.value - c2.y);
+                const dx = 0;
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
      * 获取点(p)到贝塞尔曲线上距离最近点的 t 和距离
      * * 注意: 此函数很耗性能
      * @param px 点p的x

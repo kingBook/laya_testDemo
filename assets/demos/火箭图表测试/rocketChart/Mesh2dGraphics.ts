@@ -28,7 +28,12 @@ export class Mesh2dGraphics extends Laya.Script {
         if (isRemoveAllCmd) {
             this._cmds.length = 0;
         }
-        this._mesh2dRender.sharedMesh = null;;
+
+        const sharedMesh = this._mesh2dRender.sharedMesh;
+        this._mesh2dRender.sharedMesh = null;
+
+        // 销毁释放内存
+        sharedMesh?.destroy();
     }
 
     /**
@@ -184,7 +189,12 @@ export class Mesh2dDrawLineCmd implements IMesh2dGraphicsCmd {
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];
         const mesh2D = Laya.Mesh2D.createMesh2DByPrimitive([vertices], [declaration], indices, Laya.IndexFormat.UInt16, [{ length: indices.length, start: 0 }]);
+
+        const sharedMesh = mesh2dRender.sharedMesh;
         mesh2dRender.sharedMesh = mesh2D;
+
+        // 销毁释放内存
+        sharedMesh?.destroy();
     }
 }
 
@@ -300,7 +310,12 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];
         const mesh2D = Laya.Mesh2D.createMesh2DByPrimitive([vertices], [declaration], indices, Laya.IndexFormat.UInt16, [{ length: indices.length, start: 0 }]);
+        
+        const sharedMesh = mesh2dRender.sharedMesh;
         mesh2dRender.sharedMesh = mesh2D;
+
+        // 销毁释放内存
+        sharedMesh?.destroy();
     }
 
 }
@@ -440,7 +455,16 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];
         const mesh2D = Laya.Mesh2D.createMesh2DByPrimitive([vertices], [declaration], indices, Laya.IndexFormat.UInt16, [{ length: indices.length, start: 0 }]);
+
+        if (mesh2dRender.sharedMesh) {
+            mesh2dRender.sharedMesh.destroy();
+        }
+
+        const sharedMesh = mesh2dRender.sharedMesh;
         mesh2dRender.sharedMesh = mesh2D;
+
+        // 销毁释放内存
+        sharedMesh?.destroy();
     }
 
 }

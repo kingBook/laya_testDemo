@@ -152,31 +152,45 @@
               "_$id": "xd0dxqjx",
               "_$type": "Sprite",
               "name": "lineHead",
-              "active": false,
-              "y": 350,
+              "y": 330,
               "width": 30,
               "height": 30,
-              "visible": false,
-              "_gcmds": [
+              "_gcmds": [],
+              "_filters": [],
+              "_$child": [
                 {
-                  "_$type": "DrawCircleCmd",
-                  "x": 0,
-                  "y": 0,
-                  "radius": 0.5,
-                  "percent": true,
-                  "lineWidth": 1,
-                  "lineColor": "#000000",
-                  "fillColor": "#ffffff"
-                },
-                {
-                  "_$type": "DrawLineCmd",
-                  "fromX": 0,
-                  "fromY": 0,
-                  "toX": -1,
-                  "toY": 0,
-                  "percent": true,
-                  "lineWidth": 15,
-                  "lineColor": "#ffffff"
+                  "_$id": "clujabsf",
+                  "_$type": "Sprite",
+                  "name": "graphics",
+                  "width": 100,
+                  "height": 100,
+                  "_gcmds": [
+                    {
+                      "_$type": "DrawCircleCmd",
+                      "x": 0,
+                      "y": 0,
+                      "radius": 0.1,
+                      "percent": true,
+                      "lineWidth": 1,
+                      "fillColor": "#ffffff"
+                    },
+                    {
+                      "_$type": "DrawPolyCmd",
+                      "x": 0,
+                      "y": 0,
+                      "points": [
+                        0,
+                        -11,
+                        -35,
+                        0,
+                        0,
+                        11
+                      ],
+                      "lineWidth": 1,
+                      "fillColor": "#ffffff"
+                    }
+                  ],
+                  "_filters": []
                 }
               ]
             }
