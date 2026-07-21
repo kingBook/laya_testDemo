@@ -53,6 +53,11 @@ export class RocketChart extends Laya.Script {
     /** '画布高度百分比插值'，区间：[0,1] */
     private _canvasHeightPercentT: number;
 
+    /** 时间<毫秒> */
+    private _time: number;
+    /** 倍数 */
+    private _multiplier:number;
+
 
     private _lineGraphics: Mesh2dGraphics;
     private _triangleGraphics: Mesh2dGraphics;
@@ -67,6 +72,11 @@ export class RocketChart extends Laya.Script {
     private _tempCtrlPts2: number[] = [];
 
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
+
+    /** 时间<毫秒> */
+    public get time():number { return this._time; }
+    /** 倍数 */
+    public get multiplier():number { return this._multiplier; }
 
 
     //#region Editor
@@ -124,10 +134,17 @@ export class RocketChart extends Laya.Script {
         this._curveSpeedUpChangeT1 = 0;
         this._curveSpeedUpChangeT2 = 0;
         this._canvasHeightPercentT = 0;
+        this._time = 0;
+        this._multiplier = 1;
     }
 
     onUpdate(): void {
-        console.time("draw");
+        //console.time("draw");
+
+        // 时间
+        this._time += Laya.timer.delta;
+        console.log("time", this._time/1000);
+        
 
         // 阶段1
         const speedT = this.curve1SpeedX / 5000;
@@ -211,7 +228,7 @@ export class RocketChart extends Laya.Script {
                 const lastY = this._tempTrianglePoints.at(-1);
                 const d = Math.pow(lastX - vx, 2) + Math.pow(lastY - vy, 2);
 
-                if (d <= Number.EPSILON) continue; // 过滤掉距离太小的点，导致三角化出错
+                if (d <= Number.EPSILON) continue; // 过滤掉距离太近的点，导致三角化出错
 
                 this._tempTrianglePoints.push(vx, vy);
                 continue;
@@ -225,7 +242,7 @@ export class RocketChart extends Laya.Script {
         this._triangleGraphics.clear();
         this._triangleGraphics.repaint();
 
-        console.timeEnd("draw");
+        //console.timeEnd("draw");
     }
 
     onDisable(): void {

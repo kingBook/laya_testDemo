@@ -61,30 +61,30 @@ export default class AnimationCurveUtil {
         precision: number = 8
     ): number {
         let result = NaN;
-        const len = keys.length;
-        if (len < 2) return result;
+        // const len = keys.length;
+        // if (len < 2) return result;
 
-        t = Math.min(Math.max(t, 0), 1);
+        // t = Math.min(Math.max(t, 0), 1);
 
-        for (let i = 0; i < len - 1; i++) {
-            const key1 = keys[i];
-            const key2 = keys[i + 1];
+        // for (let i = 0; i < len - 1; i++) {
+        //     const key1 = keys[i];
+        //     const key2 = keys[i + 1];
 
-            if (t >= key1.time && t <= key2.time) {
-                const c1 = this.outKeyToControlPoint(key1, 1, 1, this.tempPoint1);
-                const c2 = this.inKeyToControlPoint(key2, 1, 1, this.tempPoint2);
-                const tb = (t - key1.time) / (key2.time - key1.time);
-                //result = this.cubicBezierValue(tb, c1.x, c1.y, c2.x, c2.y, precision);
+        //     if (t >= key1.time && t <= key2.time) {
+        //         const c1 = this.outKeyToControlPoint(key1, 1, 1, this.tempPoint1);
+        //         const c2 = this.inKeyToControlPoint(key2, 1, 1, this.tempPoint2);
+        //         const tb = (t - key1.time) / (key2.time - key1.time);
+        //         //result = this.cubicBezierValue(tb, c1.x, c1.y, c2.x, c2.y, precision);
 
-                const u = 1 - t;
-                const uu = u * u;
-                const tt = t * t;
+        //         const u = 1 - t;
+        //         const uu = u * u;
+        //         const tt = t * t;
 
-                const dy = 3 * uu * (c1.y - key1.value) + 6 * u * t * (c2.y - c1.y) + 3 * tt * (key2.value - c2.y);
-                const dx = 0;
-                break;
-            }
-        }
+        //         const dy = 3 * uu * (c1.y - key1.value) + 6 * u * t * (c2.y - c1.y) + 3 * tt * (key2.value - c2.y);
+        //         const dx = 0;
+        //         break;
+        //     }
+        // }
         return result;
     }
 

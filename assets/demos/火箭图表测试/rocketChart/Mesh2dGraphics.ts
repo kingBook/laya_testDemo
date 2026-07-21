@@ -456,10 +456,6 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];
         const mesh2D = Laya.Mesh2D.createMesh2DByPrimitive([vertices], [declaration], indices, Laya.IndexFormat.UInt16, [{ length: indices.length, start: 0 }]);
 
-        if (mesh2dRender.sharedMesh) {
-            mesh2dRender.sharedMesh.destroy();
-        }
-
         const sharedMesh = mesh2dRender.sharedMesh;
         mesh2dRender.sharedMesh = mesh2D;
 
