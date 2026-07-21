@@ -41,6 +41,9 @@
           "_lineHead": {
             "_$ref": "xd0dxqjx"
           },
+          "_multiplierLabel": {
+            "_$ref": "sksvv25a"
+          },
           "curve1": {
             "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
             "keys": [
@@ -117,6 +120,7 @@
               "_$id": "aqroded6",
               "_$type": "Sprite",
               "name": "triangle",
+              "y": 330,
               "width": 100,
               "height": 100,
               "_$comp": [
@@ -134,7 +138,7 @@
               "_$id": "n52manlf",
               "_$type": "Sprite",
               "name": "line",
-              "y": 350,
+              "y": 330,
               "width": 100,
               "height": 100,
               "_$comp": [
@@ -153,8 +157,8 @@
               "_$type": "Sprite",
               "name": "lineHead",
               "y": 330,
-              "width": 30,
-              "height": 30,
+              "width": 100,
+              "height": 100,
               "_gcmds": [],
               "_filters": [],
               "_$child": [
@@ -191,6 +195,37 @@
                     }
                   ],
                   "_filters": []
+                }
+              ]
+            },
+            {
+              "_$id": "4i8rl6rg",
+              "_$type": "Box",
+              "name": "multiplierBox",
+              "x": 165,
+              "y": 22,
+              "width": 200,
+              "height": 120,
+              "centerX": 0,
+              "centerY": -83,
+              "_$child": [
+                {
+                  "_$id": "sksvv25a",
+                  "_$type": "Label",
+                  "name": "multiplierLabel",
+                  "x": 39,
+                  "y": 35,
+                  "width": 122,
+                  "height": 51,
+                  "centerX": 0,
+                  "centerY": 0,
+                  "text": "{p=1.00}x",
+                  "fontSize": 50,
+                  "color": "#ffffff",
+                  "fitContent": "yes",
+                  "templateVars": true,
+                  "align": "center",
+                  "valign": "middle"
                 }
               ]
             }

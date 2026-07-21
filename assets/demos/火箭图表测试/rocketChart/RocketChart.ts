@@ -15,12 +15,13 @@ export class RocketChart extends Laya.Script {
     private _line: Laya.Sprite;
     @property({ type: Laya.Sprite, private: false, tips: "线头" })
     private _lineHead: Laya.Sprite;
+    @property({ type: Laya.Label, private: false, tips: "倍数文本" })
+    private _multiplierLabel: Laya.Label;
 
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "第一阶段, 动画曲线" })
     public curve1: AnimationCurve = new AnimationCurve();
     @property({ type: Number, range: [1, 20], step: 1, fractionDigits: 0, tips: "第一阶段, 曲线图的x轴的增长速度" })
     public curve1SpeedX: number = 5;
-
 
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "第二阶段, 动画曲线" })
     public curve2: AnimationCurve = new AnimationCurve();
@@ -56,7 +57,7 @@ export class RocketChart extends Laya.Script {
     /** 时间<毫秒> */
     private _time: number;
     /** 倍数 */
-    private _multiplier:number;
+    private _multiplier: number;
 
 
     private _lineGraphics: Mesh2dGraphics;
@@ -74,9 +75,9 @@ export class RocketChart extends Laya.Script {
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
 
     /** 时间<毫秒> */
-    public get time():number { return this._time; }
+    public get time(): number { return this._time; }
     /** 倍数 */
-    public get multiplier():number { return this._multiplier; }
+    public get multiplier(): number { return this._multiplier; }
 
 
     //#region Editor
@@ -136,6 +137,7 @@ export class RocketChart extends Laya.Script {
         this._canvasHeightPercentT = 0;
         this._time = 0;
         this._multiplier = 1;
+        this._multiplierLabel.setVar('p', this._multiplier.toFixed(2));
     }
 
     onUpdate(): void {
@@ -143,8 +145,12 @@ export class RocketChart extends Laya.Script {
 
         // 时间
         this._time += Laya.timer.delta;
-        console.log("time", this._time/1000);
-        
+        // console.log("time", this._time / 1000);
+
+        // 倍数
+        this._multiplier += 0.001;
+        this._multiplierLabel.setVar('p', this._multiplier.toFixed(2));
+
 
         // 阶段1
         const speedT = this.curve1SpeedX / 5000;
@@ -179,7 +185,6 @@ export class RocketChart extends Laya.Script {
             const c2x = Laya.MathUtil.lerp(this._tempCtrlPts1[2], this._tempCtrlPts2[2], this._curveSpeedUpChangeT2);
             const c2y = Laya.MathUtil.lerp(this._tempCtrlPts1[3], this._tempCtrlPts2[3], this._curveSpeedUpChangeT2);
             this._curve.setTo(c1x, c1y, c2x, c2y);
-            // this._curve.precision = 32;
         }
 
         // 画线 ---------------------------------------------------
