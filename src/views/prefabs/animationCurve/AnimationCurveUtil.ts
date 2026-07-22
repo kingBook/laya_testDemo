@@ -76,12 +76,11 @@ export default class AnimationCurveUtil {
                 const uu = u * u;
                 const tt = t * t;
 
-                // 三次贝塞尔曲线公式：B(t) = P0·(1−t)³ + 3·P1·t·(1−t)² + 3·P2·t²·(1−t) + P3·t³
-                // 一阶导数公式：B′(t) = 3(1−t)²(P1−P0) + 6t(1−t)(P2−P1) + 3t²(P3−P2)
-                const dy = 3 * uu * (p1.y - p0.value) + 6 * t * u * (p2.y - p1.y) + 3 * tt * (p3.value - p2.y);
-                const dx = 3 * uu * (p1.x - p0.time) + 6 * t * u * (p2.x - p1.x) + 3 * tt * (p3.time - p2.x);
-
-                result = dy / dx;
+                // 三次贝塞尔曲线公式：B(t) = P₀(1−t)³ + 3P₁t(1−t)² + 3P₂t²(1−t) + P₃t³, t∈[0,1]
+                // 一阶导数公式：B′(t) = 3(1−t)²(P₁−P₀) + 6t(1−t)(P₂−P₁) + 3t²(P₃−P₂)
+                const dy_dt = 3 * uu * (p1.y - p0.value) + 6 * t * u * (p2.y - p1.y) + 3 * tt * (p3.value - p2.y);
+                const dx_dt = 3 * uu * (p1.x - p0.time) + 6 * t * u * (p2.x - p1.x) + 3 * tt * (p3.time - p2.x);
+                result = dy_dt / dx_dt;
                 break;
             }
         }
