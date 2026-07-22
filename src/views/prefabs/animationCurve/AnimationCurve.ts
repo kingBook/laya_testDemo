@@ -107,6 +107,15 @@ export default class AnimationCurve {
     }
 
     /**
+     * 获取曲线在 t 位置的导数（斜率）
+     * @param t 时间插值（曲线图中的x轴），区间：[0, 1]。
+     * @returns 
+     */
+    public getTangent(t: number): number {
+        return AnimationCurveUtil.getCurveTangent(this.keys, t, this.precision);
+    }
+
+    /**
     * 设置动画曲线, 源于 cubic-bezier.com 数据
     * @param c1x 控制点1.x
     * @param c1y 控制点1.y
