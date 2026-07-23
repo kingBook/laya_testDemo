@@ -50,10 +50,10 @@
               {
                 "_$type": "FloatKeyframe",
                 "inTangent": 0,
-                "outTangent": 0.34183673469387743,
+                "outTangent": 0.44571428571428573,
                 "value": 0,
                 "inWeight": 0,
-                "outWeight": 0.56,
+                "outWeight": 0.5,
                 "weightedMode": 0,
                 "time": 0
               },
@@ -70,6 +70,7 @@
             ]
           },
           "curve1SpeedX": 5,
+          "accelerationTimePoint": 10,
           "curve2": {
             "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
             "keys": [
@@ -96,7 +97,7 @@
             ]
           },
           "rangeNormalMapY": [
-            0.75,
+            0.8,
             1
           ]
         }
