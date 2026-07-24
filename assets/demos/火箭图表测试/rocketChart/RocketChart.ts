@@ -1,5 +1,6 @@
 import AnimationCurve from "views/prefabs/animationCurve/AnimationCurve";
 import { Mesh2dDrawLinesCmd, Mesh2dDrawPolygonCmd, Mesh2dGraphics } from "./Mesh2dGraphics";
+import { Point } from "./poly2tri/poly2tri";
 
 const { regClass, property } = Laya;
 
@@ -80,6 +81,7 @@ export class RocketChart extends Laya.Script {
     private _tempCtrlPts2: number[] = [];
 
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
+    private readonly _lineMinPos = new Point(0, 0);
 
     /** 时间<毫秒> */
     public get time(): number { return this._time; }
@@ -130,7 +132,7 @@ export class RocketChart extends Laya.Script {
         // 初始位置，左下角
         this._triangle.pos(0, this._canvas.height);
         this._line.pos(0, this._canvas.height);
-        this._lineHead.pos(0, this._canvas.height);
+        this._lineHead.pos(this._lineMinPos.x, this._canvas.height - this._lineMinPos.y);
         this._multiplierRuler.pos(0, this._canvas.height);
         this._timeRuler.pos(0, this._canvas.height);
 
@@ -152,7 +154,6 @@ export class RocketChart extends Laya.Script {
         this._multiplierLabel.setVar('p', this._multiplier.toFixed(2));
         this._timeOnTwoMultiplier = this.multiplierToTime(2);
         this._timeOnRight = this._timeOnTwoMultiplier - 2000;
-
     }
 
     onUpdate(): void {
@@ -236,7 +237,7 @@ export class RocketChart extends Laya.Script {
         const lastBx = this._tempLinePoints.at(-2);
         const lastBy = this._tempLinePoints.at(-1) + this._canvas.height;
         this._lineHead.rotation = Laya.MathUtil.getRotation(lastAx, lastAy, lastBx, lastBy);
-        this._lineHead.pos(lastBx, lastBy);
+        this._lineHead.pos(Math.max(lastBx, this._lineMinPos.x), Math.min(lastBy, this._canvas.height - this._lineMinPos.y));
 
 
         // 画三角形 -------------------------------------------------
@@ -250,8 +251,10 @@ export class RocketChart extends Laya.Script {
                 const lastX = this._tempTrianglePoints.at(-2);
                 const lastY = this._tempTrianglePoints.at(-1);
                 const d = Math.pow(lastX - vx, 2) + Math.pow(lastY - vy, 2);
+                const dx = Math.abs(lastX - vx)
 
                 if (d <= Number.EPSILON) continue; // 过滤掉距离太近的点，导致三角化出错
+                if (dx < 0.1) continue; // 过滤掉距离太近的点，导致三角化出错
 
                 this._tempTrianglePoints.push(vx, vy);
                 continue;
@@ -300,7 +303,7 @@ export class RocketChart extends Laya.Script {
             const text = `${value / 1000}`;
             const y = space;
             const font = `${fontSize}px Arial`;
-            const color = "#ffffff";
+            const color = "#e6e6e6";
             const textAlign = "center";
             this._timeRuler.graphics.fillText(text, x, y, font, color, textAlign);
 
@@ -321,7 +324,7 @@ export class RocketChart extends Laya.Script {
             const x = -space;
             const text = `${cellCount <= 5 ? value.toFixed(1) : value}x`;
             const font = `${fontSize}px Arial`;
-            const color = "#ffffff";
+            const color = "#e6e6e6";
             const textAlign = "right";
             this._multiplierRuler.graphics.fillText(text, x, y - fontSize * 0.5, font, color, textAlign);
 
@@ -342,13 +345,16 @@ export class RocketChart extends Laya.Script {
 
     // }
 
-    // /**
-    //  * 跳点
-    //  * @param multiple 倍数
-    //  */
-    // public jump(multiple: number): void {
+    /**
+     * 跳伞
+     * @param multiple 倍数
+     * @param sprite 显示在图表中的对象
+     * @param isPlayer 是当前用户跳吗
+     */
+    public jump(multiple: number, sprite: Laya.Sprite, isPlayer: boolean = false): void {
+        
+    }
 
-    // }
 
     /**
      * 曲线图中的x，映射到画布
@@ -373,8 +379,8 @@ export class RocketChart extends Laya.Script {
     /** 
      * 时间转换倍数
      * @param time 发射经过的时间<毫秒>
-     * @param v0 [默认: 1/12] 初速度<倍/秒>
-     * @param a [默认: 0.0005] 加速度<倍/秒>
+     * @param v0 [默认: 0.1] 初速度<倍/秒>
+     * @param a [默认: 0.001] 加速度<倍/秒>
      * @returns 倍数（保留两位小数）
      */
     private timeToMultiplier(time: number, v0: number = 0.1, a: number = 0.001): number {
@@ -382,16 +388,15 @@ export class RocketChart extends Laya.Script {
 
         let result = 1 + v0 * t + 0.5 * a * t * t;
         result = ((result * 100) | 0) / 100; // 保留两位小数
-        console.log(result);
-        
+        // console.log(result);
         return result;
     }
 
     /**
      * 倍数转时间
      * @param multiplier 倍数 （保留两位小数）
-     * @param v0 [默认: 1/12] 初速度<倍/秒>
-     * @param a [默认: 0.0005] 加速度<倍/秒>
+     * @param v0 [默认: 0.1] 初速度<倍/秒>
+     * @param a [默认: 0.001] 加速度<倍/秒>
      * @returns 发射经过的时间<毫秒>
      */
     private multiplierToTime(multiplier: number, v0: number = 0.1, a: number = 0.001): number {
