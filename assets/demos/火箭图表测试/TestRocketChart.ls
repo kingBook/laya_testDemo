@@ -70,7 +70,6 @@
             ]
           },
           "curve1SpeedX": 5,
-          "accelerationTimePoint": 10,
           "curve2": {
             "_$type": "582992a0-a2fc-45a6-92d7-9517db859673",
             "keys": [
@@ -99,7 +98,8 @@
           "rangeNormalMapY": [
             0.8,
             1
-          ]
+          ],
+          "showGrid": true
         }
       ],
       "_$child": [
@@ -108,20 +108,20 @@
           "_$type": "Box",
           "name": "canvas",
           "x": 50,
-          "y": 20,
-          "width": 530,
+          "y": 30,
+          "width": 520,
           "height": 330,
           "left": 50,
-          "right": 20,
-          "top": 20,
-          "bottom": 50,
+          "right": 30,
+          "top": 30,
+          "bottom": 40,
           "bgColor": "rgba(30,113,142,0.39215686274509803)",
           "_$child": [
             {
               "_$id": "aqroded6",
               "_$type": "Sprite",
               "name": "triangle",
-              "y": 330,
+              "y": 340,
               "width": 100,
               "height": 100,
               "_$comp": [
@@ -139,7 +139,7 @@
               "_$id": "n52manlf",
               "_$type": "Sprite",
               "name": "line",
-              "y": 330,
+              "y": 340,
               "width": 100,
               "height": 100,
               "_$comp": [
@@ -157,7 +157,7 @@
               "_$id": "xd0dxqjx",
               "_$type": "Sprite",
               "name": "lineHead",
-              "y": 330,
+              "y": 340,
               "width": 100,
               "height": 100,
               "_gcmds": [],
@@ -203,7 +203,7 @@
               "_$id": "4i8rl6rg",
               "_$type": "Box",
               "name": "multiplierBox",
-              "x": 165,
+              "x": 160,
               "y": 22,
               "width": 200,
               "height": 120,

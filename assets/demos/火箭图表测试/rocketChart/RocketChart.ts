@@ -15,7 +15,7 @@ export class RocketChart extends Laya.Script {
     private _line: Laya.Sprite;
     @property({ type: Laya.Sprite, private: false, tips: "线头" })
     private _lineHead: Laya.Sprite;
-    @property({ type: Laya.Label, private: false, tips: "倍数文本" })
+    @property({ type: Laya.Label, private: false, tips: "当前倍数文本" })
     private _multiplierLabel: Laya.Label;
 
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "阶段1, 动画曲线" })
@@ -23,8 +23,6 @@ export class RocketChart extends Laya.Script {
     @property({ type: Number, range: [1, 20], step: 1, fractionDigits: 0, tips: "阶段1, 曲线图的x轴的增长速度" })
     public curve1SpeedX: number = 5;
 
-    @property({ type: Number, tips: "进入阶段2的时间点<秒>" })
-    public accelerationTimePoint: number = 12;
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "阶段2, 动画曲线" })
     public curve2: AnimationCurve = new AnimationCurve();
 
@@ -38,11 +36,14 @@ export class RocketChart extends Laya.Script {
     })
     public rangeNormalMapY: number[] = [0.8, 1.0];
 
-    /** 时间标尺 sprite */
+    @property({ type: Boolean, tips: "显示网格线" })
+    public showGrid: boolean = true;
+
+
+    /** 时间标尺 */
     private _timeRuler: Laya.Sprite;
     /** 倍数标尺 */
     private _multiplierRuler: Laya.Sprite;
-
 
     /** 跟随加速变化的曲线 */
     private _curve: AnimationCurve;
@@ -63,9 +64,8 @@ export class RocketChart extends Laya.Script {
 
     /** 第一阶段到达右边缘时的时间 */
     private _timeOnRight: number;
-    /** 到达两倍时的时间 */
+    /** 到达两倍时的时间<毫秒> */
     private _timeOnTwoMultiplier: number;
-
 
     private _lineGraphics: Mesh2dGraphics;
     private _triangleGraphics: Mesh2dGraphics;
@@ -106,13 +106,11 @@ export class RocketChart extends Laya.Script {
     onAwake(): void {
         // 时间标尺
         this._timeRuler = new Laya.Sprite();
-        this._timeRuler.pos(this._canvas.x, this._canvas.y + this._canvas.height);
-        this.owner.addChild(this._timeRuler);
+        this._canvas.addChildAt(this._timeRuler, 0);
 
         // 倍数标尺
         this._multiplierRuler = new Laya.Sprite();
-        this._multiplierRuler.pos(this._canvas.x, this._canvas.y + this._canvas.height);
-        this.owner.addChild(this._multiplierRuler);
+        this._canvas.addChildAt(this._multiplierRuler, 0);
 
         // 线
         this._lineGraphics = this._line.getComponent(Mesh2dGraphics);
@@ -133,6 +131,8 @@ export class RocketChart extends Laya.Script {
         this._triangle.pos(0, this._canvas.height);
         this._line.pos(0, this._canvas.height);
         this._lineHead.pos(0, this._canvas.height);
+        this._multiplierRuler.pos(0, this._canvas.height);
+        this._timeRuler.pos(0, this._canvas.height);
 
         // 跟随加速变化的曲线 -> 曲线1
         this._curve.setTo(this.curve1);
@@ -150,36 +150,34 @@ export class RocketChart extends Laya.Script {
         this._time = 0;
         this._multiplier = 1;
         this._multiplierLabel.setVar('p', this._multiplier.toFixed(2));
-        this._timeOnRight = NaN;
         this._timeOnTwoMultiplier = this.multiplierToTime(2);
+        this._timeOnRight = this._timeOnTwoMultiplier - 2000;
 
     }
 
     onUpdate(): void {
-        //console.time("draw");
+        // console.time("draw");
 
         // 时间
         this._time += Laya.timer.delta;
+
 
         // 倍数
         this._multiplier = this.timeToMultiplier(this._time);
         this._multiplierLabel.setVar('p', this._multiplier.toFixed(2));
 
 
-        // 阶段1
-        this._curveT = Laya.MathUtil.clamp01((this._time / 1000) / this.accelerationTimePoint);
+        // 阶段1 ---------------------------------------------------------------------------------
+        this._curveT = Laya.MathUtil.clamp01(this._time / this._timeOnRight);
 
         // '画布高度百分比插值' 增长
         if (this._curveT >= 1) {
-            if (isNaN(this._timeOnRight)) {
-                this._timeOnRight = this._time;
-            }
-
             const speedCT = 1 / (this._timeOnTwoMultiplier - this._timeOnRight) * Laya.timer.delta;
             this._canvasHeightPercentT = Math.min(this._canvasHeightPercentT + speedCT, 1);
         }
 
-        // 阶段2 加速
+
+        // 阶段2 加速 -----------------------------------------------------------------------------
         if (this._canvasHeightPercentT >= 1) {
             // '图形颜色' 跟随加速变化
             const speedMF = this.curve1SpeedX / 500;
@@ -203,8 +201,6 @@ export class RocketChart extends Laya.Script {
             const c2y = Laya.MathUtil.lerp(this._tempCtrlPts1[3], this._tempCtrlPts2[3], this._curveSpeedUpChangeT2);
             this._curve.setTo(c1x, c1y, c2x, c2y);
         }
-
-        //console.log(this._curveT,this._curve.getTangent(this._curveT));
 
 
         // 画线 ---------------------------------------------------
@@ -233,6 +229,7 @@ export class RocketChart extends Laya.Script {
         this._lineGraphics.clear();
         this._lineGraphics.repaint();
 
+
         // 线头 -------------------------------------------------
         const lastAx = this._tempLinePoints.at(-6);
         const lastAy = this._tempLinePoints.at(-5) + this._canvas.height;
@@ -240,6 +237,7 @@ export class RocketChart extends Laya.Script {
         const lastBy = this._tempLinePoints.at(-1) + this._canvas.height;
         this._lineHead.rotation = Laya.MathUtil.getRotation(lastAx, lastAy, lastBx, lastBy);
         this._lineHead.pos(lastBx, lastBy);
+
 
         // 画三角形 -------------------------------------------------
         this._tempTrianglePoints.length = 0;
@@ -267,13 +265,71 @@ export class RocketChart extends Laya.Script {
         this._triangleGraphics.clear();
         this._triangleGraphics.repaint();
 
-        //console.timeEnd("draw");
+        // 网格标尺绘制 -------------------------------------------------
+        this.drawGridAndRulers();
+
+        // console.timeEnd("draw");
     }
 
     onDisable(): void {
         // 清空绘制，并移除所有绘制命令
         this._lineGraphics.clear(true);
         this._triangleGraphics.clear(true);
+    }
+
+    /** 网格标尺绘制 */
+    private drawGridAndRulers(): void {
+        const fontSize = 18; // 字体大小
+        const space = 10; // '倍数'、'时间'与画布的间距
+        const defaultDisplayTimeMs = 10000; // 默认时间标尺显示的时间长度<毫秒>
+
+        const displayTimeMs = this.ceilPowerOf10(Math.max(this._time, defaultDisplayTimeMs)); // 时间标尺显示的时间长度<毫秒>
+        const cellCount = this._time < defaultDisplayTimeMs ? 5 : 10; // 画刻度的格数
+        const timeScaleUnit = displayTimeMs / cellCount; // 每一刻度单位<毫秒>
+
+        const scale = this._time > defaultDisplayTimeMs ? defaultDisplayTimeMs / this._time : 1; // 计算缩放
+
+        // 时间标尺 ------------------------------
+        this._timeRuler.graphics.clear();
+
+        for (let i = 0; i <= cellCount; i++) {
+            const x = i * ((this._canvas.width * (displayTimeMs / defaultDisplayTimeMs)) / cellCount) * scale;
+            if (x > this._canvas.width) continue; // 画布外不显示
+
+            const value = i * timeScaleUnit;
+            const text = `${value / 1000}`;
+            const y = space;
+            const font = `${fontSize}px Arial`;
+            const color = "#ffffff";
+            const textAlign = "center";
+            this._timeRuler.graphics.fillText(text, x, y, font, color, textAlign);
+
+            // 网格线
+            if (this.showGrid) {
+                this._timeRuler.graphics.drawLine(x, 0, x, -this._canvas.height, "#686868", 1);
+            }
+        }
+
+        // 倍数标尺 ------------------------------
+        this._multiplierRuler.graphics.clear();
+
+        for (let i = 1; i <= cellCount; i++) {
+            const y = -i * ((this._canvas.height * (displayTimeMs / defaultDisplayTimeMs)) / cellCount) * scale;
+            if (y < -this._canvas.height) continue; // 画布外不显示
+
+            const value = 1 + (i * timeScaleUnit) / 1000 / 10;
+            const x = -space;
+            const text = `${cellCount <= 5 ? value.toFixed(1) : value}x`;
+            const font = `${fontSize}px Arial`;
+            const color = "#ffffff";
+            const textAlign = "right";
+            this._multiplierRuler.graphics.fillText(text, x, y - fontSize * 0.5, font, color, textAlign);
+
+            // 网格线
+            if (this.showGrid) {
+                this._multiplierRuler.graphics.drawLine(0, y, this._canvas.width, y, "#686868", 1);
+            }
+        }
     }
 
 
@@ -314,21 +370,20 @@ export class RocketChart extends Laya.Script {
         return -(this._canvas.height * percent) * ny;
     }
 
-
     /** 
      * 时间转换倍数
      * @param time 发射经过的时间<毫秒>
      * @param v0 [默认: 1/12] 初速度<倍/秒>
-     * @param a [默认: 0.0002] 加速度<倍/秒>
+     * @param a [默认: 0.0005] 加速度<倍/秒>
      * @returns 倍数（保留两位小数）
      */
-    private timeToMultiplier(time: number, v0: number = 1 / 12, a: number = 0.0002): number {
+    private timeToMultiplier(time: number, v0: number = 0.1, a: number = 0.001): number {
         const t = time / 1000; // 时间<秒>
 
         let result = 1 + v0 * t + 0.5 * a * t * t;
-        result = parseFloat(result.toFixed(2)); // 保留两位小数
-
-        //console.log("time", time, "result", result);
+        result = ((result * 100) | 0) / 100; // 保留两位小数
+        console.log(result);
+        
         return result;
     }
 
@@ -336,24 +391,38 @@ export class RocketChart extends Laya.Script {
      * 倍数转时间
      * @param multiplier 倍数 （保留两位小数）
      * @param v0 [默认: 1/12] 初速度<倍/秒>
-     * @param a [默认: 0.0002] 加速度<倍/秒>
+     * @param a [默认: 0.0005] 加速度<倍/秒>
      * @returns 发射经过的时间<毫秒>
      */
-    private multiplierToTime(multiplier: number, v0: number = 1 / 12, a: number = 0.0002): number {
-        // multiplier = 1 + v0 * t + 0.5 * a * t * t;
+    private multiplierToTime(multiplier: number, v0: number = 0.1, a: number = 0.001): number {
+        // 0 = (1 - multiplier) + (v0 * t) + (0.5 * a * t * t);
         const aa = 0.5 * a;
         const bb = v0;
-        const cc = 1;
-        let result1 = (-bb + Math.sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
-        //let result2 = (-bb - Math.sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+        const cc = 1 - multiplier;
 
-        //console.log(bb * bb - 4 * aa * cc, result1, result2);
+        // 一元二次求根
+        let result = (-bb + Math.sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+        result = Math.abs(result * 1000) | 0; // 转毫秒，取整
+        return result;
+    }
 
-        return Math.abs(result1 * 1000);
+    /**
+     * 求大于或等于指定数的最小10次方数
+     * * 注意：最小返回 10
+     * @param x 正整数
+     * @returns 10次方数<正整数>
+     */
+    private ceilPowerOf10(x: number): number {
+        if (x <= 1) return 10;
+        const exp = Math.ceil(Math.log10(x));
+        return 10 ** exp;
     }
 
     onKeyDown(evt: Laya.Event): void {
         // this.multiplierToTime(2);
+
+
+
     }
 
 
