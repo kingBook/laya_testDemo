@@ -4,6 +4,18 @@ import { Point } from "./poly2tri/poly2tri";
 
 const { regClass, property } = Laya;
 
+/** 跳点数据结构 */
+interface JumpPointData {
+    /** 发射经过的时间<毫秒> */
+    time: number;
+    /** 倍数 */
+    multipler: number;
+    /** 要显示的对象 */
+    sprite: Laya.Sprite;
+    /** true:玩家跳点; false:其他用户跳点 */
+    isPlayer: boolean;
+}
+
 /** 火箭图表 */
 @regClass()
 export class RocketChart extends Laya.Script {
@@ -12,12 +24,16 @@ export class RocketChart extends Laya.Script {
     private _canvas: Laya.Box;
     @property({ type: Laya.Sprite, private: false, tips: "三角形" })
     private _triangle: Laya.Sprite;
+    @property({ type: Laya.Box, private: false, tips: "线盒" })
+    private _lineBox: Laya.Box;
     @property({ type: Laya.Sprite, private: false, tips: "线" })
     private _line: Laya.Sprite;
     @property({ type: Laya.Sprite, private: false, tips: "线头" })
     private _lineHead: Laya.Sprite;
+    @property({ type: Laya.Box, private: false, tips: "倍数盒" })
+    private _multiplierBox: Laya.Box;
     @property({ type: Laya.Label, private: false, tips: "当前倍数文本" })
-    private _multiplierLabel: Laya.Label;
+    private _multiplierLabel?: Laya.Label;
 
     @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "阶段1, 动画曲线" })
     public curve1: AnimationCurve = new AnimationCurve();
@@ -46,6 +62,12 @@ export class RocketChart extends Laya.Script {
     /** 倍数标尺 */
     private _multiplierRuler: Laya.Sprite;
 
+    /** 初速度 */
+    private _initSpeed: number = 0.1;
+
+    /** 加速度 */
+    private _acceleration: number = 0.002;
+
     /** 跟随加速变化的曲线 */
     private _curve: AnimationCurve;
     /** 曲线图的x轴插值，区间：[0,1] */
@@ -58,7 +80,7 @@ export class RocketChart extends Laya.Script {
     /** '画布高度百分比插值'，区间：[0,1] */
     private _canvasHeightPercentT: number;
 
-    /** 时间<毫秒> */
+    /** 发射经过的时间<毫秒> */
     private _time: number;
     /** 倍数 */
     private _multiplier: number;
@@ -67,13 +89,14 @@ export class RocketChart extends Laya.Script {
     private _timeOnRight: number;
     /** 到达两倍时的时间<毫秒> */
     private _timeOnTwoMultiplier: number;
+    /** 跳点数组 */
+    private _jumpPoints: JumpPointData[];
 
     private _lineGraphics: Mesh2dGraphics;
     private _triangleGraphics: Mesh2dGraphics;
 
     private _drawLinesCmd: Mesh2dDrawLinesCmd;
     private _drawTriangleCmd: Mesh2dDrawPolygonCmd;
-
 
     private _tempLinePoints: number[] = [];
     private _tempTrianglePoints: number[] = [];
@@ -83,10 +106,16 @@ export class RocketChart extends Laya.Script {
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
     private readonly _lineMinPos = new Point(0, 0);
 
-    /** 时间<毫秒> */
+    /** 发射经过的时间<毫秒> */
     public get time(): number { return this._time; }
     /** 倍数 */
     public get multiplier(): number { return this._multiplier; }
+    /** 初速度 */
+    public get initSpeed(): number { return this._initSpeed; }
+    /** 加速度 */
+    public get acceleration(): number { return this._acceleration; }
+
+
 
 
     //#region Editor
@@ -106,6 +135,8 @@ export class RocketChart extends Laya.Script {
     //#endregion
 
     onAwake(): void {
+        this._jumpPoints = [];
+
         // 时间标尺
         this._timeRuler = new Laya.Sprite();
         this._canvas.addChildAt(this._timeRuler, 0);
@@ -138,34 +169,61 @@ export class RocketChart extends Laya.Script {
 
         // 跟随加速变化的曲线 -> 曲线1
         this._curve.setTo(this.curve1);
-
-        // 初始化
-        this.init();
-
     }
 
-    public init(): void {
+    /**
+     * 初始化（需在 onEnable() 之后调用这个方法）
+     * @param initSpeed 初速度
+     * @param acceleration 加速度
+     */
+    public init(initSpeed: number, acceleration: number): void {
+        this.dispose();
+
+        this._initSpeed = initSpeed;
+        this._acceleration = acceleration;
         this._curveT = 0;
         this._curveSpeedUpChangeT1 = 0;
         this._curveSpeedUpChangeT2 = 0;
         this._canvasHeightPercentT = 0;
         this._time = 0;
         this._multiplier = 1;
-        this._multiplierLabel.setVar('p', this._multiplier.toFixed(2));
-        this._timeOnTwoMultiplier = this.multiplierToTime(2);
+        this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
+        this._timeOnTwoMultiplier = this.multiplierToTime(2, initSpeed, acceleration);
         this._timeOnRight = this._timeOnTwoMultiplier - 2000;
+        this._jumpPoints.length = 0;
+        // 线盒
+        this._lineBox.visible = false;
+        // 倍数盒
+        this._multiplierBox.visible = false;
     }
 
     onUpdate(): void {
+        // 更新状态到指定的时间
+        this.updateStatusToTime(this._time + Laya.timer.delta);
+    }
+
+
+    onDisable(): void {
+        this.dispose();
+    }
+
+    /**
+     * 更新状态到指定的时间
+     * @param time 发射经过的时间<毫秒>
+     */
+    public updateStatusToTime(time: number): void {
         // console.time("draw");
+        // 线盒
+        if (!this._lineBox.visible) this._lineBox.visible = true;
+        // 倍数盒
+        if (!this._multiplierBox.visible) this._multiplierBox.visible = true;
 
         // 时间
-        this._time += Laya.timer.delta;
-
+        this._time = time;
 
         // 倍数
-        this._multiplier = this.timeToMultiplier(this._time);
-        this._multiplierLabel.setVar('p', this._multiplier.toFixed(2));
+        this._multiplier = this.timeToMultiplier(this._time, this._initSpeed, this._acceleration);
+        this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
 
 
         // 阶段1 ---------------------------------------------------------------------------------
@@ -271,13 +329,34 @@ export class RocketChart extends Laya.Script {
         // 网格标尺绘制 -------------------------------------------------
         this.drawGridAndRulers();
 
+        // 计算并展示跳点 --------------------------------------
+        this.calcAndShowPlayerJumpPoint();
+
+
         // console.timeEnd("draw");
     }
 
-    onDisable(): void {
-        // 清空绘制，并移除所有绘制命令
-        this._lineGraphics.clear(true);
-        this._triangleGraphics.clear(true);
+    /** 开始发射 */
+    public startLaunch(): void {
+
+    }
+
+    /**
+     * 添加玩家的跳点
+     * @param multipler 倍数<两位小数>
+     * @param sprite 跳点需要展示的对象
+     * @param isPlayer true:玩家跳点; false:其他用户跳点
+     */
+    public addJumpPoint(multipler: number, sprite: Laya.Sprite, isPlayer: boolean): void {
+        const time = this.multiplierToTime(multipler, this._initSpeed, this._acceleration);
+        // console.log("addJumpPoint", time, multipler);
+
+        this._jumpPoints.push({
+            time: time,
+            multipler: multipler,
+            sprite: sprite,
+            isPlayer: isPlayer
+        });
     }
 
     /** 网格标尺绘制 */
@@ -335,27 +414,59 @@ export class RocketChart extends Laya.Script {
         }
     }
 
+    /** 计算并展示跳点 */
+    private calcAndShowPlayerJumpPoint(): void {
+        if (this._jumpPoints.length <= 0) return;
 
-    // /**
-    //  * 设置值
-    //  * @param multiple 倍数
-    //  * @param height 高度
-    //  */
-    // public setValue(multiple: number, height: number): void {
+        let i = this._jumpPoints.length;
+        while (--i >= 0) {
+            const item = this._jumpPoints[i];
+            if (!item.sprite) continue;
+            if (this._multiplier < item.multipler) continue;
 
-    // }
+            if (!item.sprite.parent) {
+                this._line.parent.addChild(item.sprite);
+            }
 
-    /**
-     * 跳伞
-     * @param multiple 倍数
-     * @param sprite 显示在图表中的对象
-     * @param isPlayer 是当前用户跳吗
-     */
-    public jump(multiple: number, sprite: Laya.Sprite, isPlayer: boolean = false): void {
-        
+            const timeMax = this._time > this._timeOnRight ? this._time : this._timeOnRight;
+            const t = item.time / timeMax;
+            const x = this.mapX(t);
+            const y = this._canvas.height + this.mapY(this._curve.getValue(t), Laya.MathUtil.lerp(this.rangeNormalMapY[0], this.rangeNormalMapY[1], this._canvasHeightPercentT));
+            item.sprite.pos(x, y);
+
+            // 其他用户跳点
+            if (!item.isPlayer) {
+                const toX = x - 100;
+                const toY = y + 100;
+                const duration = 1000;
+
+                Laya.Tween.create(item.sprite)
+                    .to('x', toX)
+                    .to('y', toY)
+                    .to("alpha", 0.2)
+                    .duration(duration)
+                    .then(_ => {
+                        item.sprite?.destroy();
+                    });
+
+                this._jumpPoints.splice(i, 1); // 删除跳点元素 
+            }
+        }
     }
 
+    private dispose(): void {
+        // 清空绘制，并移除所有绘制命令
+        this._lineGraphics.clear(true);
+        this._triangleGraphics.clear(true);
 
+        // 清空跳点
+        this._jumpPoints.forEach(item => {
+            item.sprite?.destroy();
+        });
+        this._jumpPoints.length = 0;
+    }
+
+    //#region Util
     /**
      * 曲线图中的x，映射到画布
      * @param nx 曲线图中单位化的x
@@ -377,13 +488,13 @@ export class RocketChart extends Laya.Script {
     }
 
     /** 
-     * 时间转换倍数
+     * 时间转倍数
      * @param time 发射经过的时间<毫秒>
      * @param v0 [默认: 0.1] 初速度<倍/秒>
-     * @param a [默认: 0.001] 加速度<倍/秒>
+     * @param a [默认: 0.002] 加速度<倍/秒>
      * @returns 倍数（保留两位小数）
      */
-    private timeToMultiplier(time: number, v0: number = 0.1, a: number = 0.001): number {
+    private timeToMultiplier(time: number, v0: number = 0.1, a: number = 0.002): number {
         const t = time / 1000; // 时间<秒>
 
         let result = 1 + v0 * t + 0.5 * a * t * t;
@@ -396,10 +507,10 @@ export class RocketChart extends Laya.Script {
      * 倍数转时间
      * @param multiplier 倍数 （保留两位小数）
      * @param v0 [默认: 0.1] 初速度<倍/秒>
-     * @param a [默认: 0.001] 加速度<倍/秒>
+     * @param a [默认: 0.002] 加速度<倍/秒>
      * @returns 发射经过的时间<毫秒>
      */
-    private multiplierToTime(multiplier: number, v0: number = 0.1, a: number = 0.001): number {
+    private multiplierToTime(multiplier: number, v0: number = 0.1, a: number = 0.002): number {
         // 0 = (1 - multiplier) + (v0 * t) + (0.5 * a * t * t);
         const aa = 0.5 * a;
         const bb = v0;
@@ -407,7 +518,7 @@ export class RocketChart extends Laya.Script {
 
         // 一元二次求根
         let result = (-bb + Math.sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
-        result = Math.abs(result * 1000) | 0; // 转毫秒，取整
+        result = Math.abs(result * 1000); // 转毫秒
         return result;
     }
 
@@ -422,12 +533,12 @@ export class RocketChart extends Laya.Script {
         const exp = Math.ceil(Math.log10(x));
         return 10 ** exp;
     }
+    //#endregion
 
     onKeyDown(evt: Laya.Event): void {
-        // this.multiplierToTime(2);
-
-
-
+        //const multipler = 1.2;
+        //console.log("timeToMultiplier", this.timeToMultiplier(23928, this._initSpeed, this._acceleration));
+        //console.log("multiplierToTime", this.multiplierToTime(multipler, this._initSpeed, this._acceleration));
     }
 
 

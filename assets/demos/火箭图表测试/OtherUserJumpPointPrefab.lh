@@ -1,0 +1,39 @@
+{
+  "_$ver": 1,
+  "_$id": "c0lizj9r",
+  "_$type": "Sprite",
+  "name": "OtherUserJumpPointPrefab",
+  "x": 409,
+  "y": 345,
+  "width": 100,
+  "height": 100,
+  "_gcmds": [],
+  "_$child": [
+    {
+      "_$id": "rgv119n8",
+      "_$type": "Image",
+      "name": "Image",
+      "x": -18,
+      "y": -9,
+      "width": 36,
+      "height": 18,
+      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
+      "color": "#ffffff"
+    },
+    {
+      "_$id": "gdz53oe8",
+      "_$type": "Label",
+      "name": "Label",
+      "x": 13,
+      "y": -9,
+      "width": 100,
+      "height": 21,
+      "text": "南非世界杯",
+      "fontSize": 20,
+      "color": "#ffffff",
+      "fitContent": "yes",
+      "align": "center",
+      "valign": "middle"
+    }
+  ]
+}

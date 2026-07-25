@@ -310,7 +310,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];
         const mesh2D = Laya.Mesh2D.createMesh2DByPrimitive([vertices], [declaration], indices, Laya.IndexFormat.UInt16, [{ length: indices.length, start: 0 }]);
-        
+
         const sharedMesh = mesh2dRender.sharedMesh;
         mesh2dRender.sharedMesh = mesh2D;
 
@@ -403,7 +403,11 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
         }
 
         // - 执行三角化
-        swctx.Triangulate();
+        try {
+            swctx.Triangulate();
+        } catch (err) {
+            //console.error("执行三角化出错", err);
+        }
 
         // - 三角化结果
         const triangles = swctx.GetTriangles();
