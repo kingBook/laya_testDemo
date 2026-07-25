@@ -238,7 +238,6 @@
               "y": 22,
               "width": 200,
               "height": 120,
-              "visible": false,
               "centerX": 0,
               "centerY": -83,
               "_$child": [

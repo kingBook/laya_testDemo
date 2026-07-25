@@ -406,7 +406,7 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
         try {
             swctx.Triangulate();
         } catch (err) {
-            //console.error("执行三角化出错", err);
+            console.error("执行三角化出错", err);
         }
 
         // - 三角化结果

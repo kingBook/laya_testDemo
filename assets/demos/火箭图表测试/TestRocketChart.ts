@@ -20,6 +20,9 @@ export class TestRocketChart extends Laya.Script {
         const acceleration = 0.002;
         this._rocketChart.init(initSpeed, acceleration);
 
+        // 开始发射
+        this._rocketChart.startLaunch();
+
         // 添加玩家跳点
         let multipler = 1.66;
         let sprite = this._playerJumpPointPrefab.create() as Laya.Sprite;

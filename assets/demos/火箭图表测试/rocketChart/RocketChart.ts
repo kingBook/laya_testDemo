@@ -16,6 +16,13 @@ interface JumpPointData {
     isPlayer: boolean;
 }
 
+enum Flag {
+    /** 已初始化 */
+    Inited = 1,
+    /** 启动中... */
+    Launching = 1 << 1,
+}
+
 /** 火箭图表 */
 @regClass()
 export class RocketChart extends Laya.Script {
@@ -91,6 +98,9 @@ export class RocketChart extends Laya.Script {
     private _timeOnTwoMultiplier: number;
     /** 跳点数组 */
     private _jumpPoints: JumpPointData[];
+
+    /** 布尔集合 */
+    private _flags: Flag;
 
     private _lineGraphics: Mesh2dGraphics;
     private _triangleGraphics: Mesh2dGraphics;
@@ -179,6 +189,7 @@ export class RocketChart extends Laya.Script {
     public init(initSpeed: number, acceleration: number): void {
         this.dispose();
 
+        this._flags = Flag.Inited;
         this._initSpeed = initSpeed;
         this._acceleration = acceleration;
         this._curveT = 0;
@@ -191,15 +202,15 @@ export class RocketChart extends Laya.Script {
         this._timeOnTwoMultiplier = this.multiplierToTime(2, initSpeed, acceleration);
         this._timeOnRight = this._timeOnTwoMultiplier - 2000;
         this._jumpPoints.length = 0;
-        // 线盒
-        this._lineBox.visible = false;
-        // 倍数盒
-        this._multiplierBox.visible = false;
+        // this._lineBox.visible = true; // 线盒
+        // this._multiplierBox.visible = true; // 倍数盒
     }
 
     onUpdate(): void {
-        // 更新状态到指定的时间
-        this.updateStatusToTime(this._time + Laya.timer.delta);
+        if (this._flags & Flag.Launching) {
+            // 更新状态到指定的时间
+            this.updateStatusToTime(this._time + Laya.timer.delta);
+        }
     }
 
 
@@ -213,10 +224,6 @@ export class RocketChart extends Laya.Script {
      */
     public updateStatusToTime(time: number): void {
         // console.time("draw");
-        // 线盒
-        if (!this._lineBox.visible) this._lineBox.visible = true;
-        // 倍数盒
-        if (!this._multiplierBox.visible) this._multiplierBox.visible = true;
 
         // 时间
         this._time = time;
@@ -326,7 +333,7 @@ export class RocketChart extends Laya.Script {
         this._triangleGraphics.clear();
         this._triangleGraphics.repaint();
 
-        // 网格标尺绘制 -------------------------------------------------
+        // 网格标尺绘制 ----------------------------------------
         this.drawGridAndRulers();
 
         // 计算并展示跳点 --------------------------------------
@@ -338,6 +345,22 @@ export class RocketChart extends Laya.Script {
 
     /** 开始发射 */
     public startLaunch(): void {
+        if (!(this._flags & Flag.Inited)) return;
+        if (this._flags & Flag.Launching) return;
+
+        this._flags |= Flag.Launching;
+
+        // if (!this._lineBox.visible) this._lineBox.visible = true; // 线盒
+        // if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
+    }
+
+    /**
+     * 爆炸
+     * @param multipler 倍数
+     * @param time 发射经过的时间<毫秒>
+     */
+    public boom(multipler: number, time: number): void {
+        if (!(this._flags & Flag.Inited)) return;
 
     }
 
