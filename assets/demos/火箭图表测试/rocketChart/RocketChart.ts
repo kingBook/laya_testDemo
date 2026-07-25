@@ -19,8 +19,10 @@ interface JumpPointData {
 enum Flag {
     /** 已初始化 */
     Inited = 1,
-    /** 启动中... */
+    /** 已发射启动... */
     Launching = 1 << 1,
+    /** 已爆炸 */
+    Boomed = 1 << 2
 }
 
 /** 火箭图表 */
@@ -116,6 +118,16 @@ export class RocketChart extends Laya.Script {
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
     private readonly _lineMinPos = new Point(0, 0);
 
+    /** 默认时间标尺显示的时间长度<毫秒>，必须是10的次方 */
+    private readonly _defaultDisplayTimeMs = 10000;
+
+    /** 已初始化 */
+    public get isInited(): boolean { return (this._flags & Flag.Inited) > 0; }
+    /** 已发射启动... */
+    public get isLaunching(): boolean { return (this._flags & Flag.Launching) > 0; }
+    /** 已爆炸 */
+    public get isBoomd(): boolean { return (this._flags & Flag.Boomed) > 0; }
+
     /** 发射经过的时间<毫秒> */
     public get time(): number { return this._time; }
     /** 倍数 */
@@ -202,11 +214,16 @@ export class RocketChart extends Laya.Script {
         this._timeOnTwoMultiplier = this.multiplierToTime(2, initSpeed, acceleration);
         this._timeOnRight = this._timeOnTwoMultiplier - 2000;
         this._jumpPoints.length = 0;
-        // this._lineBox.visible = true; // 线盒
-        // this._multiplierBox.visible = true; // 倍数盒
+        this._lineBox.visible = false; // 线盒
+        this._multiplierBox.visible = false; // 倍数盒
+
+        // 网格标尺绘制
+        this.drawGridAndRulers(this._defaultDisplayTimeMs);
     }
 
     onUpdate(): void {
+        if (!(this._flags & Flag.Inited)) return;
+
         if (this._flags & Flag.Launching) {
             // 更新状态到指定的时间
             this.updateStatusToTime(this._time + Laya.timer.delta);
@@ -216,6 +233,10 @@ export class RocketChart extends Laya.Script {
 
     onDisable(): void {
         this.dispose();
+
+        // 清空绘制，并移除所有绘制命令
+        this._lineGraphics.clear(true);
+        this._triangleGraphics.clear(true);
     }
 
     /**
@@ -224,6 +245,9 @@ export class RocketChart extends Laya.Script {
      */
     public updateStatusToTime(time: number): void {
         // console.time("draw");
+
+        if (!this._lineBox.visible) this._lineBox.visible = true; // 线盒
+        if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
 
         // 时间
         this._time = time;
@@ -334,7 +358,8 @@ export class RocketChart extends Laya.Script {
         this._triangleGraphics.repaint();
 
         // 网格标尺绘制 ----------------------------------------
-        this.drawGridAndRulers();
+        const displayTimeMs = this.ceilPowerOf10(Math.max(this._time, this._defaultDisplayTimeMs)); // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
+        this.drawGridAndRulers(displayTimeMs);
 
         // 计算并展示跳点 --------------------------------------
         this.calcAndShowPlayerJumpPoint();
@@ -349,9 +374,6 @@ export class RocketChart extends Laya.Script {
         if (this._flags & Flag.Launching) return;
 
         this._flags |= Flag.Launching;
-
-        // if (!this._lineBox.visible) this._lineBox.visible = true; // 线盒
-        // if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
     }
 
     /**
@@ -361,6 +383,8 @@ export class RocketChart extends Laya.Script {
      */
     public boom(multipler: number, time: number): void {
         if (!(this._flags & Flag.Inited)) return;
+        if (this._flags & Flag.Boomed) return;
+        this._flags |= Flag.Boomed;
 
     }
 
@@ -382,23 +406,24 @@ export class RocketChart extends Laya.Script {
         });
     }
 
-    /** 网格标尺绘制 */
-    private drawGridAndRulers(): void {
+    /**
+     * 网格标尺绘制
+     * @param displayTimeMs 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
+     */
+    private drawGridAndRulers(displayTimeMs: number): void {
         const fontSize = 18; // 字体大小
         const space = 10; // '倍数'、'时间'与画布的间距
-        const defaultDisplayTimeMs = 10000; // 默认时间标尺显示的时间长度<毫秒>
 
-        const displayTimeMs = this.ceilPowerOf10(Math.max(this._time, defaultDisplayTimeMs)); // 时间标尺显示的时间长度<毫秒>
-        const cellCount = this._time < defaultDisplayTimeMs ? 5 : 10; // 画刻度的格数
+        const cellCount = this._time < this._defaultDisplayTimeMs ? 5 : 10; // 画刻度的格数
         const timeScaleUnit = displayTimeMs / cellCount; // 每一刻度单位<毫秒>
 
-        const scale = this._time > defaultDisplayTimeMs ? defaultDisplayTimeMs / this._time : 1; // 计算缩放
+        const scale = this._time > this._defaultDisplayTimeMs ? this._defaultDisplayTimeMs / this._time : 1; // 计算缩放
 
         // 时间标尺 ------------------------------
         this._timeRuler.graphics.clear();
 
         for (let i = 0; i <= cellCount; i++) {
-            const x = i * ((this._canvas.width * (displayTimeMs / defaultDisplayTimeMs)) / cellCount) * scale;
+            const x = i * ((this._canvas.width * (displayTimeMs / this._defaultDisplayTimeMs)) / cellCount) * scale;
             if (x > this._canvas.width) continue; // 画布外不显示
 
             const value = i * timeScaleUnit;
@@ -419,7 +444,7 @@ export class RocketChart extends Laya.Script {
         this._multiplierRuler.graphics.clear();
 
         for (let i = 1; i <= cellCount; i++) {
-            const y = -i * ((this._canvas.height * (displayTimeMs / defaultDisplayTimeMs)) / cellCount) * scale;
+            const y = -i * ((this._canvas.height * (displayTimeMs / this._defaultDisplayTimeMs)) / cellCount) * scale;
             if (y < -this._canvas.height) continue; // 画布外不显示
 
             const value = 1 + (i * timeScaleUnit) / 1000 / 10;
@@ -478,9 +503,11 @@ export class RocketChart extends Laya.Script {
     }
 
     private dispose(): void {
-        // 清空绘制，并移除所有绘制命令
-        this._lineGraphics.clear(true);
-        this._triangleGraphics.clear(true);
+        // 清空绘制
+        this._lineGraphics.clear(false);
+        this._triangleGraphics.clear(false);
+        this._timeRuler.graphics.clear();
+        this._multiplierRuler.graphics.clear();
 
         // 清空跳点
         this._jumpPoints.forEach(item => {

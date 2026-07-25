@@ -159,6 +159,7 @@
               "name": "lineBox",
               "width": 520,
               "height": 330,
+              "visible": false,
               "left": 0,
               "right": 0,
               "top": 0,
@@ -238,6 +239,7 @@
               "y": 22,
               "width": 200,
               "height": 120,
+              "visible": false,
               "centerX": 0,
               "centerY": -83,
               "_$child": [
