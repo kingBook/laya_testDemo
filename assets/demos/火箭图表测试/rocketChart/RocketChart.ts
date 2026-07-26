@@ -31,10 +31,10 @@ export class RocketChart extends Laya.Script {
 
     @property({ type: Laya.Box, private: false, tips: "画布" })
     private _canvas: Laya.Box;
+    @property({ type: Laya.Box, private: false, tips: "图形盒" })
+    private _shapeBox: Laya.Box;
     @property({ type: Laya.Sprite, private: false, tips: "三角形" })
     private _triangle: Laya.Sprite;
-    @property({ type: Laya.Box, private: false, tips: "线盒" })
-    private _lineBox: Laya.Box;
     @property({ type: Laya.Sprite, private: false, tips: "线" })
     private _line: Laya.Sprite;
     @property({ type: Laya.Sprite, private: false, tips: "线头" })
@@ -156,7 +156,7 @@ export class RocketChart extends Laya.Script {
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
         this._timeOnTwoMultiplier = this.multiplierToTime(2, initSpeed, acceleration);
         this._jumpPoints.length = 0;
-        this._lineBox.visible = false; // 线盒
+        this._shapeBox.visible = false; // 图形盒
         this._multiplierBox.visible = false; // 倍数盒
 
         // 网格标尺绘制
@@ -171,7 +171,6 @@ export class RocketChart extends Laya.Script {
             this.updateStatusToTime(this._time + Laya.timer.delta);
         }
     }
-
 
     onDisable(): void {
         this.dispose();
@@ -188,7 +187,7 @@ export class RocketChart extends Laya.Script {
     public updateStatusToTime(time: number): void {
         // console.time("draw");
 
-        if (!this._lineBox.visible) this._lineBox.visible = true; // 线盒
+        if (!this._shapeBox.visible) this._shapeBox.visible = true; // 图形盒
         if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
 
         // 时间
