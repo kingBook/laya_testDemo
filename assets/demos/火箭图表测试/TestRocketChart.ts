@@ -17,7 +17,7 @@ export class TestRocketChart extends Laya.Script {
     onStart(): void {
         // 初始化
         const initSpeed = 0.05;
-        const acceleration = 0.002;
+        const acceleration = 0.005//0.002;
         this._rocketChart.init(initSpeed, acceleration);
 
         // 开始发射
@@ -46,6 +46,11 @@ export class TestRocketChart extends Laya.Script {
         this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
 
         multipler = 1.8;
+        sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
+        isPlayer = false;
+        this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
+        
+        multipler = 2.2;
         sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
         isPlayer = false;
         this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);

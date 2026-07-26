@@ -43,25 +43,6 @@ export class RocketChart extends Laya.Script {
     private _multiplierBox: Laya.Box;
     @property({ type: Laya.Label, private: false, tips: "当前倍数文本" })
     private _multiplierLabel?: Laya.Label;
-
-    @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "阶段1, 动画曲线" })
-    public curve1: AnimationCurve = new AnimationCurve();
-    @property({ type: Number, range: [1, 20], step: 1, fractionDigits: 0, tips: "阶段1, 曲线图的x轴的增长速度" })
-    public curve1SpeedX: number = 5;
-
-    @property({ type: AnimationCurve, inspector: AnimationCurve.name, tips: "阶段2, 动画曲线" })
-    public curve2: AnimationCurve = new AnimationCurve();
-
-    @property({
-        type: [Number],
-        nullable: false,
-        fixedLength: 2,
-        elementProps: { step: 0.01, fractionDigits: 2, range: [0, 1] },
-        onChange: "onChangeRangeNormalMapY",
-        tips: "定义曲线右上角Y轴的填充范围 (1:表示填满)"
-    })
-    public rangeNormalMapY: number[] = [0.8, 1.0];
-
     @property({ type: Boolean, tips: "显示网格线" })
     public showGrid: boolean = true;
 
@@ -77,25 +58,11 @@ export class RocketChart extends Laya.Script {
     /** 加速度 */
     private _acceleration: number = 0.002;
 
-    /** 跟随加速变化的曲线 */
-    private _curve: AnimationCurve;
-    /** 曲线图的x轴插值，区间：[0,1] */
-    private _curveT: number;
-    /** 加速时，曲线变化的插值1 */
-    private _curveSpeedUpChangeT1: number;
-    /** 加速时，曲线变化的插值2 */
-    private _curveSpeedUpChangeT2: number;
-
-    /** '画布高度百分比插值'，区间：[0,1] */
-    private _canvasHeightPercentT: number;
-
     /** 发射经过的时间<毫秒> */
     private _time: number;
     /** 倍数 */
     private _multiplier: number;
 
-    /** 第一阶段到达右边缘时的时间 */
-    private _timeOnRight: number;
     /** 到达两倍时的时间<毫秒> */
     private _timeOnTwoMultiplier: number;
     /** 跳点数组 */
@@ -112,14 +79,16 @@ export class RocketChart extends Laya.Script {
 
     private _tempLinePoints: number[] = [];
     private _tempTrianglePoints: number[] = [];
-    private _tempCtrlPts1: number[] = [];
-    private _tempCtrlPts2: number[] = [];
 
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
     private readonly _lineMinPos = new Point(0, 0);
 
-    /** 默认时间标尺显示的时间长度<毫秒>，必须是10的次方 */
+    /** 时间标尺默认显示的时间长度<毫秒>，必须是10的次方 */
     private readonly _defaultDisplayTimeMs = 10000;
+    /** 倍数标尺默认显示的倍数 */
+    private readonly _defaultDisplayMultiplier = 2;
+    /** 初始倍数 */
+    private readonly _initMultiplier = 1;
 
     /** 已初始化 */
     public get isInited(): boolean { return (this._flags & Flag.Inited) > 0; }
@@ -138,23 +107,6 @@ export class RocketChart extends Laya.Script {
     public get acceleration(): number { return this._acceleration; }
 
 
-
-
-    //#region Editor
-    /** 在编辑器中改变 {@link rangeNormalMapY} 属性时的回调 (仅用于编辑器) */
-    private onChangeRangeNormalMapY(key?: string): void {
-        if (!key) return;
-        const i = parseInt(key);
-        if (i <= 0) return;
-
-        let current = this.rangeNormalMapY[i];
-
-        // 限制大于上一个
-        let prev = this.rangeNormalMapY[i - 1];
-        current = Math.max(prev, current);
-        this.rangeNormalMapY[i] = current;
-    }
-    //#endregion
 
     onAwake(): void {
         this._jumpPoints = [];
@@ -177,8 +129,6 @@ export class RocketChart extends Laya.Script {
         this._drawTriangleCmd = new Mesh2dDrawPolygonCmd();
         this._triangleGraphics.addCmd(this._drawTriangleCmd);
 
-        // 跟随加速变化的曲线
-        this._curve = new AnimationCurve();
     }
 
     onEnable(): void {
@@ -188,9 +138,6 @@ export class RocketChart extends Laya.Script {
         this._lineHead.pos(this._lineMinPos.x, this._canvas.height - this._lineMinPos.y);
         this._multiplierRuler.pos(0, this._canvas.height);
         this._timeRuler.pos(0, this._canvas.height);
-
-        // 跟随加速变化的曲线 -> 曲线1
-        this._curve.setTo(this.curve1);
     }
 
     /**
@@ -204,21 +151,16 @@ export class RocketChart extends Laya.Script {
         this._flags = Flag.Inited;
         this._initSpeed = initSpeed;
         this._acceleration = acceleration;
-        this._curveT = 0;
-        this._curveSpeedUpChangeT1 = 0;
-        this._curveSpeedUpChangeT2 = 0;
-        this._canvasHeightPercentT = 0;
         this._time = 0;
         this._multiplier = 1;
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
         this._timeOnTwoMultiplier = this.multiplierToTime(2, initSpeed, acceleration);
-        this._timeOnRight = this._timeOnTwoMultiplier - 2000;
         this._jumpPoints.length = 0;
         this._lineBox.visible = false; // 线盒
         this._multiplierBox.visible = false; // 倍数盒
 
         // 网格标尺绘制
-        this.drawGridAndRulers(this._defaultDisplayTimeMs);
+        this.drawGridAndRulers(this._defaultDisplayTimeMs, this._defaultDisplayMultiplier);
     }
 
     onUpdate(): void {
@@ -256,60 +198,36 @@ export class RocketChart extends Laya.Script {
         this._multiplier = this.timeToMultiplier(this._time, this._initSpeed, this._acceleration);
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
 
-
-        // 阶段1 ---------------------------------------------------------------------------------
-        this._curveT = Laya.MathUtil.clamp01(this._time / this._timeOnRight);
-
-        // '画布高度百分比插值' 增长
-        if (this._curveT >= 1) {
-            const speedCT = 1 / (this._timeOnTwoMultiplier - this._timeOnRight) * Laya.timer.delta;
-            this._canvasHeightPercentT = Math.min(this._canvasHeightPercentT + speedCT, 1);
-        }
-
-
-        // 阶段2 加速 -----------------------------------------------------------------------------
-        if (this._canvasHeightPercentT >= 1) {
-            // '图形颜色' 跟随加速变化
-            const speedMF = this.curve1SpeedX / 500;
+        // 2.00x 变色
+        if (this._time > this._timeOnTwoMultiplier) {
+            const speedMF = 0.015;
             let mixFactorVal = this._lineGraphics.sharedMaterial.getFloatByIndex(this._mixFactorID);
             mixFactorVal = Math.min(mixFactorVal + speedMF, 1);
 
             this._lineGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, mixFactorVal);
             this._triangleGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, mixFactorVal);
-
-            // '曲线' 跟随加速变化
-            const speedAC = this.curve1SpeedX / 10000;
-            this._curveSpeedUpChangeT1 = Math.min(this._curveSpeedUpChangeT1 + speedAC, 1);
-            if (this._curveSpeedUpChangeT1 >= 1) {
-                this._curveSpeedUpChangeT2 = Math.min(this._curveSpeedUpChangeT2 + speedAC, 1);
-            }
-            this.curve1.toControlPointValues(this._tempCtrlPts1);
-            this.curve2.toControlPointValues(this._tempCtrlPts2);
-            const c1x = Laya.MathUtil.lerp(this._tempCtrlPts1[0], this._tempCtrlPts2[0], this._curveSpeedUpChangeT1);
-            const c1y = Laya.MathUtil.lerp(this._tempCtrlPts1[1], this._tempCtrlPts2[1], this._curveSpeedUpChangeT1);
-            const c2x = Laya.MathUtil.lerp(this._tempCtrlPts1[2], this._tempCtrlPts2[2], this._curveSpeedUpChangeT2);
-            const c2y = Laya.MathUtil.lerp(this._tempCtrlPts1[3], this._tempCtrlPts2[3], this._curveSpeedUpChangeT2);
-            this._curve.setTo(c1x, c1y, c2x, c2y);
         }
 
 
         // 画线 ---------------------------------------------------
-        const canvasHeightPercent = Laya.MathUtil.lerp(this.rangeNormalMapY[0], this.rangeNormalMapY[1], this._canvasHeightPercentT); // 画布高度百分比
+        const timeRulerMax = this.getTimeRulerMax();
+        const multiplierRulerMax = this.getMultiplierRulerMax();
 
-        const targetT = this._curveT; // 区间: [0,1]
-
-        const segmentCount = this._canvasHeightPercentT >= 1 ? 100 : 20; // 线段数
-        const step = targetT / segmentCount;
+        const targetT = Laya.MathUtil.clamp01(this._time / timeRulerMax);
+        const segmentCount = 25;
+        const step = 1 / segmentCount;
         let nx = 0, ny = 0, mx = 0, my = 0;
 
         this._tempLinePoints.length = 0;
-        this._tempLinePoints.push(mx, my);
+        this._tempLinePoints.push(mx, my); // (0,0)点
 
         while (true) {
             nx = Math.min(nx + step, targetT);
-            ny = this._curve.getValue(nx);
+            ny = (this.timeToMultiplier(timeRulerMax * nx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
+
             mx = this.mapX(nx);
-            my = this.mapY(ny, canvasHeightPercent);
+            my = this.mapY(ny);
+
             this._tempLinePoints.push(mx, my);
             if (nx >= targetT) break;
         }
@@ -358,12 +276,13 @@ export class RocketChart extends Laya.Script {
         this._triangleGraphics.repaint();
 
         // 网格标尺绘制 ----------------------------------------
-        const displayTimeMs = this.ceilPowerOf10(Math.max(this._time, this._defaultDisplayTimeMs)); // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
-        this.drawGridAndRulers(displayTimeMs);
+        const displayTimeMs = this._time > this._defaultDisplayTimeMs ? this.ceilPowerOf10(this._time) : this._defaultDisplayTimeMs; // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
+        const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOf10(this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
+
+        this.drawGridAndRulers(displayTimeMs, displayMutiplier);
 
         // 计算并展示跳点 --------------------------------------
         this.calcAndShowPlayerJumpPoint();
-
 
         // console.timeEnd("draw");
     }
@@ -409,24 +328,25 @@ export class RocketChart extends Laya.Script {
     /**
      * 网格标尺绘制
      * @param displayTimeMs 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
+     * @param displayMutiplier
      */
-    private drawGridAndRulers(displayTimeMs: number): void {
+    private drawGridAndRulers(displayTimeMs: number, displayMutiplier: number): void {
         const fontSize = 18; // 字体大小
         const space = 10; // '倍数'、'时间'与画布的间距
 
-        const cellCount = this._time < this._defaultDisplayTimeMs ? 5 : 10; // 画刻度的格数
-        const timeScaleUnit = displayTimeMs / cellCount; // 每一刻度单位<毫秒>
-
-        const scale = this._time > this._defaultDisplayTimeMs ? this._defaultDisplayTimeMs / this._time : 1; // 计算缩放
-
         // 时间标尺 ------------------------------
+        const xCount = this._time > this._defaultDisplayTimeMs ? 10 : 5; // 格数
+        const xScaleUnit = displayTimeMs / xCount; // 一格的单位<毫秒>
+        const xScale = this._time > this._defaultDisplayTimeMs ? this._defaultDisplayTimeMs / this._time : 1; // 计算缩放
+        const dx = (this._canvas.width * (displayTimeMs / this._defaultDisplayTimeMs)) / xCount; // 一格距离
+
         this._timeRuler.graphics.clear();
 
-        for (let i = 0; i <= cellCount; i++) {
-            const x = i * ((this._canvas.width * (displayTimeMs / this._defaultDisplayTimeMs)) / cellCount) * scale;
+        for (let i = 0; i <= xCount; i++) {
+            const x = i * dx * xScale;
             if (x > this._canvas.width) continue; // 画布外不显示
 
-            const value = i * timeScaleUnit;
+            const value = i * xScaleUnit;
             const text = `${value / 1000}`;
             const y = space;
             const font = `${fontSize}px Arial`;
@@ -441,15 +361,23 @@ export class RocketChart extends Laya.Script {
         }
 
         // 倍数标尺 ------------------------------
+        const yCount = this._multiplier > this._defaultDisplayMultiplier ? 10 : 5; // 格数
+        const yScaleUnit = displayMutiplier / yCount; // 一格的单位<倍>
+        const dy = (this._canvas.height * (displayMutiplier / (this._defaultDisplayMultiplier - this._initMultiplier))) / yCount; // 一格距离
+        // console.log(displayMutiplier, yCount, yScaleUnit);
+
+        const yScale = this._multiplier > this._defaultDisplayMultiplier ? (this._defaultDisplayMultiplier - this._initMultiplier) / (this._multiplier - this._initMultiplier) : 1; // 计算缩放
+
         this._multiplierRuler.graphics.clear();
 
-        for (let i = 1; i <= cellCount; i++) {
-            const y = -i * ((this._canvas.height * (displayTimeMs / this._defaultDisplayTimeMs)) / cellCount) * scale;
+        for (let i = 1; i <= yCount; i++) {
+            const y = -i * dy * yScale;
             if (y < -this._canvas.height) continue; // 画布外不显示
 
-            const value = 1 + (i * timeScaleUnit) / 1000 / 10;
+            const value = this._initMultiplier + (i * yScaleUnit);
+
             const x = -space;
-            const text = `${cellCount <= 5 ? value.toFixed(1) : value}x`;
+            const text = `${yCount <= 5 ? value.toFixed(1) : value}x`;
             const font = `${fontSize}px Arial`;
             const color = "#e6e6e6";
             const textAlign = "right";
@@ -470,16 +398,17 @@ export class RocketChart extends Laya.Script {
         while (--i >= 0) {
             const item = this._jumpPoints[i];
             if (!item.sprite) continue;
-            if (this._multiplier < item.multipler) continue;
+            if (this._multiplier < item.multipler) continue; // 只处理到达倍数的跳点
 
             if (!item.sprite.parent) {
                 this._line.parent.addChild(item.sprite);
             }
 
-            const timeMax = this._time > this._timeOnRight ? this._time : this._timeOnRight;
-            const t = item.time / timeMax;
-            const x = this.mapX(t);
-            const y = this._canvas.height + this.mapY(this._curve.getValue(t), Laya.MathUtil.lerp(this.rangeNormalMapY[0], this.rangeNormalMapY[1], this._canvasHeightPercentT));
+            const nx = this.getPrecentX(item.time);
+            const ny = this.getPrecentY(item.multipler);
+
+            const x = this.mapX(nx);
+            const y = this._canvas.height + this.mapY(ny);
             item.sprite.pos(x, y);
 
             // 其他用户跳点
@@ -516,7 +445,37 @@ export class RocketChart extends Laya.Script {
         this._jumpPoints.length = 0;
     }
 
+
+
     //#region Util
+    /** 获取时间标尺当前显示的最大值 */
+    private getTimeRulerMax(): number {
+        return this._time > this._defaultDisplayTimeMs ? this.time : this._defaultDisplayTimeMs;
+    }
+
+    /** 获取倍数标尺当前显示的最大值 */
+    private getMultiplierRulerMax(): number {
+        return this._multiplier > this._defaultDisplayMultiplier ? this._multiplier : this._defaultDisplayMultiplier;
+    }
+
+    /**
+     * 获取指定时间所占时间标尺的比率
+     * @param time 发射经过的时间
+     * @returns 
+     */
+    private getPrecentX(time: number): number {
+        return time / this.getTimeRulerMax();
+    }
+
+    /**
+     * 获取指定倍数所占倍数标尺的比率
+     * @param multipler 倍数
+     * @returns 
+     */
+    private getPrecentY(multipler: number): number {
+        return (multipler - this._initMultiplier) / (this.getMultiplierRulerMax() - this._initMultiplier);
+    }
+
     /**
      * 曲线图中的x，映射到画布
      * @param nx 曲线图中单位化的x
@@ -540,15 +499,15 @@ export class RocketChart extends Laya.Script {
     /** 
      * 时间转倍数
      * @param time 发射经过的时间<毫秒>
-     * @param v0 [默认: 0.1] 初速度<倍/秒>
-     * @param a [默认: 0.002] 加速度<倍/秒>
-     * @returns 倍数（保留两位小数）
+     * @param v0 初速度<倍/秒>
+     * @param a 加速度<倍/秒>
+     * @returns 倍数
      */
-    private timeToMultiplier(time: number, v0: number = 0.1, a: number = 0.002): number {
+    private timeToMultiplier(time: number, v0: number, a: number): number {
         const t = time / 1000; // 时间<秒>
 
         let result = 1 + v0 * t + 0.5 * a * t * t;
-        result = ((result * 100) | 0) / 100; // 保留两位小数
+        // result = ((result * 100) | 0) / 100; // 保留两位小数
         // console.log(result);
         return result;
     }
@@ -556,11 +515,11 @@ export class RocketChart extends Laya.Script {
     /**
      * 倍数转时间
      * @param multiplier 倍数 （保留两位小数）
-     * @param v0 [默认: 0.1] 初速度<倍/秒>
-     * @param a [默认: 0.002] 加速度<倍/秒>
+     * @param v0 初速度<倍/秒>
+     * @param a 加速度<倍/秒>
      * @returns 发射经过的时间<毫秒>
      */
-    private multiplierToTime(multiplier: number, v0: number = 0.1, a: number = 0.002): number {
+    private multiplierToTime(multiplier: number, v0: number, a: number): number {
         // 0 = (1 - multiplier) + (v0 * t) + (0.5 * a * t * t);
         const aa = 0.5 * a;
         const bb = v0;

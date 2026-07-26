@@ -2,7 +2,7 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "ChartGradient",
+    "type": "ChartGradient3_4",
     "renderQueue": 2000,
     "materialRenderMode": 0,
     "s_Cull": 0,
