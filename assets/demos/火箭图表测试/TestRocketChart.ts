@@ -20,46 +20,58 @@ export class TestRocketChart extends Laya.Script {
         const acceleration = 0.005//0.002;
         this._rocketChart.init(initSpeed, acceleration);
 
+        // 立即设置火箭图表状态到指定的时间、倍数
+        const initTime = 18928;
+        const initMultiplier = 1.36;
+        this._rocketChart.updateStatusToTime(initTime, initMultiplier);
+
         // 开始发射
         this._rocketChart.startLaunch();
 
         // 添加玩家跳点
-        let multipler = 1.66;
+        let multiplier = 1.66;
         let sprite = this._playerJumpPointPrefab.create() as Laya.Sprite;
         let isPlayer = true;
-        this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
+        this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
         // 添加其他玩家跳点
-        multipler = 1.0;
+        multiplier = 1.0;
         sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
         isPlayer = false;
-        this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
+        this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
-        multipler = 1.3;
+        multiplier = 1.3;
         sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
         isPlayer = false;
-        this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
+        this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
-        multipler = 1.5;
+        multiplier = 1.5;
         sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
         isPlayer = false;
-        this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
+        this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
-        multipler = 1.8;
+        multiplier = 1.8;
         sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
         isPlayer = false;
-        this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
-        
-        multipler = 2.2;
+        this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
+
+        multiplier = 2.2;
         sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
         isPlayer = false;
-        this._rocketChart.addJumpPoint(multipler, sprite, isPlayer);
+        this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
+
+        // 爆炸
+        Laya.timer.once(3000, this, () => {
+            if (this._rocketChart.isLaunching) {
+                this._rocketChart.boom(18928, 1.36);
+            }
+        });
 
 
     }
 
     onUpdate(): void {
-        
+
     }
 
 

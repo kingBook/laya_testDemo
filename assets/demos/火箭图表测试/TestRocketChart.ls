@@ -44,11 +44,11 @@
           "_canvas": {
             "_$ref": "oxyf25e9"
           },
-          "_triangle": {
-            "_$ref": "aqroded6"
-          },
           "_shapeBox": {
             "_$ref": "iqrmctr9"
+          },
+          "_triangle": {
+            "_$ref": "aqroded6"
           },
           "_line": {
             "_$ref": "n52manlf"
@@ -191,9 +191,9 @@
                   "_$type": "Label",
                   "name": "multiplierLabel",
                   "x": 39,
-                  "y": 32,
+                  "y": 35,
                   "width": 122,
-                  "height": 56,
+                  "height": 51,
                   "centerX": 0,
                   "centerY": 0,
                   "text": "{p=1.00}x",
@@ -202,8 +202,7 @@
                   "fitContent": "yes",
                   "templateVars": true,
                   "align": "center",
-                  "valign": "middle",
-                  "letterSpacing": 0
+                  "valign": "middle"
                 }
               ]
             }

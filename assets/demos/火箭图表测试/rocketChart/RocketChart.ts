@@ -9,7 +9,7 @@ interface JumpPointData {
     /** 发射经过的时间<毫秒> */
     time: number;
     /** 倍数 */
-    multipler: number;
+    multiplier: number;
     /** 要显示的对象 */
     sprite: Laya.Sprite;
     /** true:玩家跳点; false:其他用户跳点 */
@@ -181,11 +181,20 @@ export class RocketChart extends Laya.Script {
     }
 
     /**
-     * 更新状态到指定的时间
+     * 更新状态到指定的时间、倍数
      * @param time 发射经过的时间<毫秒>
+     * @param multiplier [可选] 倍数
      */
-    public updateStatusToTime(time: number): void {
+    public updateStatusToTime(time: number, multiplier?: number): void {
         // console.time("draw");
+
+        // 修正时间、倍数保证对应(倍数优先)
+        if (!isNaN(multiplier)) {
+            const tempMultiplier: string = this.timeToMultiplier(time, this._initSpeed, this._acceleration).toFixed(2);
+            if (tempMultiplier != multiplier.toFixed(2)) {
+                time = this.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
+            }
+        }
 
         if (!this._shapeBox.visible) this._shapeBox.visible = true; // 图形盒
         if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
@@ -288,37 +297,43 @@ export class RocketChart extends Laya.Script {
 
     /** 开始发射 */
     public startLaunch(): void {
-        if (!(this._flags & Flag.Inited)) return;
-        if (this._flags & Flag.Launching) return;
+        if (!(this._flags & Flag.Inited)) throw new Error("未初始化，不能发射");
+        if (this._flags & Flag.Boomed) throw new Error("火箭已经爆炸，需重新初始化，才能发射");
+        if (this._flags & Flag.Launching) throw new Error("已经发射了，不能重复调用发射");
 
         this._flags |= Flag.Launching;
     }
 
     /**
      * 爆炸
-     * @param multipler 倍数
      * @param time 发射经过的时间<毫秒>
+     * @param multiplier 倍数
      */
-    public boom(multipler: number, time: number): void {
-        if (!(this._flags & Flag.Inited)) return;
-        if (this._flags & Flag.Boomed) return;
-        this._flags |= Flag.Boomed;
+    public boom(time: number, multiplier?: number): void {
+        if (!(this._flags & Flag.Inited)) throw new Error("未初始化，不能调用爆炸");
+        if (!(this._flags & Flag.Launching)) throw new Error("未开始发射，不能调用爆炸");
+        if (this._flags & Flag.Boomed) throw new Error("已经爆炸了，不能重复调用爆炸");
 
+        this._flags |= Flag.Boomed;
+        this._flags &= ~Flag.Launching;
+        this.updateStatusToTime(time, multiplier);
     }
 
     /**
      * 添加玩家的跳点
-     * @param multipler 倍数<两位小数>
+     * * 火箭到达跳点指定的倍数时，才显示跳点对应的显示对象
+     * * 如果在火箭到达跳点指定的倍数后添加跳点，则立即显示跳点对应的显示对象
+     * @param multiplier 倍数<两位小数>
      * @param sprite 跳点需要展示的对象
      * @param isPlayer true:玩家跳点; false:其他用户跳点
      */
-    public addJumpPoint(multipler: number, sprite: Laya.Sprite, isPlayer: boolean): void {
-        const time = this.multiplierToTime(multipler, this._initSpeed, this._acceleration);
-        // console.log("addJumpPoint", time, multipler);
+    public addJumpPoint(multiplier: number, sprite: Laya.Sprite, isPlayer: boolean): void {
+        const time = this.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
+        // console.log("addJumpPoint", time, multiplier);
 
         this._jumpPoints.push({
             time: time,
-            multipler: multipler,
+            multiplier: multiplier,
             sprite: sprite,
             isPlayer: isPlayer
         });
@@ -397,14 +412,14 @@ export class RocketChart extends Laya.Script {
         while (--i >= 0) {
             const item = this._jumpPoints[i];
             if (!item.sprite) continue;
-            if (this._multiplier < item.multipler) continue; // 只处理到达倍数的跳点
+            if (this._multiplier < item.multiplier) continue; // 只处理到达倍数的跳点
 
             if (!item.sprite.parent) {
                 this._line.parent.addChild(item.sprite);
             }
 
             const nx = this.getPrecentX(item.time);
-            const ny = this.getPrecentY(item.multipler);
+            const ny = this.getPrecentY(item.multiplier);
 
             const x = this.mapX(nx);
             const y = this._canvas.height + this.mapY(ny);
@@ -468,11 +483,11 @@ export class RocketChart extends Laya.Script {
 
     /**
      * 获取指定倍数所占倍数标尺的比率
-     * @param multipler 倍数
+     * @param multiplier 倍数
      * @returns 
      */
-    private getPrecentY(multipler: number): number {
-        return (multipler - this._initMultiplier) / (this.getMultiplierRulerMax() - this._initMultiplier);
+    private getPrecentY(multiplier: number): number {
+        return (multiplier - this._initMultiplier) / (this.getMultiplierRulerMax() - this._initMultiplier);
     }
 
     /**
@@ -543,10 +558,9 @@ export class RocketChart extends Laya.Script {
     }
     //#endregion
 
+    // test
     onKeyDown(evt: Laya.Event): void {
-        //const multipler = 1.2;
-        //console.log("timeToMultiplier", this.timeToMultiplier(23928, this._initSpeed, this._acceleration));
-        //console.log("multiplierToTime", this.multiplierToTime(multipler, this._initSpeed, this._acceleration));
+        if (!Laya.LayaEnv.isPreview) return;
     }
 
 
