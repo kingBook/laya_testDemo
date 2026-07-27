@@ -62,7 +62,15 @@
           "_multiplierLabel": {
             "_$ref": "3uh1ijc4"
           },
-          "showGrid": false
+          "showGrid": false,
+          "_rulerFontSize": 18,
+          "_rulerFontColor": {
+            "_$type": "Color",
+            "r": 0.9,
+            "g": 0.9,
+            "b": 0.9
+          },
+          "_rulerLabelMargin": 10
         }
       ],
       "_$child": [

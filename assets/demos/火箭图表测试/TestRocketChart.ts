@@ -21,9 +21,9 @@ export class TestRocketChart extends Laya.Script {
         this._rocketChart.init(initSpeed, acceleration);
 
         // 立即设置火箭图表状态到指定的时间、倍数
-        const initTime = 18928;
-        const initMultiplier = 1.36;
-        this._rocketChart.updateStatusToTime(initTime, initMultiplier);
+        // const initTime = 18928;
+        // const initMultiplier = 1.36;
+        // this._rocketChart.updateStatusToTime(initTime, initMultiplier);
 
         // 开始发射
         this._rocketChart.startLaunch();
@@ -82,18 +82,20 @@ export class TestRocketChart extends Laya.Script {
             this._rocketChart.init(initSpeed, acceleration);
         }
 
+         if (evt.key == 'j') {
+            console.log("发射");
+            this._rocketChart.startLaunch();
+        }
 
-        if (evt.key == 'j') {
+
+        if (evt.key == 'k') {
             console.log("爆炸");
             if (this._rocketChart.isLaunching) {
                 this._rocketChart.boom(18928, 2.36);
             }
         }
 
-        if (evt.key == 'k') {
-            console.log("发射");
-            this._rocketChart.startLaunch();
-        }
+       
     }
 
 

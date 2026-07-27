@@ -1,4 +1,3 @@
-import AnimationCurve from "views/prefabs/animationCurve/AnimationCurve";
 import { Mesh2dDrawLinesCmd, Mesh2dDrawPolygonCmd, Mesh2dGraphics } from "./Mesh2dGraphics";
 import { Point } from "./poly2tri/poly2tri";
 
@@ -43,8 +42,17 @@ export class RocketChart extends Laya.Script {
     private _multiplierBox: Laya.Box;
     @property({ type: Laya.Label, private: false, tips: "当前倍数文本" })
     private _multiplierLabel?: Laya.Label;
-    @property({ type: Boolean, tips: "显示网格线" })
-    public showGrid: boolean = true;
+
+
+    @property({ type: Boolean, catalog: "Ruler", tips: "显示网格线" })
+    public showGrid: boolean = false;
+    @property({ type: Number, private: false, catalog: "Ruler", min: 5, tips: "标尺文字与画布的边距" })
+    private _rulerLabelMargin: number = 10;
+    @property({ type: Number, private: false, catalog: "Ruler", min: 1, fractionDigits: 0, tips: "标尺字体大小" })
+    private _rulerFontSize: number = 18;
+    @property({ type: Laya.Color, private: false, catalog: "Ruler", tips: "标尺字体颜色" })
+    private _rulerFontColor: Laya.Color = new Laya.Color(0.9, 0.9, 0.9);
+
 
 
     /** 时间标尺 */
@@ -53,10 +61,9 @@ export class RocketChart extends Laya.Script {
     private _multiplierRuler: Laya.Sprite;
 
     /** 初速度 */
-    private _initSpeed: number = 0.1;
-
+    private _initSpeed: number;
     /** 加速度 */
-    private _acceleration: number = 0.002;
+    private _acceleration: number;
 
     /** 发射经过的时间<毫秒> */
     private _time: number;
@@ -95,8 +102,8 @@ export class RocketChart extends Laya.Script {
     /** 视为加速开始的倍数 */
     private readonly _accelerationStartMultiplier = 2;
 
-    // /** 加速开始时的处理器 */
-    // public onAccelerationStartHandler?:Laya.Handler;
+    /** 加速开始时的处理器，格式：```():void``` */
+    public onAccelerationStartHandler?: Laya.Handler;
 
     /** 已初始化 */
     public get isInited(): boolean { return (this._flags & Flag.Inited) > 0; }
@@ -160,7 +167,7 @@ export class RocketChart extends Laya.Script {
         this._initSpeed = initSpeed;
         this._acceleration = acceleration;
         this._time = 0;
-        this._multiplier = 1;
+        this._multiplier = this._initMultiplier;
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
         this._shaderMixFactor = 0;
         this._accelerationStartTime = this.multiplierToTime(this._accelerationStartMultiplier, initSpeed, acceleration);
@@ -169,7 +176,7 @@ export class RocketChart extends Laya.Script {
         this._multiplierBox.visible = false; // 倍数盒
 
         // 网格标尺绘制
-        this.drawGridAndRulers(this._defaultDisplayTimeMs, this._defaultDisplayMultiplier);
+        this.drawGridAndRulers(this._defaultDisplayTimeMs, this._defaultDisplayMultiplier - this._initMultiplier);
     }
 
     onUpdate(): void {
@@ -216,8 +223,13 @@ export class RocketChart extends Laya.Script {
         this._multiplier = this.timeToMultiplier(this._time, this._initSpeed, this._acceleration);
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
 
-        // 2.00x 变色
+        // 2.00x 变色, 视为加速开始
         if (this._time > this._accelerationStartTime) {
+            if (this._shaderMixFactor === 0) {
+                this.onAccelerationStartHandler?.run(); // 加速开始事件
+                // console.log("加速开始事件");
+            }
+
             const speedMF = 0.015;
             this._shaderMixFactor = Math.min(this._shaderMixFactor + speedMF, 1);
         } else {
@@ -351,17 +363,17 @@ export class RocketChart extends Laya.Script {
     /**
      * 网格标尺绘制
      * @param displayTimeMs 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
-     * @param displayMutiplier
+     * @param displayMutiplier 需要减去{@link _initMultiplier}
      */
     private drawGridAndRulers(displayTimeMs: number, displayMutiplier: number): void {
-        const fontSize = 18; // 字体大小
-        const space = 10; // '倍数'、'时间'与画布的间距
+        const fontSize = this._rulerFontSize; // 字体大小
+        const margin = this._rulerLabelMargin; // '倍数'、'时间'与画布的边距
 
         // 时间标尺 ------------------------------
         const xCount = this._time > this._defaultDisplayTimeMs ? 10 : 5; // 格数
         const xScaleUnit = displayTimeMs / xCount; // 一格的单位<毫秒>
         const xScale = this._time > this._defaultDisplayTimeMs ? this._defaultDisplayTimeMs / this._time : 1; // 计算缩放
-        const dx = (this._canvas.width * (displayTimeMs / this._defaultDisplayTimeMs)) / xCount; // 一格距离
+        const dx = (this._canvas.width * (displayTimeMs / this._defaultDisplayTimeMs)) / xCount; // 一格的距离
 
         this._timeRuler.graphics.clear();
 
@@ -371,9 +383,9 @@ export class RocketChart extends Laya.Script {
 
             const value = i * xScaleUnit;
             const text = `${value / 1000}`;
-            const y = space;
+            const y = margin;
             const font = `${fontSize}px Arial`;
-            const color = "#e6e6e6";
+            const color = this._rulerFontColor.toString();
             const textAlign = "center";
             this._timeRuler.graphics.fillText(text, x, y, font, color, textAlign);
 
@@ -386,7 +398,7 @@ export class RocketChart extends Laya.Script {
         // 倍数标尺 ------------------------------
         const yCount = this._multiplier > this._defaultDisplayMultiplier ? 10 : 5; // 格数
         const yScaleUnit = displayMutiplier / yCount; // 一格的单位<倍>
-        const dy = (this._canvas.height * (displayMutiplier / (this._defaultDisplayMultiplier - this._initMultiplier))) / yCount; // 一格距离
+        const dy = (this._canvas.height * (displayMutiplier / (this._defaultDisplayMultiplier - this._initMultiplier))) / yCount; // 一格的距离
         // console.log(displayMutiplier, yCount, yScaleUnit);
 
         const yScale = this._multiplier > this._defaultDisplayMultiplier ? (this._defaultDisplayMultiplier - this._initMultiplier) / (this._multiplier - this._initMultiplier) : 1; // 计算缩放
@@ -399,10 +411,10 @@ export class RocketChart extends Laya.Script {
 
             const value = this._initMultiplier + (i * yScaleUnit);
 
-            const x = -space;
+            const x = -margin;
             const text = `${yCount <= 5 ? value.toFixed(1) : value}x`;
             const font = `${fontSize}px Arial`;
-            const color = "#e6e6e6";
+            const color = this._rulerFontColor.toString();
             const textAlign = "right";
             this._multiplierRuler.graphics.fillText(text, x, y - fontSize * 0.5, font, color, textAlign);
 
