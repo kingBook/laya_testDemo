@@ -36,7 +36,9 @@ this._rocketChart.startLaunch();
 ```ts
 Laya.timer.once(3000, this, () => {
     if (this._rocketChart.isLaunching) {
-        this._rocketChart.boom(18928, 1.36);
+        const time = 18928;
+        const multiplier = 1.36;
+        this._rocketChart.boom(time, multiplier);
     }
 });
 ```

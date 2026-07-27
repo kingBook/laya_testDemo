@@ -3,10 +3,10 @@
   "props": {
     "textures": [],
     "type": "ChartGradient",
-    "renderQueue": 2000,
-    "materialRenderMode": 0,
+    "renderQueue": 3000,
+    "materialRenderMode": 2,
     "s_Cull": 0,
-    "s_Blend": 0,
+    "s_Blend": 1,
     "s_BlendSrc": 6,
     "s_BlendDst": 7,
     "s_BlendSrcRGB": 0,
@@ -17,7 +17,7 @@
     "s_BlendEquationRGB": 0,
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
-    "s_DepthWrite": true,
+    "s_DepthWrite": false,
     "u_mixFactor": 0,
     "u_gradientDirection": [
       0,

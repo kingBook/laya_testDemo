@@ -14,7 +14,7 @@
       "_$type": "53ff027d-3d78-489c-818b-d61ccdbbb14a",
       "scriptPath": "demos/火箭图表测试/TestRocketChart.ts",
       "_rocketChart": {
-        "_$ref": "xu5la9vr",
+        "_$ref": "285rp8ua",
         "_$type": "a49eb932-cb92-4e35-9b5b-b1eebd1fdef7"
       },
       "_playerJumpPointPrefab": {
@@ -29,7 +29,7 @@
   ],
   "_$child": [
     {
-      "_$id": "xu5la9vr",
+      "_$id": "285rp8ua",
       "_$type": "Box",
       "name": "RocketChart",
       "x": 72,
@@ -42,32 +42,32 @@
           "_$type": "a49eb932-cb92-4e35-9b5b-b1eebd1fdef7",
           "scriptPath": "demos/火箭图表测试/rocketChart/RocketChart.ts",
           "_canvas": {
-            "_$ref": "oxyf25e9"
+            "_$ref": "oz6s85xo"
           },
           "_shapeBox": {
-            "_$ref": "iqrmctr9"
+            "_$ref": "qpqz6ib3"
           },
           "_triangle": {
-            "_$ref": "aqroded6"
+            "_$ref": "l1jpd696"
           },
           "_line": {
-            "_$ref": "n52manlf"
+            "_$ref": "w5qpmom6"
           },
           "_lineHead": {
-            "_$ref": "xd0dxqjx"
+            "_$ref": "0haqjez3"
           },
           "_multiplierBox": {
-            "_$ref": "4i8rl6rg"
+            "_$ref": "mr4shopw"
           },
           "_multiplierLabel": {
-            "_$ref": "sksvv25a"
+            "_$ref": "3uh1ijc4"
           },
-          "showGrid": true
+          "showGrid": false
         }
       ],
       "_$child": [
         {
-          "_$id": "oxyf25e9",
+          "_$id": "oz6s85xo",
           "_$type": "Box",
           "name": "canvas",
           "x": 50,
@@ -81,7 +81,7 @@
           "bgColor": "rgba(30,113,142,0.39215686274509803)",
           "_$child": [
             {
-              "_$id": "iqrmctr9",
+              "_$id": "qpqz6ib3",
               "_$type": "Box",
               "name": "shapeBox",
               "width": 520,
@@ -93,7 +93,7 @@
               "bottom": 0,
               "_$child": [
                 {
-                  "_$id": "aqroded6",
+                  "_$id": "l1jpd696",
                   "_$type": "Sprite",
                   "name": "triangle",
                   "y": 340,
@@ -111,7 +111,7 @@
                   ]
                 },
                 {
-                  "_$id": "n52manlf",
+                  "_$id": "w5qpmom6",
                   "_$type": "Sprite",
                   "name": "line",
                   "y": 340,
@@ -129,53 +129,35 @@
                   ]
                 },
                 {
-                  "_$id": "xd0dxqjx",
+                  "_$id": "0haqjez3",
                   "_$type": "Sprite",
                   "name": "lineHead",
                   "y": 340,
                   "width": 100,
                   "height": 100,
-                  "_gcmds": [],
-                  "_$child": [
+                  "_gcmds": [
                     {
-                      "_$id": "clujabsf",
-                      "_$type": "Sprite",
-                      "name": "graphics",
-                      "width": 100,
-                      "height": 100,
-                      "_gcmds": [
-                        {
-                          "_$type": "DrawCircleCmd",
-                          "x": 0,
-                          "y": 0,
-                          "radius": 0.1,
-                          "percent": true,
-                          "lineWidth": 1,
-                          "fillColor": "#ffffff"
-                        },
-                        {
-                          "_$type": "DrawPolyCmd",
-                          "x": 0,
-                          "y": 0,
-                          "points": [
-                            0,
-                            -11,
-                            -35,
-                            0,
-                            0,
-                            11
-                          ],
-                          "lineWidth": 1,
-                          "fillColor": "#ffffff"
-                        }
-                      ]
+                      "_$type": "DrawPolyCmd",
+                      "x": 0,
+                      "y": 0,
+                      "points": [
+                        0,
+                        0,
+                        -40,
+                        15,
+                        -40,
+                        -15
+                      ],
+                      "lineWidth": 1,
+                      "lineColor": "#000000",
+                      "fillColor": "#ffffff"
                     }
                   ]
                 }
               ]
             },
             {
-              "_$id": "4i8rl6rg",
+              "_$id": "mr4shopw",
               "_$type": "Box",
               "name": "multiplierBox",
               "x": 160,
@@ -187,7 +169,7 @@
               "centerY": -83,
               "_$child": [
                 {
-                  "_$id": "sksvv25a",
+                  "_$id": "3uh1ijc4",
                   "_$type": "Label",
                   "name": "multiplierLabel",
                   "x": 39,

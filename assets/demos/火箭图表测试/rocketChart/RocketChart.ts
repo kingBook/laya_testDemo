@@ -63,8 +63,11 @@ export class RocketChart extends Laya.Script {
     /** 倍数 */
     private _multiplier: number;
 
-    /** 到达两倍时的时间<毫秒> */
-    private _timeOnTwoMultiplier: number;
+    /** 着色器中AB两组颜色的过渡因子 */
+    private _shaderMixFactor: number;
+
+    /** 视为加速开始的时间点<毫秒> */
+    private _accelerationStartTime: number;
     /** 跳点数组 */
     private _jumpPoints: JumpPointData[];
 
@@ -89,6 +92,11 @@ export class RocketChart extends Laya.Script {
     private readonly _defaultDisplayMultiplier = 2;
     /** 初始倍数 */
     private readonly _initMultiplier = 1;
+    /** 视为加速开始的倍数 */
+    private readonly _accelerationStartMultiplier = 2;
+
+    // /** 加速开始时的处理器 */
+    // public onAccelerationStartHandler?:Laya.Handler;
 
     /** 已初始化 */
     public get isInited(): boolean { return (this._flags & Flag.Inited) > 0; }
@@ -154,7 +162,8 @@ export class RocketChart extends Laya.Script {
         this._time = 0;
         this._multiplier = 1;
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
-        this._timeOnTwoMultiplier = this.multiplierToTime(2, initSpeed, acceleration);
+        this._shaderMixFactor = 0;
+        this._accelerationStartTime = this.multiplierToTime(this._accelerationStartMultiplier, initSpeed, acceleration);
         this._jumpPoints.length = 0;
         this._shapeBox.visible = false; // 图形盒
         this._multiplierBox.visible = false; // 倍数盒
@@ -165,6 +174,7 @@ export class RocketChart extends Laya.Script {
 
     onUpdate(): void {
         if (!(this._flags & Flag.Inited)) return;
+        if (this._flags & Flag.Boomed) return;
 
         if (this._flags & Flag.Launching) {
             // 更新状态到指定的时间
@@ -207,15 +217,14 @@ export class RocketChart extends Laya.Script {
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
 
         // 2.00x 变色
-        if (this._time > this._timeOnTwoMultiplier) {
+        if (this._time > this._accelerationStartTime) {
             const speedMF = 0.015;
-            let mixFactorVal = this._lineGraphics.sharedMaterial.getFloatByIndex(this._mixFactorID);
-            mixFactorVal = Math.min(mixFactorVal + speedMF, 1);
-
-            this._lineGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, mixFactorVal);
-            this._triangleGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, mixFactorVal);
+            this._shaderMixFactor = Math.min(this._shaderMixFactor + speedMF, 1);
+        } else {
+            this._shaderMixFactor = 0;
         }
-
+        this._lineGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, this._shaderMixFactor);
+        this._triangleGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, this._shaderMixFactor);
 
         // 画线 ---------------------------------------------------
         const timeRulerMax = this.getTimeRulerMax();
@@ -459,8 +468,6 @@ export class RocketChart extends Laya.Script {
         this._jumpPoints.length = 0;
     }
 
-
-
     //#region Util
     /** 获取时间标尺当前显示的最大值 */
     private getTimeRulerMax(): number {
@@ -559,9 +566,9 @@ export class RocketChart extends Laya.Script {
     //#endregion
 
     // test
-    onKeyDown(evt: Laya.Event): void {
-        if (!Laya.LayaEnv.isPreview) return;
-    }
+    // onKeyDown(evt: Laya.Event): void {
+    //     if (!Laya.LayaEnv.isPreview) return;
+    // }
 
 
 

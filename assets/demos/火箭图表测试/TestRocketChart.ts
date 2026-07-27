@@ -61,17 +61,39 @@ export class TestRocketChart extends Laya.Script {
         this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
         // 爆炸
-        Laya.timer.once(3000, this, () => {
-            if (this._rocketChart.isLaunching) {
-                this._rocketChart.boom(18928, 1.36);
-            }
-        });
+        // Laya.timer.once(3000, this, () => {
+        //     if (this._rocketChart.isLaunching) {
+        //         this._rocketChart.boom(18928, 1.36);
+        //     }
+        // });
 
 
     }
 
     onUpdate(): void {
 
+    }
+
+    onKeyDown(evt: Laya.Event): void {
+        if (evt.key == 'h') {
+            console.log("初始化");
+            const initSpeed = 0.05;
+            const acceleration = 0.005;
+            this._rocketChart.init(initSpeed, acceleration);
+        }
+
+
+        if (evt.key == 'j') {
+            console.log("爆炸");
+            if (this._rocketChart.isLaunching) {
+                this._rocketChart.boom(18928, 2.36);
+            }
+        }
+
+        if (evt.key == 'k') {
+            console.log("发射");
+            this._rocketChart.startLaunch();
+        }
     }
 
 
