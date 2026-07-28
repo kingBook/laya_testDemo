@@ -14,43 +14,46 @@ export class TestMesh2dGraphics extends Laya.Script {
     @property({ type: Mesh2dGraphics, private: false })
     private _meshGraphics2: Mesh2dGraphics;
 
-    onAwake(): void {
+    onStart(): void {
         // 直线
-        const drawLineCmd = new Mesh2dDrawLineCmd();
-        drawLineCmd.lineWidth = 40;
-        drawLineCmd.fromX = 0;
-        drawLineCmd.fromY = 0;
-        drawLineCmd.toX = 100;
-        drawLineCmd.toY = -100;
-        //this._meshGraphics0?.addCmd(drawLineCmd);
+        // const drawLineCmd = new Mesh2dDrawLineCmd();
+        // drawLineCmd.lineWidth = 40;
+        // drawLineCmd.fromX = 0;
+        // drawLineCmd.fromY = 0;
+        // drawLineCmd.toX = 100;
+        // drawLineCmd.toY = -100;
+        // this._meshGraphics0?.addCmd(drawLineCmd);
+        // this._meshGraphics0?.repaint();
 
         // 折线
         const drawLinesCmd = new Mesh2dDrawLinesCmd();
         drawLinesCmd.lineWidth = 40;
-        // drawLinesCmd.points = [
-        //     0, 0,
-        //     100, 50,
-        //     200, 0,
-        //     300, 100
-        // ];
         drawLinesCmd.points = [
             0, 0,
-            100, -100,
-            200, -200
+            100, 50,
+            200, 0,
+            300, 100
         ];
+        // drawLinesCmd.points = [
+        //     0, 0,
+        //     100, -100,
+        //     200, -200
+        // ];
         this._meshGraphics1?.addCmd(drawLinesCmd);
+        this._meshGraphics1?.repaint();
 
         // 多边形
-        const drawPolygonCmd = new Mesh2dDrawPolygonCmd();
-        drawPolygonCmd.points = [
-            0, 0,
-            100, 0,
-            100, 100,
-            500, 600,
-            100, 700,
-            200, 500
-        ];
-        //this._meshGraphics2?.addCmd(drawPolygonCmd);
+        // const drawPolygonCmd = new Mesh2dDrawPolygonCmd();
+        // drawPolygonCmd.points = [
+        //     0, 0,
+        //     100, 0,
+        //     100, 100,
+        //     500, 600,
+        //     100, 700,
+        //     200, 500
+        // ];
+        // this._meshGraphics2?.addCmd(drawPolygonCmd);
+        // this._meshGraphics2?.repaint();
     }
 
     private _distance = 0;
