@@ -30,33 +30,33 @@ export class TestRocketChart extends Laya.Script {
 
         // 添加玩家跳点
         let multiplier = 1.66;
-        let sprite = this._playerJumpPointPrefab.create() as Laya.Sprite;
+        let sprite = this._playerJumpPointPrefab?.create() as Laya.Sprite;
         let isPlayer = true;
         this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
         // 添加其他玩家跳点
         multiplier = 1.0;
-        sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
+        sprite = this._otherUserJumpPointPrefab?.create() as Laya.Sprite;
         isPlayer = false;
         this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
         multiplier = 1.3;
-        sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
+        sprite = this._otherUserJumpPointPrefab?.create() as Laya.Sprite;
         isPlayer = false;
         this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
         multiplier = 1.5;
-        sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
+        sprite = this._otherUserJumpPointPrefab?.create() as Laya.Sprite;
         isPlayer = false;
         this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
         multiplier = 1.8;
-        sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
+        sprite = this._otherUserJumpPointPrefab?.create() as Laya.Sprite;
         isPlayer = false;
         this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
         multiplier = 2.2;
-        sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
+        sprite = this._otherUserJumpPointPrefab?.create() as Laya.Sprite;
         isPlayer = false;
         this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
