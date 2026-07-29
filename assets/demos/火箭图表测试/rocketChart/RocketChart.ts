@@ -257,6 +257,67 @@ export class RocketChart extends Laya.Script {
         this._lineGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, this._shaderMixFactor);
         this._triangleGraphics.sharedMaterial.setFloatByIndex(this._mixFactorID, this._shaderMixFactor);
 
+        // 线和三角形绘制 ----------------------------------------
+        this.drawLineAndTriangle();
+
+        // 网格标尺绘制 ----------------------------------------
+        const displayTimeMs = this._time > this._defaultDisplayTimeMs ? this.ceilPowerOf10(this._time) : this._defaultDisplayTimeMs; // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
+        const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOf10(this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
+        this.drawGridAndRulers(displayTimeMs, displayMutiplier);
+
+        // 计算并展示跳点 --------------------------------------
+        this.calcAndShowJumpPoint();
+
+        // console.timeEnd("draw");
+    }
+
+    /** 开始发射 */
+    public startLaunch(): void {
+        if (!(this._flags & Flag.Inited)) throw new Error("未初始化，不能发射");
+        if (this._flags & Flag.Boomed) throw new Error("火箭已经爆炸，需重新初始化，才能发射");
+        if (this._flags & Flag.Launching) throw new Error("已经发射了，不能重复调用发射");
+
+        this._flags |= Flag.Launching;
+    }
+
+    /**
+     * 爆炸
+     * @param time 发射经过的时间<毫秒>
+     * @param multiplier 倍数
+     */
+    public boom(time: number, multiplier?: number): void {
+        if (!(this._flags & Flag.Inited)) throw new Error("未初始化，不能调用爆炸");
+        if (!(this._flags & Flag.Launching)) throw new Error("未开始发射，不能调用爆炸");
+        if (this._flags & Flag.Boomed) throw new Error("已经爆炸了，不能重复调用爆炸");
+
+        this._flags |= Flag.Boomed;
+        this._flags &= ~Flag.Launching;
+        this.updateStatusToTime(time, multiplier);
+    }
+
+    /**
+     * 添加玩家的跳点
+     * * 火箭到达跳点指定的倍数时，才显示跳点对应的显示对象
+     * * 如果在火箭到达跳点指定的倍数后添加跳点，则立即显示跳点对应的显示对象
+     * @param multiplier 倍数<两位小数>
+     * @param sprite 跳点需要展示的对象
+     * @param isPlayer true:玩家跳点; false:其他用户跳点
+     */
+    public addJumpPoint(multiplier: number, sprite: Laya.Sprite, isPlayer: boolean): void {
+        const time = RocketChart.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
+
+        this._jumpPoints.push({
+            time: time,
+            multiplier: multiplier,
+            sprite: sprite,
+            isPlayer: isPlayer
+        });
+    }
+
+    /**
+     * 画线和三角形
+     */
+    private drawLineAndTriangle(): void {
         // 画线 ---------------------------------------------------
         const timeRulerMax = this.getTimeRulerMax();
         const multiplierRulerMax = this.getMultiplierRulerMax();
@@ -322,60 +383,6 @@ export class RocketChart extends Laya.Script {
         this._drawTriangleCmd.points = this._tempTrianglePoints;
         this._triangleGraphics.clear();
         this._triangleGraphics.repaint();
-
-        // 网格标尺绘制 ----------------------------------------
-        const displayTimeMs = this._time > this._defaultDisplayTimeMs ? this.ceilPowerOf10(this._time) : this._defaultDisplayTimeMs; // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
-        const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOf10(this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
-
-        this.drawGridAndRulers(displayTimeMs, displayMutiplier);
-
-        // 计算并展示跳点 --------------------------------------
-        this.calcAndShowPlayerJumpPoint();
-
-        // console.timeEnd("draw");
-    }
-
-    /** 开始发射 */
-    public startLaunch(): void {
-        if (!(this._flags & Flag.Inited)) throw new Error("未初始化，不能发射");
-        if (this._flags & Flag.Boomed) throw new Error("火箭已经爆炸，需重新初始化，才能发射");
-        if (this._flags & Flag.Launching) throw new Error("已经发射了，不能重复调用发射");
-
-        this._flags |= Flag.Launching;
-    }
-
-    /**
-     * 爆炸
-     * @param time 发射经过的时间<毫秒>
-     * @param multiplier 倍数
-     */
-    public boom(time: number, multiplier?: number): void {
-        if (!(this._flags & Flag.Inited)) throw new Error("未初始化，不能调用爆炸");
-        if (!(this._flags & Flag.Launching)) throw new Error("未开始发射，不能调用爆炸");
-        if (this._flags & Flag.Boomed) throw new Error("已经爆炸了，不能重复调用爆炸");
-
-        this._flags |= Flag.Boomed;
-        this._flags &= ~Flag.Launching;
-        this.updateStatusToTime(time, multiplier);
-    }
-
-    /**
-     * 添加玩家的跳点
-     * * 火箭到达跳点指定的倍数时，才显示跳点对应的显示对象
-     * * 如果在火箭到达跳点指定的倍数后添加跳点，则立即显示跳点对应的显示对象
-     * @param multiplier 倍数<两位小数>
-     * @param sprite 跳点需要展示的对象
-     * @param isPlayer true:玩家跳点; false:其他用户跳点
-     */
-    public addJumpPoint(multiplier: number, sprite: Laya.Sprite, isPlayer: boolean): void {
-        const time = RocketChart.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
-
-        this._jumpPoints.push({
-            time: time,
-            multiplier: multiplier,
-            sprite: sprite,
-            isPlayer: isPlayer
-        });
     }
 
     /**
@@ -442,7 +449,7 @@ export class RocketChart extends Laya.Script {
     }
 
     /** 计算并展示跳点 */
-    private calcAndShowPlayerJumpPoint(): void {
+    private calcAndShowJumpPoint(): void {
         if (this._jumpPoints.length <= 0) return;
 
         let i = this._jumpPoints.length;
@@ -468,6 +475,7 @@ export class RocketChart extends Laya.Script {
                 const toY = y + 100;
                 const duration = 1000;
 
+                // 缓动
                 Laya.Tween.create(item.sprite)
                     .to('x', toX)
                     .to('y', toY)

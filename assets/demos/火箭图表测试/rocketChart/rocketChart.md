@@ -12,10 +12,11 @@ private _otherUserJumpPointPrefab: Laya.Prefab;
 
 **初始化火箭图表**
 ```ts
+// 需在 onEnable() 之后初始化
 // 初始化后，仅绘制时间、倍数标尺，不显示其它内容
 const initSpeed = 0.05; // 初速度
 const acceleration = 0.005; // 加速度
-this._rocketChart.init(initSpeed, acceleration);
+this._rocketChart.init(initSpeed, acceleration); 
 
 // 立即设置火箭图表状态到指定的时间、倍数
 const time = 18928;
