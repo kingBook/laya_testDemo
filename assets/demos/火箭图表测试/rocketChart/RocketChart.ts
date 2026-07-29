@@ -46,6 +46,11 @@ export class RocketChart extends Laya.Script {
 
     @property({ type: Boolean, catalog: "Ruler", tips: "显示网格线" })
     public showGrid: boolean = false;
+    @property({ type: Laya.Color, private: false, catalog: "Ruler", tips: "网格线颜色" })
+    private _gridColor: Laya.Color = new Laya.Color(0.4, 0.4, 0.4);
+    @property({ type: Number, private: false, catalog: "Ruler", min: 1, fractionDigits: 0, tips: "网格线宽" })
+    private _gridLineWidth: number = 1;
+
     @property({ type: Number, private: false, catalog: "Ruler", min: 5, tips: "标尺文字与画布的边距" })
     private _rulerLabelMargin: number = 10;
     @property({ type: Number, private: false, catalog: "Ruler", min: 1, fractionDigits: 0, tips: "标尺字体大小" })
@@ -242,7 +247,6 @@ export class RocketChart extends Laya.Script {
         if (this._time > this._accelerationStartTime) {
             if (this._shaderMixFactor === 0) {
                 this.onAccelerationStartHandler?.run(); // 加速开始事件
-                // console.log("加速开始事件");
             }
 
             const speedMF = 0.015;
@@ -365,7 +369,6 @@ export class RocketChart extends Laya.Script {
      */
     public addJumpPoint(multiplier: number, sprite: Laya.Sprite, isPlayer: boolean): void {
         const time = RocketChart.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
-        // console.log("addJumpPoint", time, multiplier);
 
         this._jumpPoints.push({
             time: time,
@@ -406,7 +409,7 @@ export class RocketChart extends Laya.Script {
 
             // 网格线
             if (this.showGrid) {
-                this._timeRuler.graphics.drawLine(x, 0, x, -this._canvas.height, "#686868", 1);
+                this._timeRuler.graphics.drawLine(x, 0, x, -this._canvas.height, this._gridColor.toString(), this._gridLineWidth);
             }
         }
 
@@ -414,8 +417,6 @@ export class RocketChart extends Laya.Script {
         const yCount = this._multiplier > this._defaultDisplayMultiplier ? 10 : 5; // 格数
         const yScaleUnit = displayMutiplier / yCount; // 一格的单位<倍>
         const dy = (this._canvas.height * (displayMutiplier / (this._defaultDisplayMultiplier - this._initMultiplier))) / yCount; // 一格的距离
-        // console.log(displayMutiplier, yCount, yScaleUnit);
-
         const yScale = this._multiplier > this._defaultDisplayMultiplier ? (this._defaultDisplayMultiplier - this._initMultiplier) / (this._multiplier - this._initMultiplier) : 1; // 计算缩放
 
         this._multiplierRuler.graphics.clear();
@@ -435,7 +436,7 @@ export class RocketChart extends Laya.Script {
 
             // 网格线
             if (this.showGrid) {
-                this._multiplierRuler.graphics.drawLine(0, y, this._canvas.width, y, "#686868", 1);
+                this._multiplierRuler.graphics.drawLine(0, y, this._canvas.width, y, this._gridColor.toString(), this._gridLineWidth);
             }
         }
     }
@@ -555,8 +556,6 @@ export class RocketChart extends Laya.Script {
         const t = time / 1000; // 时间<秒>
 
         let result = 1 + v0 * t + 0.5 * a * t * t;
-        // result = ((result * 100) | 0) / 100; // 保留两位小数
-        // console.log(result);
         return result;
     }
 

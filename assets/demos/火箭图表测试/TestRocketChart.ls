@@ -24,10 +24,6 @@
       "_otherUserJumpPointPrefab": {
         "_$uuid": "13513fbb-29cb-46e1-9846-64a3ef7cca59",
         "_$type": "Prefab"
-      },
-      "graphicsMaterial": {
-        "_$uuid": "ed54ef60-b7f3-4baf-b22f-f945242e8028",
-        "_$type": "Material"
       }
     }
   ],
@@ -67,6 +63,13 @@
             "_$ref": "3uh1ijc4"
           },
           "showGrid": false,
+          "_gridColor": {
+            "_$type": "Color",
+            "r": 0.4,
+            "g": 0.4,
+            "b": 0.4
+          },
+          "_gridLineWidth": 1,
           "_rulerLabelMargin": 10,
           "_rulerFontSize": 18,
           "_rulerFontColor": {
