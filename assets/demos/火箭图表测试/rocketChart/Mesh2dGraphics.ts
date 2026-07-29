@@ -221,19 +221,13 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
     public run(mesh2dRender: Laya.Mesh2DRender): void {
         //console.log("Mesh2dDrawLinesCmd::run();");
         const halfW = this.lineWidth / 2; // 线半宽
-
-        const segmentCount = this.points.length / 2 - 1; // 段数
-        const vertices = new Float32Array(segmentCount * 4 * 5);
-        const indices = new Uint16Array(segmentCount * 2 * 3);
-
-        let index = 0, triangleIndex = 0;
-        let minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE; // 包围盒
+        const segmentCount = this.points.length / 2 - 1; // 线段数
 
         //console.log("points", this.points);
         this._tempRectVertices.length = 0;
 
         // 计算每段线对应矩形的顶点，并存入数组
-        for (let i = 0, len = this.points.length / 2 - 1; i < len; i++) {
+        for (let i = 0; i < segmentCount; i++) {
             let tempI = i * 2;
             const fromX = this.points[tempI++];
             const fromY = this.points[tempI++];
@@ -305,6 +299,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
         }
 
         // 计算包围盒
+        let minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE; // 包围盒
         for (let i = 0, len = this._tempRectVertices.length / 2; i < len; i++) {
             const ix2 = i * 2;
             const vx = this._tempRectVertices[ix2];
@@ -317,15 +312,17 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             maxY = Math.max(vy, maxY);
         }
 
-        // 添加顶点（顶点排列顺序为：右上角开始，X轴向右，Y轴向下，顺时针）
+        // 添加顶点和三角形索引（顶点排列顺序为：左上角开始，X轴向右，Y轴向下，顺时针）
+        const vertices = new Float32Array(segmentCount * 4 * 5);
+        const indices = new Uint16Array(segmentCount * 2 * 3);
+        let index = 0, triangleIndex = 0;
         for (let i = 0, len = this._tempRectVertices.length / 8; i < len; i++) {
             const ix8 = i * 8;
-            index = ix8;
-            for (let j = 0; j < 8; j++) {
-                const vx = this._tempRectVertices[j * 2];
-                const vy = this._tempRectVertices[j * 2 + 1];
 
-                // 顶点、UV
+            // 顶点、UV
+            for (let j = 0; j < 4; j++) {
+                const vx = this._tempRectVertices[ix8 + j * 2];
+                const vy = this._tempRectVertices[ix8 + j * 2 + 1];
                 vertices[index++] = vx; // vertex.x
                 vertices[index++] = vy; // vertex.y
                 vertices[index++] = 0;  // vertex.z
@@ -333,15 +330,16 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
                 vertices[index++] = 0;  // uv.y 顶点y映射到包围盒
             }
 
-            //     // 三角形
-            //     triangleIndex = i * 2 * 3;
-            //     indices[triangleIndex++] = i * 4 + 0;
-            //     indices[triangleIndex++] = i * 4 + 1;
-            //     indices[triangleIndex++] = i * 4 + 3;
+            // 三角形
+            const ix4 = i * 4;
+            triangleIndex = i * 2 * 3;
+            indices[triangleIndex++] = ix4 + 0;
+            indices[triangleIndex++] = ix4 + 1;
+            indices[triangleIndex++] = ix4 + 3;
 
-            //     indices[triangleIndex++] = i * 4 + 1;
-            //     indices[triangleIndex++] = i * 4 + 2;
-            //     indices[triangleIndex++] = i * 4 + 3;
+            indices[triangleIndex++] = ix4 + 1;
+            indices[triangleIndex++] = ix4 + 2;
+            indices[triangleIndex++] = ix4 + 3;
         }
 
         // for (let i = 0, len = this.points.length / 2 - 1; i < len; i++) {
