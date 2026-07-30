@@ -216,15 +216,14 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
     public lineWidth: number;
 
     private readonly _tempRectVertices: number[] = [];
-    private readonly _tempIntersections: Array<{ x: number, y: number }> = [];
+    private readonly _tempIntersection: Laya.Point = new Laya.Point();
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
         //console.log("Mesh2dDrawLinesCmd::run();");
         const halfW = this.lineWidth / 2; // 线半宽
         const segmentCount = this.points.length / 2 - 1; // 线段数
 
-        //console.log("points", this.points);
-        this._tempRectVertices.length = 0;
+        // console.log("points", this.points);
 
         // 计算每段线对应矩形的顶点，并存入数组 ------------------------------------------
         for (let i = 0; i < segmentCount; i++) {
@@ -244,25 +243,27 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
             const radN = Math.atan(kn); // 法线弧度
             const radN2 = radN + Math.PI; // 反向法线弧度
-            console.log(radN*180/Math.PI, radN2*180/Math.PI);
 
             // 矩形顶点数组
-            this._tempRectVertices.push(fromX + halfW * Math.cos(radN));
-            this._tempRectVertices.push(fromY + halfW * Math.sin(radN));
+            const x1 = fromX + halfW * Math.cos(radN);
+            const y1 = fromY + halfW * Math.sin(radN);
+            const x2 = toX + halfW * Math.cos(radN);
+            const y2 = toY + halfW * Math.sin(radN);
+            const x3 = toX + halfW * Math.cos(radN2);
+            const y3 = toY + halfW * Math.sin(radN2);
+            const x4 = fromX + halfW * Math.cos(radN2);
+            const y4 = fromY + halfW * Math.sin(radN2);
 
-            this._tempRectVertices.push(toX + halfW * Math.cos(radN));
-            this._tempRectVertices.push(toY + halfW * Math.sin(radN));
+            // 叉积
+            const det = this.det(x1, y1, x2, y2, x3, y3);
 
-            this._tempRectVertices.push(toX + halfW * Math.cos(radN2));
-            this._tempRectVertices.push(toY + halfW * Math.sin(radN2));
-
-            this._tempRectVertices.push(fromX + halfW * Math.cos(radN2));
-            this._tempRectVertices.push(fromY + halfW * Math.sin(radN2));
-
-            //console.log(`rect${i}`,this._tempRectVertices.slice(this._tempRectVertices.length-8,this._tempRectVertices.length));
+            // 保证顺时针存入
+            if (det < 0) {
+                this._tempRectVertices.push(x4, y4, x3, y3, x2, y2, x1, y1);
+            } else {
+                this._tempRectVertices.push(x1, y1, x2, y2, x3, y3, x4, y4);
+            }
         }
-        console.log("原矩形顶点", this._tempRectVertices.concat());
-
 
         // 计算相连两个矩形边的交点 ------------------------------------------------------------
         for (let i = 0, len = this._tempRectVertices.length / 8; i < len; i++) {
@@ -281,9 +282,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             let y3 = this._tempRectVertices[nextIx8 + 1];
             let x4 = this._tempRectVertices[nextIx8 + 2];
             let y4 = this._tempRectVertices[nextIx8 + 3];
-            let intersection = this.getIntersection(x1, y1, x2, y2, x3, y3, x4, y4, this._tempIntersections)[0];
-            //console.log("testIt1", [x1, y1, x2, y2, x3, y3, x4, y4]);
-            console.log("it1", intersection);
+            let intersection = this.getIntersection(x1, y1, x2, y2, x3, y3, x4, y4, this._tempIntersection);
             this._tempRectVertices[ix8 + 2] = intersection.x;
             this._tempRectVertices[ix8 + 3] = intersection.y;
             this._tempRectVertices[nextIx8 + 0] = intersection.x;
@@ -298,16 +297,12 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             y3 = this._tempRectVertices[nextIx8 + 5];
             x4 = this._tempRectVertices[nextIx8 + 6];
             y4 = this._tempRectVertices[nextIx8 + 7];
-            intersection = this.getIntersection(x1, y1, x2, y2, x3, y3, x4, y4, this._tempIntersections)[0];
-            //console.log("testIt2", [x1, y1, x2, y2, x3, y3, x4, y4]);
-            console.log("it2", intersection);
+            intersection = this.getIntersection(x1, y1, x2, y2, x3, y3, x4, y4, this._tempIntersection);
             this._tempRectVertices[ix8 + 4] = intersection.x;
             this._tempRectVertices[ix8 + 5] = intersection.y;
             this._tempRectVertices[nextIx8 + 6] = intersection.x;
             this._tempRectVertices[nextIx8 + 7] = intersection.y;
         }
-        console.log("计算交点后", this._tempRectVertices.concat());
-
 
         // 计算包围盒 ------------------------------------------------------------------------------------------------------
         let minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE; // 包围盒
@@ -352,75 +347,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             indices[triangleIndex++] = ix4 + 2;
             indices[triangleIndex++] = ix4 + 3;
         }
-
-        // for (let i = 0, len = this.points.length / 2 - 1; i < len; i++) {
-        //     let tempI = i * 2;
-        //     const fromX = this.points[tempI++];
-        //     const fromY = this.points[tempI++];
-        //     const toX = this.points[tempI++];
-        //     const toY = this.points[tempI++];
-
-        //     //console.log("i", i, "from", fromX, fromY, "to", toX, toY);
-
-        //     const dy = toY - fromY;
-        //     const dx = toX - fromX;
-
-        //     const k = dy / dx; // 线斜率, 即: tanA, A=线与x的夹角
-        //     const kn = -1 / k; // 垂直于线的法线斜率
-
-        //     const radN = Math.atan(kn); // 法线弧度
-        //     const radN2 = radN + Math.PI; // 反向法线弧度
-
-        //     // 矩形顶点数组
-        //     this._tempRectVertices[0] = fromX + halfW * Math.cos(radN);
-        //     this._tempRectVertices[1] = fromY + halfW * Math.sin(radN);
-
-        //     this._tempRectVertices[2] = toX + halfW * Math.cos(radN);
-        //     this._tempRectVertices[3] = toY + halfW * Math.sin(radN);
-
-        //     this._tempRectVertices[4] = toX + halfW * Math.cos(radN2);
-        //     this._tempRectVertices[5] = toY + halfW * Math.sin(radN2);
-
-        //     this._tempRectVertices[6] = fromX + halfW * Math.cos(radN2);
-        //     this._tempRectVertices[7] = fromY + halfW * Math.sin(radN2);
-
-        //     // 计算包围盒
-        //     for (let j = 0; j < 4; j++) {
-        //         const vx = this._tempRectVertices[j * 2];
-        //         const vy = this._tempRectVertices[j * 2 + 1];
-
-        //         // 计算包围盒
-        //         minX = Math.min(vx, minX);
-        //         minY = Math.min(vy, minY);
-        //         maxX = Math.max(vx, maxX);
-        //         maxY = Math.max(vy, maxY);
-        //     }
-
-        //     // 计算顶点（顶点排列顺序为：右上角开始，X轴向右，Y轴向下，顺时针）
-        //     index = i * 4 * 5;
-        //     for (let j = 0; j < 4; j++) {
-        //         const vx = this._tempRectVertices[j * 2];
-        //         const vy = this._tempRectVertices[j * 2 + 1];
-
-        //         // 顶点、UV
-        //         vertices[index++] = vx; // vertex.x
-        //         vertices[index++] = vy; // vertex.y
-        //         vertices[index++] = 0;  // vertex.z
-        //         vertices[index++] = 0;  // uv.x 顶点x映射到包围盒
-        //         vertices[index++] = 0;  // uv.y 顶点y映射到包围盒
-        //     }
-
-        //     // 三角形
-        //     triangleIndex = i * 2 * 3;
-        //     indices[triangleIndex++] = i * 4 + 0;
-        //     indices[triangleIndex++] = i * 4 + 1;
-        //     indices[triangleIndex++] = i * 4 + 3;
-
-        //     indices[triangleIndex++] = i * 4 + 1;
-        //     indices[triangleIndex++] = i * 4 + 2;
-        //     indices[triangleIndex++] = i * 4 + 3;
-        // }
-        // this._tempRectVertices.length = 0;
+        this._tempRectVertices.length = 0;
 
         // 计算UV --------------------------------------------------------------------------
         for (let i = 0, len = vertices.length / 5; i < len; i++) {
@@ -442,7 +369,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
     }
 
     /** 获取两直线的交点 */
-    private getIntersection(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number, output?: { x: number, y: number }[]): { x: number, y: number }[] {
+    private getIntersection(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number, output?: Laya.Point): Laya.Point {
         // o12 为两线段的起始点两减，即p3-p1
         let o12x: number = x3 - x1, o12y: number = y3 - y1;
         // d1，d2 为两线段的末点减起始点，即 d1=p2-p1, d2=p4-p3
@@ -463,17 +390,20 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
         // ---------- = t2 = (d1x*o12y-o12x*d1y)/(d1x*-d2y+d2x*d1y)
         // |d1x -d2x|
         // |d1y -d2y|
-        let t2: number = (d1x * o12y - o12x * d1y) / (d1x * -d2y + d2x * d1y);
+        // let t2: number = (d1x * o12y - o12x * d1y) / (d1x * -d2y + d2x * d1y);
 
         // 交点（两个点理论上是一致的）
-        let it1 = { x: x1 + d1x * t1, y: y1 + d1y * t1 };
-        let it2 = { x: x3 + d2x * t2, y: y3 + d2y * t2 };
+        // let it1 = { x: x1 + d1x * t1, y: y1 + d1y * t1 };
+        // let it2 = { x: x3 + d2x * t2, y: y3 + d2y * t2 };
 
-        output ??= [];
-        output.length = 0;
-        output[0] = it1;
-        output[1] = it2;
+        output ??= new Laya.Point();
+        output.setTo(x1 + d1x * t1, y1 + d1y * t1);
         return output;
+    }
+
+    /** p2在向量p1,p3的哪一侧，计算叉积 axb (a=p2-p1, b=p3-p1) */
+    private det(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): number {
+        return x1 * y2 + x2 * y3 + x3 * y1 - y1 * x2 - y2 * x3 - y3 * x1;
     }
 
 }
