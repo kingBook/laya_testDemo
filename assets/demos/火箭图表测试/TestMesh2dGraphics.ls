@@ -38,7 +38,7 @@
       "_$comp": [
         {
           "_$type": "03fab6c1-9262-46bb-a21d-81a2a9cdac59",
-          "scriptPath": "demos/火箭图表测试/chart/Mesh2dGraphics.ts",
+          "scriptPath": "demos/火箭图表测试/rocketChart/Mesh2dGraphics.ts",
           "sharedMaterial": {
             "_$uuid": "ed54ef60-b7f3-4baf-b22f-f945242e8028",
             "_$type": "Material"
@@ -56,7 +56,7 @@
       "_$comp": [
         {
           "_$type": "03fab6c1-9262-46bb-a21d-81a2a9cdac59",
-          "scriptPath": "demos/火箭图表测试/chart/Mesh2dGraphics.ts",
+          "scriptPath": "demos/火箭图表测试/rocketChart/Mesh2dGraphics.ts",
           "sharedMaterial": {
             "_$uuid": "ed54ef60-b7f3-4baf-b22f-f945242e8028",
             "_$type": "Material"
@@ -74,11 +74,120 @@
       "_$comp": [
         {
           "_$type": "03fab6c1-9262-46bb-a21d-81a2a9cdac59",
-          "scriptPath": "demos/火箭图表测试/chart/Mesh2dGraphics.ts",
+          "scriptPath": "demos/火箭图表测试/rocketChart/Mesh2dGraphics.ts",
           "sharedMaterial": {
             "_$uuid": "ed54ef60-b7f3-4baf-b22f-f945242e8028",
             "_$type": "Material"
           }
+        }
+      ]
+    },
+    {
+      "_$id": "p23goouw",
+      "_$type": "Sprite",
+      "name": "Sprite_1",
+      "width": 100,
+      "height": 100,
+      "_gcmds": [
+        {
+          "_$type": "DrawLinesCmd",
+          "x": 0,
+          "y": 0,
+          "points": [
+            14,
+            -14,
+            128,
+            100,
+            71,
+            100,
+            -14,
+            14,
+            null
+          ],
+          "lineWidth": 2,
+          "lineColor": "#ffff00"
+        }
+      ]
+    },
+    {
+      "_$id": "50ag151j",
+      "_$type": "Sprite",
+      "name": "Sprite_2",
+      "width": 100,
+      "height": 100,
+      "_gcmds": [
+        {
+          "_$type": "DrawLinesCmd",
+          "x": 0,
+          "y": 0,
+          "points": [
+            128,
+            100,
+            214,
+            14,
+            185,
+            -14,
+            71,
+            100
+          ],
+          "lineWidth": 2,
+          "lineColor": "#ff003e"
+        }
+      ]
+    },
+    {
+      "_$id": "uk3rfyh1",
+      "_$type": "Sprite",
+      "name": "Sprite_3",
+      "y": 200,
+      "width": 100,
+      "height": 100,
+      "_gcmds": [
+        {
+          "_$type": "DrawLinesCmd",
+          "x": 0,
+          "y": 0,
+          "points": [
+            14,
+            -14,
+            114,
+            85,
+            85,
+            114,
+            -14,
+            14,
+            null
+          ],
+          "lineWidth": 2,
+          "lineColor": "#df00ff"
+        }
+      ]
+    },
+    {
+      "_$id": "rmsty4aa",
+      "_$type": "Sprite",
+      "name": "Sprite_4",
+      "y": 200,
+      "width": 100,
+      "height": 100,
+      "_gcmds": [
+        {
+          "_$type": "DrawLinesCmd",
+          "x": 0,
+          "y": 0,
+          "points": [
+            114,
+            114,
+            214,
+            14,
+            185,
+            -14,
+            85,
+            85,
+            null
+          ],
+          "lineWidth": 2,
+          "lineColor": "#0010ff"
         }
       ]
     }

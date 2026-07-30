@@ -226,7 +226,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
         //console.log("points", this.points);
         this._tempRectVertices.length = 0;
 
-        // 计算每段线对应矩形的顶点，并存入数组
+        // 计算每段线对应矩形的顶点，并存入数组 ------------------------------------------
         for (let i = 0; i < segmentCount; i++) {
             let tempI = i * 2;
             const fromX = this.points[tempI++];
@@ -244,6 +244,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
             const radN = Math.atan(kn); // 法线弧度
             const radN2 = radN + Math.PI; // 反向法线弧度
+            console.log(radN*180/Math.PI, radN2*180/Math.PI);
 
             // 矩形顶点数组
             this._tempRectVertices.push(fromX + halfW * Math.cos(radN));
@@ -257,9 +258,13 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
             this._tempRectVertices.push(fromX + halfW * Math.cos(radN2));
             this._tempRectVertices.push(fromY + halfW * Math.sin(radN2));
-        }
 
-        // 计算相连两个矩形边的交点
+            //console.log(`rect${i}`,this._tempRectVertices.slice(this._tempRectVertices.length-8,this._tempRectVertices.length));
+        }
+        console.log("原矩形顶点", this._tempRectVertices.concat());
+
+
+        // 计算相连两个矩形边的交点 ------------------------------------------------------------
         for (let i = 0, len = this._tempRectVertices.length / 8; i < len; i++) {
             const nextI = i + 1; // 下一个矩形的索引
             if (nextI >= len) break;
@@ -277,6 +282,8 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             let x4 = this._tempRectVertices[nextIx8 + 2];
             let y4 = this._tempRectVertices[nextIx8 + 3];
             let intersection = this.getIntersection(x1, y1, x2, y2, x3, y3, x4, y4, this._tempIntersections)[0];
+            //console.log("testIt1", [x1, y1, x2, y2, x3, y3, x4, y4]);
+            console.log("it1", intersection);
             this._tempRectVertices[ix8 + 2] = intersection.x;
             this._tempRectVertices[ix8 + 3] = intersection.y;
             this._tempRectVertices[nextIx8 + 0] = intersection.x;
@@ -292,13 +299,17 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             x4 = this._tempRectVertices[nextIx8 + 6];
             y4 = this._tempRectVertices[nextIx8 + 7];
             intersection = this.getIntersection(x1, y1, x2, y2, x3, y3, x4, y4, this._tempIntersections)[0];
+            //console.log("testIt2", [x1, y1, x2, y2, x3, y3, x4, y4]);
+            console.log("it2", intersection);
             this._tempRectVertices[ix8 + 4] = intersection.x;
             this._tempRectVertices[ix8 + 5] = intersection.y;
             this._tempRectVertices[nextIx8 + 6] = intersection.x;
             this._tempRectVertices[nextIx8 + 7] = intersection.y;
         }
+        console.log("计算交点后", this._tempRectVertices.concat());
 
-        // 计算包围盒
+
+        // 计算包围盒 ------------------------------------------------------------------------------------------------------
         let minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE; // 包围盒
         for (let i = 0, len = this._tempRectVertices.length / 2; i < len; i++) {
             const ix2 = i * 2;
@@ -312,7 +323,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             maxY = Math.max(vy, maxY);
         }
 
-        // 添加顶点和三角形索引（顶点排列顺序为：左上角开始，X轴向右，Y轴向下，顺时针）
+        // 添加顶点和三角形索引（顶点排列顺序为：左上角开始，X轴向右，Y轴向下，顺时针）-----------------------------------------
         const vertices = new Float32Array(segmentCount * 4 * 5);
         const indices = new Uint16Array(segmentCount * 2 * 3);
         let index = 0, triangleIndex = 0;
@@ -411,7 +422,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
         // }
         // this._tempRectVertices.length = 0;
 
-        // 计算UV
+        // 计算UV --------------------------------------------------------------------------
         for (let i = 0, len = vertices.length / 5; i < len; i++) {
             const vx = vertices[i * 5 + 0]; // vertex.x
             const vy = vertices[i * 5 + 1]; // vertex.y

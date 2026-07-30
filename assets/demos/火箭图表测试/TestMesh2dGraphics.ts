@@ -30,9 +30,9 @@ export class TestMesh2dGraphics extends Laya.Script {
         drawLinesCmd.lineWidth = 40;
         drawLinesCmd.points = [
             0, 0,
-            100, 50,
+            100, 100,
             200, 0,
-            300, 100
+            //300, 100
         ];
         // drawLinesCmd.points = [
         //     0, 0,
