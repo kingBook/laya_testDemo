@@ -341,7 +341,9 @@ export class RocketChart extends Laya.Script {
             if (nx >= targetT) break;
         }
 
-        this._drawLinesCmd.lineWidth = 5;
+        //this._drawLinesCmd.lineWidth = 5;
+        this._drawLinesCmd.lineStartWidth = 1;
+        this._drawLinesCmd.lineEndWidth = 10;
         this._drawLinesCmd.points = this._tempLinePoints;
         this._lineGraphics.clear();
         this._lineGraphics.repaint();

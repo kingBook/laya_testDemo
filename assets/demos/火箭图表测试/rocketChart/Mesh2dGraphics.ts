@@ -209,29 +209,58 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
      */
     public points: number[];
 
+
     /**
-     * @en (Optional) Line width
-     * @zh （可选）线段宽度
+     * @en Line width at the start of the polyline
+     * @zh 折线起点线宽
      */
-    public lineWidth: number;
+    public lineStartWidth: number;
+
+    /**
+     * @en Line width at the end of the polyline.
+     * @zh 折线终点线宽
+     */
+    public lineEndWidth: number;
 
     private readonly _tempRectVertices: number[] = [];
     private readonly _tempIntersection: Laya.Point = new Laya.Point();
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
         //console.log("Mesh2dDrawLinesCmd::run();");
-        const halfW = this.lineWidth / 2; // 线半宽
+        //const halfW = this.lineWidth / 2; // 线半宽
+
         const segmentCount = this.points.length / 2 - 1; // 线段数
+
+        // 线总长
+        let totalLength = 0;
+        for (let i = 0, len = segmentCount; i < len; i++) {
+            const ix2 = i * 2;
+            const x1 = this.points[ix2 + 0];
+            const y1 = this.points[ix2 + 1];
+            const x2 = this.points[ix2 + 2];
+            const y2 = this.points[ix2 + 3];
+            totalLength += Math.hypot(x2 - x1, y2 - y1);
+        }
 
         // console.log("points", this.points);
 
+        let currentLength = 0;
+
         // 计算每段线对应矩形的顶点，并存入数组 ------------------------------------------
         for (let i = 0; i < segmentCount; i++) {
-            let tempI = i * 2;
-            const fromX = this.points[tempI++];
-            const fromY = this.points[tempI++];
-            const toX = this.points[tempI++];
-            const toY = this.points[tempI++];
+            const ix2 = i * 2;
+            const fromX = this.points[ix2 + 0];
+            const fromY = this.points[ix2 + 1];
+            const toX = this.points[ix2 + 2];
+            const toY = this.points[ix2 + 3];
+
+            // form和to点在占线总长度的插值
+            const segmentLen = Math.hypot(toX - fromX, toY - fromY);
+            const t1 = Math.min(currentLength / totalLength, 1);
+            const t2 = Math.min((currentLength + segmentLen) / totalLength, 1);
+            currentLength += segmentLen;
+            const halfW1 = (this.lineStartWidth + (this.lineEndWidth - this.lineStartWidth) * t1) / 2;
+            const halfW2 = (this.lineStartWidth + (this.lineEndWidth - this.lineStartWidth) * t2) / 2;
 
             //console.log("i", i, "from", fromX, fromY, "to", toX, toY);
 
@@ -245,14 +274,14 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             const radN2 = radN + Math.PI; // 反向法线弧度
 
             // 矩形顶点数组
-            const x1 = fromX + halfW * Math.cos(radN);
-            const y1 = fromY + halfW * Math.sin(radN);
-            const x2 = toX + halfW * Math.cos(radN);
-            const y2 = toY + halfW * Math.sin(radN);
-            const x3 = toX + halfW * Math.cos(radN2);
-            const y3 = toY + halfW * Math.sin(radN2);
-            const x4 = fromX + halfW * Math.cos(radN2);
-            const y4 = fromY + halfW * Math.sin(radN2);
+            const x1 = fromX + halfW1 * Math.cos(radN);
+            const y1 = fromY + halfW1 * Math.sin(radN);
+            const x2 = toX + halfW2 * Math.cos(radN);
+            const y2 = toY + halfW2 * Math.sin(radN);
+            const x3 = toX + halfW2 * Math.cos(radN2);
+            const y3 = toY + halfW2 * Math.sin(radN2);
+            const x4 = fromX + halfW1 * Math.cos(radN2);
+            const y4 = fromY + halfW1 * Math.sin(radN2);
 
             // 叉积
             const det = this.det(x1, y1, x2, y2, x3, y3);

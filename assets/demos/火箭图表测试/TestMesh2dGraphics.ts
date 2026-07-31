@@ -27,7 +27,9 @@ export class TestMesh2dGraphics extends Laya.Script {
 
         // 折线
         const drawLinesCmd = new Mesh2dDrawLinesCmd();
-        drawLinesCmd.lineWidth = 40;
+        //drawLinesCmd.lineWidth = 40;
+        drawLinesCmd.lineStartWidth=1;
+        drawLinesCmd.lineEndWidth=40;
         drawLinesCmd.points = [
             0, 0,
             100, 100,
