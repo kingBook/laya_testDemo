@@ -76,9 +76,9 @@ GLSL Start
         clip();
         vec4 textureColor = texture2D(u_baseRender2DTexture, v_texcoord);
         
-        // ------------------------------------------------------------------------------------
+         // ------------------------------------------------------------------------------------
         // 计算渐变因子
-        float gradientFactor = dot(v_texcoord, normalize(u_gradientDirection)) * 0.5 + 0.5;
+        float gradientFactor = dot(v_texcoord, normalize(u_gradientDirection));
 
         // 混合渐变颜色A
         vec4 gradientColorA = mix(u_gradientStartColorA, u_gradientEndColorA, gradientFactor);
@@ -88,7 +88,7 @@ GLSL Start
         vec4 gradientColorB = mix(u_gradientStartColorB, u_gradientEndColorB, gradientFactor);
         gradientColorB.a =  mix(u_startAlpha, u_endAlpha, gradientFactor);
         
-        textureColor *= gradientFactor >= (u_mixFactor * 0.5 + 0.5) ? gradientColorA : gradientColorB;
+        textureColor *= gradientFactor >= u_mixFactor ? gradientColorA : gradientColorB;
         // ------------------------------------------------------------------------------------
 
         #ifdef LIGHT_AND_SHADOW
