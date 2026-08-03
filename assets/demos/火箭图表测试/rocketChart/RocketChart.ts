@@ -323,7 +323,7 @@ export class RocketChart extends Laya.Script {
         const multiplierRulerMax = this.getMultiplierRulerMax();
 
         const targetT = Laya.MathUtil.clamp01(this._time / timeRulerMax);
-        const segmentCount = 25;
+        const segmentCount = 999;
         const step = 1 / segmentCount;
         let nx = 0, ny = 0, mx = 0, my = 0;
 
@@ -332,6 +332,8 @@ export class RocketChart extends Laya.Script {
 
         while (true) {
             nx = Math.min(nx + step, targetT);
+            nx = (targetT - nx <= 0.001) ? targetT : nx; // 太靠近端点时，直接端点
+
             ny = (RocketChart.timeToMultiplier(timeRulerMax * nx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
 
             mx = this.mapX(nx);
@@ -341,7 +343,6 @@ export class RocketChart extends Laya.Script {
             if (nx >= targetT) break;
         }
 
-        //this._drawLinesCmd.lineWidth = 5;
         this._drawLinesCmd.lineStartWidth = 1;
         this._drawLinesCmd.lineEndWidth = 10;
         this._drawLinesCmd.points = this._tempLinePoints;
@@ -412,13 +413,13 @@ export class RocketChart extends Laya.Script {
             const text = `${value / 1000}`;
             const y = margin;
             const font = `${fontSize}px Arial`;
-            const color = this._rulerFontColor.toString();
+            const color = this._rulerFontColor.getStyleString()
             const textAlign = "center";
             this._timeRuler.graphics.fillText(text, x, y, font, color, textAlign);
 
             // 网格线
             if (this.showGrid) {
-                this._timeRuler.graphics.drawLine(x, 0, x, -this._canvas.height, this._gridColor.toString(), this._gridLineWidth);
+                this._timeRuler.graphics.drawLine(x, 0, x, -this._canvas.height, this._gridColor.getStyleString(), this._gridLineWidth);
             }
         }
 
@@ -439,13 +440,13 @@ export class RocketChart extends Laya.Script {
             const x = -margin;
             const text = `${yCount <= 5 ? value.toFixed(1) : value}x`;
             const font = `${fontSize}px Arial`;
-            const color = this._rulerFontColor.toString();
+            const color = this._rulerFontColor.getStyleString();
             const textAlign = "right";
             this._multiplierRuler.graphics.fillText(text, x, y - fontSize * 0.5, font, color, textAlign);
 
             // 网格线
             if (this.showGrid) {
-                this._multiplierRuler.graphics.drawLine(0, y, this._canvas.width, y, this._gridColor.toString(), this._gridLineWidth);
+                this._multiplierRuler.graphics.drawLine(0, y, this._canvas.width, y, this._gridColor.getStyleString(), this._gridLineWidth);
             }
         }
     }

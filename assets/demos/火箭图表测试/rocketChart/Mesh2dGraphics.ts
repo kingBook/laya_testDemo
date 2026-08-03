@@ -227,7 +227,6 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
     public run(mesh2dRender: Laya.Mesh2DRender): void {
         //console.log("Mesh2dDrawLinesCmd::run();");
-        //const halfW = this.lineWidth / 2; // 线半宽
 
         const segmentCount = this.points.length / 2 - 1; // 线段数
 
@@ -235,7 +234,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
         let totalLength = 0;
         for (let i = 0, len = segmentCount; i < len; i++) {
             const ix2 = i * 2;
-            const x1 = this.points[ix2 + 0];
+            const x1 = this.points[ix2];
             const y1 = this.points[ix2 + 1];
             const x2 = this.points[ix2 + 2];
             const y2 = this.points[ix2 + 3];
@@ -249,7 +248,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
         // 计算每段线对应矩形的顶点，并存入数组 ------------------------------------------
         for (let i = 0; i < segmentCount; i++) {
             const ix2 = i * 2;
-            const fromX = this.points[ix2 + 0];
+            const fromX = this.points[ix2];
             const fromY = this.points[ix2 + 1];
             const toX = this.points[ix2 + 2];
             const toY = this.points[ix2 + 3];
@@ -261,6 +260,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             currentLength += segmentLen;
             const halfW1 = (this.lineStartWidth + (this.lineEndWidth - this.lineStartWidth) * t1) / 2;
             const halfW2 = (this.lineStartWidth + (this.lineEndWidth - this.lineStartWidth) * t2) / 2;
+
 
             //console.log("i", i, "from", fromX, fromY, "to", toX, toY);
 
@@ -303,18 +303,18 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             const nextIx8 = nextI * 8;
 
             // 相连两个矩形的上边线交点
-            let x1 = this._tempRectVertices[ix8 + 0];
+            let x1 = this._tempRectVertices[ix8];
             let y1 = this._tempRectVertices[ix8 + 1];
             let x2 = this._tempRectVertices[ix8 + 2];
             let y2 = this._tempRectVertices[ix8 + 3];
-            let x3 = this._tempRectVertices[nextIx8 + 0];
+            let x3 = this._tempRectVertices[nextIx8];
             let y3 = this._tempRectVertices[nextIx8 + 1];
             let x4 = this._tempRectVertices[nextIx8 + 2];
             let y4 = this._tempRectVertices[nextIx8 + 3];
             let intersection = this.getIntersection(x1, y1, x2, y2, x3, y3, x4, y4, this._tempIntersection);
             this._tempRectVertices[ix8 + 2] = intersection.x;
             this._tempRectVertices[ix8 + 3] = intersection.y;
-            this._tempRectVertices[nextIx8 + 0] = intersection.x;
+            this._tempRectVertices[nextIx8] = intersection.x;
             this._tempRectVertices[nextIx8 + 1] = intersection.y;
 
             // 相连两个矩形的下边线交点
@@ -368,7 +368,7 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
             // 三角形
             const ix4 = i * 4;
             triangleIndex = i * 2 * 3;
-            indices[triangleIndex++] = ix4 + 0;
+            indices[triangleIndex++] = ix4;
             indices[triangleIndex++] = ix4 + 1;
             indices[triangleIndex++] = ix4 + 3;
 
@@ -380,11 +380,12 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
         // 计算UV --------------------------------------------------------------------------
         for (let i = 0, len = vertices.length / 5; i < len; i++) {
-            const vx = vertices[i * 5 + 0]; // vertex.x
-            const vy = vertices[i * 5 + 1]; // vertex.y
+            const ix5 = i * 5;
+            const vx = vertices[ix5]; // vertex.x
+            const vy = vertices[ix5 + 1]; // vertex.y
 
-            vertices[i * 5 + 3] = (vx - minX) / (maxX - minX); // uv.x
-            vertices[i * 5 + 4] = (vy - minY) / (maxY - minY); // uv.y
+            vertices[ix5 + 3] = (vx - minX) / (maxX - minX); // uv.x
+            vertices[ix5 + 4] = (vy - minY) / (maxY - minY); // uv.y
         }
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];
@@ -470,15 +471,17 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
         //console.log("Mesh2dPolygonCmd::run();");
         // 多边形点偏移
         for (let i = 0, len = this.points.length / 2; i < len; i++) {
-            this.points[i * 2] += this.offsetX;
-            this.points[i * 2 + 1] += this.offsetY;
+            const ix2 = i * 2;
+            this.points[ix2] += this.offsetX;
+            this.points[ix2 + 1] += this.offsetY;
         }
 
         // 多边形点转换数据结构
         const polygonVertices: poly2tri.Point[] = [];
         for (let i = 0, len = this.points.length / 2; i < len; i++) {
-            const px = this.points[i * 2];
-            const py = this.points[i * 2 + 1];
+            const ix2 = i * 2;
+            const px = this.points[ix2];
+            const py = this.points[ix2 + 1];
             polygonVertices.push(new poly2tri.Point(px, py));
         }
 
@@ -488,8 +491,9 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
             for (let i = 0, len = this.holePoints.length; i < len; i++) {
                 const hole: number[] = this.holePoints[i];
                 for (let j = 0, c = hole.length / 2; j < c; j++) {
-                    hole[j * 2] += this.offsetX;
-                    hole[j * 2 + 1] += this.offsetY;
+                    const jx2 = j * 2;
+                    hole[jx2] += this.offsetX;
+                    hole[jx2 + 1] += this.offsetY;
                 }
             }
 
@@ -499,8 +503,9 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
                 const hole: number[] = this.holePoints[i];
                 const holePts: poly2tri.Point[] = [];
                 for (let j = 0, c = hole.length / 2; j < c; j++) {
-                    const px = hole[j * 2];
-                    const py = hole[j * 2 + 1];
+                    const jx2 = j * 2;
+                    const px = hole[jx2];
+                    const py = hole[jx2 + 1];
                     holePts.push(new poly2tri.Point(px, py));
                 }
                 holeVertices[i] = holePts;
@@ -555,9 +560,10 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
 
         for (let i = 0, len = triangles.size(); i < len; i++) {
             const t = triangles.at(i);
+            const ix3 = i * 3;
 
             // 顶点、UV
-            index = i * 3 * 5;
+            index = ix3 * 5;
             for (let j = 0; j < 3; j++) {
                 const v = t.GetPoint(j);
                 vertices[index++] = v.x; // vertex.x
@@ -568,10 +574,10 @@ export class Mesh2dDrawPolygonCmd implements IMesh2dGraphicsCmd {
             }
 
             // 三角形
-            triangleIndex = i * 3;
-            indices[triangleIndex++] = i * 3 + 0;
-            indices[triangleIndex++] = i * 3 + 1;
-            indices[triangleIndex++] = i * 3 + 2;
+            triangleIndex = ix3;
+            indices[triangleIndex++] = ix3;
+            indices[triangleIndex++] = ix3 + 1;
+            indices[triangleIndex++] = ix3 + 2;
         }
 
         const declaration = Laya.VertexMesh2D.getVertexDeclaration(["POSITION,UV"], false)[0];

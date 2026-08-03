@@ -76,7 +76,7 @@ GLSL Start
         clip();
         vec4 textureColor = texture2D(u_baseRender2DTexture, v_texcoord);
         
-         // ------------------------------------------------------------------------------------
+        // ------------------------------------------------------------------------------------
         // 计算渐变因子
         float gradientFactor = dot(v_texcoord, normalize(u_gradientDirection));
 
