@@ -1,7 +1,7 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:"ChartGradient3_4",
+    name:"RocketChart/ChartGradient3_4",
     enableInstancing:true,
     supportReflectionProbe:true,
     shaderType:D2_BaseRenderNode2D,
