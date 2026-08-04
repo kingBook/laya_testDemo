@@ -28,24 +28,30 @@ enum Flag {
 @regClass()
 export class RocketChart extends Laya.Script {
 
-    @property({ type: Laya.Box, private: false, tips: "画布" })
-    private _canvas: Laya.Box;
-    @property({ type: Laya.Box, private: false, tips: "图形盒" })
-    private _shapeBox: Laya.Box;
+    @property({ type: Laya.UIComponent, private: false, tips: "画布" })
+    private _canvas: Laya.UIComponent;
+    @property({ type: Laya.UIComponent, private: false, tips: "图形盒" })
+    private _shapeBox: Laya.UIComponent;
     @property({ type: Laya.Sprite, private: false, tips: "三角形" })
     private _triangle: Laya.Sprite;
     @property({ type: Laya.Sprite, private: false, tips: "线" })
     private _line: Laya.Sprite;
     @property({ type: Laya.Sprite, private: false, tips: "线头" })
     private _lineHead: Laya.Sprite;
-    @property({ type: Laya.Box, private: false, tips: "倍数盒" })
-    private _multiplierBox: Laya.Box;
+    @property({ type: Laya.UIComponent, private: false, tips: "倍数盒" })
+    private _multiplierBox: Laya.UIComponent;
     @property({ type: Laya.Label, private: false, tips: "当前倍数文本" })
     private _multiplierLabel?: Laya.Label;
 
+    @property({ type: Number, private: false, catalog: "Line", min: 5, fractionDigits: 0, tips: "线的段数" })
+    private _lineSegmentCount: number = 25;
+    @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "线起点宽" })
+    private _lineStartWidth: number = 1;
+    @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "线终点宽" })
+    private _lineEndWidth: number = 10;
 
     @property({ type: Boolean, catalog: "Ruler", tips: "显示网格线" })
-    public showGrid: boolean = false;
+    private _showGrid: boolean = false;
     @property({ type: Laya.Color, private: false, catalog: "Ruler", tips: "网格线颜色" })
     private _gridColor: Laya.Color = new Laya.Color(0.4, 0.4, 0.4);
     @property({ type: Number, private: false, catalog: "Ruler", min: 1, fractionDigits: 0, tips: "网格线宽" })
@@ -148,16 +154,12 @@ export class RocketChart extends Laya.Script {
         this._triangleGraphics = this._triangle.getComponent(Mesh2dGraphics);
         this._drawTriangleCmd = new Mesh2dDrawPolygonCmd();
         this._triangleGraphics.addCmd(this._drawTriangleCmd);
+
+        // 画布大小改变侦听
+        this._canvas.on(Laya.Event.RESIZE, this, this.onCanvasResize);
     }
 
     onEnable(): void {
-        // 初始位置，左下角
-        this._triangle.pos(0, this._canvas.height);
-        this._line.pos(0, this._canvas.height);
-        this._lineHead.pos(this._lineMinPos.x, this._canvas.height - this._lineMinPos.y);
-        this._multiplierRuler.pos(0, this._canvas.height);
-        this._timeRuler.pos(0, this._canvas.height);
-
         // 把时间、倍数转换函数加入 window 对象，方便在控制台做测试
         if (Laya.LayaEnv.isPreview && window) {
             window["timeToMultiplier"] ??= RocketChart.timeToMultiplier;
@@ -215,6 +217,10 @@ export class RocketChart extends Laya.Script {
                 window["multiplierToTime"] = undefined;
             }
         }
+    }
+
+    onDestroy(): void {
+        this._canvas.off(Laya.Event.RESIZE, this, this.onCanvasResize);
     }
 
     /**
@@ -314,6 +320,16 @@ export class RocketChart extends Laya.Script {
         });
     }
 
+    /** 画布大小改变侦听函数 */
+    private onCanvasResize(): void {
+        // 初始位置，左下角
+        this._triangle.pos(0, this._canvas.height);
+        this._line.pos(0, this._canvas.height);
+        this._lineHead.pos(this._lineMinPos.x, this._canvas.height - this._lineMinPos.y);
+        this._multiplierRuler.pos(0, this._canvas.height);
+        this._timeRuler.pos(0, this._canvas.height);
+    }
+
     /**
      * 画线和三角形
      */
@@ -323,7 +339,7 @@ export class RocketChart extends Laya.Script {
         const multiplierRulerMax = this.getMultiplierRulerMax();
 
         const targetT = Laya.MathUtil.clamp01(this._time / timeRulerMax);
-        const segmentCount = 999;
+        const segmentCount = this._lineSegmentCount;
         const step = 1 / segmentCount;
         let nx = 0, ny = 0, mx = 0, my = 0;
 
@@ -343,8 +359,8 @@ export class RocketChart extends Laya.Script {
             if (nx >= targetT) break;
         }
 
-        this._drawLinesCmd.lineStartWidth = 1;
-        this._drawLinesCmd.lineEndWidth = 10;
+        this._drawLinesCmd.lineStartWidth = this._lineStartWidth;
+        this._drawLinesCmd.lineEndWidth = this._lineEndWidth;
         this._drawLinesCmd.points = this._tempLinePoints;
         this._lineGraphics.clear();
         this._lineGraphics.repaint();
@@ -418,7 +434,7 @@ export class RocketChart extends Laya.Script {
             this._timeRuler.graphics.fillText(text, x, y, font, color, textAlign);
 
             // 网格线
-            if (this.showGrid) {
+            if (this._showGrid) {
                 this._timeRuler.graphics.drawLine(x, 0, x, -this._canvas.height, this._gridColor.getStyleString(), this._gridLineWidth);
             }
         }
@@ -445,7 +461,7 @@ export class RocketChart extends Laya.Script {
             this._multiplierRuler.graphics.fillText(text, x, y - fontSize * 0.5, font, color, textAlign);
 
             // 网格线
-            if (this.showGrid) {
+            if (this._showGrid) {
                 this._multiplierRuler.graphics.drawLine(0, y, this._canvas.width, y, this._gridColor.getStyleString(), this._gridLineWidth);
             }
         }

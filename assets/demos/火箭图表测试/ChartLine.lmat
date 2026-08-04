@@ -2,7 +2,7 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "ChartGradient",
+    "type": "RocketChart/ChartGradient",
     "renderQueue": 3000,
     "materialRenderMode": 2,
     "s_Cull": 0,
@@ -24,7 +24,7 @@
       1
     ],
     "u_startAlpha": 1,
-    "u_endAlpha": 1,
+    "u_endAlpha": 0.5,
     "u_gradientStartColorA": [
       0,
       1,

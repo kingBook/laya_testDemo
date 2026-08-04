@@ -62,7 +62,10 @@
           "_multiplierLabel": {
             "_$ref": "3uh1ijc4"
           },
-          "showGrid": false,
+          "_lineSegmentCount": 25,
+          "_lineStartWidth": 1,
+          "_lineEndWidth": 10,
+          "_showGrid": false,
           "_gridColor": {
             "_$type": "Color",
             "r": 0.4,

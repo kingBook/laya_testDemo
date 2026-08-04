@@ -212,13 +212,13 @@ export class Mesh2dDrawLinesCmd implements IMesh2dGraphicsCmd {
 
     /**
      * @en Line width at the start of the polyline
-     * @zh 折线起点线宽
+     * @zh 折线起点宽
      */
     public lineStartWidth: number;
 
     /**
      * @en Line width at the end of the polyline.
-     * @zh 折线终点线宽
+     * @zh 折线终点宽
      */
     public lineEndWidth: number;
 
