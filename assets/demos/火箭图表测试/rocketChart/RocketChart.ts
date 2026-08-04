@@ -50,14 +50,14 @@ export class RocketChart extends Laya.Script {
     @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "线终点宽" })
     private _lineEndWidth: number = 10;
 
-    @property({ type: Boolean, catalog: "Ruler", tips: "显示网格线" })
+    @property({ type: Boolean, private: false, catalog: "Ruler", tips: "显示网格线" })
     private _showGrid: boolean = false;
     @property({ type: Laya.Color, private: false, catalog: "Ruler", tips: "网格线颜色" })
     private _gridColor: Laya.Color = new Laya.Color(0.4, 0.4, 0.4);
     @property({ type: Number, private: false, catalog: "Ruler", min: 1, fractionDigits: 0, tips: "网格线宽" })
     private _gridLineWidth: number = 1;
 
-    @property({ type: Number, private: false, catalog: "Ruler", min: 5, tips: "标尺文字与画布的边距" })
+    @property({ type: Number, private: false, catalog: "Ruler", min: 0, fractionDigits: 0, tips: "标尺文字与画布的边距" })
     private _rulerLabelMargin: number = 10;
     @property({ type: Number, private: false, catalog: "Ruler", min: 1, fractionDigits: 0, tips: "标尺字体大小" })
     private _rulerFontSize: number = 18;
@@ -339,8 +339,7 @@ export class RocketChart extends Laya.Script {
         const multiplierRulerMax = this.getMultiplierRulerMax();
 
         const targetT = Laya.MathUtil.clamp01(this._time / timeRulerMax);
-        const segmentCount = this._lineSegmentCount;
-        const step = 1 / segmentCount;
+        const step = 1 / this._lineSegmentCount;
         let nx = 0, ny = 0, mx = 0, my = 0;
 
         this._tempLinePoints.length = 0;
@@ -378,18 +377,29 @@ export class RocketChart extends Laya.Script {
         // 画三角形 -------------------------------------------------
         this._tempTrianglePoints.length = 0;
 
+        if (this._tempLinePoints.length === 4) {
+            const x1 = this._tempLinePoints[0];
+            const y1 = this._tempLinePoints[1];
+            const x2 = this._tempLinePoints[2];
+            const y2 = this._tempLinePoints[3];
+            const lineLen = Math.hypot(x2 - x1, y2 - y1);
+            if (lineLen < 1) return; // 线条只有两个点，且长度小于1像素，不画三角形
+        }
+
         for (let i = 0, len = this._tempLinePoints.length / 2; i < len; i++) {
-            const vx = this._tempLinePoints[i * 2];
-            const vy = this._tempLinePoints[i * 2 + 1];
+            const ix2 = i * 2;
+            const vx = this._tempLinePoints[ix2];
+            const vy = this._tempLinePoints[ix2 + 1];
 
             if (i > 0) {
                 const lastX = this._tempTrianglePoints.at(-2);
                 const lastY = this._tempTrianglePoints.at(-1);
-                const d = Math.pow(lastX - vx, 2) + Math.pow(lastY - vy, 2);
-                const dx = Math.abs(lastX - vx)
+                const dx = lastX - vx;
+                const dy = lastY - vy;
+                const d = dx * dx + dy * dy;
 
                 if (d <= Number.EPSILON) continue; // 过滤掉距离太近的点，导致三角化出错
-                if (dx < 0.1) continue; // 过滤掉距离太近的点，导致三角化出错
+                if (Math.abs(dx) < 0.1) continue; // 过滤掉距离太近的点，导致三角化出错
 
                 this._tempTrianglePoints.push(vx, vy);
                 continue;
