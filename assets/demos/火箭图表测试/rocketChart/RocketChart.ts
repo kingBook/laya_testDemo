@@ -102,7 +102,6 @@ export class RocketChart extends Laya.Script {
     private _tempTrianglePoints: number[] = [];
 
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
-    private readonly _lineMinPos = new Point(0, 0);
 
     /** 时间标尺默认显示的时间长度<毫秒>，必须是10的次方 */
     private readonly _defaultDisplayTimeMs = 10000;
@@ -325,7 +324,7 @@ export class RocketChart extends Laya.Script {
         // 初始位置，左下角
         this._triangle.pos(0, this._canvas.height);
         this._line.pos(0, this._canvas.height);
-        this._lineHead.pos(this._lineMinPos.x, this._canvas.height - this._lineMinPos.y);
+        this._lineHead.pos(0, this._canvas.height);
         this._multiplierRuler.pos(0, this._canvas.height);
         this._timeRuler.pos(0, this._canvas.height);
     }
@@ -366,12 +365,20 @@ export class RocketChart extends Laya.Script {
 
 
         // 线头 -------------------------------------------------
-        const lastAx = this._tempLinePoints.at(-6);
-        const lastAy = this._tempLinePoints.at(-5) + this._canvas.height;
-        const lastBx = this._tempLinePoints.at(-2);
-        const lastBy = this._tempLinePoints.at(-1) + this._canvas.height;
-        this._lineHead.rotation = Laya.MathUtil.getRotation(lastAx, lastAy, lastBx, lastBy);
-        this._lineHead.pos(Math.max(lastBx, this._lineMinPos.x), Math.min(lastBy, this._canvas.height - this._lineMinPos.y));
+        const headMinTime = 0.5;
+        // - 点a
+        const anx = Math.max(0, this._time - headMinTime) / timeRulerMax;
+        const any = (RocketChart.timeToMultiplier(timeRulerMax * anx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
+        const ax = this.mapX(anx);
+        const ay = this.mapY(any) + this._canvas.height;
+        // - 点b
+        const bnx = Math.max(this._time, headMinTime) / timeRulerMax;
+        const bny = (RocketChart.timeToMultiplier(timeRulerMax * bnx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
+        const bx = this.mapX(bnx);
+        const by = this.mapY(bny) + this._canvas.height;
+
+        this._lineHead.rotation = Laya.MathUtil.getRotation(ax, ay, bx, by);
+        this._lineHead.pos(bx, by);
 
 
         // 画三角形 -------------------------------------------------
@@ -536,7 +543,7 @@ export class RocketChart extends Laya.Script {
     //#region Util
     /** 获取时间标尺当前显示的最大值 */
     private getTimeRulerMax(): number {
-        return this._time > this._defaultDisplayTimeMs ? this.time : this._defaultDisplayTimeMs;
+        return this._time > this._defaultDisplayTimeMs ? this._time : this._defaultDisplayTimeMs;
     }
 
     /** 获取倍数标尺当前显示的最大值 */
@@ -614,6 +621,18 @@ export class RocketChart extends Laya.Script {
         result = Math.abs(result * 1000); // 转毫秒
         return result;
     }
+
+    // /** 
+    //  * 在指定时间点的导数
+    //  * @param time 发射经过的时间<毫秒>
+    //  * @param v0 初速度<倍/秒>
+    //  * @param a 加速度<倍/秒>
+    //  * @returns 
+    //  */
+    // public static timeToTangent(time: number, v0: number, a: number): number {
+    //     const t = time / 1000; // 时间<秒>
+    //     return v0 + a * t;
+    // }
 
     /**
      * 求大于或等于指定数的最小10次方数
