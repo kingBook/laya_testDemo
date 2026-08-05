@@ -84,8 +84,11 @@ export class RocketChart extends Laya.Script {
     /** 着色器中AB两组颜色的过渡因子 */
     private _shaderMixFactor: number;
 
-    /** 视为加速开始的时间点<毫秒> */
+    /** 加速开始的时间点<毫秒> */
     private _accelerationStartTime: number;
+    /** 加速完成的时间点<毫秒> */
+    private _accelerationFinishTime: number;
+
     /** 跳点数组 */
     private _jumpPoints: JumpPointData[];
 
@@ -182,6 +185,7 @@ export class RocketChart extends Laya.Script {
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
         this._shaderMixFactor = 0;
         this._accelerationStartTime = RocketChart.multiplierToTime(this._accelerationStartMultiplier, initSpeed, acceleration);
+        this._accelerationFinishTime = this._accelerationStartTime + 1000;
         this._jumpPoints.length = 0;
         this._shapeBox.visible = false; // 图形盒
         this._multiplierBox.visible = false; // 倍数盒
@@ -254,8 +258,7 @@ export class RocketChart extends Laya.Script {
                 this.onAccelerationStartHandler?.run(); // 加速开始事件
             }
 
-            const speedMF = 0.015;
-            this._shaderMixFactor = Math.min(this._shaderMixFactor + speedMF, 1);
+            this._shaderMixFactor = Laya.MathUtil.clamp01((this._time - this._accelerationStartTime) / (this._accelerationFinishTime - this._accelerationStartTime));
         } else {
             this._shaderMixFactor = 0;
         }
@@ -301,7 +304,7 @@ export class RocketChart extends Laya.Script {
     }
 
     /**
-     * 添加玩家的跳点
+     * 添加跳点
      * * 火箭到达跳点指定的倍数时，才显示跳点对应的显示对象
      * * 如果在火箭到达跳点指定的倍数后添加跳点，则立即显示跳点对应的显示对象
      * @param multiplier 倍数<两位小数>
