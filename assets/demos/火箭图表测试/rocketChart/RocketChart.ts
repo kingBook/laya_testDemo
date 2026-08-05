@@ -234,16 +234,22 @@ export class RocketChart extends Laya.Script {
     public updateStatusToTime(time: number, multiplier?: number): void {
         // console.time("draw");
 
+        if (!this._shapeBox.visible) this._shapeBox.visible = true; // 图形盒
+        if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
+
         // 修正时间、倍数保证对应(倍数优先)
         if (!isNaN(multiplier)) {
-            const tempMultiplier: string = RocketChart.timeToMultiplier(time, this._initSpeed, this._acceleration).toFixed(2);
-            if (tempMultiplier != multiplier.toFixed(2)) {
+            const fixedPoint = (multiplier % 1 === 0) ? 0 : 2; // 纠正时判断的小数位（是整数则0， 否则2）
+            const tempMultiplier: string = RocketChart.timeToMultiplier(time, this._initSpeed, this._acceleration).toFixed(fixedPoint);
+            if (tempMultiplier != multiplier.toFixed(fixedPoint)) {
+                // console.log("testTime 纠正时间",
+                //     "原时间", time,
+                //     "纠正后时间", RocketChart.multiplierToTime(multiplier, this._initSpeed, this._acceleration),
+                //     "原倍数", multiplier.toFixed(fixedPoint),
+                //     "纠正后倍数", tempMultiplier);
                 time = RocketChart.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
             }
         }
-
-        if (!this._shapeBox.visible) this._shapeBox.visible = true; // 图形盒
-        if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
 
         // 时间
         this._time = time;
