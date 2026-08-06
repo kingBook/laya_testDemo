@@ -308,7 +308,14 @@ export class RocketChart extends Laya.Script {
 
         this._flags |= Flag.Boomed;
         this._flags &= ~Flag.Launching;
-        this.updateStatusToTime(time, multiplier);
+
+        // 1. 同步图形和倍数
+        // this.updateStatusToTime(time, multiplier);
+
+        // 2. 仅同步倍数, 图形不变
+        this._time = time;
+        this._multiplier = multiplier;
+        this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
     }
 
     /**

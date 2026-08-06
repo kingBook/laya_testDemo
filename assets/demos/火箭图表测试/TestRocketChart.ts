@@ -91,7 +91,8 @@ export class TestRocketChart extends Laya.Script {
         if (evt.key == 'k') {
             console.log("爆炸");
             if (this._rocketChart.isLaunching) {
-                this._rocketChart.boom(18928, 2.36);
+                //this._rocketChart.boom(18928, 2.36);
+                this._rocketChart.boom(0, 1);
             }
         }
 
