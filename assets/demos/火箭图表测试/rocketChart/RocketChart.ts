@@ -56,22 +56,22 @@ export class RocketChart extends Laya.Script {
     @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "以时间定义线头左下角的最小位置，单位：<毫秒>" })
     private _lineHeadMinTime: number = 200;
     @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线默认渐变色的起始颜色" })
-    private _lineGradientA_start: Laya.Color;
+    private _lineGradientA_start: Laya.Color = new Laya.Color(0, 1, 1, 1);
     @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线默认渐变色的结束颜色" })
-    private _lineGradientA_end: Laya.Color;
+    private _lineGradientA_end: Laya.Color = new Laya.Color(0, 1, 1, 0.5);
     @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线加速渐变色的起始颜色" })
-    private _lineGradientB_start: Laya.Color;
+    private _lineGradientB_start: Laya.Color = new Laya.Color(1, 0, 1, 1);
     @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线加速渐变色的结束颜色" })
-    private _lineGradientB_end: Laya.Color;
+    private _lineGradientB_end: Laya.Color = new Laya.Color(1, 0.756, 1, 0.5);
 
     @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形默认渐变色的起始颜色" })
-    private _triangleGradientA_start: Laya.Color;
+    private _triangleGradientA_start: Laya.Color = new Laya.Color(0, 1, 1, 0.5);
     @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形默认渐变色的结束颜色" })
-    private _triangleGradientA_end: Laya.Color;
+    private _triangleGradientA_end: Laya.Color = new Laya.Color(0, 1, 1, 0);
     @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形加速渐变色的起始颜色" })
-    private _triangleGradientB_start: Laya.Color;
+    private _triangleGradientB_start: Laya.Color = new Laya.Color(1, 0, 1, 0.5);
     @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形加速渐变色的结束颜色" })
-    private _triangleGradientB_end: Laya.Color;
+    private _triangleGradientB_end: Laya.Color = new Laya.Color(1, 0, 1, 0);
 
     @property({ type: Boolean, private: false, catalog: "Ruler", tips: "显示网格线" })
     private _showGrid: boolean = false;
