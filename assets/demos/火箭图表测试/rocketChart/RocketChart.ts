@@ -43,6 +43,11 @@ export class RocketChart extends Laya.Script {
     @property({ type: Laya.Label, private: false, tips: "当前倍数文本" })
     private _multiplierLabel?: Laya.Label;
 
+    @property({ type: Number, private: false, catalog: "Acceleration", min: 1, fractionDigits: 2, tips: "加速开始的倍数" })
+    private _accelerationStartMultiplier = 2;
+    @property({ type: Number, private: false, catalog: "Acceleration", min: 100, fractionDigits: 0, tips: "加速持续的时间<毫秒>" })
+    private _accelerationDuration = 1000;
+
     @property({ type: Number, private: false, catalog: "Line", min: 5, fractionDigits: 0, tips: "线的段数" })
     private _lineSegmentCount: number = 25;
     @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "线起点宽" })
@@ -51,6 +56,23 @@ export class RocketChart extends Laya.Script {
     private _lineEndWidth: number = 10;
     @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "以时间定义线头左下角的最小位置，单位：<毫秒>" })
     private _lineHeadMinTime: number = 200;
+    @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线默认渐变色的起始颜色" })
+    private _lineGradientA_start: Laya.Color;
+    @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线默认渐变色的结束颜色" })
+    private _lineGradientA_end: Laya.Color;
+    @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线加速渐变色的起始颜色" })
+    private _lineGradientB_start: Laya.Color;
+    @property({ type: Laya.Color, private: false, catalog: "Line", tips: "线加速渐变色的结束颜色" })
+    private _lineGradientB_end: Laya.Color;
+
+    @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形默认渐变色的起始颜色" })
+    private _triangleGradientA_start: Laya.Color;
+    @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形默认渐变色的结束颜色" })
+    private _triangleGradientA_end: Laya.Color;
+    @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形加速渐变色的起始颜色" })
+    private _triangleGradientB_start: Laya.Color;
+    @property({ type: Laya.Color, private: false, catalog: "Triangle", tips: "三角形加速渐变色的结束颜色" })
+    private _triangleGradientB_end: Laya.Color;
 
     @property({ type: Boolean, private: false, catalog: "Ruler", tips: "显示网格线" })
     private _showGrid: boolean = false;
@@ -107,6 +129,10 @@ export class RocketChart extends Laya.Script {
     private _tempTrianglePoints: number[] = [];
 
     private readonly _mixFactorID = Laya.Shader3D.propertyNameToID("u_mixFactor");
+    private readonly _gradientStartColorA_ID = Laya.Shader3D.propertyNameToID("u_gradientStartColorA");
+    private readonly _gradientEndColorA_ID = Laya.Shader3D.propertyNameToID("u_gradientEndColorA");
+    private readonly _gradientStartColorB_ID = Laya.Shader3D.propertyNameToID("u_gradientStartColorB");
+    private readonly _gradientEndColorB_ID = Laya.Shader3D.propertyNameToID("u_gradientEndColorB");
 
     /** 时间标尺默认显示的时间长度<毫秒>，必须是10的次方 */
     private readonly _defaultDisplayTimeMs = 10000;
@@ -115,10 +141,6 @@ export class RocketChart extends Laya.Script {
     /** 初始倍数 */
     private readonly _initMultiplier = 1;
 
-    /** 加速开始的倍数 */
-    public accelerationStartMultiplier = 2;
-    /** 加速持续的时间<毫秒> */
-    public accelerationDuration = 1000;
     /** 加速开始时的处理器，格式：```(): void``` */
     public onAccelerationStartHandler?: Laya.Handler;
     /** 正在加速...，帧循环处理器，格式：```(progress: number): void``` ，progress∈[0,1]*/
@@ -142,6 +164,28 @@ export class RocketChart extends Laya.Script {
     /** 加速度 */
     public get acceleration(): number { return this._acceleration; }
 
+    /** 加速开始的倍数 */
+    public get accelerationStartMultiplier(): number { return this._accelerationStartMultiplier; }
+    /** 加速持续的时间<毫秒> */
+    public get accelerationDuration(): number { return this._accelerationDuration; }
+
+    /** 线默认渐变色的起始颜色 */
+    public get lineGradientA_start(): Laya.Color { return this._lineGradientA_start; }
+    /** 线默认渐变色的结束颜色 */
+    public get lineGradientA_end(): Laya.Color { return this._lineGradientA_end; }
+    /** 线加速渐变色的起始颜色 */
+    public get lineGradientB_start(): Laya.Color { return this._lineGradientB_start; }
+    /** 线加速渐变色的结束颜色 */
+    public get lineGradientB_end(): Laya.Color { return this._lineGradientB_end; }
+
+    /** 三角形默认渐变色的起始颜色 */
+    public get triangleGradientA_start(): Laya.Color { return this._triangleGradientA_start; }
+    /** 三角形默认渐变色的结束颜色 */
+    public get triangleGradientA_end(): Laya.Color { return this._triangleGradientA_end; }
+    /** 三角形加速渐变色的起始颜色 */
+    public get triangleGradientB_start(): Laya.Color { return this._triangleGradientB_start; }
+    /** 三角形加速渐变色的结束颜色 */
+    public get triangleGradientB_end(): Laya.Color { return this._triangleGradientB_end; }
 
 
     onAwake(): void {
@@ -157,11 +201,19 @@ export class RocketChart extends Laya.Script {
 
         // 线
         this._lineGraphics = this._line.getComponent(Mesh2dGraphics);
+        this._lineGraphics.sharedMaterial.setColorByIndex(this._gradientStartColorA_ID, this._lineGradientA_start);
+        this._lineGraphics.sharedMaterial.setColorByIndex(this._gradientEndColorA_ID, this._lineGradientA_end);
+        this._lineGraphics.sharedMaterial.setColorByIndex(this._gradientStartColorB_ID, this._lineGradientB_start);
+        this._lineGraphics.sharedMaterial.setColorByIndex(this._gradientEndColorB_ID, this._lineGradientB_end);
         this._drawLinesCmd = new Mesh2dDrawLinesCmd();
         this._lineGraphics.addCmd(this._drawLinesCmd);
 
         // 三角形
         this._triangleGraphics = this._triangle.getComponent(Mesh2dGraphics);
+        this._triangleGraphics.sharedMaterial.setColorByIndex(this._gradientStartColorA_ID, this._triangleGradientA_start);
+        this._triangleGraphics.sharedMaterial.setColorByIndex(this._gradientEndColorA_ID, this._triangleGradientA_end);
+        this._triangleGraphics.sharedMaterial.setColorByIndex(this._gradientStartColorB_ID, this._triangleGradientB_start);
+        this._triangleGraphics.sharedMaterial.setColorByIndex(this._gradientEndColorB_ID, this._triangleGradientB_end);
         this._drawTriangleCmd = new Mesh2dDrawPolygonCmd();
         this._triangleGraphics.addCmd(this._drawTriangleCmd);
 
@@ -192,8 +244,8 @@ export class RocketChart extends Laya.Script {
         this._multiplier = this._initMultiplier;
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
         this._shaderMixFactor = 0;
-        this._accelerationStartTime = RocketChart.multiplierToTime(this.accelerationStartMultiplier, initSpeed, acceleration);
-        this._accelerationFinishTime = this._accelerationStartTime + this.accelerationDuration;
+        this._accelerationStartTime = RocketChart.multiplierToTime(this._accelerationStartMultiplier, initSpeed, acceleration);
+        this._accelerationFinishTime = this._accelerationStartTime + this._accelerationDuration;
         this._jumpPoints.length = 0;
         this._shapeBox.visible = false; // 图形盒
         this._multiplierBox.visible = false; // 倍数盒

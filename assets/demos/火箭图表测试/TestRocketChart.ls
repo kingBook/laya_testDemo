@@ -65,6 +65,45 @@
           "_lineSegmentCount": 25,
           "_lineStartWidth": 1,
           "_lineEndWidth": 10,
+          "_lineHeadMinTime": 200,
+          "_lineGradientA_start": {
+            "_$type": "Color",
+            "r": 0
+          },
+          "_lineGradientA_end": {
+            "_$type": "Color",
+            "r": 0,
+            "a": 0.5
+          },
+          "_lineGradientB_start": {
+            "_$type": "Color",
+            "g": 0
+          },
+          "_lineGradientB_end": {
+            "_$type": "Color",
+            "g": 0.7568627450980392,
+            "a": 0.5
+          },
+          "_triangleGradientA_start": {
+            "_$type": "Color",
+            "r": 0,
+            "a": 0.5
+          },
+          "_triangleGradientA_end": {
+            "_$type": "Color",
+            "r": 0,
+            "a": 0
+          },
+          "_triangleGradientB_start": {
+            "_$type": "Color",
+            "g": 0,
+            "a": 0.5
+          },
+          "_triangleGradientB_end": {
+            "_$type": "Color",
+            "g": 0,
+            "a": 0
+          },
           "_showGrid": false,
           "_gridColor": {
             "_$type": "Color",

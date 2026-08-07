@@ -8,8 +8,6 @@ Shader3D Start
     uniformMap:{
         u_mixFactor: {type:Float, range:[0,1], default:0, tips:"AB两组颜色的过渡因子"},
         u_gradientDirection: {type:Vector2, default:[0,1], tips:"渐变方向"},
-        u_startAlpha: {type:Float, range:[0,1], default:1, tips:"起始透明度"},
-        u_endAlpha: {type:Float, range:[0,1], default:0, tips:"结束透明度"},
 
         // A组
         u_gradientStartColorA: {type:Color, default:[1,1,1,1], tips:"渐变起始颜色A"},
@@ -84,11 +82,9 @@ GLSL Start
 
         // 混合渐变颜色A
         vec4 gradientColorA = mix(u_gradientStartColorA, u_gradientEndColorA, gradientFactor);
-        gradientColorA.a = mix(u_startAlpha, u_endAlpha, gradientFactor);
 
         // 混合渐变颜色B
         vec4 gradientColorB = mix(u_gradientStartColorB, u_gradientEndColorB, gradientFactor);
-        gradientColorB.a =  mix(u_startAlpha, u_endAlpha, gradientFactor);
         
         textureColor *= gradientFactor >= u_mixFactor ? gradientColorA : gradientColorB;
         // ------------------------------------------------------------------------------------

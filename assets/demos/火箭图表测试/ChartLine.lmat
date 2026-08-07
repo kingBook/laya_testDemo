@@ -35,7 +35,7 @@
       0,
       1,
       1,
-      1
+      0.5
     ],
     "u_gradientStartColorB": [
       1,
@@ -47,7 +47,7 @@
       1,
       0.7558139534883721,
       1,
-      1
+      0.5
     ],
     "defines": [
       "BASERENDER2D"
