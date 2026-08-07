@@ -49,6 +49,8 @@ export class RocketChart extends Laya.Script {
     private _lineStartWidth: number = 1;
     @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "线终点宽" })
     private _lineEndWidth: number = 10;
+    @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "以时间定义线头左下角的最小位置，单位：<毫秒>" })
+    private _lineHeadMinTime: number = 200;
 
     @property({ type: Boolean, private: false, catalog: "Ruler", tips: "显示网格线" })
     private _showGrid: boolean = false;
@@ -112,11 +114,17 @@ export class RocketChart extends Laya.Script {
     private readonly _defaultDisplayMultiplier = 2;
     /** 初始倍数 */
     private readonly _initMultiplier = 1;
-    /** 视为加速开始的倍数 */
-    private readonly _accelerationStartMultiplier = 2;
 
-    /** 加速开始时的处理器，格式：```():void``` */
+    /** 加速开始的倍数 */
+    public accelerationStartMultiplier = 2;
+    /** 加速持续的时间<毫秒> */
+    public accelerationDuration = 1000;
+    /** 加速开始时的处理器，格式：```(): void``` */
     public onAccelerationStartHandler?: Laya.Handler;
+    /** 正在加速...，帧循环处理器，格式：```(progress: number): void``` ，progress∈[0,1]*/
+    public onAccelerationLoopHandler?: Laya.Handler;
+    /** 加速完成时的处理器，格式：```(): void``` */
+    public onAccelerationFinishHandler?: Laya.Handler;
 
     /** 已初始化 */
     public get isInited(): boolean { return (this._flags & Flag.Inited) > 0; }
@@ -184,8 +192,8 @@ export class RocketChart extends Laya.Script {
         this._multiplier = this._initMultiplier;
         this._multiplierLabel?.setVar('p', this._multiplier.toFixed(2));
         this._shaderMixFactor = 0;
-        this._accelerationStartTime = RocketChart.multiplierToTime(this._accelerationStartMultiplier, initSpeed, acceleration);
-        this._accelerationFinishTime = this._accelerationStartTime + 1000;
+        this._accelerationStartTime = RocketChart.multiplierToTime(this.accelerationStartMultiplier, initSpeed, acceleration);
+        this._accelerationFinishTime = this._accelerationStartTime + this.accelerationDuration;
         this._jumpPoints.length = 0;
         this._shapeBox.visible = false; // 图形盒
         this._multiplierBox.visible = false; // 倍数盒
@@ -263,10 +271,21 @@ export class RocketChart extends Laya.Script {
         // 2.00x 变色, 视为加速开始
         if (this._time > this._accelerationStartTime) {
             if (this._shaderMixFactor === 0) {
-                this.onAccelerationStartHandler?.run(); // 加速开始事件
+                this.onAccelerationStartHandler?.run(); // 加速开始
+                this.onAccelerationLoopHandler?.runWith(0); // 加速中...
             }
 
-            this._shaderMixFactor = Laya.MathUtil.clamp01((this._time - this._accelerationStartTime) / (this._accelerationFinishTime - this._accelerationStartTime));
+            const factor = (this._time - this._accelerationStartTime) / (this._accelerationFinishTime - this._accelerationStartTime);
+
+            if (factor >= 0 && factor <= 1) {
+                this.onAccelerationLoopHandler?.runWith(factor); // 加速中...
+            }
+
+            if (factor >= 1 && this._shaderMixFactor < 1) {
+                this.onAccelerationLoopHandler?.runWith(1); // 加速中...
+                this.onAccelerationFinishHandler?.run(); // 加速完成
+            }
+            this._shaderMixFactor = Laya.MathUtil.clamp01(factor);
         } else {
             this._shaderMixFactor = 0;
         }
@@ -383,21 +402,19 @@ export class RocketChart extends Laya.Script {
 
 
         // 线头 -------------------------------------------------
-        const headMinTime = 0.5;
         // - 点a
-        const anx = Math.max(0, this._time - headMinTime) / timeRulerMax;
+        const anx = Math.max(0, this._time - this._lineHeadMinTime) / timeRulerMax;
         const any = (RocketChart.timeToMultiplier(timeRulerMax * anx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
         const ax = this.mapX(anx);
         const ay = this.mapY(any) + this._canvas.height;
         // - 点b
-        const bnx = Math.max(this._time, headMinTime) / timeRulerMax;
+        const bnx = Math.max(this._time, this._lineHeadMinTime) / timeRulerMax;
         const bny = (RocketChart.timeToMultiplier(timeRulerMax * bnx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
         const bx = this.mapX(bnx);
         const by = this.mapY(bny) + this._canvas.height;
 
         this._lineHead.rotation = Laya.MathUtil.getRotation(ax, ay, bx, by);
         this._lineHead.pos(bx, by);
-
 
         // 画三角形 -------------------------------------------------
         this._tempTrianglePoints.length = 0;

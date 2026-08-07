@@ -31,9 +31,9 @@ this._rocketChart.startLaunch();
 
 **爆炸**
 * 必须在火箭发射后才能调用爆炸
-* boom() 与 updateStatusToTime() 的都可以立即设置火箭图表状态到指定的时间、倍数
-  * boom() 必须在火箭发射后才能调用爆炸
-  * boom() 之后必须重新初始化才能再次调用
+* boom() 会立即设置火箭倍数到参数指定的倍数，当前已绘的图形保持不变
+* boom() 必须在火箭发射后才能调用爆炸
+* boom() 之后必须重新初始化才能再次调用
 ```ts
 Laya.timer.once(3000, this, () => {
     if (this._rocketChart.isLaunching) {
@@ -59,4 +59,27 @@ multiplier = 2.5;
 sprite = this._otherUserJumpPointPrefab.create() as Laya.Sprite;
 isPlayer = false;
 this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
+```
+
+**2.00x 变色加速**
+```ts
+// 加速开始的倍数
+this._rocketChart.accelerationStartMultiplier = 2;
+// 加速持续的时间<毫秒>
+this._rocketChart.accelerationDuration = 1000;
+
+// 加速开始时的处理器
+this._rocketChart.onAccelerationStartHandler = new Laya.Handler(this, () => {
+    console.log("加速开始");
+});
+
+// 正在加速...，帧循环处理器, progress∈[0,1]
+this._rocketChart.onAccelerationLoopHandler = new Laya.Handler(this, (progress: number) => {
+    console.log("正在加速...", progress);
+});
+
+// 加速完成时的处理器
+this._rocketChart.onAccelerationFinishHandler = new Laya.Handler(this, () => {
+    console.log("加速完成");
+});
 ```

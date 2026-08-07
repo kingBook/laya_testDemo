@@ -68,6 +68,9 @@ export class TestRocketChart extends Laya.Script {
         // });
 
 
+        this._rocketChart.onAccelerationLoopHandler = new Laya.Handler(this, (progress: number) => {
+            // console.log("正在加速...", progress);
+        });
     }
 
     onUpdate(): void {
@@ -82,7 +85,7 @@ export class TestRocketChart extends Laya.Script {
             this._rocketChart.init(initSpeed, acceleration);
         }
 
-         if (evt.key == 'j') {
+        if (evt.key == 'j') {
             console.log("发射");
             this._rocketChart.startLaunch();
         }
@@ -96,7 +99,7 @@ export class TestRocketChart extends Laya.Script {
             }
         }
 
-       
+
     }
 
 
