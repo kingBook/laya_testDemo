@@ -62,6 +62,8 @@
           "_multiplierLabel": {
             "_$ref": "3uh1ijc4"
           },
+          "_accelerationStartMultiplier": 2,
+          "_accelerationDuration": 1000,
           "_lineSegmentCount": 25,
           "_lineStartWidth": 1,
           "_lineEndWidth": 10,

@@ -1,5 +1,4 @@
 import { Mesh2dDrawLinesCmd, Mesh2dDrawPolygonCmd, Mesh2dGraphics } from "./Mesh2dGraphics";
-import { Point } from "./poly2tri/poly2tri";
 
 const { regClass, property } = Laya;
 
@@ -45,7 +44,7 @@ export class RocketChart extends Laya.Script {
 
     @property({ type: Number, private: false, catalog: "Acceleration", min: 1, fractionDigits: 2, tips: "加速开始的倍数" })
     private _accelerationStartMultiplier = 2;
-    @property({ type: Number, private: false, catalog: "Acceleration", min: 100, fractionDigits: 0, tips: "加速持续的时间<毫秒>" })
+    @property({ type: Number, private: false, catalog: "Acceleration", min: 100, fractionDigits: 0, tips: "加速持续的时间<毫秒>(也就是完成颜色过渡需要的时间)" })
     private _accelerationDuration = 1000;
 
     @property({ type: Number, private: false, catalog: "Line", min: 5, fractionDigits: 0, tips: "线的段数" })
@@ -166,7 +165,7 @@ export class RocketChart extends Laya.Script {
 
     /** 加速开始的倍数 */
     public get accelerationStartMultiplier(): number { return this._accelerationStartMultiplier; }
-    /** 加速持续的时间<毫秒> */
+    /** 加速持续的时间<毫秒>(也就是完成颜色过渡需要的时间) */
     public get accelerationDuration(): number { return this._accelerationDuration; }
 
     /** 线默认渐变色的起始颜色 */
