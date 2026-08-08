@@ -16,8 +16,10 @@ export class TestRocketChart extends Laya.Script {
 
     onStart(): void {
         // 初始化
-        const initSpeed = 0.05;
-        const acceleration = 0.005//0.002;
+        // const initSpeed = 0.05;
+        // const acceleration = 0.005;
+        const initSpeed = 0.025;
+        const acceleration = 0.01;
         this._rocketChart.init(initSpeed, acceleration);
 
         // 立即设置火箭图表状态到指定的时间、倍数
