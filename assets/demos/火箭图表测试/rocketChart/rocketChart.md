@@ -63,11 +63,6 @@ this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 
 **2.00x 变色加速**
 ```ts
-// 加速开始的倍数
-this._rocketChart.accelerationStartMultiplier = 2;
-// 加速持续的时间<毫秒>
-this._rocketChart.accelerationDuration = 1000;
-
 // 加速开始时的处理器
 this._rocketChart.onAccelerationStartHandler = new Laya.Handler(this, () => {
     console.log("加速开始");
