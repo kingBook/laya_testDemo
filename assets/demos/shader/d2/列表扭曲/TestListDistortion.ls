@@ -159,12 +159,12 @@
       "_$id": "rj6rd5g7",
       "_$type": "Image",
       "name": "Image",
-      "x": 236,
-      "y": 1007,
+      "x": 123,
+      "y": 1039,
       "width": 512,
-      "height": 313,
+      "height": 256,
       "material": {
-        "_$uuid": "b75e36b9-9285-47eb-a1e0-84776ff59393",
+        "_$uuid": "e4d54ba8-7a7a-4b59-a064-229b2f8b1ab3",
         "_$type": "Material"
       },
       "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",

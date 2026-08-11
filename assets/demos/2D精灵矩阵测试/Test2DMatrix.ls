@@ -26,7 +26,7 @@
       "x": 119,
       "y": 644,
       "width": 512,
-      "height": 313,
+      "height": 256,
       "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
       "useSourceSize": true,
       "color": "#ffffff"

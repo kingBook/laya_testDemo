@@ -1,0 +1,34 @@
+{
+  "_$ver": 1,
+  "_$id": "83ozuvoh",
+  "_$type": "Box",
+  "name": "UI3dPrefab",
+  "width": 512,
+  "height": 256,
+  "_$child": [
+    {
+      "_$id": "lx4k8lut",
+      "_$type": "Image",
+      "name": "Image",
+      "width": 512,
+      "height": 256,
+      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
+      "useSourceSize": true,
+      "color": "#ffffff"
+    },
+    {
+      "_$id": "lyi1nqyl",
+      "_$type": "Button",
+      "name": "Button",
+      "x": 202,
+      "y": 114,
+      "width": 120,
+      "height": 40,
+      "skin": "res://d4cfd6a8-0d0a-475b-ac93-d85eaa646936",
+      "label": "Title",
+      "labelSize": 20,
+      "labelAlign": "center",
+      "labelVAlign": "middle"
+    }
+  ]
+}
