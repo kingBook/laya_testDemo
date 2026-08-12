@@ -29,6 +29,40 @@
       "labelSize": 20,
       "labelAlign": "center",
       "labelVAlign": "middle"
+    },
+    {
+      "_$id": "cso3igqf",
+      "_$type": "Box",
+      "name": "Box",
+      "x": 137,
+      "y": 197,
+      "width": 200,
+      "height": 200,
+      "scaleY": -1,
+      "_$child": [
+        {
+          "_$id": "4sgjtqou",
+          "_$type": "Sprite",
+          "name": "hero-pro",
+          "x": -19,
+          "y": 189,
+          "width": 157,
+          "height": 191,
+          "anchorX": 0.727,
+          "anchorY": 1,
+          "_$comp": [
+            {
+              "_$type": "Spine2DRenderNode",
+              "layer": 0,
+              "useFastRender": false,
+              "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
+              "animationName": "attack",
+              "preview": true,
+              "physicsUpdate": 2
+            }
+          ]
+        }
+      ]
     }
   ]
 }

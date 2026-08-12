@@ -43,10 +43,12 @@
           "transform": {
             "localPosition": {
               "_$type": "Vector3",
-              "y": 0.19539771853468757,
-              "z": 2.624820630414078
+              "x": -0.16958106288582264,
+              "y": 1.0155549314122099,
+              "z": 2.1296212399002115
             }
           },
+          "fieldOfView": 97,
           "nearPlane": 0.3,
           "farPlane": 1000,
           "clearFlag": 1,
@@ -93,10 +95,16 @@
           "_$type": "Sprite3D",
           "name": "UI3d",
           "transform": {
+            "localPosition": {
+              "_$type": "Vector3",
+              "x": -0.16958106288582264,
+              "y": 1.0155549314122099,
+              "z": 0.5365479122754014
+            },
             "localRotation": {
               "_$type": "Quaternion",
-              "y": -0.15246523735484024,
-              "w": 0.9883088340181586
+              "y": 0.3826834323650898,
+              "w": 0.9238795325112867
             }
           },
           "_$comp": [
@@ -110,14 +118,11 @@
                 "_$type": "Prefab"
               },
               "resolutionRate": 512,
-              "scale": {
-                "_$type": "Vector2",
-                "x": 1,
-                "y": 0.5
-              },
               "billboard": false,
               "enableHit": true,
-              "renderMode": 2
+              "cameraPlaneDistance": 1000,
+              "renderMode": 2,
+              "cull": 0
             }
           ]
         }
@@ -127,8 +132,8 @@
       "_$id": "e7e74v5a",
       "_$type": "Image",
       "name": "Image",
-      "x": 6,
-      "y": 6,
+      "x": 135,
+      "y": 834,
       "width": 512,
       "height": 256,
       "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
