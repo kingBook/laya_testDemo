@@ -1,0 +1,110 @@
+{
+  "_$ver": 1,
+  "_$id": "8day9d2b",
+  "_$type": "Box",
+  "name": "LeftListPrefab",
+  "width": 178,
+  "height": 645,
+  "_$child": [
+    {
+      "_$id": "ikr3cfyv",
+      "_$type": "List",
+      "name": "List",
+      "width": 178,
+      "height": 645,
+      "left": 0,
+      "top": 0,
+      "itemTemplate": {
+        "_$ref": "2uwolg2a",
+        "_$tmpl": "itemRender"
+      },
+      "repeatX": 1,
+      "repeatY": 8,
+      "spaceY": 10,
+      "scrollType": 2,
+      "_$comp": [
+        {
+          "_$type": "521c8653-cc8e-4a4b-837b-e1a662abcb01",
+          "scriptPath": "demos/test3dUI/TestList.ts"
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "2uwolg2a",
+          "_$type": "Box",
+          "name": "item",
+          "width": 178,
+          "height": 72,
+          "_$child": [
+            {
+              "_$id": "aqf5fo6f",
+              "_$type": "Box",
+              "name": "flipBox",
+              "x": 89,
+              "y": 36,
+              "width": 178,
+              "height": 72,
+              "anchorX": 0.5,
+              "anchorY": 0.5,
+              "_$child": [
+                {
+                  "_$id": "smqg3znu",
+                  "_$type": "Image",
+                  "name": "img_menu_item_bg",
+                  "width": 178,
+                  "height": 72,
+                  "skin": "res://2d379277-de5c-47cc-bae2-a58550fe94ff",
+                  "useSourceSize": true,
+                  "color": "#ffffff"
+                },
+                {
+                  "_$id": "r23ykgmq",
+                  "_$type": "Image",
+                  "name": "img_menu_icon_vip",
+                  "x": 10,
+                  "y": 9,
+                  "width": 54,
+                  "height": 54,
+                  "left": 10,
+                  "centerY": 0,
+                  "skin": "res://9fafcd94-e637-4982-97a9-9727f7c95c16",
+                  "useSourceSize": true,
+                  "color": "#ffffff"
+                },
+                {
+                  "_$id": "ci4mqu9r",
+                  "_$type": "Image",
+                  "name": "img_menu_title_vip",
+                  "x": 67,
+                  "y": 15,
+                  "width": 106,
+                  "height": 42,
+                  "right": 5,
+                  "centerY": 0,
+                  "skin": "res://1d709b49-1532-466d-a55c-40839d62a698",
+                  "useSourceSize": true,
+                  "color": "#ffffff"
+                },
+                {
+                  "_$id": "pal0bu8b",
+                  "_$type": "Label",
+                  "name": "txtNO",
+                  "x": 29,
+                  "width": 120,
+                  "height": 28,
+                  "top": 0,
+                  "centerX": 0,
+                  "text": "-",
+                  "fontSize": 20,
+                  "color": "#ffffff",
+                  "align": "center",
+                  "valign": "middle"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

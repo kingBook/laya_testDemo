@@ -1,0 +1,103 @@
+{
+  "_$ver": 1,
+  "_$id": "e8ro467q",
+  "_$type": "Box",
+  "name": "RightListPrefab",
+  "width": 225,
+  "height": 850,
+  "_$child": [
+    {
+      "_$id": "es2lo012",
+      "_$type": "List",
+      "name": "List",
+      "width": 225,
+      "height": 850,
+      "itemTemplate": {
+        "_$ref": "ykt523g6",
+        "_$tmpl": "itemRender"
+      },
+      "repeatX": 1,
+      "repeatY": 7,
+      "spaceY": 10,
+      "scrollType": 2,
+      "_$comp": [
+        {
+          "_$type": "521c8653-cc8e-4a4b-837b-e1a662abcb01",
+          "scriptPath": "demos/test3dUI/TestList.ts"
+        }
+      ],
+      "_$child": [
+        {
+          "_$id": "ykt523g6",
+          "_$type": "Box",
+          "name": "item",
+          "width": 214,
+          "height": 111,
+          "_$child": [
+            {
+              "_$id": "fw8ubbiu",
+              "_$type": "Box",
+              "name": "flipBox",
+              "x": 107,
+              "y": 56,
+              "width": 214,
+              "height": 111,
+              "anchorX": 0.5,
+              "anchorY": 0.5,
+              "_$child": [
+                {
+                  "_$id": "n5qygfxt",
+                  "_$type": "Image",
+                  "name": "game_bg_zp-max",
+                  "width": 214,
+                  "height": 111,
+                  "skin": "res://5e66c3e6-d728-40d0-a4e5-7dc91adb024d",
+                  "useSourceSize": true,
+                  "color": "#ffffff"
+                },
+                {
+                  "_$id": "suzuz0kg",
+                  "_$type": "Image",
+                  "name": "game_icon_boom",
+                  "x": 63,
+                  "y": -4,
+                  "width": 133,
+                  "height": 122,
+                  "skin": "res://a4899cf0-ccff-420f-b547-aa0715888a3f",
+                  "useSourceSize": true,
+                  "color": "#ffffff"
+                },
+                {
+                  "_$id": "dlcd20fi",
+                  "_$type": "Image",
+                  "name": "game_title_boom",
+                  "x": 49,
+                  "y": 61,
+                  "width": 127,
+                  "height": 30,
+                  "skin": "res://951dc420-e1be-47fa-8f48-e1b9ada34348",
+                  "color": "#ffffff"
+                },
+                {
+                  "_$id": "v196b9a3",
+                  "_$type": "Label",
+                  "name": "txtNO",
+                  "x": 47,
+                  "width": 120,
+                  "height": 28,
+                  "top": 0,
+                  "centerX": 0,
+                  "text": "-",
+                  "fontSize": 20,
+                  "color": "#ffffff",
+                  "align": "center",
+                  "valign": "middle"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
