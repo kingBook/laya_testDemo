@@ -1,0 +1,22 @@
+{
+  "_$ver": 1,
+  "_$id": "cvv45jp6",
+  "_$type": "Box",
+  "name": "BgUiPrefab",
+  "width": 750,
+  "height": 1600,
+  "_$child": [
+    {
+      "_$id": "k3avyg6s",
+      "_$type": "Image",
+      "name": "bg",
+      "width": 750,
+      "height": 1600,
+      "centerX": 0,
+      "centerY": 0,
+      "skin": "res://aaec5b47-2fb5-4d56-8c56-ff8b7f488b98",
+      "useSourceSize": true,
+      "color": "#ffffff"
+    }
+  ]
+}

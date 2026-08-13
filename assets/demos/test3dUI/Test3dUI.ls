@@ -1,9 +1,6 @@
 {
   "_$ver": 1,
   "_$id": "wnbt32u5",
-  "_$preloads": [
-    "res://f47c48b2-d2ca-424b-af28-8b46cf0c5ab8"
-  ],
   "_$type": "Scene",
   "left": 0,
   "right": 0,
@@ -15,7 +12,7 @@
   "_$comp": [
     {
       "_$type": "f465e7e5-31f0-4b76-8c12-47de245ac220",
-      "scriptPath": "resources/views/test3dUI/Test3DUI.ts"
+      "scriptPath": "demos/test3dUI/Test3DUI.ts"
     }
   ],
   "_$child": [
@@ -55,6 +52,7 @@
               "z": 120
             }
           },
+          "orthographicVerticalSize": 5,
           "fieldOfView": 10,
           "nearPlane": 0.3,
           "farPlane": 1000,
@@ -65,11 +63,7 @@
             "b": 0,
             "a": 0
           },
-          "depthTextureFormat": -1,
-          "renderTarget": {
-            "_$uuid": "c0b0977f-e06f-40df-b02c-1f77635aa8c0",
-            "_$type": "RenderTexture"
-          }
+          "depthTextureFormat": -1
         },
         {
           "_$id": "l92y2j4j",
@@ -91,7 +85,7 @@
               "_$type": "Vector3",
               "x": 10,
               "y": 10,
-              "z": 10
+              "z": 1
             }
           },
           "_$comp": [
@@ -135,7 +129,7 @@
               "_$type": "Vector3",
               "x": 15,
               "y": 15,
-              "z": 15
+              "z": 1
             }
           },
           "_$comp": [
@@ -160,37 +154,51 @@
               "renderMode": 2
             }
           ]
+        },
+        {
+          "_$id": "thjr3uk5",
+          "_$type": "Sprite3D",
+          "name": "BgUI",
+          "transform": {
+            "localScale": {
+              "_$type": "Vector3",
+              "x": 7.5,
+              "y": 16,
+              "z": 1
+            }
+          },
+          "_$comp": [
+            {
+              "_$type": "UI3D",
+              "lightmapScaleOffset": {
+                "_$type": "Vector4"
+              },
+              "prefab": {
+                "_$uuid": "ff97610f-dfec-4da2-91af-da3e4a830280",
+                "_$type": "Prefab"
+              },
+              "resolutionRate": 2048,
+              "scale": {
+                "_$type": "Vector2",
+                "x": 0.3662109375,
+                "y": 0.78125
+              },
+              "billboard": false,
+              "cameraPlaneDistance": 100,
+              "attachCamera": {
+                "_$ref": "6jx8h8bvc6"
+              }
+            },
+            {
+              "_$type": "87941eff-991a-4925-b163-7d057bb105c5",
+              "scriptPath": "demos/test3dUI/BgUI.ts",
+              "_camera": {
+                "_$ref": "6jx8h8bvc6"
+              }
+            }
+          ]
         }
       ]
-    },
-    {
-      "_$id": "4bz7aqdq",
-      "_$type": "Image",
-      "name": "bg",
-      "width": 750,
-      "height": 1600,
-      "_mouseState": 1,
-      "left": 0,
-      "right": 0,
-      "top": 0,
-      "bottom": 0,
-      "skin": "res://aaec5b47-2fb5-4d56-8c56-ff8b7f488b98",
-      "useSourceSize": true,
-      "color": "#ffffff"
-    },
-    {
-      "_$id": "yqgpxx4z",
-      "_$type": "Image",
-      "name": "imgTarget",
-      "width": 750,
-      "height": 1600,
-      "_mouseState": 1,
-      "left": 0,
-      "right": 0,
-      "top": 0,
-      "bottom": 0,
-      "skin": "res://c0b0977f-e06f-40df-b02c-1f77635aa8c0",
-      "color": "#ffffff"
     },
     {
       "_$id": "ui0ngwha",
