@@ -61,20 +61,16 @@ isPlayer = false;
 this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 ```
 
-**2.00x 变色加速**
+**颜色过渡处理器**
 ```ts
-// 加速开始时的处理器
-this._rocketChart.onAccelerationStartHandler = new Laya.Handler(this, () => {
-    console.log("加速开始");
-});
-
-// 正在加速...，帧循环处理器, progress∈[0,1]
-this._rocketChart.onAccelerationLoopHandler = new Laya.Handler(this, (progress: number) => {
-    console.log("正在加速...", progress);
-});
-
-// 加速完成时的处理器
-this._rocketChart.onAccelerationFinishHandler = new Laya.Handler(this, () => {
-    console.log("加速完成");
+// 颜色过渡中..., progress∈[0,1]
+this._rocketChart.colorTransitionHandler = new Laya.Handler(this, (progress: number, rangeColorA: RangeColor, rangeColorB: RangeColor) => {
+    if(progress == 0) {
+        // 颜色过渡开始
+    }
+    if(progress == 1) {
+        // 颜色过渡完成
+    }
+    console.log("颜色过渡中...", "进度:", progress, "颜色A:", rangeColorA.color.toString(), "颜色B:", rangeColorB.color.toString());
 });
 ```

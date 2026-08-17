@@ -62,50 +62,60 @@
           "_multiplierLabel": {
             "_$ref": "3uh1ijc4"
           },
-          "_accelerationStartMultiplier": 2,
-          "_accelerationDuration": 1000,
+          "_colorTransitionDuration": 1000,
+          "rangeColors": [
+            {
+              "_$type": "fcdae830-17eb-4f17-bf94-b7f653bfbffc",
+              "start": 1,
+              "end": 1,
+              "colorLevel": 1,
+              "color": {
+                "_$type": "Color",
+                "b": 0.15294117647058825
+              }
+            },
+            {
+              "_$type": "fcdae830-17eb-4f17-bf94-b7f653bfbffc",
+              "start": 10,
+              "end": 9999,
+              "colorLevel": 2,
+              "color": {
+                "_$type": "Color",
+                "g": 0.17647058823529413,
+                "b": 0.17647058823529413
+              }
+            },
+            {
+              "_$type": "fcdae830-17eb-4f17-bf94-b7f653bfbffc",
+              "start": 2,
+              "end": 9.99,
+              "colorLevel": 3,
+              "color": {
+                "_$type": "Color",
+                "g": 0.2196078431372549
+              }
+            },
+            {
+              "_$type": "fcdae830-17eb-4f17-bf94-b7f653bfbffc",
+              "start": 1.01,
+              "end": 1.99,
+              "colorLevel": 4,
+              "color": {
+                "_$type": "Color",
+                "r": 0.1843137254901961,
+                "g": 0.9921568627450981,
+                "b": 0.9921568627450981
+              }
+            }
+          ],
           "_lineSegmentCount": 25,
           "_lineStartWidth": 1,
           "_lineEndWidth": 10,
           "_lineHeadMinTime": 200,
-          "_lineGradientA_start": {
-            "_$type": "Color",
-            "r": 0
-          },
-          "_lineGradientA_end": {
-            "_$type": "Color",
-            "r": 0,
-            "a": 0.5
-          },
-          "_lineGradientB_start": {
-            "_$type": "Color",
-            "g": 0
-          },
-          "_lineGradientB_end": {
-            "_$type": "Color",
-            "g": 0.7568627450980392,
-            "a": 0.5
-          },
-          "_triangleGradientA_start": {
-            "_$type": "Color",
-            "r": 0,
-            "a": 0.5
-          },
-          "_triangleGradientA_end": {
-            "_$type": "Color",
-            "r": 0,
-            "a": 0
-          },
-          "_triangleGradientB_start": {
-            "_$type": "Color",
-            "g": 0,
-            "a": 0.5
-          },
-          "_triangleGradientB_end": {
-            "_$type": "Color",
-            "g": 0,
-            "a": 0
-          },
+          "_lineAlphaMin": 1,
+          "_lineAlphaMax": 0.4,
+          "_triangleAlphaMin": 0.3,
+          "_triangleAlphaMax": 0,
           "_showGrid": false,
           "_gridColor": {
             "_$type": "Color",

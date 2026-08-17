@@ -1,3 +1,4 @@
+import RangeColor from "./rocketChart/RangeColor";
 import { RocketChart } from "./rocketChart/RocketChart";
 
 const { regClass, property } = Laya;
@@ -70,8 +71,8 @@ export class TestRocketChart extends Laya.Script {
         // });
 
 
-        this._rocketChart.onAccelerationLoopHandler = new Laya.Handler(this, (progress: number) => {
-            // console.log("正在加速...", progress);
+        this._rocketChart.colorTransitionHandler = new Laya.Handler(this, (progress: number, rangeColorA: RangeColor, rangeColorB: RangeColor) => {
+            // console.log("颜色过渡中...", "进度:", progress, "颜色A:", rangeColorA.color.toString(), "颜色B:", rangeColorB.color.toString());
         });
     }
 
