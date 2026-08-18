@@ -43,7 +43,7 @@ export default class ColorSetter {
 
     /** 过渡持续时间<毫秒> */
     public transitionDuration: number = 1000;
-    /** 颜色过渡处理器，格式：```(progress: number, rangeColorA: RangeColor, rangeColorB: RangeColor): void``` ，progress∈[0,1] */
+    /** 颜色过渡处理器，格式：```(progress: number, current: RangeColor, next: RangeColor): void``` ，progress∈[0,1] */
     public onTransitionHandler?: Laya.Handler;
 
     /**

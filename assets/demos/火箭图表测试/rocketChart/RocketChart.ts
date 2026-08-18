@@ -150,7 +150,7 @@ export class RocketChart extends Laya.Script {
     /** 初始倍数 */
     private readonly _initMultiplier = 1;
 
-    /** 颜色过渡处理器，格式：```(progress: number, rangeColorA: RangeColor, rangeColorB: RangeColor): void``` ，progress∈[0,1] */
+    /** 颜色过渡处理器，格式：```(progress: number, current: RangeColor, next: RangeColor): void``` ，progress∈[0,1] */
     public set onColorTransitionHandler(value: Laya.Handler) {
         this._colorSetter.onTransitionHandler = value;
     }
