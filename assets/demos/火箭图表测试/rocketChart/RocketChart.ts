@@ -84,6 +84,8 @@ export class RocketChart extends Laya.Script {
     private _lineEndWidth: number = 10;
     @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "以时间定义线头左下角的最小位置，单位：<毫秒>" })
     private _lineHeadMinTime: number = 200;
+    @property({ type: Number, private: false, catalog: "Line", min: 0, fractionDigits: 3, tips: "截短线条的系数, 0:不截短（截短线条是为了使线头动画能完全盖住线条）" })
+    private _lineTrimFactor: number = 0.01;
     @property({ type: Number, private: false, catalog: "Line", range: [0, 1], tips: "线条的起始透明度，范围:[0,1]" })
     private _lineAlphaMin: number = 1;
     @property({ type: Number, private: false, catalog: "Line", range: [0, 1], tips: "线条的结束透明度，范围:[0,1]" })
@@ -139,6 +141,7 @@ export class RocketChart extends Laya.Script {
     private _drawTriangleCmd: Mesh2dDrawPolygonCmd;
 
     private _tempLinePoints: number[] = [];
+    private _tempLinePoints2: number[] = [];
     private _tempTrianglePoints: number[] = [];
 
     private _colorSetter: ColorSetter = new ColorSetter();
@@ -389,20 +392,21 @@ export class RocketChart extends Laya.Script {
      * 画线和三角形
      */
     private drawLineAndTriangle(): void {
-        // 画线 ---------------------------------------------------
         const timeRulerMax = this.getTimeRulerMax();
         const multiplierRulerMax = this.getMultiplierRulerMax();
-
-        const targetT = Laya.MathUtil.clamp01(this._time / timeRulerMax);
         const step = 1 / this._lineSegmentCount;
+        const targetT = Laya.MathUtil.clamp01(this._time / timeRulerMax);
+
+        // 画线 ---------------------------------------------------
         let nx = 0, ny = 0, mx = 0, my = 0;
+        const trimTargetT = Math.max(targetT - this._lineTrimFactor, 0);
 
         this._tempLinePoints.length = 0;
         this._tempLinePoints.push(mx, my); // (0,0)点
 
         while (true) {
-            nx = Math.min(nx + step, targetT);
-            nx = (targetT - nx <= 0.001) ? targetT : nx; // 太靠近端点时，直接端点
+            nx = Math.min(nx + step, trimTargetT);
+            nx = (trimTargetT - nx <= 0.001) ? trimTargetT : nx; // 太靠近端点时，直接端点
 
             ny = (RocketChart.timeToMultiplier(timeRulerMax * nx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
 
@@ -410,7 +414,7 @@ export class RocketChart extends Laya.Script {
             my = this.mapY(ny);
 
             this._tempLinePoints.push(mx, my);
-            if (nx >= targetT) break;
+            if (nx >= trimTargetT) break;
         }
 
         this._drawLinesCmd.lineStartWidth = this._lineStartWidth;
@@ -436,21 +440,38 @@ export class RocketChart extends Laya.Script {
         this._lineHead.pos(bx, by);
 
         // 画三角形 -------------------------------------------------
+        // - 计算完成的线顶点（由于画的线比实际的要短，需要重新计算完整的线顶点）
+        nx = 0, ny = 0, mx = 0, my = 0;
+        this._tempLinePoints2.length = 0;
+        this._tempLinePoints2.push(mx, my); // (0,0)点
+        while (true) {
+            nx = Math.min(nx + step, targetT);
+            nx = (targetT - nx <= 0.001) ? targetT : nx; // 太靠近端点时，直接端点
+
+            ny = (RocketChart.timeToMultiplier(timeRulerMax * nx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
+
+            mx = this.mapX(nx);
+            my = this.mapY(ny);
+
+            this._tempLinePoints2.push(mx, my);
+            if (nx >= targetT) break;
+        }
+        // - 画三角
         this._tempTrianglePoints.length = 0;
 
-        if (this._tempLinePoints.length === 4) {
-            const x1 = this._tempLinePoints[0];
-            const y1 = this._tempLinePoints[1];
-            const x2 = this._tempLinePoints[2];
-            const y2 = this._tempLinePoints[3];
+        if (this._tempLinePoints2.length === 4) {
+            const x1 = this._tempLinePoints2[0];
+            const y1 = this._tempLinePoints2[1];
+            const x2 = this._tempLinePoints2[2];
+            const y2 = this._tempLinePoints2[3];
             const lineLen = Math.hypot(x2 - x1, y2 - y1);
             if (lineLen < 1) return; // 线条只有两个点，且长度小于1像素，不画三角形
         }
 
-        for (let i = 0, len = this._tempLinePoints.length / 2; i < len; i++) {
+        for (let i = 0, len = this._tempLinePoints2.length / 2; i < len; i++) {
             const ix2 = i * 2;
-            const vx = this._tempLinePoints[ix2];
-            const vy = this._tempLinePoints[ix2 + 1];
+            const vx = this._tempLinePoints2[ix2];
+            const vy = this._tempLinePoints2[ix2 + 1];
 
             if (i > 0) {
                 const lastX = this._tempTrianglePoints.at(-2);

@@ -172,7 +172,7 @@ export default class ColorSetter {
 
     /**
      * 让颜色向白色靠近
-     * @param rgb 颜色值，例如 0xFF3300
+     * @param color 颜色
      * @param amount 变浅程度，范围 [0,1]  0 = 不变 1 = 白色
      */
     private lightenRGB(color: Laya.Color, amount: number): number {

@@ -112,6 +112,7 @@
           "_lineStartWidth": 1,
           "_lineEndWidth": 10,
           "_lineHeadMinTime": 200,
+          "_lineTrimFactor": 0.01,
           "_lineAlphaMin": 1,
           "_lineAlphaMax": 0.4,
           "_triangleAlphaMin": 0.3,
@@ -219,7 +220,7 @@
                       ],
                       "lineWidth": 1,
                       "lineColor": "#000000",
-                      "fillColor": "#ffffff"
+                      "fillColor": "rgba(255,255,255,0.4)"
                     }
                   ]
                 }
