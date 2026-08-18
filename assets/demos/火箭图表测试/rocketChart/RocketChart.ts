@@ -141,7 +141,7 @@ export class RocketChart extends Laya.Script {
     private _tempLinePoints: number[] = [];
     private _tempTrianglePoints: number[] = [];
 
-    private _colorSetter: ColorSetter;
+    private _colorSetter: ColorSetter = new ColorSetter();
 
     /** 时间标尺默认显示的时间长度<毫秒>，必须是10的次方 */
     private readonly _defaultDisplayTimeMs = 10000;
@@ -151,8 +151,8 @@ export class RocketChart extends Laya.Script {
     private readonly _initMultiplier = 1;
 
     /** 颜色过渡处理器，格式：```(progress: number, rangeColorA: RangeColor, rangeColorB: RangeColor): void``` ，progress∈[0,1] */
-    public set colorTransitionHandler(value: Laya.Handler) {
-        this._colorSetter.transitionHandler = value;
+    public set onColorTransitionHandler(value: Laya.Handler) {
+        this._colorSetter.onTransitionHandler = value;
     }
 
     /** 已初始化 */
@@ -230,7 +230,6 @@ export class RocketChart extends Laya.Script {
             triangleMaterial: this._triangleGraphics.sharedMaterial,
             rangeColors: this.rangeColors
         };
-        this._colorSetter ??= new ColorSetter();
         this._colorSetter.init(args.rocketChart, args.lineMaterial, args.triangleMaterial, args.rangeColors);
         this._colorSetter.transitionDuration = this._colorTransitionDuration;
         this._colorSetter.lineAlphaMin = this._lineAlphaMin;

@@ -71,7 +71,7 @@ export class TestRocketChart extends Laya.Script {
         // });
 
 
-        this._rocketChart.colorTransitionHandler = new Laya.Handler(this, (progress: number, current: RangeColor, next: RangeColor) => {
+        this._rocketChart.onColorTransitionHandler = new Laya.Handler(this, (progress: number, current: RangeColor, next: RangeColor) => {
             // 颜色过渡开始
             if (progress == 0) {
                 console.log("颜色过渡开始 --------------------");

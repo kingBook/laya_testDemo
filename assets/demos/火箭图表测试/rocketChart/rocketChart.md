@@ -64,7 +64,7 @@ this._rocketChart.addJumpPoint(multiplier, sprite, isPlayer);
 **颜色过渡处理器**
 ```ts
 // 颜色过渡中..., progress∈[0,1]
-this._rocketChart.colorTransitionHandler = new Laya.Handler(this, (progress: number, current: RangeColor, next: RangeColor) => {
+this._rocketChart.onColorTransitionHandler = new Laya.Handler(this, (progress: number, current: RangeColor, next: RangeColor) => {
     // 颜色过渡开始
     if (progress == 0) {
         console.log("颜色过渡开始 --------------------");

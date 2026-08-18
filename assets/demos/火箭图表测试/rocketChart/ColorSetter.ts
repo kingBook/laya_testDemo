@@ -44,7 +44,7 @@ export default class ColorSetter {
     /** 过渡持续时间<毫秒> */
     public transitionDuration: number = 1000;
     /** 颜色过渡处理器，格式：```(progress: number, rangeColorA: RangeColor, rangeColorB: RangeColor): void``` ，progress∈[0,1] */
-    public transitionHandler?: Laya.Handler;
+    public onTransitionHandler?: Laya.Handler;
 
     /**
      * 初始化
@@ -124,7 +124,7 @@ export default class ColorSetter {
             if (this._shaderMixFactor === 0) {
                 this._tempArgs.length = 0;
                 this._tempArgs.push(0, rangeColorA, rangeColorB);
-                this.transitionHandler?.runWith(this._tempArgs); // 颜色过渡，开始
+                this.onTransitionHandler?.runWith(this._tempArgs); // 颜色过渡，开始
             }
 
             const factor = (time - this._colorStartTime) / (this._colorFinishTime - this._colorStartTime);
@@ -133,13 +133,13 @@ export default class ColorSetter {
                 // console.log("factor", factor, "multiplier", ((multiplier * 100) | 0) / 100);
                 this._tempArgs.length = 0;
                 this._tempArgs.push(factor, rangeColorA, rangeColorB);
-                this.transitionHandler?.runWith(this._tempArgs); // 颜色过渡中...
+                this.onTransitionHandler?.runWith(this._tempArgs); // 颜色过渡中...
             }
 
             if (factor >= 1 && this._shaderMixFactor < 1) {
                 this._tempArgs.length = 0;
                 this._tempArgs.push(1, rangeColorA, rangeColorB);
-                this.transitionHandler?.runWith(this._tempArgs); // 颜色过渡，完成
+                this.onTransitionHandler?.runWith(this._tempArgs); // 颜色过渡，完成
             }
             this._shaderMixFactor = Laya.MathUtil.clamp01(factor);
         } else {
