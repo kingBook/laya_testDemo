@@ -81,10 +81,12 @@ export default class ColorSetter {
         if (this._index !== index) {
             this._index = index;
 
+            // 线
+            const lightenAmount = 0.3; // 向白色靠近的程度，范围:[0,1]
             this._lineGradientA_start.setRGB(rangeColorA.color.getRGB());
-            this._lineGradientA_end.setRGB(rangeColorA.color.getRGB());
+            this._lineGradientA_end.setRGB(this.lightenRGB(rangeColorA.color, lightenAmount));
             this._lineGradientB_start.setRGB(rangeColorB.color.getRGB());
-            this._lineGradientB_end.setRGB(rangeColorB.color.getRGB());
+            this._lineGradientB_end.setRGB(this.lightenRGB(rangeColorB.color, lightenAmount));
             this._lineGradientA_start.a = this.lineAlphaMin;
             this._lineGradientB_start.a = this.lineAlphaMin;
             this._lineGradientA_end.a = this.lineAlphaMax;
@@ -94,6 +96,7 @@ export default class ColorSetter {
             this._lineMaterial.setColorByIndex(this._gradientStartColorB_ID, this._lineGradientB_start);
             this._lineMaterial.setColorByIndex(this._gradientEndColorB_ID, this._lineGradientB_end);
 
+            // 三角形
             this._triangleGradientA_start.setRGB(rangeColorA.color.getRGB());
             this._triangleGradientA_end.setRGB(rangeColorA.color.getRGB());
             this._triangleGradientB_start.setRGB(rangeColorB.color.getRGB());
@@ -165,6 +168,25 @@ export default class ColorSetter {
             }
         }
         return index;
+    }
+
+    /**
+     * 让颜色向白色靠近
+     * @param rgb 颜色值，例如 0xFF3300
+     * @param amount 变浅程度，范围 [0,1]  0 = 不变 1 = 白色
+     */
+    private lightenRGB(color: Laya.Color, amount: number): number {
+        const clamped = Laya.MathUtil.clamp01(amount);
+
+        const r = (color.r * 255) | 0;
+        const g = (color.g * 255) | 0;
+        const b = (color.b * 255) | 0;
+
+        const nr = (r + (255 - r) * clamped) | 0;
+        const ng = (g + (255 - g) * clamped) | 0;
+        const nb = (b + (255 - b) * clamped) | 0;
+
+        return (nr << 16) | (ng << 8) | nb;
     }
 
 }

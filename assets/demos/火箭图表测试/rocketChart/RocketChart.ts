@@ -1,3 +1,4 @@
+import { ITEMLEVEL } from "globalCfg/GameCfg";
 import ColorSetter from "./ColorSetter";
 import { Mesh2dDrawLinesCmd, Mesh2dDrawPolygonCmd, Mesh2dGraphics } from "./Mesh2dGraphics";
 import RangeColor from "./RangeColor";
@@ -51,25 +52,25 @@ export class RocketChart extends Laya.Script {
         {
             start: 1,
             end: 1,
-            colorLevel: 1,
+            colorLevel: ITEMLEVEL.yellow,
             color: new Laya.Color().parse("#ffff27")
         },
         {
             start: 10,
             end: 9999,
-            colorLevel: 2,
+            colorLevel: ITEMLEVEL.red,
             color: new Laya.Color().parse("#ff2d2d")
         },
         {
             start: 2,
             end: 9.99,
-            colorLevel: 3,
+            colorLevel: ITEMLEVEL.purple,
             color: new Laya.Color().parse("#ff38ff")
         },
         {
             start: 1.01,
             end: 1.99,
-            colorLevel: 4,
+            colorLevel: ITEMLEVEL.blue,
             color: new Laya.Color().parse("#2ffdfd")
         }
     ];
@@ -286,16 +287,17 @@ export class RocketChart extends Laya.Script {
 
         // 修正时间、倍数保证对应(倍数优先)
         if (!isNaN(multiplier)) {
-            const fixedPoint = (multiplier % 1 === 0) ? 0 : ((multiplier * 10) % 1 === 0) ? 1 : 2; // 纠正时判断的小数位（是整数则0）
-            const tempMultiplier: string = RocketChart.timeToMultiplier(time, this._initSpeed, this._acceleration).toFixed(fixedPoint);
-            if (tempMultiplier != multiplier.toFixed(fixedPoint)) {
+            const digits = (multiplier % 1 === 0) ? 0 : ((multiplier * 10) % 1 === 0) ? 1 : 2; // 纠正时判断的小数位（是整数则0）
+            const tempMultiplier = this.toFixedNumber(RocketChart.timeToMultiplier(time, this._initSpeed, this._acceleration), digits);
+            const curMultiplier = this.toFixedNumber(multiplier, digits);
+            if (tempMultiplier != curMultiplier) {
                 const tempTime = RocketChart.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
                 // console.log("testTime 纠正时间",
                 //     "原时间", time,
-                //     "原倍数", multiplier.toFixed(2),
+                //     "原倍数", curMultiplier,
                 //     "用原时间取的倍数", tempMultiplier,
                 //     "纠正后时间", tempTime,
-                //     "纠正后时间取的倍数", RocketChart.timeToMultiplier(tempTime, this._initSpeed, this._acceleration).toFixed(2));
+                //     "纠正后时间取的倍数", this.toFixedNumber(RocketChart.timeToMultiplier(tempTime, this._initSpeed, this._acceleration), 2);
                 time = tempTime;
             }
         }
@@ -697,6 +699,16 @@ export class RocketChart extends Laya.Script {
         if (x <= 1) return 10;
         const exp = Math.ceil(Math.log10(x));
         return 10 ** exp;
+    }
+
+    /**
+     * 直接截断多余的小数位保留小数
+     * @param value 数字
+     * @param digits 保留的小数位数<正整数>
+     */
+    private toFixedNumber(value: number, digits: number): number {
+        const pow = 10 ** digits;
+        return ((value * pow) | 0) / pow;
     }
     //#endregion
 
