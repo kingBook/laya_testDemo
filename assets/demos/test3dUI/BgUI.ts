@@ -29,17 +29,20 @@ export class BgUI extends Laya.Script {
 
         // 计算缩放 --------------------------------------------------------
         // - 计算背景图所在锥体截面的宽
-        const distance = this._camera.transform.position.z - this._ui3d.owner.transform.position.x;
+        const distance = this._camera.transform.position.z - this._ui3d.owner.transform.position.x; // 背景截面与相机的距离
         const tan = Math.tan(this._camera.fieldOfView / 2 * Math.PI / 180);
-        const height = tan * distance * 2;
-        const width = this._camera.aspectRatio * height;
+        const height = tan * distance * 2; // 背景截面高
+        const width = this._camera.aspectRatio * height; // 背景截面宽
 
-        const bgWidth = this._ui3d.resolutionRate * this._ui3d.scale.x;
-        const bgHeight = this._ui3d.resolutionRate * this._ui3d.scale.y;
+        const bgWidth = this._ui3d.resolutionRate * this._ui3d.scale.x; // 750
+        const bgHeight = this._ui3d.resolutionRate * this._ui3d.scale.y; // 1600
 
-        let scaleX = bgWidth / 70;
-        let scaleY = bgHeight / 70;
+        // - 当前的缩放值
+        const p2m = 70;
+        let scaleX = bgWidth / p2m;
+        let scaleY = bgHeight / p2m;
 
+        // - 完全匹配宽高的缩放值
         const sx = (width * 100) / bgWidth;
         const sy = (height * 100) / bgHeight;
 
@@ -55,14 +58,15 @@ export class BgUI extends Laya.Script {
         // scaleX *= sy;
         // scaleY *= sy;
 
-        this.owner.transform.localScale = new Laya.Vector3(scaleX, scaleY, 1);
+        this.owner.transform.localScale = new Vector3(scaleX, scaleY, 1);
 
 
         // 对齐方式  --------------------------------------------------------
         // - 居中对齐（默认）
-
+        console.log(bgHeight, scaleY, height);
+        
         // - 顶对齐
-
+        this.owner.transform.position = new Vector3(0, 28.1, 0);
 
 
     }
