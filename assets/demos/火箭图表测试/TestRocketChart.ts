@@ -16,6 +16,18 @@ export class TestRocketChart extends Laya.Script {
     private _otherUserJumpPointPrefab: Laya.Prefab;
 
     onStart(): void {
+        this._rocketChart.onColorTransitionHandler = new Laya.Handler(this, (progress: number, current: RangeColor, next: RangeColor) => {
+            // 颜色过渡开始
+            if (progress == 0) {
+                console.log("颜色过渡开始 --------------------");
+            }
+            console.log("颜色过渡中... 进度:", progress, "当前颜色:", current.colorLevel, "下一颜色:", next.colorLevel);
+            // 颜色过渡完成
+            if (progress == 1) {
+                console.log("颜色过渡完成 --------------------");
+            }
+        });
+
         // 初始化
         // const initSpeed = 0.05;
         // const acceleration = 0.005;
@@ -24,8 +36,8 @@ export class TestRocketChart extends Laya.Script {
         this._rocketChart.init(initSpeed, acceleration);
 
         // 立即设置火箭图表状态到指定的时间、倍数
-        // const initTime = 18928;
-        // const initMultiplier = 1.36;
+        // const initMultiplier = 2.02;
+        // const initTime = RocketChart.multiplierToTime(initMultiplier, this._rocketChart.initSpeed, this._rocketChart.acceleration);
         // this._rocketChart.updateStatusToTime(initTime, initMultiplier);
 
         // 开始发射
@@ -71,17 +83,7 @@ export class TestRocketChart extends Laya.Script {
         // });
 
 
-        this._rocketChart.onColorTransitionHandler = new Laya.Handler(this, (progress: number, current: RangeColor, next: RangeColor) => {
-            // 颜色过渡开始
-            if (progress == 0) {
-                //console.log("颜色过渡开始 --------------------");
-            }
-            //console.log("颜色过渡中... 进度:", progress, "当前颜色:", current.colorLevel, "下一颜色:", next.colorLevel);
-            // 颜色过渡完成
-            if (progress == 1) {
-                //console.log("颜色过渡完成 --------------------");
-            }
-        });
+
     }
 
     onUpdate(): void {

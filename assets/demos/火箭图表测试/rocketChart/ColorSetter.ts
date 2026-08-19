@@ -63,7 +63,7 @@ export default class ColorSetter {
         this._lineMaterial = lineMaterial;
         this._triangleMaterial = triangleMaterial;
 
-        this._sequence = rangeColors.sort((a, b) => a.start - b.start); // 按倍数排序：小 -> 大
+        this._sequence = rangeColors.concat().sort((a, b) => a.start - b.start); // 按倍数排序：小 -> 大
         this._index = -1;
     }
 
