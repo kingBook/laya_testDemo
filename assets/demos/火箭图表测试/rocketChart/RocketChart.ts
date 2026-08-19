@@ -734,8 +734,8 @@ export class RocketChart extends Laya.Script {
     /**
      * 将数字转定点小数字符串
      * @param value 数字
-     * @param digits 
-     * @returns 保留的小数位数<正整数>
+     * @param digits 保留的小数位数<正整数>
+     * @returns 
      */
     public static toFixedString(value: number, digits: number): string {
         value = RocketChart.toFixedNumber(value, digits);
