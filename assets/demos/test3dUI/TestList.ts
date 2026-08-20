@@ -34,6 +34,11 @@ export class TestList extends Laya.Script {
 
             const txtNO = flipBox.getChild("txtNO", Laya.Label);
             txtNO.text = `${cellDataSource.id}`;
+
+            const spine = flipBox.getChild("spine", Laya.Sprite);
+            if (spine) {
+                //spine.visible = true;
+            }
         });
 
         // this.owner.scrollBar.changeHandler = new Laya.Handler(this, (value) => {

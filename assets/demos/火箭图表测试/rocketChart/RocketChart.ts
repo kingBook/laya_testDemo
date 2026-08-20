@@ -168,7 +168,7 @@ export class RocketChart extends Laya.Script {
     /** 发射经过的时间<毫秒> */
     public get time(): number { return this._time; }
     /** 倍数 */
-    public get multiplier(): number { return this._multiplier; }
+    public get multiplier(): number { return RocketChart.toFixedNumber(this._multiplier, 2); }
     /** 初速度 */
     public get initSpeed(): number { return this._initSpeed; }
     /** 加速度 */

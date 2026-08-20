@@ -99,6 +99,35 @@
                   "color": "#ffffff",
                   "align": "center",
                   "valign": "middle"
+                },
+                {
+                  "_$id": "h4bitcex",
+                  "_$type": "Sprite",
+                  "name": "spine",
+                  "x": 102,
+                  "y": 71,
+                  "width": 319,
+                  "height": 334,
+                  "anchorX": 0.727,
+                  "anchorY": 1,
+                  "scaleX": 0.3,
+                  "scaleY": 0.3,
+                  "visible": false,
+                  "_$comp": [
+                    {
+                      "_$type": "Spine2DRenderNode",
+                      "layer": 0,
+                      "useFastRender": false,
+                      "source": "res://866c1471-644a-435e-a1df-b16f5cf481c2",
+                      "animationName": "attack",
+                      "preview": true,
+                      "physicsUpdate": 2
+                    },
+                    {
+                      "_$type": "d72defaa-08ba-4de9-bc11-6202b1fb306d",
+                      "scriptPath": "demos/test3dUI/SpineToBitmap.ts"
+                    }
+                  ]
                 }
               ]
             }
