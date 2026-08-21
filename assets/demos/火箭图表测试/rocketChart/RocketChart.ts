@@ -320,6 +320,7 @@ export class RocketChart extends Laya.Script {
         // 网格标尺绘制 ----------------------------------------
         const displayTimeMs = this._time > this._defaultDisplayTimeMs ? this.ceilPowerOf10(this._time) : this._defaultDisplayTimeMs; // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
         const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOf10(this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
+        //const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOfBase(5, this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
         this.drawGridAndRulers(displayTimeMs, displayMutiplier);
 
         // 计算并展示跳点 --------------------------------------
@@ -776,6 +777,19 @@ export class RocketChart extends Laya.Script {
         if (x <= 1) return 10;
         const exp = Math.ceil(Math.log10(x));
         return 10 ** exp;
+    }
+
+    /**
+     * 求大于或等于指定数的最小 {@link base} 次方数
+     * * 注意：最小返回 {@link base}
+     * @param base 正整数
+     * @param x 正整数
+     * @returns 返回 {@link base} 的次方数<正整数>
+     */
+    private ceilPowerOfBase(base: number, x: number): number {
+        if (x <= 1) return base;
+        const exp = Math.ceil(Math.log(x) / Math.log(base));
+        return base ** exp;
     }
 
     /**
