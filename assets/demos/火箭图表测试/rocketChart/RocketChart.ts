@@ -582,9 +582,9 @@ export class RocketChart extends Laya.Script {
 
             // 其他用户跳点
             if (!item.isPlayer) {
-                const toX = x - 100;
-                const toY = y + 100;
-                const duration = 1000;
+                const toX = x - 200;
+                const toY = y + 200;
+                const duration = 1500;
 
                 // 缓动
                 Laya.Tween.create(item.sprite)
@@ -674,7 +674,8 @@ export class RocketChart extends Laya.Script {
     public static timeToMultiplier(time: number, v0: number, a: number): number {
         const t = time / 1000; // 时间<秒>
 
-        let result = 1 + v0 * t + 0.5 * a * t * t;
+        let result = 1 + v0 * t + 0.03 * a * t * t * t;
+        // result = ((result * 100) | 0) / 100; // 保留两位小数
         return result;
     }
 
@@ -686,15 +687,71 @@ export class RocketChart extends Laya.Script {
      * @returns 发射经过的时间<毫秒>
      */
     public static multiplierToTime(multiplier: number, v0: number, a: number): number {
-        // 0 = (1 - multiplier) + (v0 * t) + (0.5 * a * t * t);
-        const aa = 0.5 * a;
-        const bb = v0;
-        const cc = 1 - multiplier;
+        const aa = 0.03 * a;
+        const bb = 0;
+        const cc = v0;
+        const dd = 1 - multiplier;
 
-        // 一元二次求根
-        let result = (-bb + Math.sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
-        result = Math.abs(result * 1000); // 转毫秒
-        return result;
+        let result = this.cubicRoot(aa, bb, cc, dd);
+        return result * 1000; // 转毫秒
+    }
+
+
+    /**
+     * 求解一元三次方程 ax^3 + bx^2 + cx + d = 0
+     */
+    private static cubicRoot(a: number, b: number, c: number, d: number): number {
+        const eps = 1e-12;
+
+        // 退化到二次/一次
+        if (Math.abs(a) < eps) {
+            return this.quadraticRoot(b, c, d);
+        }
+
+        // 规范化：x = t - b/(3a)  -> t^3 + p t + q = 0
+        const ba = b / a, ca = c / a, da = d / a;
+        const p = (3 * ca - ba * ba) / 3;
+        const q = (2 * ba * ba * ba - 9 * ba * ca + 27 * da) / 27;
+        const discr = (q / 2) * (q / 2) + (p / 3) * (p / 3) * (p / 3);
+
+        const shift = ba / 3 * -1; // x = t + shift
+
+        if (discr > eps) {
+            // 一实根，两虚根（Cardano）
+            const sqrtD = Math.sqrt(discr);
+            const u = Math.cbrt(-q / 2 + sqrtD);
+            const v = Math.cbrt(-q / 2 - sqrtD);
+            const t = u + v;
+            return t + shift;
+        } else if (Math.abs(discr) <= eps) {
+            // 三重根或一个单根一个重根
+            const u = Math.cbrt(-q / 2);
+            const t1 = 2 * u;
+            return t1 + shift;
+        } else {
+            // 三个实根（用三角解法）
+            const rho = Math.sqrt(-(p * p * p) / 27);
+            const phi = Math.acos(Math.max(-1, Math.min(1, -q / (2 * rho))));
+            const m = 2 * Math.sqrt(-p / 3);
+            const t1 = m * Math.cos(phi / 3);
+            return t1 + shift;
+        }
+    }
+
+    private static quadraticRoot(a: number, b: number, c: number): number {
+        const eps = 1e-12;
+        if (Math.abs(a) < eps) {
+            // 线性 bx + c = 0
+            if (Math.abs(b) < eps) return NaN; // 常数方程或无解（返回空）
+            return -c / b;
+        }
+        const disc = b * b - 4 * a * c;
+        if (disc >= 0) {
+            const sd = Math.sqrt(disc);
+            return (-b + sd) / (2 * a);
+        } else {
+            return -b / (2 * a)
+        }
     }
 
     // /** 

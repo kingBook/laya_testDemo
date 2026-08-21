@@ -31,7 +31,7 @@ export class TestRocketChart extends Laya.Script {
         // 初始化
         // const initSpeed = 0.05;
         // const acceleration = 0.005;
-        const initSpeed = 0.025;
+        const initSpeed = 0.05;
         const acceleration = 0.01;
         this._rocketChart.init(initSpeed, acceleration);
 
