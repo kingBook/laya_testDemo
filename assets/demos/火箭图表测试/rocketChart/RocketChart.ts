@@ -318,9 +318,8 @@ export class RocketChart extends Laya.Script {
         this.drawLineAndTriangle();
 
         // 网格标尺绘制 ----------------------------------------
-        const displayTimeMs = this._time > this._defaultDisplayTimeMs ? this.ceilPowerOf10(this._time) : this._defaultDisplayTimeMs; // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
-        const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOf10(this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
-        //const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOfBase(5, this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
+        const displayTimeMs = this._time > this._defaultDisplayTimeMs ? this.ceilPowerOfBase(10, this._time) : this._defaultDisplayTimeMs; // 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
+        const displayMutiplier = this._multiplier > this._defaultDisplayMultiplier ? this.ceilPowerOfBase(10, this._multiplier) : this._defaultDisplayMultiplier - this._initMultiplier;
         this.drawGridAndRulers(displayTimeMs, displayMutiplier);
 
         // 计算并展示跳点 --------------------------------------
@@ -500,14 +499,19 @@ export class RocketChart extends Laya.Script {
     /**
      * 网格标尺绘制
      * @param displayTimeMs 时间标尺显示的时间长度<毫秒>，注意：必须是10的次方
-     * @param displayMutiplier 需要减去{@link _initMultiplier}
+     * @param displayMutiplier 需要减去{@link _initMultiplier}，注意：必须是10的次方
      */
     private drawGridAndRulers(displayTimeMs: number, displayMutiplier: number): void {
         const fontSize = this._rulerFontSize; // 字体大小
         const margin = this._rulerLabelMargin; // '倍数'、'时间'与画布的边距
 
         // 时间标尺 ------------------------------
-        const xCount = this._time > this._defaultDisplayTimeMs ? 10 : 5; // 格数
+        let xCount = this._time > this._defaultDisplayTimeMs ? 10 : 5; // 格数
+        if (this._time > this._defaultDisplayTimeMs) {
+            if (this._time >= displayTimeMs / 10 && this._time <= displayTimeMs / 10 * 5) {
+                xCount = 20;
+            }
+        }
         const xScaleUnit = displayTimeMs / xCount; // 一格的单位<毫秒>
         const xScale = this._time > this._defaultDisplayTimeMs ? this._defaultDisplayTimeMs / this._time : 1; // 计算缩放
         const dx = (this._canvas.width * (displayTimeMs / this._defaultDisplayTimeMs)) / xCount; // 一格的距离
@@ -533,7 +537,12 @@ export class RocketChart extends Laya.Script {
         }
 
         // 倍数标尺 ------------------------------
-        const yCount = this._multiplier > this._defaultDisplayMultiplier ? 10 : 5; // 格数
+        let yCount = this._multiplier > this._defaultDisplayMultiplier ? 10 : 5; // 格数
+        if (this._multiplier > this._defaultDisplayMultiplier) {
+            if (this._multiplier >= displayMutiplier / 10 && this._multiplier <= displayMutiplier / 10 * 5) {
+                yCount = 20;
+            }
+        }
         const yScaleUnit = displayMutiplier / yCount; // 一格的单位<倍>
         const dy = (this._canvas.height * (displayMutiplier / (this._defaultDisplayMultiplier - this._initMultiplier))) / yCount; // 一格的距离
         const yScale = this._multiplier > this._defaultDisplayMultiplier ? (this._defaultDisplayMultiplier - this._initMultiplier) / (this._multiplier - this._initMultiplier) : 1; // 计算缩放
@@ -583,8 +592,8 @@ export class RocketChart extends Laya.Script {
 
             // 其他用户跳点
             if (!item.isPlayer) {
-                const toX = x - 200;
-                const toY = y + 200;
+                const toX = x - 150;
+                const toY = y + 150;
                 const duration = 1500;
 
                 // 缓动
@@ -697,7 +706,6 @@ export class RocketChart extends Laya.Script {
         return result * 1000; // 转毫秒
     }
 
-
     /**
      * 求解一元三次方程 ax^3 + bx^2 + cx + d = 0
      */
@@ -766,18 +774,6 @@ export class RocketChart extends Laya.Script {
     //     const t = time / 1000; // 时间<秒>
     //     return v0 + a * t;
     // }
-
-    /**
-     * 求大于或等于指定数的最小10次方数
-     * * 注意：最小返回 10
-     * @param x 正整数
-     * @returns 10次方数<正整数>
-     */
-    private ceilPowerOf10(x: number): number {
-        if (x <= 1) return 10;
-        const exp = Math.ceil(Math.log10(x));
-        return 10 ** exp;
-    }
 
     /**
      * 求大于或等于指定数的最小 {@link base} 次方数
