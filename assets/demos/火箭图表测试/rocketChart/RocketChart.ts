@@ -84,6 +84,8 @@ export class RocketChart extends Laya.Script {
     private _lineEndWidth: number = 10;
     @property({ type: Number, private: false, catalog: "Line", min: 1, fractionDigits: 0, tips: "以时间定义线头左下角的最小位置，单位：<毫秒>" })
     private _lineHeadMinTime: number = 200;
+    @property({ type: Number, private: false, catalog: "Line", range: [0, 1], tips: "线头角度计算的参考点比例，实际参考点位置按 (1 - value) 计算；值越小，参考点越靠近当前线头，角度按“参考点 -> 实际线头”方向确定" })
+    private _lineHeadAngleOriginRatio: number = 0.1;
     @property({ type: Number, private: false, catalog: "Line", min: 0, fractionDigits: 3, tips: "截短线条的系数, 0:不截短（截短线条是为了使线头动画能完全盖住线条）" })
     private _lineTrimFactor: number = 0.01;
     @property({ type: Number, private: false, catalog: "Line", range: [0, 1], tips: "线条的起始透明度，范围:[0,1]" })
@@ -426,7 +428,7 @@ export class RocketChart extends Laya.Script {
 
         // 线头 -------------------------------------------------
         // - 点a
-        const anx = Math.max(0, this._time - this._lineHeadMinTime) / timeRulerMax;
+        const anx = Math.max(0, this._time - Math.max(this._lineHeadMinTime, this._time * this._lineHeadAngleOriginRatio)) / timeRulerMax;
         const any = (RocketChart.timeToMultiplier(timeRulerMax * anx, this._initSpeed, this._acceleration) - this._initMultiplier) / (multiplierRulerMax - this._initMultiplier);
         const ax = this.mapX(anx);
         const ay = this.mapY(any) + this._canvas.height;
