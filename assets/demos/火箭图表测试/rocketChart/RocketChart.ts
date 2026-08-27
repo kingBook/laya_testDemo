@@ -796,8 +796,19 @@ export class RocketChart extends Laya.Script {
      * @param digits 保留的小数位数<正整数>
      */
     public static toFixedNumber(value: number, digits: number): number {
-        const pow = 10 ** digits;
-        return ((value * pow) | 0) / pow;
+        // 整数直接返回
+        if (value % 1 === 0) {
+            return value;
+        }
+
+        let valueStr = value.toString();
+        const dotPos = valueStr.indexOf('.') + 1; // 小数点位置（从1开始）
+        const digitCount = valueStr.length - dotPos; // 小数位数量
+        if (digitCount >= digits) {
+            valueStr = valueStr.substring(0, dotPos + digits); // 直接截取两位小数
+        }
+
+        return parseFloat(valueStr);
     }
 
     /**
@@ -813,9 +824,9 @@ export class RocketChart extends Laya.Script {
     //#endregion
 
     // test
-    // onKeyDown(evt: Laya.Event): void {
-    //     if (!Laya.LayaEnv.isPreview) return;
-    // }
+    onKeyDown(evt: Laya.Event): void {
+        if (!Laya.LayaEnv.isPreview) return;
+    }
 
 
 

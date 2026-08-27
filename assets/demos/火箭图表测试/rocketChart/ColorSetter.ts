@@ -157,7 +157,7 @@ export default class ColorSetter {
      */
     private getIndexByMultiplier(multiplier: number) {
         if (multiplier < 1) throw new Error("倍数不能小于1");
-        multiplier = ((multiplier * 100) | 0) / 100; // 保留两位小数
+        multiplier = RocketChart.toFixedNumber(multiplier, 2); // 保留两位小数
         const len = this._sequence.length;
         let index = len - 1; // 默认最大（考虑比 9999x 大）
         for (let i = 0; i < len; i++) {
