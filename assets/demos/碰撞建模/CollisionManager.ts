@@ -1,5 +1,8 @@
 import { Circle } from "./Circle";
 
+// 瞬时碰撞推导：https://swang81.github.io/DevNotes/mathPhysics/collisionFormula.html
+// Physics:Collision_response：https://handwiki.org/wiki/Physics:Collision_response#Rigid_body_contact
+
 /** 碰撞管理器 */
 export default class CollisionManager {
 
