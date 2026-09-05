@@ -8,6 +8,9 @@ type Vec2 = { x: number; y: number };
 /** 碰撞管理器 */
 export default class CollisionManager {
 
+    private static readonly DEFAULT_ANGULAR_DAMPING = 0.992;
+    private static readonly DEFAULT_FRICTION = 0.14;
+
     private _colliders: Collider[];
 
     public init(colliders: Collider[]): void {
@@ -41,6 +44,30 @@ export default class CollisionManager {
                 }
             }
         }
+
+        this.applyAngularDamping();
+    }
+
+    private applyAngularDamping(): void {
+        for (const collider of this._colliders) {
+            if (!collider) continue;
+            const damping = this.getAngularDamping(collider);
+            collider.angularVelocity *= damping;
+            if (Math.abs(collider.angularVelocity) < 0.0005) {
+                collider.angularVelocity = 0;
+            }
+        }
+    }
+
+    private getAngularDamping(collider: Collider): number {
+        const value = (collider as any).angularDamping ?? CollisionManager.DEFAULT_ANGULAR_DAMPING;
+        return Math.max(0, Math.min(1, value));
+    }
+
+    private getFrictionCoefficient(a: Collider, b: Collider): number {
+        const fA = (a as any).friction ?? CollisionManager.DEFAULT_FRICTION;
+        const fB = (b as any).friction ?? CollisionManager.DEFAULT_FRICTION;
+        return (fA + fB) * 0.5;
     }
 
     private isCircle(obj: Collider): obj is Circle {
@@ -74,9 +101,14 @@ export default class CollisionManager {
         cj.owner.x += nx * cjMove;
         cj.owner.y += ny * cjMove;
 
-        const rvx = cj.velocity.x - ci.velocity.x;
-        const rvy = cj.velocity.y - ci.velocity.y;
-        const velAlongNormal = rvx * nx + rvy * ny;
+        const r1 = { x: nx * ci.radius, y: ny * ci.radius };
+        const r2 = { x: -nx * cj.radius, y: -ny * cj.radius };
+
+        const v1Contact = this.add(ci.velocity, this.rotatePerp(r1, ci.angularVelocity));
+        const v2Contact = this.add(cj.velocity, this.rotatePerp(r2, cj.angularVelocity));
+
+        const rv = this.sub(v2Contact, v1Contact);
+        const velAlongNormal = this.dot(rv, { x: nx, y: ny });
 
         if (velAlongNormal > 0) return;
 
@@ -86,133 +118,165 @@ export default class CollisionManager {
         const invI1 = 1 / this.getCircleInertia(ci);
         const invI2 = 1 / this.getCircleInertia(cj);
 
-        const contact1: Vec2 = { x: ci.owner.x + nx * ci.radius, y: ci.owner.y + ny * ci.radius };
-        const contact2: Vec2 = { x: cj.owner.x - nx * cj.radius, y: cj.owner.y - ny * cj.radius };
-
-        const r1 = this.sub(contact1, { x: ci.owner.x, y: ci.owner.y });
-        const r2 = this.sub(contact2, { x: cj.owner.x, y: cj.owner.y });
-
-        const v1Contact = this.add(ci.velocity, this.rotatePerp(r1, ci.angularVelocity));
-        const v2Contact = this.add(cj.velocity, this.rotatePerp(r2, cj.angularVelocity));
-
-        const rv = this.sub(v2Contact, v1Contact);
-        const velAlongNormal2 = this.dot(rv, { x: nx, y: ny });
-
-        if (velAlongNormal2 > 0) return;
-
         const r1CrossN = r1.x * ny - r1.y * nx;
         const r2CrossN = r2.x * ny - r2.y * nx;
         const denom = invMass1 + invMass2 + (r1CrossN * r1CrossN) * invI1 + (r2CrossN * r2CrossN) * invI2;
-        const impulseScalar = (-(1 + restitution) * velAlongNormal2) / denom;
+        const jn = (-(1 + restitution) * velAlongNormal) / denom;
 
-        const impulse = { x: impulseScalar * nx, y: impulseScalar * ny };
+        const impulseN = { x: jn * nx, y: jn * ny };
 
-        ci.velocity.x -= impulse.x * invMass1;
-        ci.velocity.y -= impulse.y * invMass1;
-        cj.velocity.x += impulse.x * invMass2;
-        cj.velocity.y += impulse.y * invMass2;
+        ci.velocity.x -= impulseN.x * invMass1;
+        ci.velocity.y -= impulseN.y * invMass1;
+        cj.velocity.x += impulseN.x * invMass2;
+        cj.velocity.y += impulseN.y * invMass2;
 
-        const torque1 = r1.x * impulse.y - r1.y * impulse.x;
-        const torque2 = r2.x * impulse.y - r2.y * impulse.x;
+        const torque1N = r1.x * impulseN.y - r1.y * impulseN.x;
+        const torque2N = r2.x * impulseN.y - r2.y * impulseN.x;
 
-        ci.angularVelocity -= torque1 * invI1;
-        cj.angularVelocity += torque2 * invI2;
+        ci.angularVelocity -= torque1N * invI1;
+        cj.angularVelocity += torque2N * invI2;
+
+        // 让圆在碰撞时真正旋转：增加切向摩擦冲量
+        const tangent = { x: -ny, y: nx };
+        const tangentSpeed = this.dot(rv, tangent);
+        const denomT = invMass1 + invMass2 + (this.cross(r1, tangent) ** 2) * invI1 + (this.cross(r2, tangent) ** 2) * invI2;
+        const jt = -tangentSpeed / denomT;
+        const mu = this.getFrictionCoefficient(ci, cj);
+        const maxFriction = mu * Math.abs(jn);
+        const clampedJt = this.clamp(jt, -maxFriction, maxFriction);
+
+        const impulseT = { x: clampedJt * tangent.x, y: clampedJt * tangent.y };
+
+        ci.velocity.x -= impulseT.x * invMass1;
+        ci.velocity.y -= impulseT.y * invMass1;
+        cj.velocity.x += impulseT.x * invMass2;
+        cj.velocity.y += impulseT.y * invMass2;
+
+        const torque1T = r1.x * impulseT.y - r1.y * impulseT.x;
+        const torque2T = r2.x * impulseT.y - r2.y * impulseT.x;
+
+        ci.angularVelocity -= torque1T * invI1;
+        cj.angularVelocity += torque2T * invI2;
     }
 
     private resolveCircleRect(circle: Circle, rect: Rectangle): void {
         const rectRot = this.deg2Rad(rect.owner.rotation);
-        const cos = Math.cos(-rectRot);
-        const sin = Math.sin(-rectRot);
+        const cos = Math.cos(rectRot);
+        const sin = Math.sin(rectRot);
+
         const dx = circle.owner.x - rect.owner.x;
         const dy = circle.owner.y - rect.owner.y;
 
-        const localX = dx * cos - dy * sin;
-        const localY = dx * sin + dy * cos;
-
+        const localX = dx * cos + dy * sin;
+        const localY = -dx * sin + dy * cos;
         const halfW = rect.width / 2;
         const halfH = rect.height / 2;
 
-        const closestX = this.clamp(localX, -halfW, halfW);
-        const closestY = this.clamp(localY, -halfH, halfH);
+        const closestLocalX = this.clamp(localX, -halfW, halfW);
+        const closestLocalY = this.clamp(localY, -halfH, halfH);
 
-        const diffX = localX - closestX;
-        const diffY = localY - closestY;
-        const distSq = diffX * diffX + diffY * diffY;
+        const closestWorld = {
+            x: rect.owner.x + closestLocalX * cos - closestLocalY * sin,
+            y: rect.owner.y + closestLocalX * sin + closestLocalY * cos
+        };
+
+        const toClosest = this.sub({ x: circle.owner.x, y: circle.owner.y }, closestWorld);
+        const distSq = toClosest.x * toClosest.x + toClosest.y * toClosest.y;
 
         if (distSq > circle.radius * circle.radius) return;
 
-        const localNormal = distSq > 0.0001
-            ? { x: diffX / Math.sqrt(distSq), y: diffY / Math.sqrt(distSq) }
-            : { x: 0, y: 0 };
+        let normal: Vec2 = { x: 0, y: 0 };
+        const dist = Math.sqrt(distSq) || 0.0001;
 
-        // 如果在矩形内部，使用最接近的边法向量
-        if (distSq <= 0.0001) {
+        if (distSq > 0.0001) {
+            normal = { x: toClosest.x / dist, y: toClosest.y / dist };
+        } else {
             const left = Math.abs(localX + halfW);
             const right = Math.abs(localX - halfW);
             const top = Math.abs(localY + halfH);
             const bottom = Math.abs(localY - halfH);
             const min = Math.min(left, right, top, bottom);
 
-            if (min === left) { localNormal.x = -1; localNormal.y = 0; }
-            else if (min === right) { localNormal.x = 1; localNormal.y = 0; }
-            else if (min === top) { localNormal.x = 0; localNormal.y = -1; }
-            else { localNormal.x = 0; localNormal.y = 1; }
+            if (min === left) { normal = { x: -cos, y: -sin }; }
+            else if (min === right) { normal = { x: cos, y: sin }; }
+            else if (min === top) { normal = { x: -sin, y: cos }; }
+            else { normal = { x: sin, y: -cos }; }
         }
 
-        const worldNormal = this.rotate(localNormal, rectRot);
-        const worldNormalLen = Math.hypot(worldNormal.x, worldNormal.y) || 1;
-        const nx = worldNormal.x / worldNormalLen;
-        const ny = worldNormal.y / worldNormalLen;
+        // 方向统一为：从矩形指向圆
+        const rectToCircle = { x: normal.x, y: normal.y };
+        const overlap = Math.max(0, circle.radius - dist);
 
-        const overlap = circle.radius - Math.sqrt(distSq || 0.0001);
-        const totalMass = circle.mass + rect.mass;
-        const circleMove = (rect.mass / totalMass) * overlap;
-        const rectMove = (circle.mass / totalMass) * overlap;
+        if (overlap > 0.001) {
+            const totalMass = circle.mass + rect.mass;
+            const circleMove = (rect.mass / totalMass) * overlap;
+            const rectMove = (circle.mass / totalMass) * overlap;
 
-        circle.owner.x += nx * circleMove;
-        circle.owner.y += ny * circleMove;
-        rect.owner.x -= nx * rectMove;
-        rect.owner.y -= ny * rectMove;
+            circle.owner.x += rectToCircle.x * circleMove;
+            circle.owner.y += rectToCircle.y * circleMove;
+            rect.owner.x -= rectToCircle.x * rectMove;
+            rect.owner.y -= rectToCircle.y * rectMove;
+        }
 
-        const contact1: Vec2 = { x: circle.owner.x, y: circle.owner.y };
-        const contact2: Vec2 = { x: rect.owner.x + nx * (rect.width * 0.5), y: rect.owner.y + ny * (rect.height * 0.5) };
+        const contact = {
+            x: circle.owner.x - rectToCircle.x * circle.radius * 0.75,
+            y: circle.owner.y - rectToCircle.y * circle.radius * 0.75
+        };
 
-        const r1 = this.sub(contact1, { x: circle.owner.x, y: circle.owner.y });
-        const r2 = this.sub(contact2, { x: rect.owner.x, y: rect.owner.y });
+        const rA = this.sub(contact, { x: rect.owner.x, y: rect.owner.y });
+        const rB = this.sub(contact, { x: circle.owner.x, y: circle.owner.y });
 
-        const v1Contact = this.add(circle.velocity, this.rotatePerp(r1, circle.angularVelocity));
-        const v2Contact = this.add(rect.velocity, this.rotatePerp(r2, rect.angularVelocity));
-
-        const rvx = v2Contact.x - v1Contact.x;
-        const rvy = v2Contact.y - v1Contact.y;
-        const velAlongNormal = rvx * nx + rvy * ny;
+        const vA = this.add(rect.velocity, this.rotatePerp(rA, rect.angularVelocity));
+        const vB = this.add(circle.velocity, this.rotatePerp(rB, circle.angularVelocity));
+        const rv = this.sub(vB, vA);
+        const velAlongNormal = this.dot(rv, rectToCircle);
 
         if (velAlongNormal > 0) return;
 
         const restitution = Math.min(circle.restitution, rect.restitution);
-        const invMass1 = 1 / circle.mass;
-        const invMass2 = 1 / rect.mass;
-        const invI1 = 1 / this.getCircleInertia(circle);
-        const invI2 = 1 / this.getRectInertia(rect);
+        const invMassA = 1 / rect.mass;
+        const invMassB = 1 / circle.mass;
+        const invIA = 1 / this.getRectInertia(rect);
+        const invIB = 1 / this.getCircleInertia(circle);
 
-        const r1CrossN = r1.x * ny - r1.y * nx;
-        const r2CrossN = r2.x * ny - r2.y * nx;
+        const rACrossN = this.cross(rA, rectToCircle);
+        const rBCrossN = this.cross(rB, rectToCircle);
+        const denom = invMassA + invMassB + (rACrossN * rACrossN) * invIA + (rBCrossN * rBCrossN) * invIB;
+        const j = (-(1 + restitution) * velAlongNormal) / denom;
+        const impulse = { x: j * rectToCircle.x, y: j * rectToCircle.y };
 
-        const denom = invMass1 + invMass2 + (r1CrossN * r1CrossN) * invI1 + (r2CrossN * r2CrossN) * invI2;
-        const impulseScalar = (-(1 + restitution) * velAlongNormal) / denom;
+        rect.velocity.x -= impulse.x * invMassA;
+        rect.velocity.y -= impulse.y * invMassA;
+        circle.velocity.x += impulse.x * invMassB;
+        circle.velocity.y += impulse.y * invMassB;
 
-        const impulse = { x: impulseScalar * nx, y: impulseScalar * ny };
+        rect.angularVelocity -= this.cross(rA, impulse) * invIA;
+        circle.angularVelocity += this.cross(rB, impulse) * invIB;
 
-        circle.velocity.x -= impulse.x * invMass1;
-        circle.velocity.y -= impulse.y * invMass1;
-        rect.velocity.x += impulse.x * invMass2;
-        rect.velocity.y += impulse.y * invMass2;
+        // 切向摩擦：控制旋转不失控
+        const tangent = { x: -rectToCircle.y, y: rectToCircle.x };
+        const tangentLen = Math.hypot(tangent.x, tangent.y) || 1;
+        const tangentUnit = { x: tangent.x / tangentLen, y: tangent.y / tangentLen };
+        const tangentVel = this.dot(rv, tangentUnit);
+        const rAT = this.cross(rA, tangentUnit);
+        const rBT = this.cross(rB, tangentUnit);
+        const tangentDenom = invMassA + invMassB + (rAT * rAT) * invIA + (rBT * rBT) * invIB;
 
-        const torque1 = r1.x * impulse.y - r1.y * impulse.x;
-        const torque2 = r2.x * impulse.y - r2.y * impulse.x;
+        if (tangentDenom > 0.0001) {
+            const jt = -tangentVel / tangentDenom;
+            const mu = this.getFrictionCoefficient(rect, circle);
+            const maxFriction = mu * Math.abs(j);
+            const clampedJt = this.clamp(jt, -maxFriction, maxFriction);
+            const frictionImpulse = { x: clampedJt * tangentUnit.x, y: clampedJt * tangentUnit.y };
 
-        circle.angularVelocity -= torque1 * invI1;
-        rect.angularVelocity += torque2 * invI2;
+            rect.velocity.x -= frictionImpulse.x * invMassA;
+            rect.velocity.y -= frictionImpulse.y * invMassA;
+            circle.velocity.x += frictionImpulse.x * invMassB;
+            circle.velocity.y += frictionImpulse.y * invMassB;
+
+            rect.angularVelocity -= this.cross(rA, frictionImpulse) * invIA;
+            circle.angularVelocity += this.cross(rB, frictionImpulse) * invIB;
+        }
     }
 
     private resolveRectRect(a: Rectangle, b: Rectangle): void {
@@ -229,10 +293,7 @@ export default class CollisionManager {
             const projB = this.projectVertices(verticesB, axis);
             const overlap = Math.min(projA.max, projB.max) - Math.max(projA.min, projB.min);
 
-            if (overlap <= 0) {
-                return;
-            }
-
+            if (overlap <= 0) return;
             if (overlap < bestOverlap) {
                 bestOverlap = overlap;
                 bestAxis = axis;
@@ -244,8 +305,7 @@ export default class CollisionManager {
 
         const centerDelta = { x: b.owner.x - a.owner.x, y: b.owner.y - a.owner.y };
         if (this.dot(centerDelta, bestAxis) < 0) {
-            bestAxis.x *= -1;
-            bestAxis.y *= -1;
+            bestAxis = { x: -bestAxis.x, y: -bestAxis.y };
         }
 
         const totalMass = a.mass + b.mass;
@@ -257,16 +317,19 @@ export default class CollisionManager {
         b.owner.x += bestAxis.x * bMove;
         b.owner.y += bestAxis.y * bMove;
 
-        const contactA = this.average(verticesA);
-        const contactB = this.average(verticesB);
-        const rA = this.sub(contactA, { x: a.owner.x, y: a.owner.y });
-        const rB = this.sub(contactB, { x: b.owner.x, y: b.owner.y });
+        const contact = {
+            x: (a.owner.x + b.owner.x) * 0.5,
+            y: (a.owner.y + b.owner.y) * 0.5
+        };
+
+        const rA = this.sub(contact, { x: a.owner.x, y: a.owner.y });
+        const rB = this.sub(contact, { x: b.owner.x, y: b.owner.y });
 
         const vA = this.add(a.velocity, this.rotatePerp(rA, a.angularVelocity));
         const vB = this.add(b.velocity, this.rotatePerp(rB, b.angularVelocity));
-
         const rv = this.sub(vB, vA);
         const velAlongNormal = this.dot(rv, bestAxis);
+
         if (velAlongNormal > 0) return;
 
         const restitution = Math.min(a.restitution, b.restitution);
@@ -275,23 +338,43 @@ export default class CollisionManager {
         const invIA = 1 / this.getRectInertia(a);
         const invIB = 1 / this.getRectInertia(b);
 
-        const rACrossN = rA.x * bestAxis.y - rA.y * bestAxis.x;
-        const rBCrossN = rB.x * bestAxis.y - rB.y * bestAxis.x;
-
+        const rACrossN = this.cross(rA, bestAxis);
+        const rBCrossN = this.cross(rB, bestAxis);
         const denom = invMassA + invMassB + (rACrossN * rACrossN) * invIA + (rBCrossN * rBCrossN) * invIB;
-        const impulseScalar = (-(1 + restitution) * velAlongNormal) / denom;
-        const impulse = { x: impulseScalar * bestAxis.x, y: impulseScalar * bestAxis.y };
+        const j = (-(1 + restitution) * velAlongNormal) / denom;
+        const impulse = { x: j * bestAxis.x, y: j * bestAxis.y };
 
         a.velocity.x -= impulse.x * invMassA;
         a.velocity.y -= impulse.y * invMassA;
         b.velocity.x += impulse.x * invMassB;
         b.velocity.y += impulse.y * invMassB;
 
-        const torqueA = rA.x * impulse.y - rA.y * impulse.x;
-        const torqueB = rB.x * impulse.y - rB.y * impulse.x;
+        a.angularVelocity -= this.cross(rA, impulse) * invIA;
+        b.angularVelocity += this.cross(rB, impulse) * invIB;
 
-        a.angularVelocity -= torqueA * invIA;
-        b.angularVelocity += torqueB * invIB;
+        const tangent = { x: -bestAxis.y, y: bestAxis.x };
+        const tangentLen = Math.hypot(tangent.x, tangent.y) || 1;
+        const tangentUnit = { x: tangent.x / tangentLen, y: tangent.y / tangentLen };
+        const tangentVel = this.dot(rv, tangentUnit);
+        const rAT = this.cross(rA, tangentUnit);
+        const rBT = this.cross(rB, tangentUnit);
+        const tangentDenom = invMassA + invMassB + (rAT * rAT) * invIA + (rBT * rBT) * invIB;
+
+        if (tangentDenom > 0.0001) {
+            const jt = -tangentVel / tangentDenom;
+            const mu = this.getFrictionCoefficient(a, b);
+            const maxFriction = mu * Math.abs(j);
+            const clampedJt = this.clamp(jt, -maxFriction, maxFriction);
+            const frictionImpulse = { x: clampedJt * tangentUnit.x, y: clampedJt * tangentUnit.y };
+
+            a.velocity.x -= frictionImpulse.x * invMassA;
+            a.velocity.y -= frictionImpulse.y * invMassA;
+            b.velocity.x += frictionImpulse.x * invMassB;
+            b.velocity.y += frictionImpulse.y * invMassB;
+
+            a.angularVelocity -= this.cross(rA, frictionImpulse) * invIA;
+            b.angularVelocity += this.cross(rB, frictionImpulse) * invIB;
+        }
     }
 
     private getRectVertices(rect: Rectangle): Vec2[] {
@@ -389,5 +472,9 @@ export default class CollisionManager {
 
     private getRectInertia(rect: Rectangle): number {
         return (rect.mass * (rect.width * rect.width + rect.height * rect.height)) / 12;
+    }
+
+    private cross(v: Vec2, w: Vec2): number {
+        return v.x * w.y - v.y * w.x;
     }
 }

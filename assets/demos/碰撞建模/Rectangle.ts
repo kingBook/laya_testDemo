@@ -23,6 +23,12 @@ export class Rectangle extends Laya.Script {
     /** 恢复系数 */
     public restitution: number = 1;
 
+    @property({ type: Number, tips: "摩擦系数（越大越容易拖住旋转）" })
+    public friction: number = 0.1;
+
+    @property({ type: Number, tips: "角速度阻尼（0~1，越大衰减越慢）" })
+    public angularDamping: number = 0.992;
+
     onAwake(): void {
         this.owner.graphics.drawRect(-this.width / 2, -this.height / 2, this.width, this.height, "#00ff0033", "#ffffff", 2);
         this.owner.graphics.drawLine(0, 0, this.width * 0.6, 0, "#ffffff", 2);
