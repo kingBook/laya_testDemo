@@ -64,6 +64,7 @@ export class Rectangle extends Laya.Script {
         // 旋转
         const dt = Laya.timer.delta;
         let rotation = this.owner.rotation;
+        this.angularVelocity *= this.angularDamping;
         rotation += this.angularVelocity / Laya.MathUtils3D.Deg2Rad * dt;
         this.owner.rotation = rotation;
     }
