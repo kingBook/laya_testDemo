@@ -1,4 +1,5 @@
 import { Circle } from "./Circle";
+import { Rectangle } from "./Rectangle";
 import CollisionManager from "./CollisionManager";
 
 const { regClass, property } = Laya;
@@ -12,7 +13,8 @@ export class TestCollision extends Laya.Script {
     private _mouseDelta: Laya.Vector2;
 
     private _circleArr: Circle[];
-    private _curDragCircle: Circle;
+    private _rectArr: Rectangle[];
+    private _curDragCollider: Circle | Rectangle;
     private _curDragDelta: Laya.Vector2;
 
     private _collisionManager: CollisionManager;
@@ -22,35 +24,61 @@ export class TestCollision extends Laya.Script {
         this._mouseDelta = new Laya.Vector2(0, 0);
 
         this._circleArr = [];
+        this._rectArr = [];
         this._curDragDelta = new Laya.Vector2();
 
         this._collisionManager = new CollisionManager();
-        this._collisionManager.init(this._circleArr);
+        this._collisionManager.init([...this._circleArr, ...this._rectArr]);
     }
 
     /** 鼠标右键或中键按下时执行（注意：移动平台时不会执行） */
     onRightMouseDown(evt: Laya.Event): void {
-        console.log("onRightMouseDown", evt);
+        // 是否按下 shift 键？
+        const hasKeyDownShift = Laya.InputManager.hasKeyDown(Laya.Keyboard.SHIFT);
 
-        // 创建圆
-        const circle = this.createCircle(evt.touchPos.x, evt.touchPos.y);
-        this._circleArr.push(circle);
+        console.log("onRightMouseDown", {
+            hasKeyDownShift: hasKeyDownShift,
+            evt: evt
+        });
+
+        if (hasKeyDownShift) {
+            // 创建矩形
+            const rect = this.createRectangle(evt.touchPos.x, evt.touchPos.y);
+            this._rectArr.push(rect);
+            this._collisionManager.init([...this._circleArr, ...this._rectArr]);
+        } else {
+            // 创建圆形
+            const circle = this.createCircle(evt.touchPos.x, evt.touchPos.y);
+            this._circleArr.push(circle);
+            this._collisionManager.init([...this._circleArr, ...this._rectArr]);
+        }
     }
 
     onMouseDown(evt: Laya.Event): void {
         console.log("onMouseDown", evt);
 
-        // 查找鼠标下的圆
-        const circle = this._circleArr.find(item => {
+        const all = [...this._circleArr, ...this._rectArr];
+        const target = all.find(item => {
+            // 矩形
+            if (item instanceof Rectangle) {
+                const cx = item.owner.x;
+                const cy = item.owner.y;
+                const halfW = item.width / 2;
+                const halfH = item.height / 2;
+                return evt.touchPos.x >= cx - halfW && evt.touchPos.x <= cx + halfW
+                    && evt.touchPos.y >= cy - halfH && evt.touchPos.y <= cy + halfH;
+            }
+
+            // 圆形
             const d = Laya.MathUtil.distance(item.owner.x, item.owner.y, evt.touchPos.x, evt.touchPos.y);
-            if (d < item.radius) return item;
+            return d < item.radius;
         });
 
-        // 开始拖动鼠标下的圆
-        if (circle) {
-            this._curDragCircle = circle;
-            this._curDragDelta.x = circle.owner.x - evt.touchPos.x;
-            this._curDragDelta.y = circle.owner.y - evt.touchPos.y;
+        // 开始拖动
+        if (target) {
+            this._curDragCollider = target;
+            this._curDragDelta.x = target.owner.x - evt.touchPos.x;
+            this._curDragDelta.y = target.owner.y - evt.touchPos.y;
         }
     }
 
@@ -58,26 +86,26 @@ export class TestCollision extends Laya.Script {
         console.log("onMouseUp", evt);
 
         // 停止拖动
-        if (this._curDragCircle) {
-            this._curDragCircle.velocity.setValue(this._mouseDelta.x, this._mouseDelta.y);
+        if (this._curDragCollider) {
+            this._curDragCollider.velocity.setValue(this._mouseDelta.x, this._mouseDelta.y);
         }
-        this._curDragCircle = null;
+        this._curDragCollider = null;
     }
 
     onUpdate(): void {
-        // 计算两帧之间的鼠标位移
+        // 鼠标两帧之间位移
         this._mouseDelta.x = Laya.stage.mouseX - this._lastMousePos.x;
         this._mouseDelta.y = Laya.stage.mouseY - this._lastMousePos.y;
         this._lastMousePos.x = Laya.stage.mouseX;
         this._lastMousePos.y = Laya.stage.mouseY;
 
-        // 更新当前拖的圆的位置
-        if (this._curDragCircle) {
-            this._curDragCircle.owner.x = Laya.stage.mouseX + this._curDragDelta.x;
-            this._curDragCircle.owner.y = Laya.stage.mouseY + this._curDragDelta.y;
+        // '当前拖的形状'的位置
+        if (this._curDragCollider) {
+            this._curDragCollider.owner.x = Laya.stage.mouseX + this._curDragDelta.x;
+            this._curDragCollider.owner.y = Laya.stage.mouseY + this._curDragDelta.y;
         }
 
-        // 更新碰撞管理器
+        // 碰撞管理器，帧循环
         this._collisionManager.update();
     }
 
@@ -85,8 +113,8 @@ export class TestCollision extends Laya.Script {
      * 创建圆
      * @param x 位置x
      * @param y 位置y
-     * @param vx 速度x
-     * @param vy 速度y
+     * @param vx 速度向量x
+     * @param vy 速度向量y
      * @param angularVelocity 角速度<弧度/秒>
      * @returns 
      */
@@ -103,4 +131,25 @@ export class TestCollision extends Laya.Script {
         return circleCmp;
     }
 
+    /**
+     * 创建矩形
+     * @param x 位置x
+     * @param y 位置y
+     * @param vx 速度向量x
+     * @param vy 速度向量y
+     * @param angularVelocity 角速度<弧度/秒>
+     * @returns 
+     */
+    private createRectangle(x: number, y: number, vx = 0, vy = 0, angularVelocity = 0): Rectangle {
+        const sprite = new Laya.Sprite();
+        sprite.pos(x, y);
+
+        const rectCmp = sprite.addComponent(Rectangle);
+        rectCmp.velocity.x = vx;
+        rectCmp.velocity.y = vy;
+        rectCmp.angularVelocity = angularVelocity;
+
+        this.owner.addChild(sprite);
+        return rectCmp;
+    }
 }
