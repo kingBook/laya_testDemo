@@ -13,6 +13,8 @@ export default class ColorSetter {
     private _shaderMixFactor: number;
     private _colorStartTime: number;
     private _colorFinishTime: number;
+    private _colorRealStartTime: number;
+    private _colorRealFinishTime: number;
 
     private readonly _lineGradientA_start = new Laya.Color();
     private readonly _lineGradientA_end = new Laya.Color();
@@ -115,7 +117,11 @@ export default class ColorSetter {
 
             const colorEndTime = RocketChart.multiplierToTime(rangeColorB.end, this._rocketChart.initSpeed, this._rocketChart.acceleration);
             const duration = Math.min(this.transitionDuration, Math.max(colorEndTime - this._colorStartTime, 0)); // 过渡持续时间<毫秒>
+            // console.log("duration", duration, colorEndTime - this._colorStartTime, colorEndTime, this._colorStartTime);
             this._colorFinishTime = this._colorStartTime + duration;
+
+            this._colorRealStartTime = Laya.timer.totalTime;
+            this._colorRealFinishTime = this._colorRealStartTime + duration;
         }
         // console.log("index", index, "multiplier", ((multiplier * 100) | 0) / 100, "time", time);
 
@@ -127,7 +133,8 @@ export default class ColorSetter {
                 this.onTransitionHandler?.runWith(this._tempArgs); // 颜色过渡，开始
             }
 
-            const factor = (time - this._colorStartTime) / (this._colorFinishTime - this._colorStartTime);
+            const factorOld = Laya.MathUtil.clamp01((time - this._colorStartTime) / (this._colorFinishTime - this._colorStartTime));
+            const factor = factorOld >= 1 ? 1 : (Laya.timer.totalTime - this._colorRealStartTime) / (this._colorRealFinishTime - this._colorRealStartTime);
 
             if (factor >= 0 && factor <= 1) {
                 // console.log("factor", factor, "multiplier", ((multiplier * 100) | 0) / 100);

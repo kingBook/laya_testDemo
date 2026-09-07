@@ -87,7 +87,7 @@ export class RocketChart extends Laya.Script {
     @property({ type: Number, private: false, catalog: "Line", range: [0, 1], tips: "线头角度计算的参考点比例，实际参考点位置按 (1 - value) 计算；值越小，参考点越靠近当前线头，角度按“参考点 -> 实际线头”方向确定" })
     private _lineHeadAngleOriginRatio: number = 0.1;
     @property({ type: Number, private: false, catalog: "Line", min: 0, fractionDigits: 3, tips: "截短线条的系数, 0:不截短（截短线条是为了使线头动画能完全盖住线条）" })
-    private _lineTrimFactor: number = 0.01;
+    private _lineTrimFactor: number = 0.005;
     @property({ type: Number, private: false, catalog: "Line", range: [0, 1], tips: "线条的起始透明度，范围:[0,1]" })
     private _lineAlphaMin: number = 1;
     @property({ type: Number, private: false, catalog: "Line", range: [0, 1], tips: "线条的结束透明度，范围:[0,1]" })
@@ -207,6 +207,7 @@ export class RocketChart extends Laya.Script {
         if (Laya.LayaEnv.isPreview && window) {
             window["timeToMultiplier"] ??= RocketChart.timeToMultiplier;
             window["multiplierToTime"] ??= RocketChart.multiplierToTime;
+            window["correctTime"] ??= RocketChart.correctTime;
         }
     }
 
@@ -248,12 +249,16 @@ export class RocketChart extends Laya.Script {
 
     onUpdate(): void {
         if (!(this._flags & Flag.Inited)) return;
-        if (this._flags & Flag.Boomed) return;
 
-        if (this._flags & Flag.Launching) {
-            // 更新状态到指定的时间
-            this.updateStatusToTime(this._time + Laya.timer.delta);
+        if (!(this._flags & Flag.Boomed)) {
+            if (this._flags & Flag.Launching) {
+                // 更新状态到指定的时间
+                this.updateStatusToTime(this._time + Laya.timer.delta);
+            }
         }
+
+        // 设置颜色
+        this._colorSetter.updateStatusToTime(this._time, this._multiplier);
     }
 
     onDisable(): void {
@@ -266,10 +271,13 @@ export class RocketChart extends Laya.Script {
         // 把时间、倍数转换函数从 window 对象中移除
         if (Laya.LayaEnv.isPreview && window) {
             if (window["timeToMultiplier"] == RocketChart.timeToMultiplier) {
-                window["timeToMultiplier"] = undefined;
+                delete window["timeToMultiplier"];
             }
             if (window["multiplierToTime"] == RocketChart.multiplierToTime) {
-                window["multiplierToTime"] = undefined;
+                delete window["multiplierToTime"];
+            }
+            if (window["correctTime"] == RocketChart.correctTime) {
+                delete window["correctTime"];
             }
         }
     }
@@ -289,21 +297,14 @@ export class RocketChart extends Laya.Script {
         if (!this._shapeBox.visible) this._shapeBox.visible = true; // 图形盒
         if (!this._multiplierBox.visible) this._multiplierBox.visible = true; // 倍数盒
 
-        // 修正时间、倍数保证对应(倍数优先)
+        // 校正时间，确保与倍数对应(倍数优先)
         if (!isNaN(multiplier)) {
-            const digits = (multiplier % 1 === 0) ? 0 : ((multiplier * 10) % 1 === 0) ? 1 : 2; // 纠正时判断的小数位（是整数则0）
-            const tempMultiplier = RocketChart.toFixedNumber(RocketChart.timeToMultiplier(time, this._initSpeed, this._acceleration), digits);
-            const curMultiplier = RocketChart.toFixedNumber(multiplier, digits);
-            if (tempMultiplier != curMultiplier) {
-                const tempTime = RocketChart.multiplierToTime(multiplier, this._initSpeed, this._acceleration);
-                // console.log("testTime 纠正时间",
-                //     "原时间", time,
-                //     "原倍数", curMultiplier,
-                //     "用原时间取的倍数", tempMultiplier,
-                //     "纠正后时间", tempTime,
-                //     "纠正后时间取的倍数", RocketChart.toFixedNumber(RocketChart.timeToMultiplier(tempTime, this._initSpeed, this._acceleration), 2);
-                time = tempTime;
-            }
+            const correctedTime = RocketChart.correctTime(time, multiplier, this._initSpeed, this._acceleration);
+            // const correctedMultiplier = RocketChart.toFixedNumber(RocketChart.timeToMultiplier(correctedTime, this._initSpeed, this._acceleration), 2);
+            // if (correctedMultiplier !== RocketChart.toFixedNumber(multiplier, 2)) {
+            //     console.error("校正时间失败", time, correctedTime, multiplier, correctedMultiplier);
+            // }
+            time = correctedTime;
         }
 
         // 时间
@@ -314,7 +315,7 @@ export class RocketChart extends Laya.Script {
         this._multiplierLabel?.setVar('p', RocketChart.toFixedString(this._multiplier, 2));
 
         // 设置颜色
-        this._colorSetter.updateStatusToTime(this._time, this._multiplier);
+        // this._colorSetter.updateStatusToTime(this._time, this._multiplier);
 
         // 线和三角形绘制 ----------------------------------------
         this.drawLineAndTriangle();
@@ -528,7 +529,7 @@ export class RocketChart extends Laya.Script {
             const text = `${value / 1000}`;
             const y = margin;
             const font = `${fontSize}px Arial`;
-            const color = this._rulerFontColor.getStyleString()
+            const color = this._rulerFontColor.getStyleString();
             const textAlign = "center";
             this._timeRuler.graphics.fillText(text, x, y, font, color, textAlign);
 
@@ -820,6 +821,32 @@ export class RocketChart extends Laya.Script {
     public static toFixedString(value: number, digits: number): string {
         value = RocketChart.toFixedNumber(value, digits);
         return value.toFixed(digits);
+    }
+
+    /**
+     * 校正时间，确保与倍数对应(倍数优先)
+     * @param time 发射经过的时间<毫秒>
+     * @param multiplier 倍数<两位小数>
+     */
+    private static correctTime(time: number, multiplier: number, initSpeed: number, acceleration: number): number {
+        // 小数位数
+        let digits: number;
+        if (multiplier % 1 === 0) {
+            digits = 0;
+        } else {
+            const multiplierStr = multiplier.toString();
+            const dotPos = multiplierStr.indexOf('.') + 1; // 小数点位置（从1开始）
+            digits = Laya.MathUtil.clamp(multiplierStr.length - dotPos, 0, 2); // 小数位数量
+        }
+
+        const curTimeToMultiplier = RocketChart.toFixedNumber(RocketChart.timeToMultiplier(time, initSpeed, acceleration), digits); // 当前时间转换的倍数
+        const curMultiplier = RocketChart.toFixedNumber(multiplier, digits); // 当前倍数
+        if (curTimeToMultiplier != curMultiplier) {
+            multiplier = multiplier + 5 / Math.pow(10, digits + 1); // 小数位后加一个5，计算更准确
+            time = RocketChart.multiplierToTime(multiplier, initSpeed, acceleration);
+        }
+
+        return time;
     }
     //#endregion
 

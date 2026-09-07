@@ -81,9 +81,6 @@ export class TestRocketChart extends Laya.Script {
         //         this._rocketChart.boom(18928, 1.36);
         //     }
         // });
-
-
-
     }
 
     onUpdate(): void {
@@ -107,11 +104,33 @@ export class TestRocketChart extends Laya.Script {
         if (evt.key == 'k') {
             console.log("爆炸");
             if (this._rocketChart.isLaunching) {
-                //this._rocketChart.boom(18928, 2.36);
-                this._rocketChart.boom(0, 1);
+                this._rocketChart.boom(this._rocketChart.time, this._rocketChart.multiplier);
             }
         }
 
+        if (evt.key == 'l') {
+            console.log("爆炸1倍");
+            if (this._rocketChart.isLaunching) {
+                const multiplier = 1;
+                this._rocketChart.boom(RocketChart.multiplierToTime(multiplier, this._rocketChart.initSpeed, this._rocketChart.acceleration), multiplier);
+            }
+        }
+
+        if (evt.key == 'n') {
+            console.log("爆炸1.95倍");
+            if (this._rocketChart.isLaunching) {
+                const multiplier = 1.95;
+                this._rocketChart.boom(RocketChart.multiplierToTime(multiplier, this._rocketChart.initSpeed, this._rocketChart.acceleration), multiplier);
+            }
+        }
+
+        if (evt.key == 'm') {
+            console.log("爆炸2.01倍");
+            if (this._rocketChart.isLaunching) {
+                const multiplier = 2.01;
+                this._rocketChart.boom(RocketChart.multiplierToTime(multiplier, this._rocketChart.initSpeed, this._rocketChart.acceleration), multiplier);
+            }
+        }
 
     }
 
