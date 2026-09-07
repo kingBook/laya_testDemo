@@ -113,7 +113,7 @@
           "_lineEndWidth": 10,
           "_lineHeadMinTime": 200,
           "_lineHeadAngleOriginRatio": 0.1,
-          "_lineTrimFactor": 0.01,
+          "_lineTrimFactor": 0.005,
           "_lineAlphaMin": 1,
           "_lineAlphaMax": 0.4,
           "_triangleAlphaMin": 0.3,
