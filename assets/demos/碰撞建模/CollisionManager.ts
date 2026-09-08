@@ -428,8 +428,7 @@ export default class CollisionManager {
      * @returns 1 / I
      */
     private getInvInertia(collider: Collider): number {
-        if (this.isCircle(collider)) return 1 / this.getCircleInertia(collider);
-        return 1 / this.getRectInertia(collider);
+        return 1 / collider.getInertia();
     }
 
     /**
@@ -594,24 +593,6 @@ export default class CollisionManager {
         return deg * Math.PI / 180;
     }
 
-    /**
-     * 计算圆形的惯性矩。
-     * @param circle 圆形碰撞体
-     * @returns 圆形的惯性矩
-     */
-    private getCircleInertia(circle: Circle): number {
-        return 0.5 * circle.mass * circle.radius * circle.radius;
-    }
+    
 
-    /**
-     * 计算矩形的惯性矩。
-     *
-     * 这里使用矩形绕中心轴的惯性矩公式：
-     * I = m * (w^2 + h^2) / 12
-     * @param rect 矩形碰撞体
-     * @returns 矩形的惯性矩
-     */
-    private getRectInertia(rect: Rectangle): number {
-        return (rect.mass * (rect.width * rect.width + rect.height * rect.height)) / 12;
-    }
 }
