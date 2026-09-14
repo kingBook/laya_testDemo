@@ -1,0 +1,106 @@
+{
+  "_$type": "Animator2D",
+  "enabled": true,
+  "controllerLayers": [
+    {
+      "name": "Base Layer",
+      "defaultStateName": "NewAnimation",
+      "playOnWake": true,
+      "blendingMode": 0,
+      "states": [
+        {
+          "name": "scale",
+          "clip": {
+            "_$uuid": "cea0885e-8f87-481f-8560-4ed4986a6e1a"
+          },
+          "loop": 0,
+          "speed": 1,
+          "clipEnd": 1,
+          "x": 133.11553084477026,
+          "y": 293.43186153413546,
+          "id": "0",
+          "soloTransitions": [
+            {
+              "id": "1",
+              "exitByTime": false,
+              "exitTime": 0.175,
+              "conditions": [
+                {
+                  "compareFlag": 0,
+                  "id": 0,
+                  "type": 1,
+                  "checkValue": 2
+                }
+              ]
+            }
+          ],
+          "loopState": 1
+        },
+        {
+          "x": 10,
+          "y": 100,
+          "_isLooping": 0,
+          "id": "-1",
+          "name": "进入",
+          "speed": 1,
+          "clipEnd": 1,
+          "soloTransitions": [
+            {
+              "id": "0",
+              "exitByTime": false,
+              "exitTime": 1,
+              "conditions": [
+                {
+                  "compareFlag": 0,
+                  "id": 0,
+                  "type": 0,
+                  "checkValue": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "x": 494.28570395336635,
+          "y": 192.85714136607467,
+          "_isLooping": 0,
+          "id": "-2",
+          "name": "任何状态",
+          "speed": 1,
+          "clipEnd": 1,
+          "soloTransitions": []
+        },
+        {
+          "x": 198.2822303190302,
+          "y": 581.3079940552303,
+          "_isLooping": 0,
+          "id": "1",
+          "name": "rotation",
+          "speed": 1,
+          "clipEnd": 1,
+          "clip": {
+            "_$uuid": "99b552a2-9e0c-4526-86c4-287c4a6deaeb"
+          },
+          "loop": 0,
+          "loopState": 1,
+          "scripts": [
+            "res://3cb84a8a-778f-4347-9c38-030666d13921"
+          ]
+        }
+      ],
+      "defaultWeight": 1,
+      "stageX": 40.900000000000055,
+      "stageY": 34.614285714286,
+      "stageScale": 0.6000000000000001
+    }
+  ],
+  "layerW": 150,
+  "animatorParams": [
+    {
+      "id": 0,
+      "name": "stateFloat",
+      "type": 0,
+      "val": 0
+    }
+  ]
+}
