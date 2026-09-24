@@ -1,14 +1,12 @@
 Shader3D Start
 {
     type:Shader3D,
-    name:"列表扭曲/ListDistortion",
+    name:"列表扭曲/Distortion",
     enableInstancing:true,
     supportReflectionProbe:true,
     shaderType:3,
     uniformMap:{
-        // u_Radius: { type: Float, default: 0.5, tips: "圆柱半径，控制扭曲强度" },
-        // u_Squeeze: { type: Float, default: 0.2, tips: "对称挤压系数（正值扩张，负值收缩）" },
-        // u_SqueezeRange: { type: Float, default: 1.0, tips: "挤压衰减范围（基于 angle，单位为弧度），越小衰减越集中" },
+        
     },
     attributeMap: {
         a_posuv: Vector4,
@@ -31,9 +29,8 @@ Shader3D End
 GLSL Start
 #defineGLSL textureVS
 
-    #define SHADER_NAME ListDistortion
+    #define SHADER_NAME Distortion
     #include "Sprite2DVertex.glsl";
-    #include "Math.glsl";
 
     void getPosition2(inout vec4 glPosition){
         vec4 pos = vec4(a_posuv.xy,0.,1.);
@@ -46,7 +43,7 @@ GLSL Start
         #ifdef CAMERA2D
             pos.xy = (u_view2D *vec3(pos.x,pos.y,1.0)).xy+u_size/2.;
         #endif  
-        
+
         //clip
     	float clipw = length(u_clipMatDir.xy);
     	float cliph = length(u_clipMatDir.zw);
@@ -56,6 +53,8 @@ GLSL Start
         #else
         vec2 clippos = pos.xy- clpos;	//pos已经应用矩阵了，为了减的有意义，clip的位置也要缩放
         #endif
+
+
         if(clipw>20000. && cliph>20000.)
             v_cliped = vec2(0.5,0.5);
         else {
@@ -68,22 +67,26 @@ GLSL Start
         // * 2.0：放大到 [-1,1]
         vec4 pos1 = vec4((pos.x/u_size.x-0.5)*2.0,(0.5-pos.y/u_size.y)*2.0,0.,1.0);
 
-        // -------------------------------------------------------------------------
+        // 居中缩放Y -------------------------------------------------------------------------
+        // // scaleY 左(小) -> 右(大)
+        // // pos1.x 的范围 [-1,1]， 转换为 [0,1]
+        // float t = (pos1.x + 1.0) * 0.5;
+        // // min/max 垂直比例
+        // float minScaleY = 1.0;
+        // float maxScaleY = 0.5;
+        // float scaleY = mix(minScaleY, maxScaleY, t);
+        // pos1.y *= 0.5;
+
+        // 居中缩放X -------------------------------------------------------------------------
         // scaleX 上(小) -> 下(大)
         // pos1.y 的范围 [-1,1]， 转换为 [0,1]
         float t = 1.0 - ((pos1.y + 1.0) * 0.5);
         // min/max 水平比例
-        float minScaleX = 0.5;
+        float minScaleX = 0.1;
         float maxScaleX = 1.0;
         float scaleX = mix(minScaleX, maxScaleX, t);
-
-        // float nx = pos.x / u_size.x;
-        // float cx = 0.5;
-        // nx = (nx - cx) * scaleX + cx; // scale about center
-        // pos1.x = (nx - 0.5) * 2.0; // convert back to [-1,1]
         pos1.x *= scaleX;
-
-        // -------------------------------------------------------------------------
+        // ------------------------------------------------------------------------------------
         
         #ifdef MVP3D
             glPosition = u_MvpMatrix * pos1;
@@ -106,15 +109,14 @@ GLSL Start
 	    v_color = info.color;
 
 	    vec4 pos;
-        getPosition2(pos);
+	    getPosition2(pos);
 	    gl_Position = pos;
 
     }
-
 #endGLSL
 
 #defineGLSL texturePS
-    #define SHADER_NAME ListDistortion
+    #define SHADER_NAME Distortion
     //texture和fillrect使用的。
     #if defined(GL_FRAGMENT_PRECISION_HIGH) // 原来的写法会被我们自己的解析流程处理，而我们的解析是不认内置宏的，导致被删掉，所以改成 if defined 了
         precision highp float;
@@ -124,15 +126,12 @@ GLSL Start
 
     #include "Sprite2DFrag.glsl";
 
-
     void main()
     {
         clip();
         vec4 color = getSpriteTextureColor();
         setglColor(color);
     }
-
-    
     
 #endGLSL
 GLSL End
