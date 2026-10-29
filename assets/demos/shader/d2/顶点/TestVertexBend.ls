@@ -12,7 +12,7 @@
   "_$comp": [
     {
       "_$type": "c0af4d74-f99e-47dd-8443-41f96374c5f9",
-      "scriptPath": "demos/shader/2d/顶点/TestVertexBend.ts",
+      "scriptPath": "demos/shader/d2/顶点/TestVertexBend.ts",
       "image": {
         "_$ref": "nbd579fx"
       }
@@ -26,7 +26,7 @@
       "x": 119,
       "y": 644,
       "width": 512,
-      "height": 313,
+      "height": 256,
       "material": {
         "_$uuid": "268f2e4a-3b93-4cdd-aa05-667e8ac82aa4",
         "_$type": "Material"

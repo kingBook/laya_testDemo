@@ -2,7 +2,7 @@
   "version": "LAYAMATERIAL:04",
   "props": {
     "textures": [],
-    "type": "列表扭曲/ListDistortion",
+    "type": "列表扭曲/Distortion",
     "renderQueue": 2000,
     "materialRenderMode": 0,
     "s_Cull": 2,
@@ -18,9 +18,14 @@
     "s_BlendEquationAlpha": 0,
     "s_DepthTest": 1,
     "s_DepthWrite": true,
-    "u_Radius": 0.469,
-    "u_Squeeze": 0.1,
-    "u_SqueezeRange": 1,
+    "u_center": [
+      0,
+      0
+    ],
+    "u_viewSize": [
+      100,
+      100
+    ],
     "defines": [
       "TEXTUREVS"
     ]

@@ -1,6 +1,9 @@
 {
   "_$ver": 1,
   "_$id": "o2xljarm",
+  "_$preloads": [
+    ""
+  ],
   "_$type": "Scene",
   "left": 0,
   "right": 0,
@@ -17,8 +20,14 @@
         "_$uuid": "b75e36b9-9285-47eb-a1e0-84776ff59393",
         "_$type": "Material"
       },
+      "_listBox": {
+        "_$ref": "hpzx3ej2"
+      },
       "_list": {
         "_$ref": "c8u0es93"
+      },
+      "_scaleBox": {
+        "_$ref": "n0dm3x4n"
       }
     }
   ],
@@ -52,7 +61,7 @@
     {
       "_$id": "hpzx3ej2",
       "_$type": "Box",
-      "name": "Box",
+      "name": "listBox",
       "x": 542,
       "y": 603,
       "width": 160,
@@ -84,12 +93,11 @@
               "name": "item",
               "width": 160,
               "height": 128,
-              "cacheAs": "bitmap",
               "_$child": [
                 {
                   "_$id": "n5mmwyc5",
                   "_$type": "Image",
-                  "name": "Image",
+                  "name": "image",
                   "width": 160,
                   "height": 128,
                   "skin": "res://63142bf4-b894-4f47-b8e4-7cea71a7d2b1",
@@ -129,7 +137,8 @@
                       "source": "res://f7598c89-281d-450c-9f8e-d474379d7c2f",
                       "animationName": "loop",
                       "preview": true,
-                      "physicsUpdate": 2
+                      "physicsUpdate": 2,
+                      "premultipliedAlpha": true
                     }
                   ]
                 },
@@ -147,7 +156,8 @@
                   "fontSize": 30,
                   "color": "#ffef00",
                   "align": "center",
-                  "valign": "middle"
+                  "valign": "middle",
+                  "letterSpacing": 0
                 }
               ]
             }
@@ -173,13 +183,10 @@
     {
       "_$id": "n0dm3x4n",
       "_$type": "Box",
-      "name": "Box_1",
-      "x": 10,
+      "name": "scaleBox",
       "y": 416,
       "width": 512,
       "height": 768,
-      "left": 10,
-      "centerY": 0,
       "bgColor": "rgba(52,81,90,0.3803921568627451)",
       "_$child": [
         {
@@ -192,10 +199,7 @@
             "_$uuid": "a95f93e9-c37d-4c1e-98df-85fa54a78b8e",
             "_$type": "Material"
           },
-          "centerX": 0,
-          "centerY": -256,
-          "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
-          "useSourceSize": true,
+          "skin": "res://7a319744-ce88-4c54-92db-3aaa17ee2920",
           "color": "#ffffff"
         },
         {
@@ -209,10 +213,7 @@
             "_$uuid": "a95f93e9-c37d-4c1e-98df-85fa54a78b8e",
             "_$type": "Material"
           },
-          "centerX": 0,
-          "centerY": 0,
-          "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
-          "useSourceSize": true,
+          "skin": "res://2230bb75-180a-47f4-bb6c-d188ffd58194",
           "color": "#ffffff"
         },
         {
@@ -226,10 +227,7 @@
             "_$uuid": "a95f93e9-c37d-4c1e-98df-85fa54a78b8e",
             "_$type": "Material"
           },
-          "centerX": 0,
-          "centerY": 256,
-          "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
-          "useSourceSize": true,
+          "skin": "res://c1011814-840b-4ebd-834b-c3a386dd0eae",
           "color": "#ffffff"
         }
       ]
