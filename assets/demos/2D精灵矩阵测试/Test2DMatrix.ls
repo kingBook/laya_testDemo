@@ -23,11 +23,11 @@
       "_$id": "7cy71jjh",
       "_$type": "Image",
       "name": "img",
-      "x": 119,
-      "y": 644,
-      "width": 512,
-      "height": 256,
-      "skin": "res://c13c1b8e-c516-4a0f-98ad-e356f45f0365",
+      "x": 325,
+      "y": 750,
+      "width": 100,
+      "height": 100,
+      "skin": "res://aa25b502-5c7e-4df8-ae43-9a3a4f534ffb",
       "useSourceSize": true,
       "color": "#ffffff"
     }

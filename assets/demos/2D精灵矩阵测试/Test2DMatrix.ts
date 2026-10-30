@@ -14,7 +14,7 @@ export class Test2DMatrix extends Laya.Script {
 
     }
 
-    onKeyDown(evt: Laya.Event): void {
+   onUpdate(): void {
         this._angle = Laya.MathUtil.repeat(this._angle + 1, 360);
         console.log("_angle",this._angle);
         
